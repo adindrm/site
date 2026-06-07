@@ -3289,7 +3289,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
 //  PORTFOLIO SYSTEM
 // ══════════════════════════════════════════════════════════
 (function() {
-  const GAS_URL    = 'https://script.google.com/macros/s/AKfycbyCfpKbauLjEVprtY7bH3mkyguXWq35Ja7xsxvfsgud7iL6tJ3IccDPoy7Hv1qcfofqqg/exec';
+  const GAS_URL    = 'https://script.google.com/macros/s/AKfycbxOcOY-cugEVF67ItT1LuWtr4frIUvSTPuDZxYCT7P3Qiy9TdQeJzqVe5iPzpiGxb0MQQ/exec';
   const CSV_PORTO  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1pZJX7_1O6beVsqvit0RpoNt9xQQB4su3kNd74T-XfI5BcTJcUTsDZ1ZKILxjIRME3Xasjw-E5eV5/pub?gid=838576042&single=true&output=csv';
   const CSV_CATS   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1pZJX7_1O6beVsqvit0RpoNt9xQQB4su3kNd74T-XfI5BcTJcUTsDZ1ZKILxjIRME3Xasjw-E5eV5/pub?gid=1211665282&single=true&output=csv';
 
@@ -3379,7 +3379,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
         fetchCSV(CSV_PORTO),
         fetchFromGAS({ action: 'categories' }).catch(() => fetchCSV(CSV_CATS))
       ]);
-      allPortfolio  = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>s.trim()).filter(Boolean) : [] }));
+      allPortfolio  = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : [] }));
       allCategories = (Array.isArray(cats) ? cats : []).map(r => ({
         ...r,
         subcategories_id: r.subcategories_id
@@ -3753,18 +3753,45 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     list.appendChild(addBtn);
   }
 
+  // ── Drive URL normalizer ──
+  // Konversi berbagai format URL Drive ke format yang bisa diembed langsung
+  function normalizeDriveUrl(url) {
+    if (!url) return url;
+    // Sudah berformat thumbnail/uc/lh3 → biarkan
+    if (url.includes('lh3.googleusercontent.com') || url.includes('uc?export=view') || url.includes('thumbnail?')) return url;
+    // Format: https://drive.google.com/file/d/FILE_ID/view atau /view?usp=...
+    const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return `https://lh3.googleusercontent.com/d/${m[1]}`;
+    // Format: https://drive.google.com/open?id=FILE_ID
+    const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m2) return `https://lh3.googleusercontent.com/d/${m2[1]}`;
+    return url;
+  }
+
   // File input → upload to Drive via GAS
   document.getElementById('apFileInput')?.addEventListener('change', async function() {
     const files = Array.from(this.files);
     if (!files.length) return;
     const progress = document.getElementById('apUploadProgress');
     progress.style.display = 'block';
-    for (const file of files) {
-      progress.textContent = `Mengupload ${file.name}...`;
+    // Ambil nama proyek dari form untuk penamaan file di Drive
+    const projectName = (document.getElementById('apName')?.value || '').trim();
+    const totalImages = files.length;
+    for (let fi = 0; fi < files.length; fi++) {
+      const file = files[fi];
+      progress.textContent = `Mengupload ${file.name} (${fi+1}/${totalImages})...`;
       try {
         const b64 = await fileToBase64(file);
-        const res = await gasPost({ action:'upload', filename: file.name, mimeType: file.type, data: b64 });
-        if (res.ok) editingImages.push({ url: res.url, isNew: true });
+        const res = await gasPost({
+          action:      'upload',
+          filename:    file.name,
+          mimeType:    file.type,
+          data:        b64,
+          projectName: projectName,
+          imageIndex:  fi + 1,
+          totalImages: totalImages,
+        });
+        if (res.ok) editingImages.push({ url: normalizeDriveUrl(res.url), isNew: true });
         else alert('Upload gagal: ' + res.message);
       } catch(e) { alert('Upload error: ' + e.message); }
     }
@@ -3843,15 +3870,15 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
       allPortfolio = (Array.isArray(porto) ? porto : []).map(r => ({
         ...r,
         images: Array.isArray(r.images)
-          ? r.images
-          : (r.images ? r.images.split(',').map(s=>s.trim()).filter(Boolean) : [])
+          ? r.images.map(normalizeDriveUrl)
+          : (r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : [])
       }));
       renderGrid();
     } catch(e) {
       console.warn('Reload via GAS gagal, fallback ke CSV:', e);
       try {
         const porto = await fetchCSV(CSV_PORTO);
-        allPortfolio = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>s.trim()).filter(Boolean) : [] }));
+        allPortfolio = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : [] }));
         renderGrid();
       } catch(e2) { console.warn('Reload CSV juga gagal:', e2); }
     }
@@ -6723,8 +6750,7 @@ function setMenuIcon(sectionId) {
 
       // Auto-close hacker overlay setelah login berhasil
       setTimeout(() => {
-        try { stopGlitch(); } catch(e) {}
-        try { closeHacker(); } catch(e) {}
+        if (typeof window.closeHackerOverlay === 'function') window.closeHackerOverlay();
       }, 2000);
     }
 
@@ -6996,6 +7022,7 @@ function setMenuIcon(sectionId) {
 
     // Expose to outer scope — include startGlitch so it runs on every open
     window.triggerHackerOverlay = function() { openHacker(); startGlitch(); };
+    window.closeHackerOverlay   = function() { stopGlitch(); closeHacker(); };
   })();
 
 (function() {
