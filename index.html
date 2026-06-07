@@ -460,30 +460,58 @@
     }
     .works-header { width: 100%; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .works-header-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; }
-    .works-filter { display: flex; gap: 8px; flex-wrap: wrap; }
-    .works-filter-btn {
-      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
-      color: #999; background: none; border: 1px solid #ddd; padding: 7px 16px; cursor: pointer;
+    /* ── WORKS FILTER DROPDOWNS ── */
+    .works-filter { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .works-filter-dropdown {
+      position: relative;
+    }
+    .works-filter-select {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #888;
+      background: transparent;
+      border: 1px solid #ddd;
+      padding: 8px 36px 8px 14px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      border-radius: 0;
       transition: color 0.25s, border-color 0.25s, background 0.25s;
+      min-width: 120px;
     }
-    .works-filter-btn:hover { color: #111; border-color: #111; }
-    .works-filter-btn.active { color: #fff; border-color: #111; background: #111; }
-    .works-filter-sub {
-      display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-bottom: 0;
-      max-height: 0; overflow: hidden; opacity: 0;
-      transition: max-height 0.4s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
+    .works-filter-select:hover { color: #111; border-color: #bbb; }
+    .works-filter-select:focus { color: #111; border-color: #111; }
+    .works-filter-select.has-value { color: #111; border-color: #111; background: #f9f9f9; }
+    .works-filter-dropdown::after {
+      content: '';
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid #aaa;
+      pointer-events: none;
+      transition: border-top-color 0.2s;
     }
-    .works-filter-sub.visible { max-height: 200px; opacity: 1; margin-bottom: 28px; }
-    .works-filter-sub-btn {
-      font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.25em; text-transform: uppercase;
-      color: #aaa; background: none; border: 1px solid #eee; padding: 5px 13px; cursor: pointer;
-      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    .works-filter-dropdown:hover::after { border-top-color: #111; }
+    .works-filter-select option {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: #111;
+      background: #fff;
     }
-    .works-filter-sub-btn:hover { color: #555; border-color: #aaa; }
-    .works-filter-sub-btn.active { color: #111; border-color: #555; background: #f5f5f5; }
+    /* legacy sub-buttons hidden — replaced by second dropdown */
+    .works-filter-sub { display: none !important; }
     .works-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; width: 100%; }
     .work-item {
       position: relative; overflow: hidden; aspect-ratio: 4/3; background: #e8e8e8; cursor: pointer;
+      border-radius: 6px;
       opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease;
     }
     .work-item[data-hidden="true"] { display: none; }
@@ -1401,7 +1429,16 @@
             <h2 class="section-title" id="works-title">Selected Works</h2>
           </div>
           <div class="works-filter" id="worksFilter1">
-            <button class="works-filter-btn active" data-filter="all" data-code="all">All</button>
+            <div class="works-filter-dropdown">
+              <select class="works-filter-select" id="filterCatSelect">
+                <option value="all">All</option>
+              </select>
+            </div>
+            <div class="works-filter-dropdown" id="filterSubWrap" style="display:none">
+              <select class="works-filter-select" id="filterSubSelect">
+                <option value="">All</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="works-filter-sub" id="worksFilter2"></div>
@@ -3361,95 +3398,92 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     }
   }
 
-  // ── Build Filter Level 1 ──
+  // ── Build Filter Dropdowns ──
   function buildFilter1() {
     const lang = getLangP();
-    const wrap = document.getElementById('worksFilter1');
-    if (!wrap) return;
-    wrap.innerHTML = '';
-    // All button
-    const allBtn = document.createElement('button');
-    allBtn.className = 'works-filter-btn active';
-    allBtn.dataset.filter = 'all'; allBtn.dataset.code = 'all';
-    allBtn.textContent = 'All';
-    wrap.appendChild(allBtn);
+    const catSel = document.getElementById('filterCatSelect');
+    if (!catSel) return;
+    catSel.innerHTML = '';
+    // All option
+    const allOpt = document.createElement('option');
+    allOpt.value = 'all';
+    allOpt.textContent = lang === 'id' ? 'Semua Kategori' : 'All Categories';
+    catSel.appendChild(allOpt);
     allCategories.forEach(cat => {
-      const btn = document.createElement('button');
-      btn.className = 'works-filter-btn';
-      btn.dataset.filter = lang === 'id' ? cat.name_id : cat.name_en;
-      btn.dataset.code   = cat.code;
-      btn.textContent    = lang === 'id' ? cat.name_id : cat.name_en;
-      wrap.appendChild(btn);
+      const opt = document.createElement('option');
+      opt.value = cat.code;
+      opt.textContent = lang === 'id' ? cat.name_id : cat.name_en;
+      catSel.appendChild(opt);
     });
+    catSel.value = activeFilter1 === 'all' ? 'all' : activeFilter1;
+    catSel.classList.toggle('has-value', activeFilter1 !== 'all');
     attachFilter1Events();
   }
 
   function attachFilter1Events() {
-    document.querySelectorAll('.works-filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const code = btn.dataset.code;
-        const same = (activeFilter1 === code);
-        // Set active
-        document.querySelectorAll('.works-filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (same && code !== 'all') {
-          // Second click on same → show Level 2
-          buildFilter2(code);
-          toggleFilter2(true);
-        } else {
-          // First click → hide L2, reset sub
-          activeFilter2 = '';
-          toggleFilter2(false);
-        }
-        activeFilter1 = code;
-        lastClickedCat = code;
-        renderGrid();
-      });
+    const catSel = document.getElementById('filterCatSelect');
+    const subWrap = document.getElementById('filterSubWrap');
+    if (!catSel) return;
+    // Remove old listeners by cloning
+    const fresh = catSel.cloneNode(true);
+    catSel.parentNode.replaceChild(fresh, catSel);
+    fresh.addEventListener('change', () => {
+      const code = fresh.value;
+      activeFilter1 = code;
+      activeFilter2 = '';
+      fresh.classList.toggle('has-value', code !== 'all');
+      if (code !== 'all') {
+        buildFilter2(code);
+        if (subWrap) subWrap.style.display = '';
+      } else {
+        if (subWrap) subWrap.style.display = 'none';
+        const subSel = document.getElementById('filterSubSelect');
+        if (subSel) { subSel.innerHTML = ''; }
+      }
+      renderGrid();
     });
   }
 
-  // ── Build Filter Level 2 ──
+  // ── Build Sub-filter Dropdown ──
   function buildFilter2(catCode) {
     const lang = getLangP();
     const cat  = allCategories.find(c => c.code === catCode);
-    const wrap = document.getElementById('worksFilter2');
-    if (!wrap || !cat) return;
-    wrap.innerHTML = '';
+    const subSel = document.getElementById('filterSubSelect');
+    if (!subSel || !cat) return;
+    subSel.innerHTML = '';
     const subs = lang === 'id' ? cat.subcategories_id : cat.subcategories_en;
     const subsOther = lang === 'id' ? cat.subcategories_en : cat.subcategories_id;
-    // All sub button
-    const allBtn = document.createElement('button');
-    allBtn.className = 'works-filter-sub-btn' + (activeFilter2 === '' ? ' active' : '');
-    allBtn.textContent = lang === 'id' ? 'Semua' : 'All';
-    allBtn.addEventListener('click', () => {
-      activeFilter2 = '';
-      document.querySelectorAll('.works-filter-sub-btn').forEach(b => b.classList.remove('active'));
-      allBtn.classList.add('active');
-      renderGrid();
+
+    const allOpt = document.createElement('option');
+    allOpt.value = '';
+    allOpt.textContent = lang === 'id' ? 'Semua Sub' : 'All Sub';
+    subSel.appendChild(allOpt);
+
+    (subs || []).forEach((sub, i) => {
+      const opt = document.createElement('option');
+      opt.value = sub;
+      opt.dataset.subId = sub;
+      opt.dataset.subEn = (subsOther || [])[i] || sub;
+      opt.textContent = sub;
+      subSel.appendChild(opt);
     });
-    wrap.appendChild(allBtn);
-    subs.forEach((sub, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'works-filter-sub-btn';
-      btn.textContent = sub;
-      // store both lang versions for matching
-      btn.dataset.subId = sub;
-      btn.dataset.subEn = subsOther[i] || sub;
-      btn.addEventListener('click', () => {
-        activeFilter2 = sub;
-        document.querySelectorAll('.works-filter-sub-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderGrid();
-      });
-      wrap.appendChild(btn);
+
+    subSel.value = activeFilter2 || '';
+    subSel.classList.toggle('has-value', !!activeFilter2);
+
+    // Remove old listeners
+    const freshSub = subSel.cloneNode(true);
+    // preserve options
+    subSel.parentNode.replaceChild(freshSub, subSel);
+    freshSub.addEventListener('change', () => {
+      activeFilter2 = freshSub.value;
+      freshSub.classList.toggle('has-value', !!activeFilter2);
+      renderGrid();
     });
   }
 
   function toggleFilter2(show) {
-    const wrap = document.getElementById('worksFilter2');
-    if (!wrap) return;
-    if (show) wrap.classList.add('visible');
-    else { wrap.classList.remove('visible'); wrap.innerHTML = ''; }
+    // no-op — handled by dropdown visibility
   }
 
   // ── Render Grid ──
@@ -3476,6 +3510,10 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     if (items.length === 0) {
       grid.innerHTML = '<div class="works-empty">Belum ada karya.</div>';
       if (countEl) countEl.textContent = '';
+      // FIX: Tetap tampilkan tombol Add Work saat admin mode aktif meskipun grid kosong
+      if (document.body.classList.contains('admin-mode')) {
+        addAdminAddTile();
+      }
       return;
     }
 
@@ -6613,6 +6651,7 @@ function setMenuIcon(sectionId) {
           aspect-ratio:4/3;display:flex;
           align-items:center;justify-content:center;
           border:1px dashed #ccc;cursor:pointer;background:#fafafa;
+          border-radius:6px;
           transition:border-color 0.2s,background 0.2s;
         }
         .work-item-add:hover{border-color:#111;background:#f0f0f0;}
@@ -6676,9 +6715,17 @@ function setMenuIcon(sectionId) {
 
       // FIX: Kalau sedang tidak di halaman Works, navigasi ke Works
       // agar edit bar muncul. Kalau sudah di Works, renderGrid sudah dipanggil di atas.
-      if (currentPage !== 'sec-works') {
-        setTimeout(() => navigateToPage('sec-works', true), 300);
-      }
+      try {
+        if (currentPage !== 'sec-works') {
+          setTimeout(() => { try { navigateToPage('sec-works', true); } catch(e) {} }, 300);
+        }
+      } catch(e) {}
+
+      // Auto-close hacker overlay setelah login berhasil
+      setTimeout(() => {
+        try { stopGlitch(); } catch(e) {}
+        try { closeHacker(); } catch(e) {}
+      }, 2000);
     }
 
     // ── SHORT CIRCUIT sound (wrong input) ─────────────────────
@@ -6810,7 +6857,6 @@ function setMenuIcon(sectionId) {
             playAccessGranted();
             responseEl.textContent = '> ' + val + '\n' + 'ACCESS GRANTED. ◈\nROLE: ADMIN\nWELCOME BACK.';
             setAdminRole();
-            setTimeout(() => { stopGlitch(); closeHacker(); }, 2200);
           } else {
             authStep = 0;
             playShortCircuit();
