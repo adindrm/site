@@ -3741,7 +3741,14 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
       el.className = 'ap-img-thumb'; el.src = img.url; el.alt = 'img';
       const rm = document.createElement('button');
       rm.className = 'ap-img-remove'; rm.textContent = '×';
-      rm.onclick = () => { editingImages.splice(i, 1); renderAdminImages(); };
+      rm.onclick = async () => {
+        const removed = editingImages.splice(i, 1)[0];
+        renderAdminImages();
+        // Skenario 2: hapus dari Drive langsung saat klik ✕
+        if (removed.isNew && removed.fileId) {
+          try { await gasPost({ action: 'deleteFiles', fileIds: [removed.fileId] }); } catch(e) {}
+        }
+      };
       wrap.appendChild(el); wrap.appendChild(rm);
       list.appendChild(wrap);
     });
@@ -3791,7 +3798,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
           imageIndex:  fi + 1,
           totalImages: totalImages,
         });
-        if (res.ok) editingImages.push({ url: normalizeDriveUrl(res.url), isNew: true });
+        if (res.ok) editingImages.push({ url: normalizeDriveUrl(res.url), fileId: res.fileId, isNew: true });
         else alert('Upload gagal: ' + res.message);
       } catch(e) { alert('Upload error: ' + e.message); }
     }
@@ -3856,7 +3863,13 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     if (e.target === document.getElementById('adminPortoModal')) closeAdminForm();
   });
 
-  function closeAdminForm() {
+  async function closeAdminForm() {
+    // Skenario 1: hapus file isNew yang tersisa (belum disimpan) dari Drive
+    const orphans = editingImages.filter(img => img.isNew && img.fileId).map(img => img.fileId);
+    if (orphans.length) {
+      try { await gasPost({ action: 'deleteFiles', fileIds: orphans }); } catch(e) {}
+    }
+    editingImages = [];
     const modal = document.getElementById('adminPortoModal');
     if (modal) modal.classList.remove('open');
     document.body.style.overflow = '';
