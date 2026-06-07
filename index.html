@@ -459,63 +459,28 @@
       align-items: flex-start; padding-top: 72px; padding-bottom: 80px;
     }
     .works-header { width: 100%; opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
-    .works-header-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
-    /* Filter ALL button */
-    .works-filter-all-wrap { width: 100%; margin-bottom: 16px; }
-    .works-filter-all-btn {
-      display: block; width: 100%;
-      font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.4em; text-transform: uppercase;
-      color: #bbb; background: none; border: 1px solid #e8e8e8;
-      padding: 9px 0; cursor: pointer; text-align: center;
+    .works-header-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; }
+    .works-filter { display: flex; gap: 8px; flex-wrap: wrap; }
+    .works-filter-btn {
+      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: #999; background: none; border: 1px solid #ddd; padding: 7px 16px; cursor: pointer;
       transition: color 0.25s, border-color 0.25s, background 0.25s;
     }
-    .works-filter-all-btn:hover { color: #555; border-color: #aaa; }
-    .works-filter-all-btn.active { color: #111; border-color: #111; background: #111; color: #fff; }
-    /* Filter tile grid */
-    .works-filter {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px; width: 100%;
-    }
-    .works-filter-btn {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 6px; padding: 12px 4px;
-      font-family: 'Cinzel', serif; font-size: 7px; letter-spacing: 0.15em; text-transform: uppercase;
-      color: #999; background: #fff; border: 1px solid #e8e8e8;
-      cursor: pointer; transition: all 0.25s ease; min-width: 0;
-    }
-    .works-filter-btn .filter-icon { font-size: 18px; line-height: 1; }
-    .works-filter-btn .filter-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding: 0 2px; }
-    .works-filter-btn:hover { border-color: #aaa; color: #333; box-shadow: 0 3px 10px rgba(0,0,0,0.07); }
-    .works-filter-btn.active { border-color: #111; background: #111; color: #fff; }
-    /* Filter Level 2 — dropdown */
-    .works-filter-sub-wrap {
-      position: relative; width: 100%; margin-top: 8px;
-    }
+    .works-filter-btn:hover { color: #111; border-color: #111; }
+    .works-filter-btn.active { color: #fff; border-color: #111; background: #111; }
     .works-filter-sub {
-      position: absolute; top: 0; left: 0; right: 0; z-index: 50;
-      background: #fff; border: 1px solid #e0e0e0;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      display: flex; flex-wrap: wrap; gap: 6px; padding: 14px;
-      opacity: 0; pointer-events: none; transform: translateY(-6px);
-      transition: opacity 0.25s ease, transform 0.25s ease;
+      display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-bottom: 0;
+      max-height: 0; overflow: hidden; opacity: 0;
+      transition: max-height 0.4s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
     }
-    .works-filter-sub.visible { opacity: 1; pointer-events: all; transform: translateY(0); }
+    .works-filter-sub.visible { max-height: 200px; opacity: 1; margin-bottom: 28px; }
     .works-filter-sub-btn {
-      font-family: 'Cinzel', serif; font-size: 7.5px; letter-spacing: 0.25em; text-transform: uppercase;
-      color: #aaa; background: none; border: 1px solid #eee; padding: 6px 14px; cursor: pointer;
+      font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.25em; text-transform: uppercase;
+      color: #aaa; background: none; border: 1px solid #eee; padding: 5px 13px; cursor: pointer;
       transition: color 0.2s, border-color 0.2s, background 0.2s;
     }
     .works-filter-sub-btn:hover { color: #555; border-color: #aaa; }
-    .works-filter-sub-btn.active { color: #111; border-color: #111; background: #111; color: #fff; }
-    @media (max-width: 640px) {
-      .works-filter { grid-template-columns: repeat(4, 1fr); gap: 5px; }
-      .works-filter-btn { padding: 10px 3px; font-size: 6.5px; }
-      .works-filter-btn .filter-icon { font-size: 16px; }
-    }
-    @media (max-width: 380px) {
-      .works-filter { grid-template-columns: repeat(4, 1fr); gap: 4px; }
-    }
+    .works-filter-sub-btn.active { color: #111; border-color: #555; background: #f5f5f5; }
     .works-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; width: 100%; }
     .work-item {
       position: relative; overflow: hidden; aspect-ratio: 4/3; background: #e8e8e8; cursor: pointer;
@@ -1435,14 +1400,11 @@
             <p class="section-label" id="works-label">Portfolio</p>
             <h2 class="section-title" id="works-title">Selected Works</h2>
           </div>
+          <div class="works-filter" id="worksFilter1">
+            <button class="works-filter-btn active" data-filter="all" data-code="all">All</button>
+          </div>
         </div>
-        <div class="works-filter-all-wrap">
-          <button class="works-filter-all-btn active" id="worksFilterAll" data-code="all">All</button>
-        </div>
-        <div class="works-filter" id="worksFilter1"></div>
-        <div class="works-filter-sub-wrap">
-          <div class="works-filter-sub" id="worksFilter2"></div>
-        </div>
+        <div class="works-filter-sub" id="worksFilter2"></div>
       </div>
       <div class="works-grid" id="worksGrid">
         <div class="works-loading" id="worksLoading">Loading Portfolio...</div>
@@ -3351,118 +3313,70 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     return r.json();
   }
 
-  // ── Fallback categories (jika CSV gagal dimuat) ──
-  const FALLBACK_CATS = [
-    { code:'01', name_id:'Identitas Merek',    name_en:'Brand Identity',        subcategories_id:['Desain Logo','Edit / Redesain Logo','Sistem Visual','Panduan Merek','Warna & Tipografi'], subcategories_en:['Logo Design','Edit / Redesign Logo','Visual System','Brand Guidelines','Color & Typography'] },
-    { code:'02', name_id:'Desain Cetak',       name_en:'Print Design',          subcategories_id:['Desain CV / Resume','Desain Dokumen','Layout Editorial','Poster & Kolateral'], subcategories_en:['CV / Resume Design','Document Design','Editorial Layout','Poster & Collateral'] },
-    { code:'03', name_id:'Tipografi',          name_en:'Typography',            subcategories_id:['Custom Lettering','Desain Typeface','Layout Tipografis','Sistem Tipografi'], subcategories_en:['Custom Lettering','Typeface Design','Typographic Layout','Type System'] },
-    { code:'04', name_id:'Grafis Gerak',       name_en:'Motion Graphics',       subcategories_id:['Logo Animasi','Identitas Gerak','Animasi Media Sosial','Title Sequence'], subcategories_en:['Animated Logo','Motion Identity','Social Media Animation','Title Sequence'] },
-    { code:'05', name_id:'Arahan Seni',        name_en:'Art Direction',         subcategories_id:['Konsep Kreatif','Penceritaan Visual','Arahan Kampanye','Arahan Foto'], subcategories_en:['Creative Concept','Visual Storytelling','Campaign Direction','Photo Direction'] },
-    { code:'06', name_id:'UI / Digital',       name_en:'UI / Digital',          subcategories_id:['Web Undangan','Website Umum','Landing Page','Aplikasi Merek Digital'], subcategories_en:['Web Invitation','General Website','Landing Page','Digital Brand Application'] },
-    { code:'07', name_id:'Studio & Fotografi', name_en:'Studio & Photography',  subcategories_id:['Foto Produk','Video Produk','Self Photo Studio','Sesi Photo Studio'], subcategories_en:['Product Photography','Product Video','Self Photo Studio','Photo Studio Session'] },
-  ];
-
   // ── Init ──
   async function initPortfolio() {
-    // Selalu pakai fallback dulu supaya filter langsung muncul
-    allCategories = FALLBACK_CATS;
-    buildFilter1();
-
     try {
       const [porto, cats] = await Promise.all([fetchCSV(CSV_PORTO), fetchCSV(CSV_CATS)]);
       allPortfolio  = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>s.trim()).filter(Boolean) : [] }));
-      // Hanya ganti categories jika CSV berhasil dan punya data
-      if (cats && cats.length > 0) {
-        allCategories = cats.map(r => ({
-          ...r,
-          subcategories_id: r.subcategories_id ? r.subcategories_id.split(',').map(s=>s.trim()) : [],
-          subcategories_en: r.subcategories_en ? r.subcategories_en.split(',').map(s=>s.trim()) : [],
-        }));
-        buildFilter1(); // rebuild dengan data dari sheet
-      }
+      allCategories = cats.map(r => ({
+        ...r,
+        subcategories_id: r.subcategories_id ? r.subcategories_id.split(',').map(s=>s.trim()) : [],
+        subcategories_en: r.subcategories_en ? r.subcategories_en.split(',').map(s=>s.trim()) : [],
+      }));
+      buildFilter1();
       renderGrid();
     } catch(e) {
-      console.warn('Portfolio CSV fetch failed:', e);
       const g = document.getElementById('worksGrid');
-      if (g) g.innerHTML = '<div class="works-empty">Belum ada karya ditampilkan.</div>';
+      if (g) g.innerHTML = '<div class="works-empty">Gagal memuat portfolio.</div>';
     }
   }
-
-  // ── Category icons map ──
-  const CAT_ICONS = {
-    '01': '✦',   // Brand Identity
-    '02': '◫',   // Print Design
-    '03': 'Aa',  // Typography
-    '04': '▶',   // Motion Graphics
-    '05': '◉',   // Art Direction
-    '06': '⬡',   // UI / Digital
-    '07': '⬛',   // Studio & Photography
-  };
 
   // ── Build Filter Level 1 ──
   function buildFilter1() {
     const lang = getLangP();
     const wrap = document.getElementById('worksFilter1');
-    const allBtn = document.getElementById('worksFilterAll');
     if (!wrap) return;
     wrap.innerHTML = '';
-
-    // Wire All button
-    if (allBtn) {
-      allBtn.className = 'works-filter-all-btn' + (activeFilter1 === 'all' ? ' active' : '');
-      allBtn.onclick = () => {
-        activeFilter1 = 'all';
-        activeFilter2 = '';
-        allBtn.classList.add('active');
-        wrap.querySelectorAll('.works-filter-btn').forEach(b => b.classList.remove('active'));
-        toggleFilter2(false);
-        renderGrid();
-      };
-    }
-
+    // All button
+    const allBtn = document.createElement('button');
+    allBtn.className = 'works-filter-btn active';
+    allBtn.dataset.filter = 'all'; allBtn.dataset.code = 'all';
+    allBtn.textContent = 'All';
+    wrap.appendChild(allBtn);
     allCategories.forEach(cat => {
       const btn = document.createElement('button');
-      btn.className = 'works-filter-btn' + (activeFilter1 === cat.code ? ' active' : '');
-      btn.dataset.code = cat.code;
-      btn.dataset.clicks = '0';
-      const label = lang === 'id' ? cat.name_id : cat.name_en;
-      const short = label.split(' ').slice(0,2).join(' ');
-      btn.innerHTML = `<span class="filter-icon">${CAT_ICONS[cat.code] || '◆'}</span><span class="filter-label">${short}</span>`;
-      btn.title = label;
+      btn.className = 'works-filter-btn';
+      btn.dataset.filter = lang === 'id' ? cat.name_id : cat.name_en;
+      btn.dataset.code   = cat.code;
+      btn.textContent    = lang === 'id' ? cat.name_id : cat.name_en;
+      wrap.appendChild(btn);
+    });
+    attachFilter1Events();
+  }
+
+  function attachFilter1Events() {
+    document.querySelectorAll('.works-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const code = btn.dataset.code;
-        const wasActive = (activeFilter1 === code);
-        // Count consecutive clicks on same button
-        if (wasActive) {
-          btn.dataset.clicks = String(parseInt(btn.dataset.clicks || '0') + 1);
-        } else {
-          // Reset all click counters
-          wrap.querySelectorAll('.works-filter-btn').forEach(b => b.dataset.clicks = '0');
-          btn.dataset.clicks = '1';
-        }
-        const clickCount = parseInt(btn.dataset.clicks);
-        // Deactivate all
-        wrap.querySelectorAll('.works-filter-btn').forEach(b => b.classList.remove('active'));
-        if (allBtn) allBtn.classList.remove('active');
+        const same = (activeFilter1 === code);
+        // Set active
+        document.querySelectorAll('.works-filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        // 3rd click → show dropdown L2
-        if (clickCount >= 3) {
+        if (same && code !== 'all') {
+          // Second click on same → show Level 2
           buildFilter2(code);
           toggleFilter2(true);
-          btn.dataset.clicks = '0'; // reset after opening
         } else {
-          // 1st or 2nd click → just filter, hide L2
+          // First click → hide L2, reset sub
           activeFilter2 = '';
           toggleFilter2(false);
         }
         activeFilter1 = code;
+        lastClickedCat = code;
         renderGrid();
       });
-      wrap.appendChild(btn);
     });
   }
-
-  function attachFilter1Events() { /* handled inside buildFilter1 */ }
 
   // ── Build Filter Level 2 ──
   function buildFilter2(catCode) {
@@ -3504,23 +3418,8 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
   function toggleFilter2(show) {
     const wrap = document.getElementById('worksFilter2');
     if (!wrap) return;
-    if (show) {
-      wrap.classList.add('visible');
-      // Close dropdown when clicking outside
-      setTimeout(() => {
-        document.addEventListener('click', function closeL2(e) {
-          const f1 = document.getElementById('worksFilter1');
-          const f2 = document.getElementById('worksFilter2');
-          if (!f1?.contains(e.target) && !f2?.contains(e.target)) {
-            toggleFilter2(false);
-            document.removeEventListener('click', closeL2);
-          }
-        });
-      }, 100);
-    } else {
-      wrap.classList.remove('visible');
-      setTimeout(() => { if (!wrap.classList.contains('visible')) wrap.innerHTML = ''; }, 300);
-    }
+    if (show) wrap.classList.add('visible');
+    else { wrap.classList.remove('visible'); wrap.innerHTML = ''; }
   }
 
   // ── Render Grid ──
