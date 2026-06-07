@@ -6738,6 +6738,30 @@ function setMenuIcon(sectionId) {
 
       // WORKS admin handled by portfolio system
       if (typeof window._onAdminModeEnabled === 'function') window._onAdminModeEnabled();
+
+      function enableStoreAdmin() {
+        try {
+          // Tambahkan store-admin-bar ke semua section yang punya konten
+          document.querySelectorAll('.store-admin-bar').forEach(bar => {
+            bar.style.display = 'flex';
+          });
+
+          // Inject tombol Add Work jika belum ada
+          const worksGrid = document.getElementById('worksGrid') || document.querySelector('.works-grid');
+          if (worksGrid && !document.querySelector('.work-item-add')) {
+            const addCard = document.createElement('div');
+            addCard.className = 'work-item-add';
+            addCard.innerHTML = '<span>+ Add Work</span>';
+            addCard.addEventListener('click', () => {
+              if (typeof openAdminForm === 'function') openAdminForm(null);
+            });
+            worksGrid.appendChild(addCard);
+          }
+        } catch(e) {
+          // Abaikan jika elemen belum tersedia
+        }
+      }
+
       enableStoreAdmin();
 
       // FIX: Kalau sedang tidak di halaman Works, navigasi ke Works
