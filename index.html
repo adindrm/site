@@ -3305,12 +3305,15 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
   }
 
   async function gasPost(body) {
+    // FIX: Gunakan Content-Type text/plain agar browser tidak kirim preflight OPTIONS
+    // (GAS tidak bisa handle preflight dengan benar). redirect:'follow' wajib untuk
+    // mengikuti redirect Google yang terjadi pada setiap request POST ke GAS.
     const r = await fetch(GAS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(body)
     });
-    // FIX: Handle non-JSON response (misal redirect ke login Google)
     const text = await r.text();
     try {
       return JSON.parse(text);
@@ -3323,7 +3326,8 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
   // ── Fetch dari GAS API (fresh, no CSV cache) ──
   async function fetchFromGAS(params) {
     const qs  = Object.entries(params).map(([k,v]) => k + '=' + encodeURIComponent(v)).join('&');
-    const r   = await fetch(GAS_URL + '?' + qs);
+    // FIX: tambah redirect:'follow' agar mengikuti redirect Google
+    const r   = await fetch(GAS_URL + '?' + qs, { redirect: 'follow' });
     const json = await r.json();
     if (!json.ok) throw new Error(json.message || 'GAS error');
     return json.data;
