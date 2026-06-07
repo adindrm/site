@@ -3252,9 +3252,9 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
 //  PORTFOLIO SYSTEM
 // ══════════════════════════════════════════════════════════
 (function() {
-  const GAS_URL    = 'https://script.google.com/macros/s/AKfycbxHwLL68a_vgy8bAkcOcYShwMHrAQ3CrnvsBPf08m4BifOFjfUulhk3-1FMb9RSNAMzJg/exec';
-  const CSV_PORTO  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTe6kpisXa30IHSwn3eO-EWCpFfeGYO-CLxOOZWltD9fNoKvUXHdxvpZKrHVwf6N6RV75u5EPlKmj6g/pub?gid=838576042&single=true&output=csv';
-  const CSV_CATS   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTe6kpisXa30IHSwn3eO-EWCpFfeGYO-CLxOOZWltD9fNoKvUXHdxvpZKrHVwf6N6RV75u5EPlKmj6g/pub?gid=1211665282&single=true&output=csv';
+  const GAS_URL    = 'https://script.google.com/macros/s/AKfycbyCfpKbauLjEVprtY7bH3mkyguXWq35Ja7xsxvfsgud7iL6tJ3IccDPoy7Hv1qcfofqqg/exec';
+  const CSV_PORTO  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1pZJX7_1O6beVsqvit0RpoNt9xQQB4su3kNd74T-XfI5BcTJcUTsDZ1ZKILxjIRME3Xasjw-E5eV5/pub?gid=838576042&single=true&output=csv';
+  const CSV_CATS   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1pZJX7_1O6beVsqvit0RpoNt9xQQB4su3kNd74T-XfI5BcTJcUTsDZ1ZKILxjIRME3Xasjw-E5eV5/pub?gid=1211665282&single=true&output=csv';
 
   // ── State ──
   let allPortfolio = [];
@@ -3310,24 +3310,50 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    return r.json();
+    // FIX: Handle non-JSON response (misal redirect ke login Google)
+    const text = await r.text();
+    try {
+      return JSON.parse(text);
+    } catch(e) {
+      console.error('GAS response bukan JSON:', text.slice(0, 200));
+      throw new Error('GAS tidak merespons dengan JSON. Pastikan GAS sudah di-deploy dengan akses "Anyone".');
+    }
+  }
+
+  // ── Fetch dari GAS API (fresh, no CSV cache) ──
+  async function fetchFromGAS(params) {
+    const qs  = Object.entries(params).map(([k,v]) => k + '=' + encodeURIComponent(v)).join('&');
+    const r   = await fetch(GAS_URL + '?' + qs);
+    const json = await r.json();
+    if (!json.ok) throw new Error(json.message || 'GAS error');
+    return json.data;
   }
 
   // ── Init ──
   async function initPortfolio() {
     try {
-      const [porto, cats] = await Promise.all([fetchCSV(CSV_PORTO), fetchCSV(CSV_CATS)]);
+      // Portfolio: CSV untuk load awal (cepat)
+      // Kategori: GAS API (no cache) dengan fallback ke CSV
+      const [porto, cats] = await Promise.all([
+        fetchCSV(CSV_PORTO),
+        fetchFromGAS({ action: 'categories' }).catch(() => fetchCSV(CSV_CATS))
+      ]);
       allPortfolio  = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>s.trim()).filter(Boolean) : [] }));
-      allCategories = cats.map(r => ({
+      allCategories = (Array.isArray(cats) ? cats : []).map(r => ({
         ...r,
-        subcategories_id: r.subcategories_id ? r.subcategories_id.split(',').map(s=>s.trim()) : [],
-        subcategories_en: r.subcategories_en ? r.subcategories_en.split(',').map(s=>s.trim()) : [],
+        subcategories_id: r.subcategories_id
+          ? (Array.isArray(r.subcategories_id) ? r.subcategories_id : r.subcategories_id.split(',').map(s=>s.trim()))
+          : [],
+        subcategories_en: r.subcategories_en
+          ? (Array.isArray(r.subcategories_en) ? r.subcategories_en : r.subcategories_en.split(',').map(s=>s.trim()))
+          : [],
       }));
       buildFilter1();
       renderGrid();
     } catch(e) {
       const g = document.getElementById('worksGrid');
       if (g) g.innerHTML = '<div class="works-empty">Gagal memuat portfolio.</div>';
+      console.error('initPortfolio error:', e);
     }
   }
 
@@ -3767,13 +3793,26 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     document.body.style.overflow = '';
   }
 
-  // ── Reload from CSV after mutation ──
+  // ── Reload dari GAS setelah mutasi (fresh, no cache) ──
   async function reloadPortfolio() {
     try {
-      const porto = await fetchCSV(CSV_PORTO);
-      allPortfolio = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>s.trim()).filter(Boolean) : [] }));
+      // Pakai GAS GET ?action=list&status=all agar data langsung fresh tanpa tunggu cache CSV
+      const porto = await fetchFromGAS({ action: 'list', status: 'all' });
+      allPortfolio = (Array.isArray(porto) ? porto : []).map(r => ({
+        ...r,
+        images: Array.isArray(r.images)
+          ? r.images
+          : (r.images ? r.images.split(',').map(s=>s.trim()).filter(Boolean) : [])
+      }));
       renderGrid();
-    } catch(e) { console.warn('Reload failed', e); }
+    } catch(e) {
+      console.warn('Reload via GAS gagal, fallback ke CSV:', e);
+      try {
+        const porto = await fetchCSV(CSV_PORTO);
+        allPortfolio = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>s.trim()).filter(Boolean) : [] }));
+        renderGrid();
+      } catch(e2) { console.warn('Reload CSV juga gagal:', e2); }
+    }
   }
 
   // ── Language switch: rebuild filter + grid ──
@@ -6630,6 +6669,12 @@ function setMenuIcon(sectionId) {
       // WORKS admin handled by portfolio system
       if (typeof window._onAdminModeEnabled === 'function') window._onAdminModeEnabled();
       enableStoreAdmin();
+
+      // FIX: Kalau sedang tidak di halaman Works, navigasi ke Works
+      // agar edit bar muncul. Kalau sudah di Works, renderGrid sudah dipanggil di atas.
+      if (currentPage !== 'sec-works') {
+        setTimeout(() => navigateToPage('sec-works', true), 300);
+      }
     }
 
     // ── SHORT CIRCUIT sound (wrong input) ─────────────────────
