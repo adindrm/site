@@ -562,6 +562,42 @@
     .porto-detail { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.05em; line-height: 2.1; color: #777; }
     .porto-date { font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.3em; color: #bbb; text-transform: uppercase; margin-top: 24px; }
 
+    /* ── STORE DETAIL MODAL ── */
+    #storeModal { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding-top: 64px; padding-bottom: 24px; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; overflow-y: auto; }
+    #storeModal.open { opacity: 1; pointer-events: all; }
+    #storeModalBox { background: #fff; width: 90vw; max-width: 860px; position: relative; border-radius: 6px; overflow: hidden; transform: translateY(24px); transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1); flex-shrink: 0; }
+    #storeModal.open #storeModalBox { transform: translateY(0); }
+    #storeModalClose { position: absolute; top: 16px; right: 16px; z-index: 2; background: transparent; border: 1px solid #ddd; color: #aaa; font-size: 12px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: monospace; transition: color 0.2s, border-color 0.2s; }
+    #storeModalClose:hover { color: #111; border-color: #111; }
+    .smd-gallery { position: relative; width: 100%; aspect-ratio: 16/9; background: #111; overflow: hidden; }
+    .smd-gallery-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s ease; }
+    .smd-gallery-img.active { opacity: 1; }
+    .smd-gallery-nav { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; pointer-events: none; z-index: 2; }
+    .smd-gallery-btn { pointer-events: all; background: rgba(0,0,0,0.5); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; opacity: 0.7; }
+    .smd-gallery-btn:hover { background: rgba(0,0,0,0.85); opacity: 1; }
+    .smd-gallery-dots { position: absolute; bottom: 12px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; z-index: 2; }
+    .smd-gallery-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: background 0.2s; }
+    .smd-gallery-dot.active { background: #fff; }
+    .smd-body { padding: 36px 40px 40px; }
+    .smd-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .smd-cat-badge { font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: #888; border: 1px solid #ddd; padding: 4px 12px; }
+    .smd-badge { font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.25em; text-transform: uppercase; color: #aaa; border: 1px solid #eee; padding: 4px 12px; }
+    .smd-badge-sold { color: #999; border-color: #ddd; background: #f7f7f7; }
+    .smd-title { font-family: 'Cinzel', serif; font-size: clamp(20px,3vw,32px); font-weight: 700; letter-spacing: 0.08em; color: #111; margin-bottom: 12px; line-height: 1.2; }
+    .smd-desc { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.06em; line-height: 2; color: #555; margin-bottom: 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; }
+    .smd-price-row { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+    .smd-price-big { font-family: 'Cinzel', serif; font-size: clamp(16px,2.5vw,24px); font-weight: 700; letter-spacing: 0.1em; color: #111; }
+    .smd-period-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.2em; color: #999; }
+    .smd-action-btn { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; padding: 12px 32px; cursor: pointer; border: 1px solid #111; background: #111; color: #fff; transition: background 0.2s, color 0.2s, border-color 0.2s; text-decoration: none; display: inline-block; }
+    .smd-action-btn:hover { background: #333; border-color: #333; }
+    .smd-action-btn-disabled { border: 1px solid #ddd; background: transparent; color: #bbb; cursor: not-allowed; }
+    .smd-action-btn-disabled:hover { background: transparent; border-color: #ddd; color: #bbb; }
+    .smd-date { font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.3em; color: #bbb; text-transform: uppercase; margin-top: 24px; }
+    @media (max-width: 600px) {
+      .smd-body { padding: 24px 20px 28px; }
+      .smd-price-row { flex-wrap: wrap; gap: 10px; }
+    }
+
     /* ── ADMIN PORTO FORM ── */
     #adminPortoModal { position: fixed; inset: 0; z-index: 99000; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     #adminPortoModal.open { opacity: 1; pointer-events: all; }
@@ -1375,6 +1411,28 @@
         <div class="porto-desc" id="portoDesc"></div>
         <div class="porto-detail" id="portoDetail"></div>
         <div class="porto-date" id="portoDate"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORE DETAIL MODAL -->
+  <div id="storeModal">
+    <div id="storeModalBox">
+      <button id="storeModalClose">&#x2715;</button>
+      <div class="smd-gallery" id="smdGallery"></div>
+      <div class="smd-body">
+        <div class="smd-meta">
+          <span class="smd-cat-badge" id="smdCatBadge"></span>
+          <span class="smd-badge" id="smdBadge"></span>
+        </div>
+        <div class="smd-title" id="smdTitle"></div>
+        <div class="smd-desc" id="smdDesc"></div>
+        <div class="smd-price-row">
+          <span class="smd-price-big" id="smdPrice"></span>
+          <span class="smd-period-label" id="smdPeriod"></span>
+        </div>
+        <a class="smd-action-btn" id="smdActionBtn" href="#sec-contact"></a>
+        <div class="smd-date" id="smdDate"></div>
       </div>
     </div>
   </div>
@@ -3972,6 +4030,22 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
           </div>
         `;
 
+        // Klik card → buka detail modal
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.porto-admin-bar')) return;
+          if (e.target.closest('.store-btn:not(.store-btn-disabled)')) return;
+          openStoreModal(item);
+        });
+
+        // Tombol order/sewa → buka detail modal juga
+        const actionBtn = card.querySelector('.store-btn:not(.store-btn-disabled)');
+        if (actionBtn) {
+          actionBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openStoreModal(item);
+          });
+        }
+
         // Admin: edit bar
         if (isAdmin) {
           const bar = document.createElement('div');
@@ -3988,6 +4062,111 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
       });
     });
   }
+
+  // ── Store Detail Modal ────────────────────────────────────
+  let smdGalleryImages = [];
+  let smdGalleryIdx    = 0;
+
+  function openStoreModal(item) {
+    const lang    = document.getElementById('langSwitch')?.checked ? 'en' : 'id';
+    const name    = lang === 'en' ? (item.name_en || item.name_id) : item.name_id;
+    const desc    = lang === 'en' ? (item.desc_en || item.desc_id) : item.desc_id;
+    const badge   = item.badge || '';
+    const isSold  = badge.toLowerCase().includes('sold');
+    const isRent  = (item.category || '').toLowerCase() === 'rent';
+
+    document.getElementById('smdCatBadge').textContent = isRent ? (lang === 'en' ? 'Rent' : 'Sewa') : 'Shop';
+    const badgeEl = document.getElementById('smdBadge');
+    badgeEl.textContent = badge;
+    badgeEl.className = 'smd-badge' + (isSold ? ' smd-badge-sold' : '');
+    badgeEl.style.display = badge ? '' : 'none';
+
+    document.getElementById('smdTitle').textContent  = name;
+    document.getElementById('smdDesc').textContent   = desc;
+    document.getElementById('smdPrice').textContent  = item.price || '';
+    document.getElementById('smdPeriod').textContent = item.period || '';
+    document.getElementById('smdDate').textContent   = item.date || '';
+
+    const btn = document.getElementById('smdActionBtn');
+    if (isSold) {
+      btn.textContent = lang === 'en' ? 'Sold Out' : 'Habis';
+      btn.className = 'smd-action-btn smd-action-btn-disabled';
+      btn.removeAttribute('href');
+      btn.style.pointerEvents = 'none';
+    } else {
+      btn.textContent = isRent ? (lang === 'en' ? 'Rent Now' : 'Sewa Sekarang') : (lang === 'en' ? 'Order Now' : 'Pesan Sekarang');
+      btn.className = 'smd-action-btn';
+      btn.setAttribute('href', '#sec-contact');
+      btn.style.pointerEvents = '';
+      btn.addEventListener('click', () => {
+        closeStoreModal();
+      });
+    }
+
+    // Gallery
+    const gallery = document.getElementById('smdGallery');
+    smdGalleryImages = item.images || [];
+    smdGalleryIdx = 0;
+    buildSmdGallery(gallery, smdGalleryImages);
+
+    document.getElementById('storeModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function buildSmdGallery(gallery, images) {
+    gallery.innerHTML = '';
+    if (!images || images.length === 0) { gallery.style.display = 'none'; return; }
+    gallery.style.display = '';
+    images.forEach((url, i) => {
+      const img = document.createElement('img');
+      img.className = 'smd-gallery-img' + (i === 0 ? ' active' : '');
+      img.src = url; img.alt = 'Photo ' + (i + 1);
+      gallery.appendChild(img);
+    });
+    if (images.length > 1) {
+      const nav = document.createElement('div');
+      nav.className = 'smd-gallery-nav';
+      const prev = document.createElement('button');
+      prev.className = 'smd-gallery-btn'; prev.innerHTML = '&#8249;';
+      prev.onclick = () => shiftSmdGallery(-1);
+      const next = document.createElement('button');
+      next.className = 'smd-gallery-btn'; next.innerHTML = '&#8250;';
+      next.onclick = () => shiftSmdGallery(1);
+      nav.appendChild(prev); nav.appendChild(next);
+      gallery.appendChild(nav);
+      const dots = document.createElement('div');
+      dots.className = 'smd-gallery-dots';
+      images.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'smd-gallery-dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goSmdGallery(i);
+        dots.appendChild(d);
+      });
+      gallery.appendChild(dots);
+    }
+  }
+
+  function shiftSmdGallery(dir) {
+    const imgs = document.querySelectorAll('.smd-gallery-img');
+    if (!imgs.length) return;
+    goSmdGallery((smdGalleryIdx + dir + imgs.length) % imgs.length);
+  }
+
+  function goSmdGallery(idx) {
+    document.querySelectorAll('.smd-gallery-img').forEach((el, i) => el.classList.toggle('active', i === idx));
+    document.querySelectorAll('.smd-gallery-dot').forEach((el, i) => el.classList.toggle('active', i === idx));
+    smdGalleryIdx = idx;
+  }
+
+  function closeStoreModal() {
+    document.getElementById('storeModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('storeModalClose')?.addEventListener('click', closeStoreModal);
+  document.getElementById('storeModal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('storeModal')) closeStoreModal();
+  });
 
   // ── Admin Form ────────────────────────────────────────────
   function openStoreForm(item, defaultCat) {
