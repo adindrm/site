@@ -298,7 +298,7 @@
     #sec-about { background: #f7f7f7; }
     .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
     .about-photo {
-      aspect-ratio: 3/4; background: #ddd; position: relative; overflow: hidden;
+      aspect-ratio: 1/1; background: #ddd; position: relative; overflow: hidden;
       opacity: 0; transform: translateX(-40px);
       transition: opacity 0.9s ease, transform 0.9s ease;
     }
@@ -538,9 +538,9 @@
     .section.page-active .work-item:nth-child(8)  { transition-delay: 0.64s; }
 
     /* ── PORTFOLIO DETAIL MODAL ── */
-    #portfolioModal { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
+    #portfolioModal { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding-top: 64px; padding-bottom: 24px; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; overflow-y: auto; }
     #portfolioModal.open { opacity: 1; pointer-events: all; }
-    #portfolioModalBox { background: #fff; width: 90vw; max-width: 860px; max-height: 88vh; overflow-y: auto; position: relative; transform: translateY(24px); transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1); }
+    #portfolioModalBox { background: #fff; width: 90vw; max-width: 860px; position: relative; border-radius: 6px; overflow: hidden; transform: translateY(24px); transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1); flex-shrink: 0; }
     #portfolioModal.open #portfolioModalBox { transform: translateY(0); }
     #portfolioModalClose { position: absolute; top: 16px; right: 16px; z-index: 2; background: transparent; border: 1px solid #ddd; color: #aaa; font-size: 12px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: monospace; transition: color 0.2s, border-color 0.2s; }
     #portfolioModalClose:hover { color: #111; border-color: #111; }
@@ -565,6 +565,14 @@
     /* ── ADMIN PORTO FORM ── */
     #adminPortoModal { position: fixed; inset: 0; z-index: 99000; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     #adminPortoModal.open { opacity: 1; pointer-events: all; }
+    #adminStoreModal { position: fixed; inset: 0; z-index: 99000; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    #adminStoreModal.open { opacity: 1; pointer-events: all; }
+    #adminStoreBox { background: #fff; width: 92vw; max-width: 480px; max-height: 88vh; overflow-y: auto; padding: 28px 24px 24px; transform: translateY(20px); transition: transform 0.3s ease; border-radius: 6px; }
+    #adminStoreModal.open #adminStoreBox { transform: translateY(0); }
+    .store-loading { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.2em; color: #444; padding: 40px; text-align: center; grid-column: 1/-1; }
+  .store-add-tile { background: #111; border: 1px dashed #333; border-radius: 10px; display: flex; align-items: center; justify-content: center; min-height: 160px; cursor: pointer; color: #444; font-size: 22px; transition: border-color 0.2s, color 0.2s; }
+  .store-add-tile:hover { border-color: #666; color: #888; }
+  .store-img-placeholder { width: 100%; height: 100%; background: #1a1a1a; position: absolute; inset: 0; }
     #adminPortoBox { background: #fff; width: 92vw; max-width: 640px; max-height: 90vh; overflow-y: auto; padding: 36px 32px; position: relative; transform: translateY(20px); transition: transform 0.3s ease; }
     #adminPortoModal.open #adminPortoBox { transform: translateY(0); }
     .ap-title { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; color: #111; margin-bottom: 24px; }
@@ -1420,6 +1428,63 @@
   </div>
   <input type="file" id="apFileInput" accept="image/*" multiple style="display:none"/>
 
+  <!-- STORE ADMIN MODAL -->
+  <div id="adminStoreModal">
+    <div id="adminStoreBox">
+      <div class="ap-title" id="asFormTitle">Add Product</div>
+      <input type="hidden" id="asEditId"/>
+      <div class="ap-field">
+        <label class="ap-label">Nama Produk</label>
+        <input class="ap-input" id="asName" placeholder="Nama produk dalam bahasa Indonesia"/>
+      </div>
+      <div class="ap-row">
+        <div class="ap-field">
+          <label class="ap-label">Kategori</label>
+          <select class="ap-select ap-input" id="asCategory">
+            <option value="shop">Shop</option>
+            <option value="rent">Rent</option>
+          </select>
+        </div>
+        <div class="ap-field">
+          <label class="ap-label">Badge</label>
+          <input class="ap-input" id="asBadge" placeholder="New / Popular / Sold Out"/>
+        </div>
+      </div>
+      <div class="ap-row">
+        <div class="ap-field">
+          <label class="ap-label">Harga</label>
+          <input class="ap-input" id="asPrice" placeholder="Rp 150.000"/>
+        </div>
+        <div class="ap-field">
+          <label class="ap-label">Periode (khusus Rent)</label>
+          <input class="ap-input" id="asPeriod" placeholder="/ 6 mo"/>
+        </div>
+      </div>
+      <div class="ap-field">
+        <label class="ap-label">Deskripsi</label>
+        <textarea class="ap-textarea" id="asDesc" placeholder="Deskripsi singkat produk..."></textarea>
+      </div>
+      <div class="ap-field">
+        <label class="ap-label">Foto Produk</label>
+        <div class="ap-images-list" id="asImagesList"></div>
+        <div class="ap-upload-progress" id="asUploadProgress">Mengupload...</div>
+      </div>
+      <div class="ap-field">
+        <label class="ap-label">Status</label>
+        <select class="ap-select ap-input" id="asStatus">
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
+      </div>
+      <div class="ap-btn-row">
+        <span class="ap-saving" id="asSaving">Menyimpan...</span>
+        <button class="ap-btn danger" id="asDeleteBtn" style="display:none">Hapus</button>
+        <button class="ap-btn" id="asCancelBtn">Batal</button>
+        <button class="ap-btn primary" id="asSaveBtn">Simpan</button>
+      </div>
+    </div>
+  </div>
+  <input type="file" id="asFileInput" accept="image/*" multiple style="display:none"/>
   <section class="section" id="sec-works">
     <div class="section-inner">
       <div class="works-header">
@@ -1473,122 +1538,13 @@
       <!-- SHOP subpage -->
       <div class="store-subpage" id="store-shop">
         <p class="store-sub-desc" id="store-shop-desc">Printed merchandise, posters, and physical design objects — crafted with the same precision as client work.</p>
-        <div class="store-grid">
-          <div class="store-card">
-            <div class="store-card-img">
-              <img src="https://source.unsplash.com/600x600/?poster+art+print&sig=10" alt="Art Poster Series"/>
-              <div class="store-badge" id="badge-new">New</div>
-            </div>
-            <div class="store-card-info">
-              <div class="store-card-name" id="shop-01-name">Art Poster Series</div>
-              <div class="store-card-desc" id="shop-01-desc">Limited edition A2 risograph prints, signed and numbered.</div>
-              <div class="store-card-footer">
-                <span class="store-price">Rp 185.000</span>
-                <button class="store-btn" id="store-btn-order">Order</button>
-              </div>
-            </div>
-          </div>
-          <div class="store-card">
-            <div class="store-card-img">
-              <img src="https://source.unsplash.com/600x600/?tote+bag+design+minimal&sig=11" alt="Studio Tote Bag"/>
-            </div>
-            <div class="store-card-info">
-              <div class="store-card-name" id="shop-02-name">Studio Tote Bag</div>
-              <div class="store-card-desc" id="shop-02-desc">Canvas tote with screen-printed studio mark. One size.</div>
-              <div class="store-card-footer">
-                <span class="store-price">Rp 120.000</span>
-                <button class="store-btn" id="store-btn-order2">Order</button>
-              </div>
-            </div>
-          </div>
-          <div class="store-card">
-            <div class="store-card-img">
-              <img src="https://source.unsplash.com/600x600/?zine+print+publication&sig=12" alt="Design Zine Vol.1"/>
-              <div class="store-badge store-badge-sold" id="badge-sold">Sold Out</div>
-            </div>
-            <div class="store-card-info">
-              <div class="store-card-name" id="shop-03-name">Design Zine Vol.1</div>
-              <div class="store-card-desc" id="shop-03-desc">Self-published 48-page zine on visual identity and craft.</div>
-              <div class="store-card-footer">
-                <span class="store-price">Rp 95.000</span>
-                <button class="store-btn store-btn-disabled" disabled id="store-btn-sold">Sold Out</button>
-              </div>
-            </div>
-          </div>
-          <div class="store-card">
-            <div class="store-card-img">
-              <img src="https://source.unsplash.com/600x600/?enamel+pin+badge+minimal&sig=13" alt="Logo Pin Set"/>
-            </div>
-            <div class="store-card-info">
-              <div class="store-card-name" id="shop-04-name">Logo Pin Set</div>
-              <div class="store-card-desc" id="shop-04-desc">Set of 3 enamel pins featuring studio marks and typographic icons.</div>
-              <div class="store-card-footer">
-                <span class="store-price">Rp 75.000</span>
-                <button class="store-btn" id="store-btn-order3">Order</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="store-grid" id="shopGrid"><div class="store-loading">Loading...</div></div>
       </div>
 
       <!-- RENT subpage -->
       <div class="store-subpage" id="store-rent" style="display:none">
         <p class="store-sub-desc" id="store-rent-desc">License design assets, templates, and visual systems for a limited period — full usage rights included.</p>
-        <div class="store-grid">
-          <div class="store-card">
-            <div class="store-card-img">
-              <img src="https://source.unsplash.com/600x600/?brand+identity+template&sig=20" alt="Brand Identity Kit"/>
-              <div class="store-badge" id="badge-popular">Popular</div>
-            </div>
-            <div class="store-card-info">
-              <div class="store-card-name" id="rent-01-name">Brand Identity Kit</div>
-              <div class="store-card-desc" id="rent-01-desc">Complete brand system template — logo variants, color palette, typography guide. 6-month license.</div>
-              <div class="store-card-footer">
-                <span class="store-price">Rp 450.000 <span class="store-period" id="period-mo">/ 6 mo</span></span>
-                <button class="store-btn" id="store-btn-rent1">Rent</button>
-              </div>
-            </div>
-          </div>
-          <div class="store-card">
-            <div class="store-card-img">
-              <img src="https://source.unsplash.com/600x600/?editorial+layout+magazine&sig=21" alt="Editorial Layout Pack"/>
-            </div>
-            <div class="store-card-info">
-              <div class="store-card-name" id="rent-02-name">Editorial Layout Pack</div>
-              <div class="store-card-desc" id="rent-02-desc">12 InDesign layouts for magazine, lookbook, and zine production. 3-month license.</div>
-              <div class="store-card-footer">
-                <span class="store-price">Rp 280.000 <span class="store-period" id="period-mo2">/ 3 mo</span></span>
-                <button class="store-btn" id="store-btn-rent2">Rent</button>
-              </div>
-            </div>
-          </div>
-          <div class="store-card">
-            <div class="store-card-img">
-              <img src="https://source.unsplash.com/600x600/?motion+graphics+loop+abstract&sig=22" alt="Motion Loop Library"/>
-            </div>
-            <div class="store-card-info">
-              <div class="store-card-name" id="rent-03-name">Motion Loop Library</div>
-              <div class="store-card-desc" id="rent-03-desc">20 After Effects loops — abstract, typographic, and ambient. 1-month license.</div>
-              <div class="store-card-footer">
-                <span class="store-price">Rp 200.000 <span class="store-period" id="period-mo3">/ 1 mo</span></span>
-                <button class="store-btn" id="store-btn-rent3">Rent</button>
-              </div>
-            </div>
-          </div>
-          <div class="store-card">
-            <div class="store-card-img">
-              <img src="https://source.unsplash.com/600x600/?typography+font+poster&sig=23" alt="Type System Bundle"/>
-            </div>
-            <div class="store-card-info">
-              <div class="store-card-name" id="rent-04-name">Type System Bundle</div>
-              <div class="store-card-desc" id="rent-04-desc">Curated pairing guide + 8 typographic layout templates. 6-month license.</div>
-              <div class="store-card-footer">
-                <span class="store-price">Rp 320.000 <span class="store-period" id="period-mo4">/ 6 mo</span></span>
-                <button class="store-btn" id="store-btn-rent4">Rent</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="store-grid" id="rentGrid"><div class="store-loading">Loading...</div></div>
       </div>
 
     </div>
@@ -3915,6 +3871,292 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
 
 })();
 
+// ═══════════════════════════════════════════════════════════
+//  STORE — Load & Admin
+// ═══════════════════════════════════════════════════════════
+(function() {
+  let allStore       = [];
+  let storeImages    = []; // { url, fileId, isNew }
+  let storeEditId    = null;
+  let storeCategory  = 'shop'; // tab aktif saat form dibuka
+
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbycTu5yEXyqCKfy0AuURGgmWhI7-evpnP2JrgEV57ckwyvHBhm22c5NRGFtmotxb79v/exec';
+
+  function gasPost(body) {
+    return fetch(GAS_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(body)
+    }).then(r => r.text()).then(t => {
+      try { return JSON.parse(t); }
+      catch(e) { throw new Error('GAS tidak merespons JSON.'); }
+    });
+  }
+
+  function normUrl(url) {
+    if (!url) return '';
+    const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800';
+    const m2 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m2) return 'https://drive.google.com/thumbnail?id=' + m2[1] + '&sz=w800';
+    return url;
+  }
+
+  // ── Load store dari GAS ──────────────────────────────────
+  async function loadStore() {
+    try {
+      const url = GAS_URL + '?action=store&status=published&category=all&_=' + Date.now();
+      const res = await fetch(url).then(r => r.json());
+      if (res.ok) {
+        allStore = res.data.map(item => ({
+          ...item,
+          images: Array.isArray(item.images) ? item.images.map(normUrl) : []
+        }));
+      }
+    } catch(e) { console.warn('Store load error:', e); }
+    renderStore();
+  }
+
+  // ── Render grid shop & rent ──────────────────────────────
+  function renderStore() {
+    const lang     = document.getElementById('langSwitch')?.checked ? 'en' : 'id';
+    const isAdmin  = document.body.classList.contains('admin-mode');
+    const shopGrid = document.getElementById('shopGrid');
+    const rentGrid = document.getElementById('rentGrid');
+
+    ['shop', 'rent'].forEach(cat => {
+      const grid  = cat === 'shop' ? shopGrid : rentGrid;
+      const items = allStore.filter(i => (i.status === 'published' || isAdmin) && i.category === cat);
+      grid.innerHTML = '';
+
+      // Admin: tombol tambah
+      if (isAdmin) {
+        const addTile = document.createElement('div');
+        addTile.className = 'store-add-tile';
+        addTile.innerHTML = '<i class="fa-solid fa-plus"></i>';
+        addTile.addEventListener('click', () => openStoreForm(null, cat));
+        grid.appendChild(addTile);
+      }
+
+      if (!items.length && !isAdmin) {
+        grid.innerHTML = '<div class="store-loading">—</div>';
+        return;
+      }
+
+      items.forEach(item => {
+        const name   = lang === 'en' ? (item.name_en || item.name_id) : item.name_id;
+        const desc   = lang === 'en' ? (item.desc_en || item.desc_id) : item.desc_id;
+        const imgSrc = item.images[0] || '';
+        const badge  = item.badge || '';
+        const isSold = badge.toLowerCase().includes('sold');
+
+        const card = document.createElement('div');
+        card.className = 'store-card';
+        card.dataset.id = item.id;
+
+        card.innerHTML = `
+          <div class="store-card-img">
+            ${imgSrc ? `<img src="${imgSrc}" alt="${name}" loading="lazy"/>` : '<div class="store-img-placeholder"></div>'}
+            ${badge ? `<div class="store-badge${isSold ? ' store-badge-sold' : ''}">${badge}</div>` : ''}
+          </div>
+          <div class="store-card-info">
+            <div class="store-card-name">${name}</div>
+            <div class="store-card-desc">${desc}</div>
+            <div class="store-card-footer">
+              <span class="store-price">${item.price || ''}${item.period ? ' <span class="store-period">'+item.period+'</span>' : ''}</span>
+              ${isSold
+                ? `<button class="store-btn store-btn-disabled" disabled>${lang==='en'?'Sold Out':'Habis'}</button>`
+                : `<button class="store-btn">${cat==='rent'?(lang==='en'?'Rent':'Sewa'):(lang==='en'?'Order':'Pesan')}</button>`
+              }
+            </div>
+          </div>
+        `;
+
+        // Admin: edit bar
+        if (isAdmin) {
+          const bar = document.createElement('div');
+          bar.className = 'porto-admin-bar';
+          bar.innerHTML = '<span class="porto-admin-edit"><i class="fa-solid fa-pen"></i> Edit</span>';
+          bar.querySelector('.porto-admin-edit').addEventListener('click', e => {
+            e.stopPropagation();
+            openStoreForm(item);
+          });
+          card.appendChild(bar);
+        }
+
+        grid.appendChild(card);
+      });
+    });
+  }
+
+  // ── Admin Form ────────────────────────────────────────────
+  function openStoreForm(item, defaultCat) {
+    storeEditId   = item ? item.id : null;
+    storeCategory = item ? item.category : (defaultCat || 'shop');
+    storeImages   = item ? item.images.map(url => ({ url, isNew: false })) : [];
+
+    document.getElementById('asFormTitle').textContent = item ? 'Edit Product' : 'Add Product';
+    document.getElementById('asEditId').value          = storeEditId || '';
+    document.getElementById('asName').value            = item ? item.name_id : '';
+    document.getElementById('asCategory').value        = storeCategory;
+    document.getElementById('asBadge').value           = item ? (item.badge || '') : '';
+    document.getElementById('asPrice').value           = item ? (item.price || '') : '';
+    document.getElementById('asPeriod').value          = item ? (item.period || '') : '';
+    document.getElementById('asDesc').value            = item ? item.desc_id : '';
+    document.getElementById('asStatus').value          = item ? (item.status || 'published') : 'published';
+    document.getElementById('asDeleteBtn').style.display = item ? '' : 'none';
+    document.getElementById('asSaving').style.display  = 'none';
+
+    renderStoreImages();
+    document.getElementById('adminStoreModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function renderStoreImages() {
+    const list = document.getElementById('asImagesList');
+    list.innerHTML = '';
+    storeImages.forEach((img, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'ap-img-wrap';
+      const el = document.createElement('img');
+      el.className = 'ap-img-thumb'; el.src = img.url;
+      const rm = document.createElement('button');
+      rm.className = 'ap-img-remove'; rm.textContent = '×';
+      rm.onclick = async () => {
+        const removed = storeImages.splice(i, 1)[0];
+        renderStoreImages();
+        if (removed.isNew && removed.fileId) {
+          try { await gasPost({ action: 'deleteFiles', fileIds: [removed.fileId] }); } catch(e) {}
+        }
+      };
+      wrap.appendChild(el); wrap.appendChild(rm);
+      list.appendChild(wrap);
+    });
+    const addBtn = document.createElement('div');
+    addBtn.className = 'ap-upload-btn';
+    addBtn.innerHTML = '<i class="fa-solid fa-plus"></i><span>Foto</span>';
+    addBtn.onclick = () => document.getElementById('asFileInput').click();
+    list.appendChild(addBtn);
+  }
+
+  async function closeStoreForm() {
+    const orphans = storeImages.filter(i => i.isNew && i.fileId).map(i => i.fileId);
+    if (orphans.length) {
+      try { await gasPost({ action: 'deleteFiles', fileIds: orphans }); } catch(e) {}
+    }
+    storeImages = [];
+    document.getElementById('adminStoreModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Upload gambar store
+  document.getElementById('asFileInput')?.addEventListener('change', async function() {
+    const files = Array.from(this.files);
+    if (!files.length) return;
+    const prog = document.getElementById('asUploadProgress');
+    prog.style.display = 'block';
+    const cat = document.getElementById('asCategory').value;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      prog.textContent = 'Mengupload ' + file.name + ' (' + (i+1) + '/' + files.length + ')...';
+      const b64 = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result.split(',')[1]);
+        r.onerror = () => rej(new Error('Read failed'));
+        r.readAsDataURL(file);
+      });
+      try {
+        const res = await gasPost({
+          action: 'upload', data: b64, mimeType: file.type,
+          projectName: document.getElementById('asName').value || 'product',
+          imageIndex: i + 1, totalImages: files.length,
+          storeType: 'store', category: cat
+        });
+        if (res.ok) storeImages.push({ url: normUrl(res.url), fileId: res.fileId, isNew: true });
+        else alert('Upload gagal: ' + res.message);
+      } catch(e) { alert('Upload error: ' + e.message); }
+      renderStoreImages();
+    }
+    prog.style.display = 'none';
+    this.value = '';
+  });
+
+  // Save
+  document.getElementById('asSaveBtn')?.addEventListener('click', async () => {
+    const name_id = document.getElementById('asName').value.trim();
+    if (!name_id) { alert('Nama produk wajib diisi.'); return; }
+    document.getElementById('asSaving').style.display = '';
+    const body = {
+      action:   storeEditId ? 'updateStore' : 'addStore',
+      id:       storeEditId || undefined,
+      name_id,
+      category: document.getElementById('asCategory').value,
+      badge:    document.getElementById('asBadge').value.trim(),
+      price:    document.getElementById('asPrice').value.trim(),
+      period:   document.getElementById('asPeriod').value.trim(),
+      desc_id:  document.getElementById('asDesc').value.trim(),
+      images:   storeImages.map(i => i.url),
+      status:   document.getElementById('asStatus').value,
+    };
+    try {
+      const res = await gasPost(body);
+      if (res.ok) {
+        storeImages = storeImages.map(i => ({ ...i, isNew: false }));
+        document.getElementById('adminStoreModal').classList.remove('open');
+        document.body.style.overflow = '';
+        storeImages = [];
+        await reloadStore();
+      } else { alert('Gagal: ' + res.message); }
+    } catch(e) { alert('Error: ' + e.message); }
+    document.getElementById('asSaving').style.display = 'none';
+  });
+
+  // Delete
+  document.getElementById('asDeleteBtn')?.addEventListener('click', async () => {
+    if (!storeEditId) return;
+    if (!confirm('Hapus produk ini?')) return;
+    try {
+      const res = await gasPost({ action: 'deleteStore', id: storeEditId });
+      if (res.ok) {
+        document.getElementById('adminStoreModal').classList.remove('open');
+        document.body.style.overflow = '';
+        storeImages = [];
+        await reloadStore();
+      } else { alert('Gagal hapus: ' + res.message); }
+    } catch(e) { alert('Error: ' + e.message); }
+  });
+
+  // Cancel
+  document.getElementById('asCancelBtn')?.addEventListener('click', closeStoreForm);
+  document.getElementById('adminStoreModal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('adminStoreModal')) closeStoreForm();
+  });
+
+  async function reloadStore() {
+    try {
+      const url = GAS_URL + '?action=store&status=all&category=all&_=' + Date.now();
+      const res = await fetch(url).then(r => r.json());
+      if (res.ok) {
+        allStore = res.data.map(item => ({
+          ...item,
+          images: Array.isArray(item.images) ? item.images.map(normUrl) : []
+        }));
+      }
+    } catch(e) { console.warn('Reload store error:', e); }
+    renderStore();
+  }
+
+  // Re-render saat admin mode berubah
+  const _origOnAdmin = window._onAdminModeEnabled;
+  window._onAdminModeEnabled = function() {
+    if (_origOnAdmin) _origOnAdmin();
+    renderStore();
+  };
+
+  // Start
+  loadStore();
+})();
+
 const sectionIcons = {
   'sec-hero':     'fa-house',
   'sec-about':    'fa-user',
@@ -4865,8 +5107,10 @@ function setMenuIcon(sectionId) {
 
     /* ── FIGURE CANVAS (inside door, behind leaves) ── */
     function animateDoorCanvas(canvas, doorX, doorY, sessionMode) {
-      const W = canvas.width, H = canvas.height;
+      const dpr = window.devicePixelRatio || 1;
+      const W = canvas.width / dpr, H = canvas.height / dpr;
       const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
       const startTime = performance.now();
 
       // Figure layout
@@ -4978,6 +5222,20 @@ function setMenuIcon(sectionId) {
         const legY    = sleepBodyY + bodyH;
         const legGap  = bodyW * 0.08;
         const legR    = legW * 0.45;
+
+        // Glow kaki kiri
+        const legLCX = cx - legGap / 2 - legW / 2;
+        const legRCX = cx + legGap / 2 + legW / 2;
+        const legGlowY = legY + legH * 0.5;
+        const legGlowR = legW * 1.8;
+        [legLCX, legRCX].forEach(lx => {
+          const lg = ctx.createRadialGradient(lx, legGlowY, 0, lx, legGlowY, legGlowR);
+          lg.addColorStop(0, `rgba(255,255,255,${0.18 * alpha})`);
+          lg.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.beginPath(); ctx.arc(lx, legGlowY, legGlowR, 0, Math.PI * 2);
+          ctx.fillStyle = lg; ctx.fill();
+        });
+
         ctx.beginPath();
         ctx.roundRect(cx - legGap / 2 - legW, legY + leftLegOffY, legW, legH, [0, 0, legR, legR]);
         ctx.fillStyle = '#fff'; ctx.fill();
@@ -4988,12 +5246,30 @@ function setMenuIcon(sectionId) {
         ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5; ctx.stroke();
 
         // Body
+        const bodyCX = cx + shakeX;
+        const bodyCY = sleepBodyY + bodyH / 2;
+        const bodyGlowR = bodyW * 1.4;
+        const bodyGlow = ctx.createRadialGradient(bodyCX, bodyCY, 0, bodyCX, bodyCY, bodyGlowR);
+        bodyGlow.addColorStop(0, `rgba(255,255,255,${0.18 * alpha})`);
+        bodyGlow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.beginPath(); ctx.arc(bodyCX, bodyCY, bodyGlowR, 0, Math.PI * 2);
+        ctx.fillStyle = bodyGlow; ctx.fill();
+
         ctx.beginPath();
         ctx.roundRect(cx - bodyW / 2 + shakeX, sleepBodyY, bodyW, bodyH, [headR * 0.30, headR * 0.30, 0, 0]);
         ctx.fillStyle = '#fff'; ctx.fill();
         ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5; ctx.stroke();
 
-        // Arms
+        // Arms — glow sebelum gambar lengan
+        const armGlowR = armW * 2.2;
+        [[leftPivotX + shakeX, pivotY + armH * 0.5], [rightPivotX + shakeX, pivotY + armH * 0.5]].forEach(([ax, ay]) => {
+          const ag = ctx.createRadialGradient(ax, ay, 0, ax, ay, armGlowR);
+          ag.addColorStop(0, `rgba(255,255,255,${0.15 * alpha})`);
+          ag.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.beginPath(); ctx.arc(ax, ay, armGlowR, 0, Math.PI * 2);
+          ctx.fillStyle = ag; ctx.fill();
+        });
+
         drawArmRotated(leftPivotX  + shakeX, pivotY, armW, armH, armW * 0.45,  leftAngle);
         drawArmRotated(rightPivotX + shakeX, pivotY, armW, armH, armW * 0.45, rightAngle);
 
@@ -5005,11 +5281,11 @@ function setMenuIcon(sectionId) {
         ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5; ctx.stroke();
 
         // Glow
-        const glow = ctx.createRadialGradient(cx, headY, headR * 0.2, cx, headY, headR * 2.0);
-        glow.addColorStop(0, `rgba(255,255,255,${0.18 * alpha})`);
+        const glow = ctx.createRadialGradient(cx, headY, headR * 0.2, cx, headY, headR * 2.5);
+        glow.addColorStop(0, `rgba(255,255,255,${0.35 * alpha})`);
         glow.addColorStop(1, 'rgba(255,255,255,0)');
         ctx.beginPath();
-        ctx.arc(cx, headY, headR * 2.0, 0, Math.PI * 2);
+        ctx.arc(cx, headY, headR * 2.5, 0, Math.PI * 2);
         ctx.fillStyle = glow; ctx.fill();
 
         // Eyes
@@ -5096,6 +5372,29 @@ function setMenuIcon(sectionId) {
         // Spawn letters/balls/Z while hands are together, stop 3s before close
         const cycleT   = elapsed % CYCLE;
         const handsOn  = cycleT >= CLAP_TIME && cycleT < ARM_RETURN;
+
+        // Glow ujung tangan saat bertemu (sesi letter & ball saja, bukan sleep) — medium
+        if (handsOn && sessionMode !== 'sleep' && fadeIn >= 1) {
+          // Midpoint kedua ujung tangan dalam canvas-space dengan scaleFactor
+          const scale = 0.4 + 0.6 * fadeIn;
+          const midRawX = (lTip.x + rTip.x) / 2;
+          const midRawY = (lTip.y + rTip.y) / 2;
+          const scTipX = cx + (midRawX - cx) * scale;
+          const scTipY = H * 0.6 + (midRawY - H * 0.6) * scale;
+          const pulse = 0.6 + 0.4 * Math.sin(elapsed * 20);
+          const glowR = armW * scale * 6;
+          ctx.save();
+          const handGlow = ctx.createRadialGradient(scTipX, scTipY, 0, scTipX, scTipY, glowR);
+          handGlow.addColorStop(0,   `rgba(255,255,255,${0.85 * pulse})`);
+          handGlow.addColorStop(0.3, `rgba(255,255,255,${0.50 * pulse})`);
+          handGlow.addColorStop(0.7, `rgba(255,255,255,${0.20 * pulse})`);
+          handGlow.addColorStop(1,   'rgba(255,255,255,0)');
+          ctx.beginPath();
+          ctx.arc(scTipX, scTipY, glowR, 0, Math.PI * 2);
+          ctx.fillStyle = handGlow;
+          ctx.fill();
+          ctx.restore();
+        }
         if (sessionMode === 'sleep') {
           // Mode tidur: spawn Z satu per satu dari kepala secara periodik
           if (elapsed > 1.5 && elapsed < LETTERS_STOP) {
@@ -5395,8 +5694,11 @@ function setMenuIcon(sectionId) {
       portal.style.top  = pos.y + 'px';
 
       const canvas = document.createElement('canvas');
-      canvas.width  = DOOR_W;
-      canvas.height = DOOR_H;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width  = DOOR_W * dpr;
+      canvas.height = DOOR_H * dpr;
+      canvas.style.width  = DOOR_W + 'px';
+      canvas.style.height = DOOR_H + 'px';
       canvas.className = 'door-canvas';
 
       portal.innerHTML =
