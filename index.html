@@ -8317,11 +8317,13 @@ function setMenuIcon(sectionId) {
    ABOUT PHOTO SLIDESHOW
    Fetch photo_id dari Google Sheet tab "about",
    tampilkan via Google Drive thumbnail, bergantian random.
+   Setiap gambar tunggu onload sebelum fade — tidak pernah
+   menampilkan gambar yang belum selesai di-load.
 ══════════════════════════════════ */
 (function() {
   const CSV_URL     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWlmn-e1vQQ_f018VOuwLmisPOkV1a4rlwZpKd2J-0B8ZXTtWJCkgRMECx_TnAqA12uH1F2wUj2jJi/pub?gid=1282573995&single=true&output=csv';
-  const INTERVAL_MS = 4000;
-  const FADE_MS     = 900;
+  const INTERVAL_MS = 4000;  // jeda antar foto (ms)
+  const FADE_MS     = 900;   // durasi crossfade (harus sama dengan CSS transition)
 
   const imgA = document.getElementById('aboutPhotoA');
   const imgB = document.getElementById('aboutPhotoB');
@@ -8340,56 +8342,80 @@ function setMenuIcon(sectionId) {
     return a;
   }
 
+  // Preload sebuah gambar ke elemen img, kembalikan Promise
+  function preload(imgEl, url) {
+    return new Promise((resolve) => {
+      imgEl.onload  = () => resolve(true);
+      imgEl.onerror = () => resolve(false); // gagal load = skip tapi tetap lanjut
+      imgEl.src = url;
+    });
+  }
+
   let queue   = [];
   let qIdx    = 0;
-  let current = 'A';
-  let timer   = null;
+  let current = 'A'; // layer yang sedang tampil
+  let running = false;
 
-  function getNext() {
+  function nextUrl() {
     qIdx++;
     if (qIdx >= queue.length) { queue = shuffle(queue); qIdx = 0; }
     return toUrl(queue[qIdx]);
   }
 
-  function showFirst() {
-    if (!queue.length) return;
-    queue  = shuffle(queue);
-    qIdx   = 0;
-    imgA.src = toUrl(queue[0]);
-    imgA.onload = () => {
-      imgA.classList.add('visible');
-      current = 'A';
-      if (queue.length > 1) imgB.src = getNext();
-      timer = setInterval(swap, INTERVAL_MS);
-    };
-    imgA.onerror = () => { if (queue.length > 1) { imgA.src = getNext(); } };
+  // Loop utama — async agar bisa await onload
+  async function loop() {
+    running = true;
+    while (running) {
+      // Tentukan layer mana yang idle (akan diisi berikutnya)
+      const incoming = current === 'A' ? imgB : imgA;
+      const outgoing = current === 'A' ? imgA : imgB;
+
+      // Preload gambar berikutnya ke layer idle — tunggu sampai siap
+      await preload(incoming, nextUrl());
+
+      // Tunggu interval sebelum mulai fade
+      await new Promise(r => setTimeout(r, INTERVAL_MS));
+
+      // Fade in layer baru
+      incoming.classList.add('visible');
+
+      // Setelah sedikit jeda (biarkan fade in mulai), fade out layer lama
+      await new Promise(r => setTimeout(r, 80));
+      outgoing.classList.remove('visible');
+
+      // Tandai layer aktif berganti
+      current = current === 'A' ? 'B' : 'A';
+
+      // Tunggu fade selesai sepenuhnya sebelum iterasi berikutnya
+      await new Promise(r => setTimeout(r, FADE_MS));
+    }
   }
 
-  function swap() {
-    if (queue.length < 2) return;
-    if (current === 'A') {
-      imgB.classList.add('visible');
-      setTimeout(() => {
-        imgA.classList.remove('visible');
-        current = 'B';
-        setTimeout(() => { imgA.src = getNext(); }, FADE_MS);
-      }, 50);
-    } else {
-      imgA.classList.add('visible');
-      setTimeout(() => {
-        imgB.classList.remove('visible');
-        current = 'A';
-        setTimeout(() => { imgB.src = getNext(); }, FADE_MS);
-      }, 50);
-    }
+  async function showFirst() {
+    if (!queue.length) return;
+    queue = shuffle(queue);
+    qIdx  = 0;
+
+    // Load dan tampilkan foto pertama di layer A
+    const ok = await preload(imgA, toUrl(queue[0]));
+    if (!ok && queue.length < 2) return; // tidak ada foto valid
+    imgA.classList.add('visible');
+    current = 'A';
+
+    // Mulai loop hanya jika ada lebih dari 1 foto
+    if (queue.length > 1) loop();
   }
 
   function startWhenReady() {
     const secAbout = document.getElementById('sec-about');
-    if (!secAbout) { showFirst(); return; }
-    if (secAbout.classList.contains('page-active')) { showFirst(); return; }
+    if (!secAbout || secAbout.classList.contains('page-active')) {
+      showFirst();
+      return;
+    }
     const obs = new MutationObserver(() => {
-      if (secAbout.classList.contains('page-active') && !timer) showFirst();
+      if (secAbout.classList.contains('page-active') && !running) {
+        showFirst();
+      }
     });
     obs.observe(secAbout, { attributes: true });
   }
