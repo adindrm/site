@@ -3811,6 +3811,8 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
           projectName: projectName,
           imageIndex:  fi + 1,
           totalImages: totalImages,
+          storeType:   'studio',
+          category:    (document.getElementById('apCategory')?.value || '').trim(),
         });
         if (res.ok) editingImages.push({ url: normalizeDriveUrl(res.url), fileId: res.fileId, isNew: true });
         else alert('Upload gagal: ' + res.message);
