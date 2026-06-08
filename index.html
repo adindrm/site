@@ -300,15 +300,18 @@
     .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
     .about-photo {
       aspect-ratio: 1/1; background: #ddd; position: relative; overflow: hidden;
+      border-radius: 24px;
       opacity: 0; transform: translateX(-40px);
       transition: opacity 0.9s ease, transform 0.9s ease;
     }
-    .about-photo::after {
-      content: 'Photo'; position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Cinzel', serif; font-size: 12px;
-      letter-spacing: 0.3em; color: #aaa; text-transform: uppercase;
+    .about-photo-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.9s ease;
     }
+    .about-photo-img.visible { opacity: 1; }
     .about-photo-accent {
       position: absolute; bottom: -20px; right: -20px;
       width: 120px; height: 120px; border: 1px solid #111;
@@ -1613,7 +1616,9 @@
   <section class="section" id="sec-about">
     <div class="section-inner">
       <div class="about-grid">
-        <div class="about-photo">
+        <div class="about-photo" id="aboutPhoto">
+          <img class="about-photo-img" id="aboutPhotoA" src="" alt="About photo"/>
+          <img class="about-photo-img" id="aboutPhotoB" src="" alt="About photo"/>
           <div class="about-photo-accent"></div>
         </div>
         <div class="about-content">
@@ -8306,6 +8311,99 @@ function setMenuIcon(sectionId) {
   closeBtn.addEventListener('click', closeModal);
   backdrop.addEventListener('click', closeModal);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+})();
+
+/* ══════════════════════════════════
+   ABOUT PHOTO SLIDESHOW
+   Fetch photo_id dari Google Sheet tab "about",
+   tampilkan via Google Drive thumbnail, bergantian random.
+══════════════════════════════════ */
+(function() {
+  const CSV_URL     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWlmn-e1vQQ_f018VOuwLmisPOkV1a4rlwZpKd2J-0B8ZXTtWJCkgRMECx_TnAqA12uH1F2wUj2jJi/pub?gid=1282573995&single=true&output=csv';
+  const INTERVAL_MS = 4000;
+  const FADE_MS     = 900;
+
+  const imgA = document.getElementById('aboutPhotoA');
+  const imgB = document.getElementById('aboutPhotoB');
+  if (!imgA || !imgB) return;
+
+  function toUrl(id) {
+    return 'https://drive.google.com/thumbnail?id=' + id.trim() + '&sz=w800';
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  let queue   = [];
+  let qIdx    = 0;
+  let current = 'A';
+  let timer   = null;
+
+  function getNext() {
+    qIdx++;
+    if (qIdx >= queue.length) { queue = shuffle(queue); qIdx = 0; }
+    return toUrl(queue[qIdx]);
+  }
+
+  function showFirst() {
+    if (!queue.length) return;
+    queue  = shuffle(queue);
+    qIdx   = 0;
+    imgA.src = toUrl(queue[0]);
+    imgA.onload = () => {
+      imgA.classList.add('visible');
+      current = 'A';
+      if (queue.length > 1) imgB.src = getNext();
+      timer = setInterval(swap, INTERVAL_MS);
+    };
+    imgA.onerror = () => { if (queue.length > 1) { imgA.src = getNext(); } };
+  }
+
+  function swap() {
+    if (queue.length < 2) return;
+    if (current === 'A') {
+      imgB.classList.add('visible');
+      setTimeout(() => {
+        imgA.classList.remove('visible');
+        current = 'B';
+        setTimeout(() => { imgA.src = getNext(); }, FADE_MS);
+      }, 50);
+    } else {
+      imgA.classList.add('visible');
+      setTimeout(() => {
+        imgB.classList.remove('visible');
+        current = 'A';
+        setTimeout(() => { imgB.src = getNext(); }, FADE_MS);
+      }, 50);
+    }
+  }
+
+  function startWhenReady() {
+    const secAbout = document.getElementById('sec-about');
+    if (!secAbout) { showFirst(); return; }
+    if (secAbout.classList.contains('page-active')) { showFirst(); return; }
+    const obs = new MutationObserver(() => {
+      if (secAbout.classList.contains('page-active') && !timer) showFirst();
+    });
+    obs.observe(secAbout, { attributes: true });
+  }
+
+  fetch(CSV_URL)
+    .then(r => r.text())
+    .then(csv => {
+      const rows = csv.trim().split('\n');
+      queue = rows.slice(1)
+        .map(r => r.replace(/"/g, '').trim())
+        .filter(Boolean);
+      if (queue.length) startWhenReady();
+    })
+    .catch(err => console.warn('About photos: gagal fetch CSV', err));
 })();
 </script>
 </body>
