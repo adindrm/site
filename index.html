@@ -3778,14 +3778,17 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
   // Konversi berbagai format URL Drive ke format yang bisa diembed langsung
   function normalizeDriveUrl(url) {
     if (!url) return url;
-    // Sudah berformat thumbnail/uc/lh3 → biarkan
-    if (url.includes('lh3.googleusercontent.com') || url.includes('uc?export=view') || url.includes('thumbnail?')) return url;
-    // Format: https://drive.google.com/file/d/FILE_ID/view atau /view?usp=...
-    const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (m) return `https://lh3.googleusercontent.com/d/${m[1]}`;
-    // Format: https://drive.google.com/open?id=FILE_ID
-    const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (m2) return `https://lh3.googleusercontent.com/d/${m2[1]}`;
+    // Sudah lh3 → biarkan
+    if (url.includes('lh3.googleusercontent.com')) return url;
+    // Format thumbnail?id= atau uc?export=view&id=
+    const mId = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (mId) return 'https://lh3.googleusercontent.com/d/' + mId[1];
+    // Format: https://drive.google.com/file/d/FILE_ID/...
+    const mFile = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (mFile) return 'https://lh3.googleusercontent.com/d/' + mFile[1];
+    // Format: /d/FILE_ID (pendek)
+    const mD = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (mD) return 'https://lh3.googleusercontent.com/d/' + mD[1];
     return url;
   }
 
@@ -3955,10 +3958,14 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
 
   function normUrl(url) {
     if (!url) return '';
+    // Sudah lh3 → biarkan
+    if (url.includes('lh3.googleusercontent.com')) return url;
+    // Format thumbnail?id= atau uc?export=view&id=
     const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w800';
-    const m2 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (m2) return 'https://drive.google.com/thumbnail?id=' + m2[1] + '&sz=w800';
+    if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
+    // Format /file/d/ atau /d/
+    const m2 = url.match(/\/(?:file\/)?d\/([a-zA-Z0-9_-]+)/);
+    if (m2) return 'https://lh3.googleusercontent.com/d/' + m2[1];
     return url;
   }
 
