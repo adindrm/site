@@ -510,7 +510,7 @@
     .works-filter-sub { display: none !important; }
     .works-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; width: 100%; }
     .work-item {
-      position: relative; overflow: hidden; aspect-ratio: 4/3; background: #e8e8e8; cursor: pointer;
+      position: relative; overflow: hidden; aspect-ratio: 1/1; background: #e8e8e8; cursor: pointer;
       border-radius: 6px;
       opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease;
     }
@@ -544,7 +544,7 @@
     #portfolioModal.open #portfolioModalBox { transform: translateY(0); }
     #portfolioModalClose { position: absolute; top: 16px; right: 16px; z-index: 2; background: transparent; border: 1px solid #ddd; color: #aaa; font-size: 12px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: monospace; transition: color 0.2s, border-color 0.2s; }
     #portfolioModalClose:hover { color: #111; border-color: #111; }
-    .porto-gallery { position: relative; width: 100%; aspect-ratio: 16/9; background: #111; overflow: hidden; }
+    .porto-gallery { position: relative; width: 100%; aspect-ratio: 1/1; background: #111; overflow: hidden; }
     .porto-gallery-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s ease; }
     .porto-gallery-img.active { opacity: 1; }
     .porto-gallery-nav { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; pointer-events: none; z-index: 2; }
@@ -569,7 +569,7 @@
     #storeModal.open #storeModalBox { transform: translateY(0); }
     #storeModalClose { position: absolute; top: 16px; right: 16px; z-index: 2; background: transparent; border: 1px solid #ddd; color: #aaa; font-size: 12px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: monospace; transition: color 0.2s, border-color 0.2s; }
     #storeModalClose:hover { color: #111; border-color: #111; }
-    .smd-gallery { position: relative; width: 100%; aspect-ratio: 16/9; background: #111; overflow: hidden; }
+    .smd-gallery { position: relative; width: 100%; aspect-ratio: 1/1; background: #111; overflow: hidden; }
     .smd-gallery-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.4s ease; }
     .smd-gallery-img.active { opacity: 1; }
     .smd-gallery-nav { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; pointer-events: none; z-index: 2; }
@@ -1175,7 +1175,7 @@
   }
   .store-card:hover { border-color: #333; transform: translateY(-3px); }
   .store-card-img {
-    position: relative; width: 100%; padding-top: 75%;
+    position: relative; width: 100%; padding-top: 100%;
     background: #111; overflow: hidden;
   }
   .store-card-img img {
@@ -7178,7 +7178,7 @@ function setMenuIcon(sectionId) {
         }
         .store-admin-btn:hover{border-color:#333;color:#333;}
         .work-item-add{
-          aspect-ratio:4/3;display:flex;
+          aspect-ratio:1/1;display:flex;
           align-items:center;justify-content:center;
           border:1px dashed #ccc;cursor:pointer;background:#fafafa;
           border-radius:6px;
