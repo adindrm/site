@@ -5,6 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="color-scheme" content="light only"/>
   <title>AIIDENTITY</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><image href='https://raw.githubusercontent.com/adindrm/site/f61986b01d7a68b0cf6b4184e2cbcdd150d3549c/main_logo.png' width='32' height='32' style='filter:invert(1)'/></svg>"/>
+
+  <!-- SEO -->
+  <meta name="description" content="Sesuatu sedang mengamatimu. Bukan dari luar, melainkan dari dalam. Siapakah kamu, sebenarnya?"/>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://aiidentity.web.id/"/>
+  <meta property="og:title" content="AIIDENTITY"/>
+  <meta property="og:description" content="Sesuatu sedang mengamatimu. Bukan dari luar, melainkan dari dalam. Siapakah kamu, sebenarnya?"/>
+  <meta property="og:image" content="https://raw.githubusercontent.com/adindrm/site/f61986b01d7a68b0cf6b4184e2cbcdd150d3549c/main_logo.png"/>
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:url" content="https://aiidentity.web.id/"/>
+  <meta name="twitter:title" content="AIIDENTITY"/>
+  <meta name="twitter:description" content="Sesuatu sedang mengamatimu. Bukan dari luar, melainkan dari dalam. Siapakah kamu, sebenarnya?"/>
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/adindrm/site/f61986b01d7a68b0cf6b4184e2cbcdd150d3549c/main_logo.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
   <style>
@@ -1599,13 +1619,13 @@
 
       <!-- SHOP subpage -->
       <div class="store-subpage" id="store-shop">
-        <p class="store-sub-desc" id="store-shop-desc">Printed merchandise, posters, and physical design objects — crafted with the same precision as client work.</p>
+        <p class="store-sub-desc" id="store-shop-desc">Printed merchandise, posters, and physical design objects, crafted with the same precision as client work.</p>
         <div class="store-grid" id="shopGrid"><div class="store-loading">Loading...</div></div>
       </div>
 
       <!-- RENT subpage -->
       <div class="store-subpage" id="store-rent" style="display:none">
-        <p class="store-sub-desc" id="store-rent-desc">License design assets, templates, and visual systems for a limited period — full usage rights included.</p>
+        <p class="store-sub-desc" id="store-rent-desc">License design assets, templates, and visual systems for a limited period, with full usage rights included.</p>
         <div class="store-grid" id="rentGrid"><div class="store-loading">Loading...</div></div>
       </div>
 
@@ -1655,7 +1675,7 @@
         <p class="section-label">Contact</p>
         <h2 class="section-title">Let's Work<br>Together.</h2>
         <p class="contact-sub">Have a project in mind? Reach out.</p>
-        <a href="mailto:hello@aiidentity.com" class="contact-email">hello@aiidentity.com</a>
+        <a href="mailto:aiidentity@icloud.com" class="contact-email">aiidentity@icloud.com</a>
         <div class="contact-socials">
           <a href="#" class="social-link">Instagram</a>
           <a href="#" class="social-link">Behance</a>
@@ -4012,7 +4032,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
       }
 
       if (!items.length && !isAdmin) {
-        grid.innerHTML = '<div class="store-loading">—</div>';
+        grid.innerHTML = '<div class="store-loading">Memuat...</div>';
         return;
       }
 
@@ -4403,8 +4423,8 @@ function setMenuIcon(sectionId) {
       'store-title':     'Shop & Rent',
       'store-tab-shop':  'Shop',
       'store-tab-rent':  'Rent',
-      'store-shop-desc': 'Printed merchandise, posters, and physical design objects — crafted with the same precision as client work.',
-      'store-rent-desc': 'License design assets, templates, and visual systems for a limited period — full usage rights included.',
+      'store-shop-desc': 'Printed merchandise, posters, and physical design objects, crafted with the same precision as client work.',
+      'store-rent-desc': 'License design assets, templates, and visual systems for a limited period, with full usage rights included.',
       'shop-01-name':    'Art Poster Series',
       'shop-01-desc':    'Limited edition A2 risograph prints, signed and numbered.',
       'shop-02-name':    'Studio Tote Bag',
@@ -4414,11 +4434,11 @@ function setMenuIcon(sectionId) {
       'shop-04-name':    'Logo Pin Set',
       'shop-04-desc':    'Set of 3 enamel pins featuring studio marks and typographic icons.',
       'rent-01-name':    'Brand Identity Kit',
-      'rent-01-desc':    'Complete brand system template — logo variants, color palette, typography guide. 6-month license.',
+      'rent-01-desc':    'Complete brand system template, including logo variants, color palette, typography guide. 6-month license.',
       'rent-02-name':    'Editorial Layout Pack',
       'rent-02-desc':    '12 InDesign layouts for magazine, lookbook, and zine production. 3-month license.',
       'rent-03-name':    'Motion Loop Library',
-      'rent-03-desc':    '20 After Effects loops — abstract, typographic, and ambient. 1-month license.',
+      'rent-03-desc':    '20 After Effects loops covering abstract, typographic, and ambient styles. 1-month license.',
       'rent-04-name':    'Type System Bundle',
       'rent-04-desc':    'Curated pairing guide + 8 typographic layout templates. 6-month license.',
       'badge-new':       'New',
@@ -4475,8 +4495,8 @@ function setMenuIcon(sectionId) {
       'store-title':     'Beli & Sewa',
       'store-tab-shop':  'Beli',
       'store-tab-rent':  'Sewa',
-      'store-shop-desc': 'Merchandise cetak, poster, dan objek desain fisik — dibuat dengan presisi yang sama seperti karya klien.',
-      'store-rent-desc': 'Lisensi aset desain, template, dan sistem visual untuk jangka waktu terbatas — termasuk hak penggunaan penuh.',
+      'store-shop-desc': 'Merchandise cetak, poster, dan objek desain fisik yang dibuat dengan presisi yang sama seperti karya klien.',
+      'store-rent-desc': 'Lisensi aset desain, template, dan sistem visual untuk jangka waktu terbatas, termasuk hak penggunaan penuh.',
       'shop-01-name':    'Seri Poster Seni',
       'shop-01-desc':    'Cetak risografi A2 edisi terbatas, ditandatangani dan bernomor.',
       'shop-02-name':    'Tote Bag Studio',
@@ -4486,11 +4506,11 @@ function setMenuIcon(sectionId) {
       'shop-04-name':    'Set Pin Logo',
       'shop-04-desc':    'Set 3 pin enamel dengan tanda studio dan ikon tipografi.',
       'rent-01-name':    'Kit Identitas Merek',
-      'rent-01-desc':    'Template sistem merek lengkap — variasi logo, palet warna, panduan tipografi. Lisensi 6 bulan.',
+      'rent-01-desc':    'Template sistem merek lengkap, mencakup variasi logo, palet warna, panduan tipografi. Lisensi 6 bulan.',
       'rent-02-name':    'Paket Layout Editorial',
       'rent-02-desc':    '12 layout InDesign untuk majalah, lookbook, dan zine. Lisensi 3 bulan.',
       'rent-03-name':    'Perpustakaan Loop Motion',
-      'rent-03-desc':    '20 loop After Effects — abstrak, tipografi, dan ambient. Lisensi 1 bulan.',
+      'rent-03-desc':    '20 loop After Effects yang mencakup tema abstrak, tipografi, dan ambient. Lisensi 1 bulan.',
       'rent-04-name':    'Bundel Sistem Tipografi',
       'rent-04-desc':    'Panduan pasangan tipografi + 8 template layout. Lisensi 6 bulan.',
       'badge-new':       'Baru',
