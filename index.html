@@ -3927,6 +3927,9 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     try {
       const res = await gasPost(payload);
       if (res.ok) {
+        // Kosongkan editingImages sebelum closeAdminForm agar file yang sudah
+        // tersimpan tidak ikut dihapus oleh logika orphan cleanup
+        editingImages = [];
         closeAdminForm();
         await reloadPortfolio();
       } else { alert('Gagal: ' + res.message); }
