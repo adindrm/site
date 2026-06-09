@@ -3386,7 +3386,9 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
 
   // ── Fetch helpers ──
   async function fetchCSV(url) {
-    const r = await fetch(url);
+    // Tambah cache-busting agar browser tidak pakai data lama
+    const sep = url.includes('?') ? '&' : '?';
+    const r = await fetch(url + sep + '_=' + Date.now(), { cache: 'no-store' });
     return parseCSV(await r.text());
   }
 
@@ -3422,16 +3424,18 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
   // ── Init ──
   async function initPortfolio() {
     try {
-      // Portfolio: CSV untuk load awal (cepat)
-      // Kategori: GAS API (no cache) dengan fallback ke CSV
+      // Ambil portfolio & kategori dari GAS agar selalu fresh (tidak kena cache CSV)
       const [porto, cats] = await Promise.all([
-        fetchCSV(CSV_PORTO),
+        fetchFromGAS({ action: 'list', status: 'published' }).catch(() => fetchCSV(CSV_PORTO)),
         fetchFromGAS({ action: 'categories' }).catch(() => fetchCSV(CSV_CATS))
       ]);
-      allPortfolio = porto.map(r => ({
+      const portoArr = Array.isArray(porto) ? porto : [];
+      allPortfolio = portoArr.map(r => ({
         ...r,
         category: normCatCode(r.category),
-        images: r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : []
+        images: Array.isArray(r.images)
+          ? r.images.map(normalizeDriveUrl)
+          : (r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : [])
       }));
       allCategories = (Array.isArray(cats) ? cats : []).map(r => ({
         ...r,
