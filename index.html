@@ -3875,15 +3875,16 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
       try {
         const b64 = await fileToBase64(file);
         const res = await gasPost({
-          action:      'upload',
-          filename:    file.name,
-          mimeType:    file.type,
-          data:        b64,
-          projectName: projectName,
-          imageIndex:  fi + 1,
-          totalImages: totalImages,
-          storeType:   'studio',
-          category:    (document.getElementById('apCategory')?.value || '').trim(),
+          action:       'upload',
+          filename:     file.name,
+          mimeType:     file.type,
+          data:         b64,
+          projectName:  projectName,
+          imageIndex:   fi + 1,
+          totalImages:  totalImages,
+          storeType:    'studio',
+          category:     (document.getElementById('apCategory')?.value || '').trim(),
+          subcategory:  (document.getElementById('apSubcategory')?.value || '').trim(),
         });
         if (res.ok) editingImages.push({ url: normalizeDriveUrl(res.url), fileId: res.fileId, isNew: true });
         else alert('Upload gagal: ' + res.message);
