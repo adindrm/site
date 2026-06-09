@@ -3756,7 +3756,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     tile.className = 'work-item-add';
     tile.innerHTML = '<span>+ Add Work</span>';
     tile.addEventListener('click', () => openAdminForm(null));
-    grid.appendChild(tile);
+    grid.insertBefore(tile, grid.firstChild);
   }
 
   // ── Admin Form ──
@@ -4409,6 +4409,9 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     if (_origOnAdmin) _origOnAdmin();
     renderStore();
   };
+
+  // Expose renderStore untuk dipanggil dari luar (misal saat logout)
+  window._renderStore = renderStore;
 
   // Start
   loadStore();
@@ -7534,6 +7537,8 @@ function setMenuIcon(sectionId) {
             document.querySelectorAll('.store-admin-bar').forEach(el => el.remove());
             const addTile = document.querySelector('.work-item-add');
             if (addTile) addTile.remove();
+            // Re-render store agar tile tambah produk ikut hilang
+            if (typeof window._renderStore === 'function') window._renderStore();
             // Suara shutdown
             playHackerLogout();
             responseEl.textContent = '> logout\nSESSION TERMINATED. ROLE: VISITOR.';
