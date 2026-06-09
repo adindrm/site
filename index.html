@@ -3358,30 +3358,45 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     return (sw && sw.checked) ? 'id' : 'en';
   }
 
-  // ── CSV Parser ──
+  // ── CSV Parser — handle newline di dalam quoted cell ──
+  function parseCSVAll(text) {
+    const rows = [];
+    let cur = '', inQ = false, row = [];
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i], next = text[i + 1];
+      if (c === '"') {
+        if (inQ && next === '"') { cur += '"'; i++; } // escaped quote ""
+        else { inQ = !inQ; }
+      } else if (c === ',' && !inQ) {
+        row.push(cur); cur = '';
+      } else if (c === '\n' && !inQ) {
+        if (cur.endsWith('\r')) cur = cur.slice(0, -1);
+        row.push(cur); cur = '';
+        rows.push(row); row = [];
+      } else {
+        cur += c;
+      }
+    }
+    // baris terakhir
+    if (cur.endsWith('\r')) cur = cur.slice(0, -1);
+    row.push(cur);
+    if (row.some(v => v !== '')) rows.push(row);
+    return rows;
+  }
+
   function parseCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    if (lines.length < 2) return [];
-    const headers = parseCSVRow(lines[0]);
-    return lines.slice(1).map(line => {
-      const vals = parseCSVRow(line);
+    const rows = parseCSVAll(text.trim());
+    if (rows.length < 2) return [];
+    const headers = rows[0].map(h => h.trim());
+    return rows.slice(1).map(vals => {
       const obj = {};
-      headers.forEach((h, i) => { obj[h.trim()] = (vals[i] || '').trim(); });
+      headers.forEach((h, i) => { obj[h] = (vals[i] || '').trim(); });
       return obj;
     }).filter(r => r.id || r.code);
   }
 
   function parseCSVRow(line) {
-    const result = [];
-    let cur = ''; let inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-      else { cur += c; }
-    }
-    result.push(cur);
-    return result;
+    return parseCSVAll(line)[0] || [];
   }
 
   // ── Fetch helpers ──
