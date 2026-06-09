@@ -3334,6 +3334,14 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
   const CSV_PORTO  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWlmn-e1vQQ_f018VOuwLmisPOkV1a4rlwZpKd2J-0B8ZXTtWJCkgRMECx_TnAqA12uH1F2wUj2jJi/pub?gid=257539292&single=true&output=csv';
   const CSV_CATS   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWlmn-e1vQQ_f018VOuwLmisPOkV1a4rlwZpKd2J-0B8ZXTtWJCkgRMECx_TnAqA12uH1F2wUj2jJi/pub?gid=147589532&single=true&output=csv';
 
+  // ── Normalisasi code kategori: "1" -> "01" ──
+  function normCatCode(val) {
+    if (!val) return val;
+    const n = parseInt(val, 10);
+    if (!isNaN(n)) return String(n).padStart(2, '0');
+    return val;
+  }
+
   // ── State ──
   let allPortfolio = [];
   let allCategories = [];
@@ -3420,9 +3428,14 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
         fetchCSV(CSV_PORTO),
         fetchFromGAS({ action: 'categories' }).catch(() => fetchCSV(CSV_CATS))
       ]);
-      allPortfolio  = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : [] }));
+      allPortfolio = porto.map(r => ({
+        ...r,
+        category: normCatCode(r.category),
+        images: r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : []
+      }));
       allCategories = (Array.isArray(cats) ? cats : []).map(r => ({
         ...r,
+        code: normCatCode(r.code),
         subcategories_id: r.subcategories_id
           ? (Array.isArray(r.subcategories_id) ? r.subcategories_id : r.subcategories_id.split(',').map(s=>s.trim()))
           : [],
@@ -3536,14 +3549,22 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
 
     // Filter data
     let items = allPortfolio.filter(p => p.status === 'published' || p.status === '');
+    // Sort: terbaru di atas (descending by date, fallback ke urutan row jika tanggal kosong)
+    items.sort((a, b) => {
+      const da = a.date ? new Date(a.date) : new Date(0);
+      const db = b.date ? new Date(b.date) : new Date(0);
+      return db - da;
+    });
     if (activeFilter1 !== 'all') {
       items = items.filter(p => p.category === activeFilter1);
     }
     if (activeFilter2) {
-      // match against both id and en sub names
+      // match against both id and en sub names — cari nilai alternatif dari option di dropdown
+      const subOptEl = document.querySelector(`#filterSubSelect option[value="${CSS.escape(activeFilter2)}"]`);
+      const altSubValue = subOptEl ? subOptEl.dataset.subEn : null;
       items = items.filter(p =>
         p.subcategory === activeFilter2 ||
-        p.subcategory === document.querySelector(`.works-filter-sub-btn[data-sub-id="${activeFilter2}"]`)?.dataset?.subEn
+        (altSubValue && p.subcategory === altSubValue)
       );
     }
 
@@ -3821,6 +3842,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
 
   // File input → upload to Drive via GAS
   document.getElementById('apFileInput')?.addEventListener('change', async function() {
+    // Preserve urutan file sesuai yang dipilih user (bukan urutan sistem file)
     const files = Array.from(this.files);
     if (!files.length) return;
     const progress = document.getElementById('apUploadProgress');
@@ -3928,6 +3950,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
       const porto = await fetchFromGAS({ action: 'list', status: 'all' });
       allPortfolio = (Array.isArray(porto) ? porto : []).map(r => ({
         ...r,
+        category: normCatCode(r.category),
         images: Array.isArray(r.images)
           ? r.images.map(normalizeDriveUrl)
           : (r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : [])
@@ -3937,7 +3960,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
       console.warn('Reload via GAS gagal, fallback ke CSV:', e);
       try {
         const porto = await fetchCSV(CSV_PORTO);
-        allPortfolio = porto.map(r => ({ ...r, images: r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : [] }));
+        allPortfolio = porto.map(r => ({ ...r, category: normCatCode(r.category), images: r.images ? r.images.split(',').map(s=>normalizeDriveUrl(s.trim())).filter(Boolean) : [] }));
         renderGrid();
       } catch(e2) { console.warn('Reload CSV juga gagal:', e2); }
     }
@@ -7167,13 +7190,27 @@ function setMenuIcon(sectionId) {
       window._isAdmin = true;
       document.body.classList.add('admin-mode');
 
-      // Admin badge di header
+      // Admin badge di header — ganti teks "aiidentity" jadi "admin"
       const headerTitle = document.getElementById('headerTitle');
+      if (headerTitle) {
+        // Simpan teks asli untuk restore saat logout
+        if (!headerTitle.dataset.originalHtml) {
+          headerTitle.dataset.originalHtml = headerTitle.innerHTML;
+        }
+        // Ganti semua span teks dengan "admin"
+        const spans = headerTitle.querySelectorAll('span');
+        const adminChars = 'ADMIN'.split('');
+        spans.forEach((sp, i) => {
+          sp.textContent = adminChars[i] !== undefined ? adminChars[i] : '';
+        });
+        // Sembunyikan span lebih dari 5 karakter
+        spans.forEach((sp, i) => { sp.style.display = i < adminChars.length ? '' : 'none'; });
+        headerTitle.dataset.adminMode = '1';
+      }
       if (headerTitle && !document.getElementById('adminBadge')) {
         const badge = document.createElement('span');
         badge.id = 'adminBadge';
-        badge.textContent = ' [ADMIN]';
-        badge.style.cssText = 'font-size:9px;letter-spacing:0.2em;color:#888;margin-left:8px;font-family:Courier New,monospace;';
+        badge.style.cssText = 'font-size:9px;letter-spacing:0.2em;color:#888;margin-left:8px;font-family:Courier New,monospace;display:none;';
         headerTitle.appendChild(badge);
       }
 
@@ -7463,6 +7500,13 @@ function setMenuIcon(sectionId) {
             window._isAdmin = false;
             authStep = 0;
             document.body.classList.remove('admin-mode');
+            // Kembalikan teks header ke "aiidentity"
+            const headerTitleEl = document.getElementById('headerTitle');
+            if (headerTitleEl && headerTitleEl.dataset.originalHtml) {
+              headerTitleEl.innerHTML = headerTitleEl.dataset.originalHtml;
+              delete headerTitleEl.dataset.originalHtml;
+              delete headerTitleEl.dataset.adminMode;
+            }
             const badge = document.getElementById('adminBadge');
             if (badge) badge.remove();
             const storeSection = document.getElementById('sec-store');
