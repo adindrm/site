@@ -533,7 +533,43 @@
     }
     /* legacy sub-buttons hidden — replaced by second dropdown */
     .works-filter-sub { display: none !important; }
-    .works-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; width: 100%; }
+    .works-grid { display: flex; flex-direction: column; gap: 0; width: 100%; }
+
+    /* ── Category group ── */
+    .works-cat-group { width: 100%; margin-bottom: 48px; }
+    .works-cat-heading {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(11px, 1.3vw, 15px);
+      font-weight: 700;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #111;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #111;
+      margin-bottom: 24px;
+      opacity: 0; transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .section.page-active .works-cat-heading { opacity: 1; transform: translateY(0); }
+
+    /* ── Subcategory group ── */
+    .works-sub-group { width: 100%; margin-bottom: 28px; }
+    .works-sub-heading {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(8px, 0.9vw, 10px);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 10px;
+      padding-left: 2px;
+      opacity: 0; transform: translateY(12px);
+      transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s;
+    }
+    .section.page-active .works-sub-heading { opacity: 1; transform: translateY(0); }
+
+    /* ── Inner grid (the actual 2-col card grid) ── */
+    .works-sub-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; width: 100%; }
+
     .work-item {
       position: relative; overflow: hidden; aspect-ratio: 1/1; background: #e8e8e8; cursor: pointer;
       border-radius: 6px; box-shadow: 4px 4px 10px rgba(0,0,0,0.25);
@@ -553,14 +589,6 @@
     .section.page-active .works-count { opacity: 1; }
     .section.page-active .works-header { opacity: 1; transform: translateY(0); }
     .section.page-active .work-item { opacity: 1; transform: translateY(0); }
-    .section.page-active .work-item:nth-child(1)  { transition-delay: 0.08s; }
-    .section.page-active .work-item:nth-child(2)  { transition-delay: 0.16s; }
-    .section.page-active .work-item:nth-child(3)  { transition-delay: 0.24s; }
-    .section.page-active .work-item:nth-child(4)  { transition-delay: 0.32s; }
-    .section.page-active .work-item:nth-child(5)  { transition-delay: 0.40s; }
-    .section.page-active .work-item:nth-child(6)  { transition-delay: 0.48s; }
-    .section.page-active .work-item:nth-child(7)  { transition-delay: 0.56s; }
-    .section.page-active .work-item:nth-child(8)  { transition-delay: 0.64s; }
 
     /* ── PORTFOLIO DETAIL MODAL ── */
     #portfolioModal { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: flex; align-items: flex-start; justify-content: center; padding-top: 64px; padding-bottom: 24px; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; overflow-y: auto; }
@@ -3561,14 +3589,14 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
 
   // ── Render Grid ──
   function renderGrid() {
-    const lang   = getLangP();
-    const grid   = document.getElementById('worksGrid');
+    const lang    = getLangP();
+    const grid    = document.getElementById('worksGrid');
     const countEl = document.getElementById('worksCount');
     if (!grid) return;
 
     // Filter data
     let items = allPortfolio.filter(p => p.status === 'published' || p.status === '');
-    // Sort: terbaru di atas (descending by date, fallback ke urutan row jika tanggal kosong)
+    // Sort: terbaru di atas
     items.sort((a, b) => {
       const da = a.date ? new Date(a.date) : new Date(0);
       const db = b.date ? new Date(b.date) : new Date(0);
@@ -3578,7 +3606,6 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
       items = items.filter(p => p.category === activeFilter1);
     }
     if (activeFilter2) {
-      // match against both id and en sub names — cari nilai alternatif dari option di dropdown
       const subOptEl = document.querySelector(`#filterSubSelect option[value="${CSS.escape(activeFilter2)}"]`);
       const altSubValue = subOptEl ? subOptEl.dataset.subEn : null;
       items = items.filter(p =>
@@ -3588,49 +3615,142 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     }
 
     grid.innerHTML = '';
+
     if (items.length === 0) {
       grid.innerHTML = '<div class="works-empty">Belum ada karya.</div>';
       if (countEl) countEl.textContent = '';
-      // FIX: Tetap tampilkan tombol Add Work saat admin mode aktif meskipun grid kosong
-      if (document.body.classList.contains('admin-mode')) {
-        addAdminAddTile();
-      }
+      if (document.body.classList.contains('admin-mode')) addAdminAddTile();
       return;
     }
 
-    items.forEach((p, idx) => {
-      const name = lang === 'id' ? (p.name_id || p.name_en) : (p.name_en || p.name_id);
-      const cat  = allCategories.find(c => c.code === p.category);
-      const catName = cat ? (lang === 'id' ? cat.name_id : cat.name_en) : p.category;
-      const thumb = p.images[0] || '';
+    // ── Group by category, then subcategory ──
+    // Preserve category order from allCategories
+    const catOrder = allCategories.map(c => c.code);
+    const grouped = {}; // { catCode: { subName: [items] } }
 
-      const div = document.createElement('div');
-      div.className = 'work-item';
-      div.dataset.id  = p.id;
-      div.dataset.cat = p.category;
-      div.dataset.sub = p.subcategory;
-      div.innerHTML = `
-        <div class="work-num">${String(idx+1).padStart(2,'0')}</div>
-        ${thumb ? `<img src="${thumb}" alt="${name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" loading="lazy"/>` : '<div class="work-placeholder"><span class="work-placeholder-label">No Image</span></div>'}
-        <div class="work-overlay">
-          <div class="work-title">${name}</div>
-          <div class="work-cat">${catName}</div>
-        </div>`;
-      div.addEventListener('click', () => openPortoModal(p, lang));
-      grid.appendChild(div);
+    items.forEach(p => {
+      const catCode = p.category || '__none__';
+      const subName = p.subcategory || '__none__';
+      if (!grouped[catCode]) grouped[catCode] = {};
+      if (!grouped[catCode][subName]) grouped[catCode][subName] = [];
+      grouped[catCode][subName].push(p);
+    });
+
+    // Sort categories by allCategories order
+    const sortedCatCodes = Object.keys(grouped).sort((a, b) => {
+      const ia = catOrder.indexOf(a), ib = catOrder.indexOf(b);
+      if (ia === -1 && ib === -1) return 0;
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+
+    let globalIdx = 0;
+    let catDelay  = 0;
+
+    sortedCatCodes.forEach(catCode => {
+      const cat     = allCategories.find(c => c.code === catCode);
+      const catName = cat ? (lang === 'id' ? cat.name_id : cat.name_en) : catCode;
+      const subMap  = grouped[catCode];
+
+      // Get subcategory order from allCategories definition
+      const subOrderId = cat ? (cat.subcategories_id || []) : [];
+      const subOrderEn = cat ? (cat.subcategories_en || []) : [];
+      const subOrderCurrent = lang === 'id' ? subOrderId : subOrderEn;
+
+      const sortedSubs = Object.keys(subMap).sort((a, b) => {
+        const ia = subOrderCurrent.indexOf(a), ib = subOrderCurrent.indexOf(b);
+        // fallback: try the other lang
+        const ia2 = (lang === 'id' ? subOrderEn : subOrderId).indexOf(a);
+        const ib2 = (lang === 'id' ? subOrderEn : subOrderId).indexOf(b);
+        const fa = ia !== -1 ? ia : (ia2 !== -1 ? ia2 : 999);
+        const fb = ib !== -1 ? ib : (ib2 !== -1 ? ib2 : 999);
+        if (fa === 999 && fb === 999) return 0;
+        return fa - fb;
+      });
+
+      // Category group container
+      const catGroup = document.createElement('div');
+      catGroup.className = 'works-cat-group';
+
+      // Category heading
+      const catHeading = document.createElement('div');
+      catHeading.className = 'works-cat-heading';
+      catHeading.textContent = catName;
+      catHeading.style.transitionDelay = catDelay + 's';
+      catGroup.appendChild(catHeading);
+      catDelay += 0.07;
+
+      let subDelay = catDelay;
+
+      sortedSubs.forEach(subName => {
+        const subItems = subMap[subName];
+
+        // Subcategory group
+        const subGroup = document.createElement('div');
+        subGroup.className = 'works-sub-group';
+
+        // Subcategory heading (only if not placeholder)
+        if (subName !== '__none__') {
+          const subHeading = document.createElement('div');
+          subHeading.className = 'works-sub-heading';
+          subHeading.textContent = subName;
+          subHeading.style.transitionDelay = subDelay + 's';
+          subGroup.appendChild(subHeading);
+          subDelay += 0.05;
+        }
+
+        // Inner 2-col grid
+        const subGrid = document.createElement('div');
+        subGrid.className = 'works-sub-grid';
+
+        subItems.forEach(p => {
+          const name  = lang === 'id' ? (p.name_id || p.name_en) : (p.name_en || p.name_id);
+          const thumb = p.images[0] || '';
+          globalIdx++;
+
+          const div = document.createElement('div');
+          div.className = 'work-item';
+          div.dataset.id  = p.id;
+          div.dataset.cat = p.category;
+          div.dataset.sub = p.subcategory;
+          div.style.transitionDelay = (subDelay + (globalIdx % 2) * 0.08) + 's';
+          div.innerHTML = `
+            <div class="work-num">${String(globalIdx).padStart(2,'0')}</div>
+            ${thumb
+              ? `<img src="${thumb}" alt="${name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" loading="lazy"/>`
+              : '<div class="work-placeholder"><span class="work-placeholder-label">No Image</span></div>'}
+            <div class="work-overlay">
+              <div class="work-title">${name}</div>
+              <div class="work-cat">${catName}</div>
+            </div>`;
+          div.addEventListener('click', () => openPortoModal(p, lang));
+          subGrid.appendChild(div);
+        });
+
+        subDelay += 0.1;
+        subGroup.appendChild(subGrid);
+        catGroup.appendChild(subGroup);
+      });
+
+      catDelay = subDelay + 0.05;
+      grid.appendChild(catGroup);
     });
 
     if (countEl) countEl.textContent = items.length + ' Project' + (items.length !== 1 ? 's' : '');
 
-    // Re-trigger animation if section active
+    // Re-trigger animation if section already active
     const sec = document.getElementById('sec-works');
     if (sec && sec.classList.contains('page-active')) {
-      grid.querySelectorAll('.work-item').forEach((el, i) => {
-        el.style.transitionDelay = (i * 0.08) + 's';
+      // force reflow so transitions fire
+      void grid.offsetWidth;
+      grid.querySelectorAll('.works-cat-heading, .works-sub-heading, .work-item').forEach(el => {
+        el.style.opacity = '';
+        el.style.transform = '';
       });
     }
 
-    // Add admin edit bars if admin mode
+    // Admin mode
     if (document.body.classList.contains('admin-mode')) {
       grid.querySelectorAll('.work-item').forEach(item => addPortoAdminBar(item));
       addAdminAddTile();
@@ -3756,7 +3876,13 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     tile.className = 'work-item-add';
     tile.innerHTML = '<span>+ Add Work</span>';
     tile.addEventListener('click', () => openAdminForm(null));
-    grid.insertBefore(tile, grid.firstChild);
+    // Prepend before first sub-grid or directly in grid
+    const firstSubGrid = grid.querySelector('.works-sub-grid');
+    if (firstSubGrid) {
+      firstSubGrid.insertBefore(tile, firstSubGrid.firstChild);
+    } else {
+      grid.insertBefore(tile, grid.firstChild);
+    }
   }
 
   // ── Admin Form ──
