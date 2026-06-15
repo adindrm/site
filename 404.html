@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="light only"/>
+  <title>404 - ANOMALI DETEKSI AII.ENTITY</title>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <link rel="apple-touch-icon" sizes="512x512" href="/apple-touch-icon.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *:focus { outline: none; }
+    
+    body { 
+      background: #000; 
+      color: #fff;
+      width: 100vw; 
+      height: 100vh; 
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      position: relative;
+    }
+
+    /* Efek Glitch & Scanline Satu Layar Penuh */
+    body::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), 
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.04));
+      z-index: 10;
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+    }
+
+    /* Animasi Guncangan Layar Utama */
+    .screen-glitch-active {
+      animation: screen-shake 0.3s steps(2) infinite;
+    }
+
+    /* Lapisan Efek Flash Merah/Biru di Seluruh Layar saat Glitch */
+    body::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 246, 255, 0.1);
+      opacity: 0;
+      z-index: 9;
+      pointer-events: none;
+    }
+    body.screen-glitch-active::after {
+      animation: screen-flash 0.3s linear;
+    }
+
+    .error-container {
+      text-align: center;
+      padding: 40px;
+      max-width: 600px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Wadah Khusus Garis Vertikal Acak di Latar Belakang */
+    .bg-lines-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* Elemen Garis Latar Belakang yang Muncul Random */
+    .random-deco-line {
+      position: absolute;
+      width: 1px;
+      height: var(--line-height, 60px);
+      background: #fff;
+      opacity: var(--line-opacity, 0.2);
+      transform-origin: top;
+      animation: lineFlow var(--line-duration, 2s) ease-in-out forwards;
+    }
+
+    /* Area Angka 404 */
+    .error-code-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .error-code {
+      font-size: clamp(60px, 10vw, 120px);
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #fff;
+      line-height: 1;
+      user-select: none;
+      position: relative;
+    }
+
+    /* Efek Glitch Teks Internal */
+    .error-code::before,
+    .error-code::after {
+      content: '404';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #000;
+      clip: rect(0, 0, 0, 0); 
+    }
+
+    .error-code-wrapper.glitch-severe .error-code::before {
+      left: 5px;
+      text-shadow: -3px 0 #ff00c8;
+      animation: glitch-heavy 0.4s infinite linear alternate-reverse;
+    }
+
+    .error-code-wrapper.glitch-severe .error-code::after {
+      left: -5px;
+      text-shadow: 3px 0 #00f6ff;
+      animation: glitch-heavy-2 0.4s infinite linear alternate-reverse;
+    }
+
+    /* Wadah untuk Karakter yang Mental/Jatuh */
+    .particle-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* Gaya Huruf Utama yang Mental */
+    .glitch-letter {
+      position: absolute;
+      font-size: clamp(20px, 3.5vw, 40px);
+      font-weight: bold;
+      color: #00f6ff;
+      text-shadow: 2px 0 #ff00c8;
+      font-family: monospace;
+      opacity: 1;
+      transform-origin: center;
+      white-space: nowrap;
+    }
+
+    /* Gaya Serpihan Pecahan Kecil pas Menyentuh Lantai */
+    .shattered-shard {
+      position: absolute;
+      font-size: clamp(10px, 2vw, 18px);
+      font-weight: bold;
+      font-family: monospace;
+      color: #ff00c8;
+      text-shadow: 1px 0 #00f6ff;
+      pointer-events: none;
+      opacity: 1;
+      animation: shard-fade 0.5s forwards ease-out;
+    }
+
+    .error-eyebrow {
+      font-size: clamp(7px, 0.9vw, 10px);
+      letter-spacing: 0.45em;
+      color: #999;
+      text-transform: uppercase;
+      margin-top: 20px;
+      margin-bottom: 32px;
+    }
+
+    .error-divider {
+      width: 60px;
+      height: 1px;
+      background: #fff;
+      margin: 24px auto;
+      opacity: 0.6;
+    }
+
+    .error-tagline {
+      font-size: clamp(9px, 1.1vw, 12px);
+      letter-spacing: 0.25em;
+      color: #ccc;
+      text-transform: uppercase;
+      line-height: 2;
+      margin-bottom: 52px;
+    }
+
+    .error-cta {
+      display: inline-block;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #000;
+      background: #fff;
+      padding: 16px 40px;
+      text-decoration: none;
+      border: 1px solid #fff;
+      border-radius: 50px;
+      transition: background 0.3s, color 0.3s, transform 0.2s;
+    }
+
+    .error-cta:hover {
+      background: #000;
+      color: #fff;
+      transform: scale(1.03);
+    }
+
+    /* Overlay Interaksi Awal untuk Membuka Aturan Kebijakan Audio Browser */
+    .audio-unlocker {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.9);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.5s ease;
+    }
+    .audio-unlocker p {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      color: #00f6ff;
+      text-shadow: 0 0 10px rgba(0,246,255,0.5);
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes lineFlow {
+      0%   { transform: scaleY(0); transform-origin: top; }
+      50%  { transform: scaleY(1); transform-origin: top; }
+      51%  { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    @keyframes screen-shake {
+      0% { transform: translate(0, 0) skewX(0deg); }
+      20% { transform: translate(-6px, 4px) skewX(-2deg); }
+      40% { transform: translate(8px, -5px) skewX(3deg); }
+      60% { transform: translate(-4px, -4px) skewX(1deg); }
+      80% { transform: translate(6px, 6px) skewX(-2deg); }
+      100% { transform: translate(0, 0) skewX(0deg); }
+    }
+
+    @keyframes screen-flash {
+      0%, 100% { opacity: 0; background: rgba(255, 0, 200, 0.08); }
+      50% { opacity: 1; background: rgba(0, 246, 255, 0.12); }
+    }
+
+    @keyframes glitch-heavy {
+      0% { clip: rect(15px, 9999px, 45px, 0); transform: skew(1deg); }
+      50% { clip: rect(70px, 9999px, 110px, 0); transform: skew(-3deg); }
+      100% { clip: rect(25px, 9999px, 65px, 0); transform: skew(2deg); }
+    }
+
+    @keyframes glitch-heavy-2 {
+      0% { clip: rect(60px, 9999px, 95px, 0); transform: skew(-2deg); }
+      50% { clip: rect(20px, 9999px, 60px, 0); transform: skew(2deg); }
+      100% { clip: rect(85px, 9999px, 130px, 0); transform: skew(-2deg); }
+    }
+
+    @keyframes shard-fade {
+      0% { opacity: 1; }
+      100% { opacity: 0; transform: translate(var(--mx), var(--my)) scale(0.2); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="audio-unlocker" id="audioUnlocker" onclick="inisialisasiAnomaliSuara()">
+    <p>KLIK UNTUK MEMBUKA ENKRIPSI DATA</p>
+  </div>
+
+  <div class="bg-lines-container" id="bgLinesContainer"></div>
+
+  <div class="error-container" id="mainContainer">
+    <div class="error-eyebrow">Sistem Malafungsi</div>
+    
+    <div class="error-code-wrapper" id="glitchWrapper">
+      <div class="error-code">404</div>
+    </div>
+
+    <div class="error-divider"></div>
+    <div class="error-tagline">
+      Ruang data tidak ditemukan.<br>
+      Kamu melangkah terlalu jauh ke dalam kekosongan.
+    </div>
+    <a href="/" class="error-cta">Kembali ke Beranda</a>
+  </div>
+
+  <div class="particle-container" id="particleContainer"></div>
+
+  <script>
+    const body = document.body;
+    const glitchWrapper = document.getElementById('glitchWrapper');
+    const particleContainer = document.getElementById('particleContainer');
+    const bgLinesContainer = document.getElementById('bgLinesContainer');
+    const audioUnlocker = document.getElementById('audioUnlocker');
+    
+    const poolKarakter = "01XØ█▓⚡⚠🤖AIIENTITY404§$#@_+%?";
+    const partikelSerpihan = "*+.--°•×¤";
+
+    // --- ENGINES AUDIO PROSEDURAL (Web Audio API) ---
+    let audioCtx;
+    let bgAmbientAudio;
+
+    function inisialisasiAnomaliSuara() {
+      // 1. Hilangkan layar hitam pembuka
+      audioUnlocker.style.opacity = '0';
+      setTimeout(() => audioUnlocker.remove(), 500);
+
+      // 2. Bangun Konteks Audio
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      // 3. Muat & Mainkan Drone Sound Latar Belakang (Mengambil audio sci-fi loop terbuka dari Wikimedia)
+      bgAmbientAudio = new Audio('https://upload.wikimedia.org/wikipedia/commons/2/22/Space_Drone_Loop.ogg');
+      bgAmbientAudio.loop = true;
+      bgAmbientAudio.volume = 0.4;
+      bgAmbientAudio.play().catch(e => console.log("Audio autoplay dicegah: ", e));
+
+      // 4. Mulai Interval Sinkronisasi setelah interaksi user disetujui
+      setInterval(guncangLayarPenuh, 2500);
+      setInterval(ledakanMuntahHuruf, 4000);
+      setInterval(buatGarisLatarBelakang, 450);
+
+      // Trigger langsung ledakan pertama saat masuk
+      guncangLayarPenuh();
+      ledakanMuntahHuruf();
+      for(let i=0; i<5; i++) buatGarisLatarBelakang();
+    }
+
+    // Generator Efek Suara Glitch Pendek (Sintesis Prosedural Elektronik)
+    function playGlitchSound(frequency, duration, type = 'sawtooth') {
+      if (!audioCtx) return;
+      
+      let osc = audioCtx.createOscillator();
+      let gainNode = audioCtx.createGain();
+      
+      osc.type = type;
+      osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+      
+      // Modulasi frekuensi kilat untuk menciptakan tekstur pecah/rusak
+      osc.frequency.exponentialRampToValueAtTime(frequency / 4, audioCtx.currentTime + duration);
+      
+      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    // --- SINKRONISASI 1: DISTORSI KHUSUS LAYAR (Tiap 2.5 Detik) ---
+    function guncangLayarPenuh() {
+      if(!audioCtx) return;
+      body.classList.add('screen-glitch-active');
+      
+      // Bunyi guncangan statis berfrekuensi rendah (Zzzzt!)
+      playGlitchSound(60 + Math.random() * 40, 0.3, 'square');
+
+      setTimeout(() => {
+        body.classList.remove('screen-glitch-active');
+      }, 350);
+    }
+
+    // --- SINKRONISASI 2: DISTORSI 404 & MENTALNYA HURUF (Tiap 4 Detik) ---
+    function ledakanMuntahHuruf() {
+      if(!audioCtx) return;
+      glitchWrapper.classList.add('glitch-severe');
+      
+      // Bunyi letupan ledakan digital saat huruf dimuntahkan keluar (Boom-glitch!)
+      playGlitchSound(180, 0.4, 'sawtooth');
+      playGlitchSound(800, 0.15, 'triangle');
+
+      for (let i = 0; i < 10; i++) {
+        buatHurufMemental();
+      }
+
+      setTimeout(() => {
+        glitchWrapper.classList.remove('glitch-severe');
+      }, 500);
+    }
+
+    // --- SINKRONISASI 3: GENERATOR GARIS RANDOM DI LATAR BELAKANG ---
+    function buatGarisLatarBelakang() {
+      const line = document.createElement('div');
+      line.className = 'random-deco-line';
+
+      const posX = Math.random() * 100;
+      const posY = Math.random() * 80;
+
+      const acakTinggi = 40 + Math.random() * 80;      
+      const acakDurasi = 1.5 + Math.random() * 2.5;    
+      const acakOpasitas = 0.1 + Math.random() * 0.3;  
+
+      line.style.left = `${posX}vw`;
+      line.style.top = `${posY}vh`;
+      line.style.setProperty('--line-height', `${acakTinggi}px`);
+      line.style.setProperty('--line-duration', `${acakDurasi}s`);
+      line.style.setProperty('--line-opacity', acakOpasitas);
+
+      bgLinesContainer.appendChild(line);
+
+      setTimeout(() => {
+        line.remove();
+      }, acakDurasi * 1000);
+    }
+
+    // --- MESIN MEKANIKA FISIKA JATUH & MEKANISME HANCUR EKSTRIM ---
+    function buatHurufMemental() {
+      const span = document.createElement('span');
+      span.className = 'glitch-letter';
+      span.innerText = poolKarakter[Math.floor(Math.random() * poolKarakter.length)];
+      
+      const kotak404 = glitchWrapper.getBoundingClientRect();
+      const startX = kotak404.left + (kotak404.width / 2);
+      const startY = kotak404.top + (kotak404.height / 2);
+
+      span.style.left = `${startX}px`;
+      span.style.top = `${startY}px`;
+      
+      particleContainer.appendChild(span);
+
+      const kecepatanX = (Math.random() - 0.5) * 380; 
+      let kecepatanY = -Math.random() * 300 - 150;    
+      const gravitasi = 24;                           
+      
+      let posX = 0;
+      let posY = 0;
+      let rotasi = 0;
+      const kecRotasi = (Math.random() - 0.5) * 20;
+
+      function updateFrame() {
+        const batasBawahViewport = window.innerHeight;
+        const koordinatYAsli = startY + posY;
+
+        if (koordinatYAsli >= batasBawahViewport - 20) {
+          pecahMenjadiSerpihan(startX + posX, batasBawahViewport - 20);
+          span.remove(); 
+          return; 
+        }
+
+        kecepatanY += gravitasi;
+        posX += kecepatanX * 0.016;
+        posY += kecepatanY * 0.016;
+        rotasi += kecRotasi;
+
+        span.style.transform = `translate(-50%, -50%) translate(${posX}px, ${posY}px) rotate(${rotasi}deg)`;
+
+        requestAnimationFrame(updateFrame);
+      }
+
+      requestAnimationFrame(updateFrame);
+    }
+
+    function pecahMenjadiSerpihan(x, y) {
+      // Suara kaca mikro pecah/debu elektronik berfrekuensi tinggi (Tik!) saat menyentuh lantai
+      playGlitchSound(2000 + Math.random() * 3000, 0.04, 'sine');
+
+      const jumlahSerpihan = 4 + Math.floor(Math.random() * 4); 
+      
+      for(let i = 0; i < jumlahSerpihan; i++) {
+        const shard = document.createElement('span');
+        shard.className = 'shattered-shard';
+        shard.innerText = partikelSerpihan[Math.floor(Math.random() * partikelSerpihan.length)];
+        
+        shard.style.left = `${x}px`;
+        shard.style.top = `${y}px`;
+        
+        const gerakX = (Math.random() - 0.5) * 120;
+        const gerakY = -Math.random() * 80 - 20;
+        shard.style.setProperty('--mx', `${gerakX}px`);
+        shard.style.setProperty('--my', `${gerakY}px`);
+        
+        particleContainer.appendChild(shard);
+        
+        setTimeout(() => {
+          shard.remove();
+        }, 500);
+      }
+    }
+  </script>
+
+</body>
+</html>
