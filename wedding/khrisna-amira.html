@@ -5116,7 +5116,7 @@ document.getElementById('souModal').addEventListener('click', function (e) {
         requestAnimationFrame(step);
     }
 
-    /* Tunggu semua resource siap, lalu selesaikan ke 100% dan fade out */
+    /* Tutup loader dan fade out */
     function finish() {
         if (done) return;
         done = true;
@@ -5129,15 +5129,49 @@ document.getElementById('souModal').addEventListener('click', function (e) {
         }, 500);
     }
 
-    if (document.readyState === 'complete') {
-        setTimeout(finish, 200);
-    } else {
-        window.addEventListener('load', function () {
-            setTimeout(finish, 200);
+    /* Tunggu cover.mp4 siap diputar (readyState >= 3 = HAVE_FUTURE_DATA) */
+    function waitForVideo(callback) {
+        var video = document.getElementById('coverVideo');
+        if (!video) { callback(); return; }
+
+        // Sudah cukup buffered
+        if (video.readyState >= 3) { callback(); return; }
+
+        // Naikkan progress saat video mulai loading
+        video.addEventListener('progress', function () {
+            if (video.buffered.length > 0 && video.duration) {
+                var bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                var ratio = Math.min(bufferedEnd / video.duration, 1);
+                // Map 90–98% sesuai buffer video
+                setProgress(90 + ratio * 8);
+            }
         });
-        /* Fallback: paksa tutup setelah 5 detik meski ada aset yang gagal */
-        setTimeout(finish, 5000);
+
+        video.addEventListener('canplay', function onCanPlay() {
+            video.removeEventListener('canplay', onCanPlay);
+            callback();
+        });
+
+        // Paksa browser mulai load jika belum
+        if (video.preload !== 'auto') video.preload = 'auto';
+        video.load();
     }
+
+    /* Alur utama: tunggu window.load dulu, lalu pastikan video siap */
+    function onWindowLoad() {
+        waitForVideo(function () {
+            finish();
+        });
+    }
+
+    if (document.readyState === 'complete') {
+        onWindowLoad();
+    } else {
+        window.addEventListener('load', onWindowLoad);
+    }
+
+    /* Fallback mutlak: tutup paksa setelah 10 detik (koneksi sangat lambat) */
+    setTimeout(finish, 10000);
 })();
 </script>
 <!-- ===== END PRELOADER SCRIPT ===== -->
