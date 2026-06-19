@@ -6278,8 +6278,8 @@ function setMenuIcon(sectionId) {
   #aiVisitorAvatar {
     width: 36px; height: 36px;
     border-radius: 50%;
-    background: #111;
-    border: 1px solid #2a2a2a;
+    background: transparent;
+    border: none;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
     position: relative;
@@ -6287,13 +6287,14 @@ function setMenuIcon(sectionId) {
     animation: avatarGlow 2.8s ease-in-out infinite;
   }
   @keyframes avatarGlow {
-    0%,100% { box-shadow: 0 0 4px 1px rgba(255,255,255,0.08), 0 0 0px 0px rgba(255,255,255,0); border-color: #2a2a2a; }
-    50%     { box-shadow: 0 0 10px 3px rgba(255,255,255,0.22), 0 0 18px 6px rgba(255,255,255,0.08); border-color: #666; }
+    0%,100% { box-shadow: 0 0 4px 1px rgba(255,255,255,0.08), 0 0 0px 0px rgba(255,255,255,0); }
+    50%     { box-shadow: 0 0 10px 3px rgba(255,255,255,0.22), 0 0 18px 6px rgba(255,255,255,0.08); }
   }
   #aiAvatarCanvas {
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     width: 100%; height: 100%;
+    border-radius: 50%;
+    display: block;
   }
   #aiVisitorNameRow {
     flex: 1; min-width: 0;
@@ -6784,23 +6785,49 @@ function setMenuIcon(sectionId) {
     }
 
     function drawFrame(now) {
-      ctx.clearRect(0, 0, W, H);
+      const dpr = window.devicePixelRatio || 1;
+      const dispW = 36, dispH = 36;
+      if (cvs.width !== Math.round(dispW * dpr)) {
+        cvs.width  = Math.round(dispW * dpr);
+        cvs.height = Math.round(dispH * dpr);
+        cvs.style.width  = dispW + 'px';
+        cvs.style.height = dispH + 'px';
+      }
+      const ctx = cvs.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const W2 = dispW, H2 = dispH;
+      const cx2 = W2 / 2, cy2 = H2 / 2;
+      const R2 = W2 / 2 - 1;
+
+      ctx.clearRect(0, 0, W2, H2);
+
+      // Background circle — dark
+      ctx.beginPath();
+      ctx.arc(cx2, cy2, R2, 0, Math.PI * 2);
+      ctx.fillStyle = '#111';
+      ctx.fill();
+      ctx.strokeStyle = '#444';
+      ctx.lineWidth = 1;
+      ctx.stroke();
 
       const openAmt = getOpenAmt(now);
-      const eyeH    = W * 0.12 * openAmt;
+      const eyeH2   = W2 * 0.12 * openAmt;
+      const eyeW2   = W2 * 0.16;
+      const eyeOX2  = W2 * 0.18;
+      const eyeY2   = H2 * 0.46;
 
-      if (eyeH > 0.6) {
-        [cx - eyeOX, cx + eyeOX].forEach(ex => {
+      if (eyeH2 > 0.6) {
+        [cx2 - eyeOX2, cx2 + eyeOX2].forEach(ex => {
           ctx.beginPath();
-          ctx.roundRect(ex - eyeW / 2, eyeY - eyeH / 2, eyeW, eyeH, eyeW * 0.22);
+          ctx.roundRect(ex - eyeW2 / 2, eyeY2 - eyeH2 / 2, eyeW2, eyeH2, eyeW2 * 0.22);
           ctx.fillStyle = '#fff';
           ctx.fill();
         });
       } else {
-        [cx - eyeOX, cx + eyeOX].forEach(ex => {
+        [cx2 - eyeOX2, cx2 + eyeOX2].forEach(ex => {
           ctx.beginPath();
-          ctx.moveTo(ex - eyeW * 0.38, eyeY);
-          ctx.lineTo(ex + eyeW * 0.38, eyeY);
+          ctx.moveTo(ex - eyeW2 * 0.38, eyeY2);
+          ctx.lineTo(ex + eyeW2 * 0.38, eyeY2);
           ctx.strokeStyle = '#fff';
           ctx.lineWidth = 1.5;
           ctx.lineCap = 'round';
@@ -8241,6 +8268,16 @@ function setMenuIcon(sectionId) {
     shown = true;
     chatArea.innerHTML = '';
     replyBox.style.display = 'none';
+    // Hide aiidentity widget if shown
+    const aiiWidget = document.getElementById('aiiAssistant');
+    if (aiiWidget && aiiWidget.classList.contains('aii-visible')) {
+      aiiWidget.classList.remove('aii-visible');
+    }
+    // Switch logo to aii.entity logo (alt logo)
+    const logoMain = document.getElementById('headerLogo');
+    const logoAlt  = document.getElementById('headerLogoAlt');
+    if (logoMain) logoMain.style.opacity = '0';
+    if (logoAlt)  logoAlt.style.opacity  = '1';
     // Apply current language status text
     const lang = getEggLang();
     const content = eggContent[lang];
@@ -8263,6 +8300,11 @@ function setMenuIcon(sectionId) {
       replyBox.innerHTML = '';
       replyBox.style.display = 'none';
       resetIdle();
+      // Restore main logo when aii.entity hides
+      const logo    = document.getElementById('headerLogo');
+      const logoAlt = document.getElementById('headerLogoAlt');
+      if (logo)    logo.style.opacity    = '1';
+      if (logoAlt) logoAlt.style.opacity = '0';
     }, 800);
   }
 
@@ -8661,6 +8703,1261 @@ function setMenuIcon(sectionId) {
       if (queue.length) startWhenReady();
     })
     .catch(err => console.warn('About photos: gagal fetch CSV', err));
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     AIIDENTITY ASSISTANT WIDGET v2
+     ══════════════════════════════════════════════════════════ -->
+<style>
+  /* ── Container utama ── */
+  #aiiAssistant {
+    position: fixed;
+    left: 20px;
+    bottom: -520px;
+    z-index: 9000;
+    width: 300px;
+    transition: bottom 0.55s cubic-bezier(0.34,1.15,0.64,1);
+    pointer-events: none;
+  }
+  #aiiAssistant.aii-visible {
+    bottom: 20px;
+    pointer-events: all;
+  }
+
+  /* ── Card ── */
+  #aiiCard {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 20px;
+    padding: 18px 18px 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+  }
+
+  /* ── Header ── */
+  #aiiHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #aiiAvatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  #aiiAvatarCanvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    display: block;
+  }
+  /* Sleep state: gentle bob */
+  #aiiAvatar.aii-sleeping {
+    animation: aiiSleepBob 3s ease-in-out infinite;
+  }
+  @keyframes aiiSleepBob {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(2px); }
+  }
+  #aiiNameRow { flex: 1; min-width: 0; }
+  #aiiName {
+    font-family: 'Cinzel', serif;
+    font-size: 9.5px; font-weight: 700;
+    letter-spacing: 0.3em;
+    color: #111;
+    text-transform: uppercase;
+  }
+  #aiiStatus {
+    display: flex; align-items: center; gap: 5px;
+    margin-top: 4px;
+  }
+  #aiiStatusDot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #111;
+    flex-shrink: 0;
+    animation: aiiDotBlink 2.4s ease-in-out infinite;
+  }
+  #aiiStatusDot.aii-dot-sleep {
+    background: #bbb;
+    animation: none;
+    box-shadow: none;
+  }
+  @keyframes aiiDotBlink {
+    0%,100% { opacity: 1; box-shadow: 0 0 4px 1px rgba(0,0,0,0.25); }
+    50%     { opacity: 0.2; box-shadow: none; }
+  }
+  #aiiStatusText {
+    font-family: 'Cinzel', serif;
+    font-size: 7px; letter-spacing: 0.28em;
+    color: #555; text-transform: uppercase;
+  }
+  #aiiDismiss {
+    background: rgba(0,0,0,0.04);
+    border: 1px solid #e0e0e0;
+    color: #999; cursor: pointer;
+    font-size: 10px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+  }
+  #aiiDismiss:hover { color: #111; background: rgba(0,0,0,0.08); border-color: #bbb; }
+
+  /* ── Sleep bubble (zzz) ── */
+  #aiiSleepBubble {
+    display: none;
+    align-items: center; gap: 4px;
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px 12px 12px 4px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: #bbb;
+    letter-spacing: 0.1em;
+    animation: aiiBubblePop 0.3s cubic-bezier(0.34,1.4,0.64,1) both;
+  }
+  #aiiSleepBubble.aii-sleep-show { display: flex; }
+  .aii-zzz { animation: aiiZzz 2s ease-in-out infinite; display: inline-block; }
+  .aii-zzz:nth-child(2) { animation-delay: 0.4s; font-size: 8px; }
+  .aii-zzz:nth-child(3) { animation-delay: 0.8s; font-size: 6px; }
+  @keyframes aiiZzz {
+    0%,100% { opacity: 0.2; transform: translateY(0) scale(0.9); }
+    50%     { opacity: 0.8; transform: translateY(-4px) scale(1.1); }
+  }
+
+  /* ── Wake-up prompt bubble ── */
+  #aiiWakeBubble {
+    display: none;
+    padding: 10px 13px;
+    background: #f5f5f5;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px 12px 12px 4px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    line-height: 1.8;
+    letter-spacing: 0.04em;
+    color: #222;
+    cursor: pointer;
+    transition: background 0.2s;
+    animation: aiiBubblePop 0.35s cubic-bezier(0.34,1.4,0.64,1) both;
+  }
+  #aiiWakeBubble.aii-wake-show { display: block; }
+  #aiiWakeBubble:hover { background: #eee; }
+
+  /* ── Chat area ── */
+  #aiiChatArea {
+    display: flex; flex-direction: column; gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding-right: 2px;
+  }
+  #aiiChatArea::-webkit-scrollbar { display: none; }
+
+  .aii-bubble {
+    background: #f5f5f5;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px 12px 12px 4px;
+    padding: 10px 13px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    line-height: 1.9;
+    letter-spacing: 0.04em;
+    color: #222;
+    max-width: 100%;
+    word-break: break-word;
+    animation: aiiBubblePop 0.3s cubic-bezier(0.34,1.4,0.64,1) both;
+  }
+  .aii-bubble.aii-typing-bubble {
+    background: #f0f0f0;
+    border-color: #e0e0e0;
+  }
+  .aii-bubble.aii-user-bubble {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 12px 12px 4px 12px;
+    align-self: flex-end;
+    color: #fff;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+  @keyframes aiiBubblePop {
+    from { opacity: 0; transform: translateY(8px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .aii-cursor {
+    display: inline-block;
+    width: 1.5px; height: 10px;
+    background: #111;
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: aiiCursorBlink 0.75s step-end infinite;
+  }
+  @keyframes aiiCursorBlink {
+    0%,100% { opacity: 1; }
+    50%     { opacity: 0; }
+  }
+  .aii-thinking {
+    display: flex; gap: 4px; align-items: center; padding: 4px 0;
+  }
+  .aii-thinking span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #333; opacity: 0.3;
+    animation: aiiThinkDot 1.1s ease-in-out infinite;
+  }
+  .aii-thinking span:nth-child(2) { animation-delay: 0.18s; }
+  .aii-thinking span:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes aiiThinkDot {
+    0%,80%,100% { opacity: 0.2; transform: scale(0.85); }
+    40%         { opacity: 0.8; transform: scale(1.1); }
+  }
+
+  /* ── Reply buttons ── */
+  #aiiReplyBox {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    position: relative; z-index: 1;
+  }
+  .aii-choice-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 7px; letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    border: 1px solid #ccc;
+    background: #fff; color: #333;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+  .aii-choice-btn:hover {
+    color: #111; border-color: #111; background: #f5f5f5;
+    transform: translateY(-1px);
+  }
+  .aii-choice-btn:active { transform: scale(0.97); }
+  .aii-nav-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 7px; letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border: none;
+    background: #111; color: #fff;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .aii-nav-btn:hover { background: #333; transform: translateY(-1px); }
+  .aii-nav-btn:active { transform: scale(0.97); }
+
+  /* ── Free-text input ── */
+  #aiiInputRow {
+    display: flex; gap: 6px; align-items: center;
+    border-top: 1px solid #ececec;
+    padding-top: 10px; margin-top: 2px;
+  }
+  #aiiTextField {
+    flex: 1;
+    background: #f7f7f7;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    padding: 7px 13px;
+    font-family: 'Cinzel', serif;
+    font-size: 8.5px; letter-spacing: 0.05em;
+    color: #111; outline: none;
+    transition: border-color 0.2s;
+  }
+  #aiiTextField::placeholder { color: #aaa; }
+  #aiiTextField:focus { border-color: #999; }
+  #aiiSendBtn {
+    background: #111; color: #fff;
+    border: none; border-radius: 50%;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; font-size: 11px;
+    transition: background 0.2s, transform 0.15s;
+  }
+  #aiiSendBtn:hover { background: #333; transform: scale(1.08); }
+  #aiiSendBtn:active { transform: scale(0.95); }
+
+  /* ── FAB — avatar mini ── */
+  #aiiFab {
+    position: fixed;
+    left: 20px; bottom: 20px;
+    z-index: 8999;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center; justify-content: center;
+    box-shadow: none;
+    padding: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  #aiiFab.aii-fab-show { display: flex; animation: aiiFabIn 0.4s cubic-bezier(0.34,1.4,0.64,1) both; }
+  #aiiFab:hover { transform: scale(1.1); }
+  #aiiFab:active { transform: scale(0.95); }
+  /* FAB sleep: gentle bob animation */
+  #aiiFab.aii-fab-sleeping {
+    animation: aiiFabIn 0.4s cubic-bezier(0.34,1.4,0.64,1) both, aiiFabSleepBob 3s ease-in-out 0.4s infinite;
+  }
+  @keyframes aiiFabSleepBob {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    30%     { transform: translateY(2px) rotate(-4deg); }
+    70%     { transform: translateY(2px) rotate(-4deg); }
+  }
+  #aiiFabCanvas {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: block;
+  }
+  @keyframes aiiFabIn {
+    from { opacity:0; transform: scale(0.4); }
+    to   { opacity:1; transform: scale(1); }
+  }
+
+  /* ── FAB wake bubble (melayang di atas FAB) ── */
+  #aiiFabWakeBubble {
+    position: fixed;
+    left: 14px;
+    bottom: 54px;
+    z-index: 9000;
+    display: none;
+    background: #111;
+    color: #fff;
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    border-radius: 10px 10px 10px 3px;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    animation: fabWakePop 0.4s cubic-bezier(0.34,1.4,0.64,1) both;
+  }
+  #aiiFabWakeBubble.aii-fab-wake-show {
+    display: block;
+    animation: fabWakePop 0.4s cubic-bezier(0.34,1.4,0.64,1) both,
+               fabWakeFloat 2.4s ease-in-out 0.4s infinite;
+  }
+  @keyframes fabWakePop {
+    from { opacity: 0; transform: translateY(6px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes fabWakeFloat {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-3px); }
+  }
+
+  /* ── FAB zzz bubble ── */
+  #aiiFabZzz {
+    position: fixed;
+    left: 34px;
+    bottom: 38px;
+    z-index: 9000;
+    display: none;
+    pointer-events: none;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    color: #555;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+  #aiiFabZzz.aii-fab-zzz-show { display: flex; gap: 1px; align-items: flex-end; }
+  #aiiFabZzz span { display: inline-block; animation: fabZzz 2s ease-in-out infinite; }
+  #aiiFabZzz span:nth-child(1) { font-size: 7px; animation-delay: 0s; }
+  #aiiFabZzz span:nth-child(2) { font-size: 9px; animation-delay: 0.4s; }
+  #aiiFabZzz span:nth-child(3) { font-size: 6px; animation-delay: 0.8s; }
+  @keyframes fabZzz {
+    0%,100% { opacity: 0.15; transform: translateY(0); }
+    50%     { opacity: 0.8;  transform: translateY(-5px); }
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 480px) {
+    #aiiAssistant { left: 12px; right: 12px; width: auto; bottom: -520px; }
+    #aiiAssistant.aii-visible { bottom: 12px; }
+    #aiiCard { padding: 14px 14px 12px; border-radius: 16px; }
+    .aii-bubble { font-size: 9.5px; }
+    .aii-choice-btn, .aii-nav-btn { font-size: 7px; padding: 7px 10px; }
+    #aiiFab { left: 12px; bottom: 12px; }
+  }
+</style>
+
+<!-- AIIDENTITY Widget HTML -->
+<div id="aiiAssistant">
+  <div id="aiiCard">
+    <div id="aiiHeader">
+      <div id="aiiAvatar">
+        <canvas id="aiiAvatarCanvas" width="36" height="36"></canvas>
+      </div>
+      <div id="aiiNameRow">
+        <div id="aiiName">AIIDENTITY</div>
+        <div id="aiiStatus">
+          <div id="aiiStatusDot"></div>
+          <div id="aiiStatusText"></div>
+        </div>
+      </div>
+      <button id="aiiDismiss" title="Tutup">✕</button>
+    </div>
+    <!-- sleep zzz bubble -->
+    <div id="aiiSleepBubble">
+      <span class="aii-zzz">z</span><span class="aii-zzz">z</span><span class="aii-zzz">z</span>
+    </div>
+    <!-- wake-up prompt -->
+    <div id="aiiWakeBubble"></div>
+    <div id="aiiChatArea"></div>
+    <div id="aiiReplyBox"></div>
+    <div id="aiiInputRow" style="display:none">
+      <input id="aiiTextField" type="text" placeholder="ketik pertanyaanmu..." autocomplete="off" spellcheck="false"/>
+      <button id="aiiSendBtn" title="Kirim">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB — mini avatar -->
+<button id="aiiFab" title="Butuh bantuan?">
+  <canvas id="aiiFabCanvas" width="26" height="26"></canvas>
+</button>
+<!-- FAB sleep zzz -->
+<div id="aiiFabZzz"><span>z</span><span>z</span><span>z</span></div>
+<!-- FAB wake bubble melayang -->
+<div id="aiiFabWakeBubble"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   AIIDENTITY ASSISTANT v2 — full logic
+   ══════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  // ── DOM refs ──────────────────────────────────────────────
+  const widget      = document.getElementById('aiiAssistant');
+  const avatarEl    = document.getElementById('aiiAvatar');
+  const chatArea    = document.getElementById('aiiChatArea');
+  const replyBox    = document.getElementById('aiiReplyBox');
+  const inputRow    = document.getElementById('aiiInputRow');
+  const textField   = document.getElementById('aiiTextField');
+  const sendBtn     = document.getElementById('aiiSendBtn');
+  const dismissBtn  = document.getElementById('aiiDismiss');
+  const fab         = document.getElementById('aiiFab');
+  const statusText  = document.getElementById('aiiStatusText');
+  const statusDot   = document.getElementById('aiiStatusDot');
+  const sleepBubble = document.getElementById('aiiSleepBubble');
+  const wakeBubble  = document.getElementById('aiiWakeBubble');
+
+  // ── Audio context ─────────────────────────────────────────
+  let _audioCtx = null;
+  function getAudioCtx() {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return _audioCtx;
+  }
+  function playTone(freq, type, vol, dur, delay) {
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + (delay||0));
+      gain.gain.setValueAtTime(vol||0.06, ctx.currentTime + (delay||0));
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (delay||0) + dur);
+      osc.start(ctx.currentTime + (delay||0));
+      osc.stop(ctx.currentTime + (delay||0) + dur + 0.01);
+    } catch(e) {}
+  }
+  function soundAppear() {
+    // Soft chime — two rising notes
+    playTone(440, 'sine', 0.06, 0.25, 0);
+    playTone(660, 'sine', 0.05, 0.3, 0.18);
+  }
+  function soundDismiss() {
+    playTone(330, 'sine', 0.05, 0.35, 0);
+    playTone(220, 'sine', 0.04, 0.3, 0.14);
+  }
+  function soundSleep() {
+    // Descending lullaby tones
+    playTone(330, 'sine', 0.035, 0.5, 0);
+    playTone(277, 'sine', 0.03, 0.5, 0.35);
+    playTone(220, 'sine', 0.025, 0.7, 0.65);
+  }
+  function soundWake() {
+    // Ascending gentle tones
+    playTone(220, 'sine', 0.03, 0.3, 0);
+    playTone(330, 'sine', 0.04, 0.3, 0.2);
+    playTone(440, 'sine', 0.05, 0.35, 0.38);
+  }
+  function soundChoiceClick() {
+    playTone(440, 'sine', 0.05, 0.12, 0);
+    playTone(660, 'sine', 0.04, 0.12, 0.07);
+  }
+  function soundBubblePop() {
+    playTone(520, 'sine', 0.05, 0.18, 0);
+  }
+  function soundTypeTick() {
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(900 + Math.random()*300, ctx.currentTime);
+      gain.gain.setValueAtTime(0.012, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.055);
+    } catch(e) {}
+  }
+  function soundFabOpen() {
+    playTone(500, 'sine', 0.05, 0.22, 0);
+  }
+
+  // ── Session memory ────────────────────────────────────────
+  const SESSION_KEY = 'aiidentity_session';
+  function getSession() {
+    try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
+  }
+  function saveSession(data) {
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {}
+  }
+
+  // ── Language ──────────────────────────────────────────────
+  function getLang() {
+    const sw = document.getElementById('langSwitch');
+    return (sw && sw.checked) ? 'id' : 'en';
+  }
+
+  // ── Content bilingual ─────────────────────────────────────
+  const content = {
+    en: {
+      status: 'Online', statusSleep: 'Sleeping',
+      greeting: ["Hey! Welcome to AIIDENTITY.", "I'm here to help you find what you need.", "What are you looking for?"],
+      returning: "Welcome back! Still need help?",
+      wakePrompt: "Psst... need help with something? 👋",
+      firstChoices: [
+        { label: "Design services",   key: "services" },
+        { label: "Portfolio / works", key: "works"    },
+        { label: "Studio & pricing",  key: "studio"   },
+        { label: "Browse on my own",  key: "browse"   },
+      ],
+      branches: {
+        services: {
+          seq: ["AIIDENTITY offers brand identity, print design, typography, motion graphics, art direction, UI/digital, and studio photography.", "Each service is crafted with intention — built to make your brand stand out."],
+          nav: { label: "See Services →", section: "sec-services" },
+          followup: [
+            { label: "Tell me about branding", key: "branding" },
+            { label: "I need a website",       key: "web"      },
+            { label: "Motion / animation",     key: "motion"   },
+            { label: "Contact directly",       key: "contact"  },
+          ]
+        },
+        works: {
+          seq: ["The portfolio spans branding, editorial, motion, and digital projects.", "Each piece is a story — told through form, type, and space."],
+          nav: { label: "View Works →", section: "sec-works" },
+          followup: [
+            { label: "I want something like this", key: "contact"  },
+            { label: "See services instead",       key: "services" },
+          ]
+        },
+        studio: {
+          seq: ["The studio offers product photography, video, and self-photo sessions.", "Pricing depends on scope — the best way to get a quote is to reach out directly."],
+          nav: { label: "Get in Touch →", section: "sec-contact" },
+          followup: [
+            { label: "What else is offered?", key: "services" },
+            { label: "See the portfolio",     key: "works"    },
+          ]
+        },
+        browse: {
+          seq: ["Of course! Take your time.", "I'll be right here if you need anything."],
+          nav: null, followup: null, end: true
+        },
+        branding: {
+          seq: ["Brand Identity includes logo creation, visual systems, and full brand guidelines.", "It's the foundation everything else is built on."],
+          nav: { label: "See Brand Services →", section: "sec-services" },
+          followup: [{ label: "Let's talk about my project", key: "contact" }]
+        },
+        web: {
+          seq: ["UI/Digital covers websites, landing pages, wedding invitations, and digital brand applications.", "Clean, functional, and visually intentional."],
+          nav: { label: "See UI/Digital →", section: "sec-services" },
+          followup: [{ label: "Get a quote", key: "contact" }]
+        },
+        motion: {
+          seq: ["Motion Graphics includes animated logos, motion identity systems, social animations, and title sequences.", "Movement that makes your brand unforgettable."],
+          nav: { label: "See Motion Works →", section: "sec-works" },
+          followup: [{ label: "I'm interested", key: "contact" }]
+        },
+        contact: {
+          seq: ["Great! Let's connect.", "You can reach out via email — or head to the contact section."],
+          nav: { label: "Go to Contact →", section: "sec-contact" },
+          followup: null, end: true
+        },
+      },
+      contextGreet: {
+        'sec-works':    "Enjoying the portfolio? I can tell you more about any of these projects.",
+        'sec-services': "Exploring the services? Ask me anything — I can help narrow it down.",
+        'sec-contact':  "Ready to connect? I can help you know what to say.",
+        'sec-about':    "Getting to know AIIDENTITY? Feel free to ask anything.",
+        'sec-store':    "Browsing the store? I can help you find the right piece.",
+      },
+      inputPlaceholder: "type your question...",
+      errorMsg: "Sorry, I couldn't process that. Try the buttons above or ask again.",
+    },
+    id: {
+      status: 'Online', statusSleep: 'Tidur',
+      greeting: ["Hei! Selamat datang di AIIDENTITY.", "Saya di sini untuk membantu kamu menemukan apa yang kamu butuhkan.", "Sedang mencari apa?"],
+      returning: "Selamat datang kembali! Masih butuh bantuan?",
+      wakePrompt: "Psst... ada yang bisa saya bantu? 👋",
+      firstChoices: [
+        { label: "Jasa desain",          key: "services" },
+        { label: "Portofolio / karya",   key: "works"    },
+        { label: "Studio & harga",       key: "studio"   },
+        { label: "Jelajah sendiri dulu", key: "browse"   },
+      ],
+      branches: {
+        services: {
+          seq: ["AIIDENTITY menawarkan brand identity, desain cetak, tipografi, grafis gerak, arahan seni, UI/digital, dan fotografi studio.", "Setiap layanan dibuat dengan niat — dirancang agar merek kamu tampil berbeda."],
+          nav: { label: "Lihat Layanan →", section: "sec-services" },
+          followup: [
+            { label: "Ceritakan soal branding", key: "branding" },
+            { label: "Saya butuh website",      key: "web"      },
+            { label: "Motion / animasi",        key: "motion"   },
+            { label: "Hubungi langsung",        key: "contact"  },
+          ]
+        },
+        works: {
+          seq: ["Portofolio mencakup branding, editorial, motion, dan proyek digital.", "Setiap karya adalah sebuah cerita — diceritakan lewat bentuk, teks, dan ruang."],
+          nav: { label: "Lihat Karya →", section: "sec-works" },
+          followup: [
+            { label: "Saya ingin seperti ini", key: "contact"  },
+            { label: "Lihat layanan dulu",     key: "services" },
+          ]
+        },
+        studio: {
+          seq: ["Studio menawarkan foto produk, video, dan sesi foto mandiri.", "Harga tergantung lingkup — cara terbaik mendapat penawaran adalah menghubungi langsung."],
+          nav: { label: "Hubungi Kami →", section: "sec-contact" },
+          followup: [
+            { label: "Apa lagi yang ditawarkan?", key: "services" },
+            { label: "Lihat portofolio dulu",     key: "works"    },
+          ]
+        },
+        browse: {
+          seq: ["Tentu! Ambil waktu kamu.", "Saya ada di sini jika kamu butuh sesuatu."],
+          nav: null, followup: null, end: true
+        },
+        branding: {
+          seq: ["Brand Identity mencakup pembuatan logo, sistem visual, dan panduan merek lengkap.", "Ini fondasi dari segalanya."],
+          nav: { label: "Lihat Layanan Brand →", section: "sec-services" },
+          followup: [{ label: "Bicara soal proyek saya", key: "contact" }]
+        },
+        web: {
+          seq: ["UI/Digital mencakup website, landing page, undangan digital, dan aplikasi merek digital.", "Bersih, fungsional, dan penuh niat visual."],
+          nav: { label: "Lihat UI/Digital →", section: "sec-services" },
+          followup: [{ label: "Minta penawaran", key: "contact" }]
+        },
+        motion: {
+          seq: ["Grafis Gerak mencakup logo animasi, sistem identitas gerak, animasi media sosial, dan title sequence.", "Gerakan yang membuat merekmu tak terlupakan."],
+          nav: { label: "Lihat Karya Motion →", section: "sec-works" },
+          followup: [{ label: "Saya tertarik", key: "contact" }]
+        },
+        contact: {
+          seq: ["Bagus! Mari terhubung.", "Kamu bisa menghubungi via email — atau langsung ke bagian kontak."],
+          nav: { label: "Ke Halaman Kontak →", section: "sec-contact" },
+          followup: null, end: true
+        },
+      },
+      contextGreet: {
+        'sec-works':    "Menikmati portofolionya? Saya bisa ceritakan lebih soal karya-karya ini.",
+        'sec-services': "Menjelajahi layanan? Tanya apa saja — saya bisa bantu mempersempitnya.",
+        'sec-contact':  "Siap terhubung? Saya bisa bantu kamu tahu apa yang harus disampaikan.",
+        'sec-about':    "Mengenal AIIDENTITY? Jangan ragu bertanya apa saja.",
+        'sec-store':    "Menjelajahi toko? Saya bisa bantu menemukan karya yang tepat.",
+      },
+      inputPlaceholder: "ketik pertanyaanmu...",
+      errorMsg: "Maaf, saya tidak bisa memproses itu. Coba gunakan tombol di atas atau tanya lagi.",
+    }
+  };
+
+  // ── Avatar draw (shared between main & FAB canvas) ────────
+  // avatarState: { sleeping, sleepAmt (0=awake,1=sleep), blinkStart, blinkDur }
+  const avatarState = { sleeping: false, sleepAmt: 0, blinkStart: null, blinkDur: 110 };
+
+  function drawAvatarOnCanvas(cvs, now) {
+    if (!cvs) return;
+    const dpr = window.devicePixelRatio || 1;
+    const displayW = 36;
+    const displayH = 36;
+    // Set canvas resolution to match DPR (only once or when DPR changes)
+    if (cvs.width !== Math.round(displayW * dpr)) {
+      cvs.width  = Math.round(displayW * dpr);
+      cvs.height = Math.round(displayH * dpr);
+      cvs.style.width  = displayW + 'px';
+      cvs.style.height = displayH + 'px';
+    }
+    // For FAB canvas (26px)
+    const isFab = cvs.id === 'aiiFabCanvas';
+    const dW = isFab ? 26 : 36;
+    const dH = isFab ? 26 : 36;
+    if (cvs.width !== Math.round(dW * dpr)) {
+      cvs.width  = Math.round(dW * dpr);
+      cvs.height = Math.round(dH * dpr);
+      cvs.style.width  = dW + 'px';
+      cvs.style.height = dH + 'px';
+    }
+
+    const ctx2 = cvs.getContext('2d');
+    ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const W = isFab ? 26 : 36;
+    const H = isFab ? 26 : 36;
+    const cx = W / 2, cy = H / 2;
+    const R = W / 2 - 1;
+
+    ctx2.clearRect(0, 0, W, H);
+
+    // Circle background — white with black outline
+    ctx2.beginPath();
+    ctx2.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx2.fillStyle = '#fff';
+    ctx2.fill();
+    ctx2.strokeStyle = '#111';
+    ctx2.lineWidth = 1.5;
+    ctx2.stroke();
+
+    const s = avatarState;
+    // Eye parameters — smaller kotak hitam
+    const eyeSize = W * 0.09;
+    const eyeOX   = W * 0.185;
+    const eyeY    = cy * 0.95;
+
+    // Blink logic (only when awake)
+    let openAmt = 1;
+    if (!s.sleeping && s.blinkStart !== null) {
+      const age = now - s.blinkStart;
+      if (age < s.blinkDur) {
+        openAmt = Math.max(Math.sin((age / s.blinkDur) * Math.PI), 0.03);
+      } else {
+        s.blinkStart = null;
+      }
+    }
+
+    // Sleep: eyes gradually close (sleepAmt 0→1)
+    const sleepClose = s.sleepAmt;
+    const finalOpenAmt = openAmt * (1 - sleepClose);
+
+    // Draw square eyes — black, smaller
+    [cx - eyeOX, cx + eyeOX].forEach(ex => {
+      const eH = eyeSize * 2 * Math.max(finalOpenAmt, 0.04);
+      const eW = eyeSize * 1.8;
+      ctx2.save();
+      ctx2.beginPath();
+      ctx2.rect(ex - eW / 2, eyeY - eH / 2, eW, eH);
+      ctx2.fillStyle = '#111';
+      ctx2.fill();
+      ctx2.restore();
+    });
+  }
+
+  // Shared RAF loop for avatar
+  let _avatarRafId = null;
+  function startAvatarLoop() {
+    if (_avatarRafId) return;
+    const mainCvs = document.getElementById('aiiAvatarCanvas');
+    const fabCvs  = document.getElementById('aiiFabCanvas');
+    function loop(now) {
+      drawAvatarOnCanvas(mainCvs, now);
+      drawAvatarOnCanvas(fabCvs, now);
+      _avatarRafId = requestAnimationFrame(loop);
+    }
+    _avatarRafId = requestAnimationFrame(loop);
+  }
+
+  // Blink scheduler
+  let _blinkTimer = null;
+  function scheduleBlink() {
+    clearTimeout(_blinkTimer);
+    const interval = 2400 + Math.random() * 3000;
+    _blinkTimer = setTimeout(() => {
+      if (!avatarState.sleeping) {
+        avatarState.blinkStart = performance.now();
+      }
+      scheduleBlink();
+    }, interval);
+  }
+
+  // Sleep transition
+  let _sleepRaf = null;
+  function transitionSleep(toSleep, onDone) {
+    cancelAnimationFrame(_sleepRaf);
+    const start = performance.now();
+    const dur = 1200;
+    const from = avatarState.sleepAmt;
+    const to = toSleep ? 1 : 0;
+    function step(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+      avatarState.sleepAmt = from + (to - from) * ease;
+      if (t < 1) {
+        _sleepRaf = requestAnimationFrame(step);
+      } else {
+        avatarState.sleepAmt = to;
+        avatarState.sleeping = toSleep;
+        if (onDone) onDone();
+      }
+    }
+    _sleepRaf = requestAnimationFrame(step);
+  }
+
+  // ── Sleep / idle / auto-close timers ──────────────────────
+  const SLEEP_DELAY     = 15000;  // 15s FAB idle → FAB mulai tidur
+  const WAKE_DELAY      = 35000;  // 20s setelah tidur → bangun + wake bubble
+  const AUTOCLOSE_DELAY = 20000;  // 20s widget terbuka tanpa interaksi → tutup
+
+  let _sleepTimer   = null;
+  let _wakeTimer    = null;
+  let _closeTimer   = null;
+  let _fabSleepTimer = null;
+  let _fabWakeTimer  = null;
+  let _isSleeping   = false;
+  let _isFabSleeping = false;
+  let _shown        = false;
+
+  // DOM refs untuk FAB sleep elements
+  const fabZzz       = document.getElementById('aiiFabZzz');
+  const fabWakeBubble = document.getElementById('aiiFabWakeBubble');
+
+  // ── FAB sleep logic (saat widget TERTUTUP) ────────────────
+  function enterFabSleep() {
+    if (_isFabSleeping || _shown) return;
+    _isFabSleeping = true;
+    soundSleep();
+    fab.classList.add('aii-fab-sleeping');
+    if (fabZzz) fabZzz.classList.add('aii-fab-zzz-show');
+    // Setelah 20 detik tidur → bangun + tampil wake bubble
+    _fabWakeTimer = setTimeout(() => {
+      if (!_isFabSleeping || _shown) return;
+      wakeUpFab(true);
+    }, 20000);
+    // Update avatarState agar mata menutup di FAB canvas
+    transitionSleep(true);
+  }
+
+  function wakeUpFab(showBubble) {
+    if (!_isFabSleeping) return;
+    _isFabSleeping = false;
+    soundWake();
+    fab.classList.remove('aii-fab-sleeping');
+    fab.classList.add('aii-fab-show');
+    if (fabZzz) fabZzz.classList.remove('aii-fab-zzz-show');
+    transitionSleep(false);
+    if (showBubble && fabWakeBubble) {
+      const lang = getLang();
+      fabWakeBubble.textContent = lang === 'id' ? 'Ada yang bisa dibantu? 👋' : 'Need help? 👋';
+      fabWakeBubble.classList.add('aii-fab-wake-show');
+      // Sembunyikan bubble setelah 8 detik
+      setTimeout(() => {
+        fabWakeBubble.classList.remove('aii-fab-wake-show');
+      }, 8000);
+    }
+    // Reset FAB sleep timer agar bisa tidur lagi
+    resetFabSleepTimer();
+  }
+
+  function resetFabSleepTimer() {
+    clearTimeout(_fabSleepTimer);
+    clearTimeout(_fabWakeTimer);
+    if (fabWakeBubble) fabWakeBubble.classList.remove('aii-fab-wake-show');
+    if (!_shown && fab.classList.contains('aii-fab-show')) {
+      _fabSleepTimer = setTimeout(() => {
+        if (!_shown) enterFabSleep();
+      }, SLEEP_DELAY);
+    }
+  }
+
+  function resetIdleTimers() {
+    clearTimeout(_closeTimer);
+    if (!_shown) return;
+    _closeTimer = setTimeout(() => {
+      if (_shown) hideWidget();
+    }, AUTOCLOSE_DELAY);
+  }
+
+  // (sleep logic dipindah ke FAB — lihat enterFabSleep/wakeUpFab di atas)
+
+  // Reset idle on any user interaction with the widget
+  function bindWidgetInteraction() {
+    [widget, textField, sendBtn].forEach(el => {
+      el.addEventListener('mousemove', resetIdleTimers, { passive: true });
+      el.addEventListener('click',     resetIdleTimers, { passive: true });
+      el.addEventListener('keydown',   resetIdleTimers, { passive: true });
+      el.addEventListener('touchstart',resetIdleTimers, { passive: true });
+    });
+  }
+
+  // ── Click outside to close ────────────────────────────────
+  document.addEventListener('click', function(e) {
+    if (!_shown) return;
+    if (widget.contains(e.target) || fab.contains(e.target)) return;
+    hideWidget();
+  }, { passive: true });
+
+  // ── Mute audio when tab not visible ──────────────────────
+  document.addEventListener('visibilitychange', function() {
+    if (_audioCtx) {
+      if (document.hidden) {
+        _audioCtx.suspend();
+      } else {
+        _audioCtx.resume();
+      }
+    }
+  });
+
+  // ── Mutual hide: aiidentity widget ↔ aii.entity widget ───
+  // When this widget (aiidentity) shows, hide aii.entity (aiVisitor)
+  // When aii.entity shows, hide aiidentity — handled via MutationObserver
+  function hideAiiEntityWidget() {
+    const visitor = document.getElementById('aiVisitor');
+    if (visitor && visitor.classList.contains('visible')) {
+      visitor.classList.remove('visible');
+    }
+  }
+  // Logo switching: aiidentity = main logo, aii.entity = alt logo
+  function setLogoForAiidentity() {
+    const logo    = document.getElementById('headerLogo');
+    const logoAlt = document.getElementById('headerLogoAlt');
+    if (logo)    logo.style.opacity    = '1';
+    if (logoAlt) logoAlt.style.opacity = '0';
+  }
+  function setLogoForAiiEntity() {
+    const logo    = document.getElementById('headerLogo');
+    const logoAlt = document.getElementById('headerLogoAlt');
+    if (logo)    logo.style.opacity    = '0';
+    if (logoAlt) logoAlt.style.opacity = '1';
+  }
+
+  // Watch aii.entity visibility and react
+  const _aiiEntityEl = document.getElementById('aiVisitor');
+  if (_aiiEntityEl) {
+    const _entityObs = new MutationObserver(() => {
+      if (_aiiEntityEl.classList.contains('visible')) {
+        // aii.entity appeared → hide aiidentity widget, swap logo
+        if (_shown) hideWidget();
+        setLogoForAiiEntity();
+      } else {
+        // aii.entity hid → restore main logo
+        setLogoForAiidentity();
+      }
+    });
+    _entityObs.observe(_aiiEntityEl, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // Override showWidget to also hide aii.entity and swap logo
+  const _origShowWidget = showWidget;
+
+
+  // ── Chat helpers ──────────────────────────────────────────
+  function scrollChat() {
+    setTimeout(() => { chatArea.scrollTop = chatArea.scrollHeight; }, 50);
+  }
+  function addBubble(text, cls) {
+    const b = document.createElement('div');
+    b.className = 'aii-bubble' + (cls ? ' ' + cls : '');
+    b.innerHTML = text.replace(/\n/g, '<br>');
+    chatArea.appendChild(b);
+    scrollChat();
+    return b;
+  }
+  function showThinking() {
+    const b = document.createElement('div');
+    b.className = 'aii-bubble aii-typing-bubble';
+    b.innerHTML = '<div class="aii-thinking"><span></span><span></span><span></span></div>';
+    chatArea.appendChild(b);
+    scrollChat();
+    return b;
+  }
+  function typeIntoBubble(text, cb) {
+    resetIdleTimers();
+    const thinkBubble = showThinking();
+    const delay = Math.min(500 + text.length * 14, 1400);
+    setTimeout(() => {
+      thinkBubble.remove();
+      const b = document.createElement('div');
+      b.className = 'aii-bubble';
+      b.innerHTML = '<span class="aii-cursor"></span>';
+      chatArea.appendChild(b);
+      scrollChat();
+      let i = 0;
+      function step() {
+        if (i <= text.length) {
+          b.innerHTML = text.slice(0,i).replace(/\n/g,'<br>') + '<span class="aii-cursor"></span>';
+          if (i > 0 && text[i-1] !== '\n') soundTypeTick();
+          i++;
+          setTimeout(step, 28 + Math.random()*20);
+          scrollChat();
+        } else {
+          b.innerHTML = text.replace(/\n/g,'<br>');
+          soundBubblePop();
+          if (cb) cb();
+        }
+      }
+      setTimeout(step, 150);
+    }, delay);
+  }
+  function runSeq(lines, onDone) {
+    let i = 0;
+    function next() {
+      if (i >= lines.length) { if (onDone) onDone(); return; }
+      typeIntoBubble(lines[i], () => { i++; setTimeout(next, 350); });
+    }
+    next();
+  }
+  function clearReplyBox() {
+    replyBox.innerHTML = ''; replyBox.style.display = 'none';
+  }
+  function showChoices(choices) {
+    replyBox.innerHTML = '';
+    choices.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'aii-choice-btn';
+      btn.textContent = c.label;
+      btn.addEventListener('click', () => { soundChoiceClick(); handleChoice(c.key, c.label); });
+      replyBox.appendChild(btn);
+    });
+    replyBox.style.display = 'flex';
+  }
+  function showNavBtn(navData) {
+    if (!navData) return;
+    const btn = document.createElement('button');
+    btn.className = 'aii-nav-btn';
+    btn.textContent = navData.label;
+    btn.addEventListener('click', () => {
+      soundChoiceClick();
+      if (typeof navigateToPage === 'function') navigateToPage(navData.section, true);
+    });
+    replyBox.appendChild(btn);
+    replyBox.style.display = 'flex';
+  }
+
+  // ── Handle scripted choices ───────────────────────────────
+  function handleChoice(key, label) {
+    clearReplyBox();
+    wakeBubble.classList.remove('aii-wake-show');
+    addBubble(label, 'aii-user-bubble');
+    resetIdleTimers();
+    const lang = getLang();
+    const branch = content[lang].branches[key];
+    if (!branch) return;
+    setTimeout(() => {
+      runSeq(branch.seq, () => {
+        if (branch.nav || branch.followup) {
+          replyBox.innerHTML = '';
+          if (branch.nav) showNavBtn(branch.nav);
+          if (branch.followup) showChoices(branch.followup);
+          else replyBox.style.display = branch.nav ? 'flex' : 'none';
+        }
+        if (branch.end) {
+          setTimeout(() => { inputRow.style.display = 'none'; }, 600);
+          setTimeout(hideWidget, 5000);
+        }
+        const sess = getSession() || {};
+        sess.lastKey = key; sess.interacted = true;
+        saveSession(sess);
+      });
+    }, 280);
+  }
+
+  // ── Anthropic API free-text ───────────────────────────────
+  async function handleFreeText(userText) {
+    if (!userText.trim()) return;
+    clearReplyBox();
+    wakeBubble.classList.remove('aii-wake-show');
+    addBubble(userText, 'aii-user-bubble');
+    textField.value = '';
+    resetIdleTimers();
+    const lang = getLang();
+    const thinkBubble = showThinking();
+    const systemPrompt = lang === 'id'
+      ? `Kamu adalah AIIDENTITY, asisten ramah di website portofolio desain grafis bernama AIIDENTITY (aiidentity.web.id). Website ini menawarkan layanan: Brand Identity, Print Design, Tipografi, Grafis Gerak, Arahan Seni, UI/Digital (website, landing page, undangan digital), dan Studio & Fotografi. Bantu pengunjung menemukan layanan yang mereka butuhkan. Jawab singkat, hangat, dan profesional dalam Bahasa Indonesia. Maksimal 2-3 kalimat. Jika pengunjung ingin menghubungi, arahkan ke email aiidentity@icloud.com.`
+      : `You are AIIDENTITY, a friendly assistant on a graphic design portfolio website called AIIDENTITY (aiidentity.web.id). This website offers: Brand Identity, Print Design, Typography, Motion Graphics, Art Direction, UI/Digital (websites, landing pages, digital invitations), and Studio & Photography. Help visitors find what they need. Keep answers short, warm, and professional. Maximum 2-3 sentences. If visitor wants to contact, direct them to aiidentity@icloud.com.`;
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userText }]
+        })
+      });
+      const data = await response.json();
+      thinkBubble.remove();
+      const replyText = data.content
+        ? data.content.map(b => b.type === 'text' ? b.text : '').join('')
+        : content[lang].errorMsg;
+      typeIntoBubble(replyText.trim(), () => {
+        const l2 = getLang();
+        replyBox.innerHTML = '';
+        const contactBtn = document.createElement('button');
+        contactBtn.className = 'aii-nav-btn';
+        contactBtn.textContent = l2 === 'id' ? 'Hubungi Kami →' : 'Get in Touch →';
+        contactBtn.addEventListener('click', () => {
+          soundChoiceClick();
+          if (typeof navigateToPage === 'function') navigateToPage('sec-contact', true);
+        });
+        const moreBtn = document.createElement('button');
+        moreBtn.className = 'aii-choice-btn';
+        moreBtn.textContent = l2 === 'id' ? 'Tanya lagi' : 'Ask more';
+        moreBtn.addEventListener('click', () => { clearReplyBox(); textField.focus(); });
+        replyBox.appendChild(contactBtn);
+        replyBox.appendChild(moreBtn);
+        replyBox.style.display = 'flex';
+      });
+      const sess = getSession() || {};
+      sess.interacted = true; sess.lastFreeText = userText;
+      saveSession(sess);
+    } catch(e) {
+      thinkBubble.remove();
+      addBubble(content[getLang()].errorMsg);
+    }
+  }
+
+  // ── Show / Hide widget ────────────────────────────────────
+  function showWidget(isReturn) {
+    if (_shown) return;
+    // Stop FAB sleep state dulu
+    clearTimeout(_fabSleepTimer);
+    clearTimeout(_fabWakeTimer);
+    if (_isFabSleeping) {
+      _isFabSleeping = false;
+      fab.classList.remove('aii-fab-sleeping');
+      if (fabZzz) fabZzz.classList.remove('aii-fab-zzz-show');
+    }
+    if (fabWakeBubble) fabWakeBubble.classList.remove('aii-fab-wake-show');
+    // Reset sleep amt saat buka widget
+    avatarState.sleepAmt = 0;
+    avatarState.sleeping = false;
+    // Hide aii.entity (aiVisitor) and switch logo to aiidentity
+    hideAiiEntityWidget();
+    setLogoForAiidentity();
+    _shown = true;
+    chatArea.innerHTML = '';
+    clearReplyBox();
+    sleepBubble.classList.remove('aii-sleep-show');
+    wakeBubble.classList.remove('aii-wake-show');
+    fab.classList.remove('aii-fab-show');
+    avatarEl.classList.remove('aii-sleeping');
+    statusDot.classList.remove('aii-dot-sleep');
+
+    const lang = getLang();
+    const c = content[lang];
+    statusText.textContent = c.status;
+    textField.placeholder = c.inputPlaceholder;
+    inputRow.style.display = 'flex';
+
+    widget.classList.add('aii-visible');
+    soundAppear();
+    startAvatarLoop();
+    scheduleBlink();
+    resetIdleTimers();
+    bindWidgetInteraction();
+
+    if (isReturn) {
+      typeIntoBubble(c.returning, () => showChoices(c.firstChoices));
+    } else {
+      const curPage = typeof currentPage !== 'undefined' ? currentPage : null;
+      const ctxGreet = curPage && c.contextGreet[curPage] ? c.contextGreet[curPage] : null;
+      runSeq(ctxGreet ? [ctxGreet] : c.greeting, () => {
+        setTimeout(() => showChoices(c.firstChoices), 400);
+      });
+    }
+  }
+
+  function hideWidget() {
+    soundDismiss();
+    widget.classList.remove('aii-visible');
+    clearTimeout(_closeTimer);
+    setTimeout(() => {
+      _shown = false;
+      avatarState.sleepAmt = 0;
+      avatarState.sleeping = false;
+      chatArea.innerHTML = '';
+      clearReplyBox();
+      sleepBubble.classList.remove('aii-sleep-show');
+      wakeBubble.classList.remove('aii-wake-show');
+      inputRow.style.display = 'none';
+      fab.classList.add('aii-fab-show');
+      // Restore main logo (only if aii.entity not shown)
+      const visitor = document.getElementById('aiVisitor');
+      if (!visitor || !visitor.classList.contains('visible')) {
+        setLogoForAiidentity();
+      }
+      // Mulai FAB sleep timer
+      resetFabSleepTimer();
+    }, 600);
+  }
+
+  // ── Events ────────────────────────────────────────────────
+  dismissBtn.addEventListener('click', hideWidget);
+
+  fab.addEventListener('click', () => {
+    soundFabOpen();
+    clearTimeout(_fabSleepTimer);
+    clearTimeout(_fabWakeTimer);
+    _isFabSleeping = false;
+    fab.classList.remove('aii-fab-sleeping');
+    if (fabZzz) fabZzz.classList.remove('aii-fab-zzz-show');
+    if (fabWakeBubble) fabWakeBubble.classList.remove('aii-fab-wake-show');
+    avatarState.sleepAmt = 0;
+    avatarState.sleeping = false;
+    fab.classList.remove('aii-fab-show');
+    const sess = getSession();
+    showWidget(sess && sess.interacted);
+  });
+
+  sendBtn.addEventListener('click', () => handleFreeText(textField.value));
+  textField.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleFreeText(textField.value);
+  });
+
+  // ── Auto-trigger on page reveal ───────────────────────────
+  function waitForMainPageAndShow() {
+    const mainPageEl = document.getElementById('mainPage');
+    if (!mainPageEl) return;
+    const sess = getSession();
+    if (sess && sess.interacted) {
+      fab.classList.add('aii-fab-show');
+      startAvatarLoop();
+      resetFabSleepTimer();
+      return;
+    }
+    const obs = new MutationObserver(() => {
+      if (mainPageEl.classList.contains('visible')) {
+        obs.disconnect();
+        startAvatarLoop();
+        setTimeout(() => showWidget(false), 3500);
+      }
+    });
+    obs.observe(mainPageEl, { attributes: true, attributeFilter: ['class'] });
+    if (mainPageEl.classList.contains('visible')) {
+      startAvatarLoop();
+      setTimeout(() => showWidget(false), 3500);
+    }
+  }
+
+  waitForMainPageAndShow();
 })();
 </script>
 </body>
