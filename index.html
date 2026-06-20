@@ -247,7 +247,134 @@
     }
 
     /* Door knob — REMOVED */
-    .section-inner { width: 100%; max-width: 1100px; padding: 80px 48px; margin: 0 auto; }
+    /* ── TEAM BLOCK (dalam sec-contact) ──────────────────────── */
+  .team-block {
+    margin-top: 50px;
+    padding-top: 50px;
+    border-top: 1px solid #e8e8e8;
+    width: 100%;
+  }
+  .team-block-label {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 20px;
+  }
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 16px;
+    justify-items: center;
+    width: 100%;
+  }
+  @media (max-width: 600px) {
+    .team-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px 12px;
+    }
+  }
+  .team-member {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.22s ease;
+    will-change: transform;
+    isolation: isolate;
+  }
+  .team-member:hover { transform: translateY(-4px); }
+  .team-avatar-wrap {
+    width: 64px; height: 64px;
+    border-radius: 50%;S
+    overflow: hidden;
+    background: #eee;
+    border: 2px solid #111;
+    flex-shrink: 0;
+  }
+  .team-avatar-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+  }
+  .team-member-name {
+    font-size: 7px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(255, 255, 255);
+    font-weight: 600;
+    text-align: center;
+  }
+  .team-member-role {
+    display: none;
+  }
+  /* Card popup */
+  .team-card-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+    backdrop-filter: blur(4px);
+  }
+  .team-card-overlay.active { opacity: 1; pointer-events: all; }
+  .team-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 28px 24px;
+    width: min(300px, calc(100vw - 32px));
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+    transform: scale(0.92) translateY(12px);
+    transition: transform 0.3s cubic-bezier(0.34,1.3,0.64,1);
+    position: relative;
+  }
+  .team-card-overlay.active .team-card { transform: scale(1) translateY(0); }
+  @keyframes teamCardIn {
+    from { opacity: 0; transform: scale(0.88) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes teamCardOut {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to   { opacity: 0; transform: scale(0.92) translateY(12px); }
+  }
+  .team-card-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; cursor: pointer;
+    font-size: 18px; color: #888; line-height: 1;
+    padding: 4px 6px; border-radius: 50%;
+    transition: background 0.15s, color 0.15s;
+  }
+  .team-card-close:hover { background: #f0f0f0; color: #111; }
+  .team-card-avatar {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2.5px solid #111;
+    background: #eee;
+    margin-bottom: 4px;
+  }
+  .team-card-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .team-card-name {
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #111;
+  }
+  .team-card-role {
+    font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #888;
+  }
+  .team-card-socials {
+    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center;
+  }
+  .team-card-social {
+    font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #111; text-decoration: none;
+    border: 1px solid #111; padding: 5px 11px; border-radius: 20px;
+    transition: background 0.18s, color 0.18s;
+  }
+  .team-card-social:hover { background: #111; color: #fff; }
     /* Section yang kontennya muat 1 layar: center vertikal */
     .section > .section-inner { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
     /* Works: tidak center vertikal, biarkan konten mulai dari atas */
@@ -296,20 +423,37 @@
     .hero-cta:hover { background: #fff; color: #111; }
     .hero-scroll-hint {
       position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
-      font-family: 'Cinzel', serif; font-size: 7px;
-      letter-spacing: 0.35em; color: #bbb; text-transform: uppercase;
       opacity: 0; transition: opacity 0.8s ease 1.1s;
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      pointer-events: none;
     }
-    .hero-scroll-hint::after {
-      content: ''; display: block; width: 1px; height: 40px; background: #bbb;
-      animation: scrollLine 1.8s ease-in-out infinite;
+    .hero-scroll-hint::after { display: none; }
+    /* ── Hero vertical lines (hanya di sec-hero) ── */
+    .vline-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 1s ease 1.2s;
     }
-    @keyframes scrollLine {
-      0%   { transform: scaleY(0); transform-origin: top; }
-      50%  { transform: scaleY(1); transform-origin: top; }
-      51%  { transform: scaleY(1); transform-origin: bottom; }
-      100% { transform: scaleY(0); transform-origin: bottom; }
+    .section.page-active .vline-container { opacity: 1; }
+    .vline {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%) scaleY(0);
+      width: 1px;
+      height: 28%;
+      background: linear-gradient(to bottom, transparent 0%, #aaa 25%, #aaa 75%, transparent 100%);
+      transform-origin: top;
+    }
+    @keyframes vlineGrow {
+      0%   { transform: translateY(-50%) scaleY(0); transform-origin: top;    opacity: 0; }
+      10%  { opacity: 1; }
+      45%  { transform: translateY(-50%) scaleY(1); transform-origin: top;    opacity: 1; }
+      55%  { transform: translateY(-50%) scaleY(1); transform-origin: bottom; opacity: 1; }
+      90%  { opacity: 0.3; }
+      100% { transform: translateY(-50%) scaleY(0); transform-origin: bottom; opacity: 0; }
     }
     .section.page-active .hero-eyebrow, .section.page-active .hero-name,
     .section.page-active .hero-tagline, .section.page-active .hero-cta,
@@ -1374,6 +1518,7 @@
 
   <!-- HERO -->
   <section class="section" id="sec-hero">
+    <div class="vline-container" id="vlineContainer"></div>
     <div id="doorContainer"></div>
     <div class="section-inner">
       <p class="hero-eyebrow"><span class="hero-eyebrow-inner">Graphic Design &amp; Visual Identity</span></p>
@@ -1382,7 +1527,7 @@
       <p class="hero-tagline"><span class="hero-tagline-inner">Crafting stories<br>through form, type &amp; space</span></p>
       <a href="#sec-works" class="hero-cta"><span class="hero-cta-inner">View Works</span></a>
     </div>
-    <div class="hero-scroll-hint">Explore</div>
+    <div class="hero-scroll-hint"></div>
   </section>
 
   <!-- SERVICES -->
@@ -1711,13 +1856,116 @@
           <a href="#" class="social-link">Dribbble</a>
           <a href="#" class="social-link">LinkedIn</a>
         </div>
+
+        <!-- TEAM -->
+        <div class="team-block">
+          <p class="team-block-label">The Team</p>
+          <div class="team-grid">
+
+            <div class="team-member" onclick="openTeamCard(0)">
+              <div class="team-avatar-wrap">
+                <img src="https://drive.google.com/uc?export=view&id=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlso" alt="Andi Pratama" onerror="this.src='https://ui-avatars.com/api/?name=Andi+Pratama&background=111&color=fff&size=80'"/>
+              </div>
+              <div class="team-member-name">Andi Pratama</div>
+              <div class="team-member-role">Creative Director</div>
+            </div>
+
+            <div class="team-member" onclick="openTeamCard(1)">
+              <div class="team-avatar-wrap">
+                <img src="https://drive.google.com/uc?export=view&id=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlso" alt="Sari Dewi" onerror="this.src='https://ui-avatars.com/api/?name=Sari+Dewi&background=111&color=fff&size=80'"/>
+              </div>
+              <div class="team-member-name">Sari Dewi</div>
+              <div class="team-member-role">Visual Designer</div>
+            </div>
+
+            <div class="team-member" onclick="openTeamCard(2)">
+              <div class="team-avatar-wrap">
+                <img src="https://drive.google.com/uc?export=view&id=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlso" alt="Reza Mahendra" onerror="this.src='https://ui-avatars.com/api/?name=Reza+Mahendra&background=111&color=fff&size=80'"/>
+              </div>
+              <div class="team-member-name">Reza Mahendra</div>
+              <div class="team-member-role">Brand Strategist</div>
+            </div>
+
+            <div class="team-member" onclick="openTeamCard(3)">
+              <div class="team-avatar-wrap">
+                <img src="https://drive.google.com/uc?export=view&id=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlso" alt="Maya Kusuma" onerror="this.src='https://ui-avatars.com/api/?name=Maya+Kusuma&background=111&color=fff&size=80'"/>
+              </div>
+              <div class="team-member-name">Maya Kusuma</div>
+              <div class="team-member-role">Motion Designer</div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
     <footer class="site-footer">All Rights Reserved</footer>
   </section>
 </div>
 
+<!-- TEAM CARD OVERLAY -->
+<div class="team-card-overlay" id="teamCardOverlay" onclick="closeTeamCard(event)">
+  <div class="team-card" id="teamCard">
+    <button class="team-card-close" onclick="closeTeamCardDirect()">✕</button>
+    <div class="team-card-avatar"><img id="teamCardImg" src="" alt=""/></div>
+    <div class="team-card-name" id="teamCardName"></div>
+    <div class="team-card-role" id="teamCardRole"></div>
+    <div class="team-card-socials" id="teamCardSocials"></div>
+  </div>
+</div>
+
 <script>
+/* ══════════════════════════════════
+   HERO VERTICAL LINES
+══════════════════════════════════ */
+(function() {
+  const container = document.getElementById('vlineContainer');
+  if (!container) return;
+  const LINE_COUNT = 5;
+
+  // Buat elemen garis
+  for (let i = 0; i < LINE_COUNT; i++) {
+    const el = document.createElement('div');
+    el.className = 'vline';
+    container.appendChild(el);
+  }
+
+  const lineEls = container.querySelectorAll('.vline');
+
+  function spawnLine(el, delay) {
+    setTimeout(function go() {
+      const left    = Math.random() * 90 + 5;          // 5%–95%
+      const dur     = 5000 + Math.random() * 5000;     // 5–10 detik
+      const opScale = 0.07 + Math.random() * 0.12;     // opacity tipis
+
+      el.style.left                    = left + '%';
+      el.style.opacity                 = opScale;
+      el.style.animationName           = 'none';
+      el.style.animationDuration       = dur + 'ms';
+      void el.offsetWidth;
+      el.style.animationName           = 'vlineGrow';
+      el.style.animationTimingFunction = 'ease-in-out';
+      el.style.animationFillMode       = 'both';
+
+      // Respawn setelah selesai + jeda panjang agar tidak rapat
+      setTimeout(go, dur + 2500 + Math.random() * 4000);
+    }, delay);
+  }
+
+  // Mulai setelah hero text muncul (~1.5 detik setelah page-active)
+  // Cek kapan sec-hero dapat class page-active
+  const heroEl = document.getElementById('sec-hero');
+  function tryStart() {
+    if (heroEl && heroEl.classList.contains('page-active')) {
+      lineEls.forEach((el, i) => spawnLine(el, 1500 + i * 900 + Math.random() * 1200));
+    } else {
+      // Coba lagi tiap 200ms
+      setTimeout(tryStart, 200);
+    }
+  }
+  tryStart();
+})();
+
 /* ══════════════════════════════════
    AUDIO
 ══════════════════════════════════ */
@@ -4576,7 +4824,7 @@ function setMenuIcon(sectionId) {
       'hero-eyebrow':    'Graphic Design & Visual Identity',
       'hero-tagline':    'Crafting stories<br>through form, type & space',
       'hero-cta':        'View Works',
-      'hero-scroll':     'Explore',
+      'hero-scroll':     '',
       'svc-label':       'Services',
       'svc-title':       'What I Do',
       'svc-01-name':     'Brand Identity',
@@ -4636,6 +4884,7 @@ function setMenuIcon(sectionId) {
       'contact-label':   'Contact',
       'contact-title':   "Let's Work<br>Together.",
       'contact-sub':     'Have a project in mind? Reach out.',
+      'team-label':      'The Team',
       'footer':          'All Rights Reserved',
       'menu-home':       'Home',
       'menu-services':   'Services',
@@ -4648,7 +4897,7 @@ function setMenuIcon(sectionId) {
       'hero-eyebrow':    'Desain Grafis & Identitas Visual',
       'hero-tagline':    'Merangkai ceritab<br>lewat bentuk, huruf & ruang',
       'hero-cta':        'Lihat Karya',
-      'hero-scroll':     'Jelajahi',
+      'hero-scroll':     '',
       'svc-label':       'Layanan',
       'svc-title':       'Yang Saya Kerjakan',
       'svc-01-name':     'Identitas Merek',
@@ -4708,6 +4957,7 @@ function setMenuIcon(sectionId) {
       'contact-label':   'Kontak',
       'contact-title':   'Mari Bekerja<br>Bersama.',
       'contact-sub':     'Punya proyek? Hubungi saya.',
+      'team-label':      'Tim Kami',
       'footer':          'Hak Cipta Dilindungi',
       'menu-home':       'Beranda',
       'menu-services':   'Layanan',
@@ -4807,6 +5057,8 @@ function setMenuIcon(sectionId) {
       contactSection.querySelector('.section-label').textContent = t['contact-label'];
       contactSection.querySelector('.section-title').innerHTML = t['contact-title'];
       contactSection.querySelector('.contact-sub').textContent = t['contact-sub'];
+      const teamLbl = contactSection.querySelector('.team-block-label');
+      if (teamLbl) teamLbl.textContent = t['team-label'];
       const footer = contactSection.querySelector('.site-footer');
       if (footer) footer.textContent = t['footer'];
     }
@@ -9613,14 +9865,29 @@ function setMenuIcon(sectionId) {
     hideWidget();
   }, { passive: true });
 
-  // ── Mute audio when tab not visible ──────────────────────
+  // ── Mute SEMUA suara di browser saat pindah tab ──────────
   document.addEventListener('visibilitychange', function() {
+    const hidden = document.hidden;
+
+    // 1. Semua elemen <audio> dan <video>
+    document.querySelectorAll('audio, video').forEach(el => {
+      if (hidden) { if (!el.paused) { el._wasPlaying = true; el.pause(); } }
+      else        { if (el._wasPlaying) { el._wasPlaying = false; el.play().catch(()=>{}); } }
+    });
+
+    // 2. AudioContext global halaman utama (audioCtx)
+    if (typeof audioCtx !== 'undefined' && audioCtx) {
+      hidden ? audioCtx.suspend() : audioCtx.resume();
+    }
+
+    // 3. AudioContext aii.entity (_hac via window._hacCtx jika di-expose)
+    if (typeof _hac !== 'undefined' && _hac) {
+      hidden ? _hac.suspend() : _hac.resume();
+    }
+
+    // 4. AudioContext aiidentity widget (_audioCtx lokal)
     if (_audioCtx) {
-      if (document.hidden) {
-        _audioCtx.suspend();
-      } else {
-        _audioCtx.resume();
-      }
+      hidden ? _audioCtx.suspend() : _audioCtx.resume();
     }
   });
 
@@ -9956,6 +10223,115 @@ function setMenuIcon(sectionId) {
       setTimeout(() => showWidget(false), 3500);
     }
   }
+
+  // ── TEAM CARD ─────────────────────────────────────────────
+  const _teamData = [
+    {
+      name: 'Andi Pratama',
+      role: 'Creative Director',
+      img: 'https://ui-avatars.com/api/?name=Andi+Pratama&background=111&color=fff&size=200',
+      socials: [
+        { label: 'Instagram', url: '#' },
+        { label: 'Behance',   url: '#' },
+        { label: 'LinkedIn',  url: '#' }
+      ]
+    },
+    {
+      name: 'Sari Dewi',
+      role: 'Visual Designer',
+      img: 'https://ui-avatars.com/api/?name=Sari+Dewi&background=111&color=fff&size=200',
+      socials: [
+        { label: 'Instagram', url: '#' },
+        { label: 'Dribbble',  url: '#' }
+      ]
+    },
+    {
+      name: 'Reza Mahendra',
+      role: 'Brand Strategist',
+      img: 'https://ui-avatars.com/api/?name=Reza+Mahendra&background=111&color=fff&size=200',
+      socials: [
+        { label: 'LinkedIn',  url: '#' },
+        { label: 'Twitter',   url: '#' }
+      ]
+    },
+    {
+      name: 'Maya Kusuma',
+      role: 'Motion Designer',
+      img: 'https://ui-avatars.com/api/?name=Maya+Kusuma&background=111&color=fff&size=200',
+      socials: [
+        { label: 'Instagram', url: '#' },
+        { label: 'Behance',   url: '#' }
+      ]
+    }
+  ];
+
+  function _teamCardSound(open) {
+    try {
+      if (!audioCtx) initAudio();
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const g   = audioCtx.createGain();
+      osc.type = 'sine';
+      if (open) {
+        osc.frequency.setValueAtTime(280, t);
+        osc.frequency.exponentialRampToValueAtTime(520, t + 0.18);
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.14, t + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(t); osc.stop(t + 0.3);
+      } else {
+        osc.frequency.setValueAtTime(420, t);
+        osc.frequency.exponentialRampToValueAtTime(200, t + 0.18);
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.10, t + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(t); osc.stop(t + 0.25);
+      }
+    } catch(e) {}
+  }
+
+  window.openTeamCard = function(idx) {
+    const d = _teamData[idx];
+    if (!d) return;
+    document.getElementById('teamCardImg').src  = d.img;
+    document.getElementById('teamCardImg').alt  = d.name;
+    document.getElementById('teamCardName').textContent = d.name;
+    document.getElementById('teamCardRole').textContent = d.role;
+    const soc = document.getElementById('teamCardSocials');
+    soc.innerHTML = d.socials.map(s =>
+      `<a class="team-card-social" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`
+    ).join('');
+    const overlay = document.getElementById('teamCardOverlay');
+    const card    = document.getElementById('teamCard');
+    overlay.classList.add('active');
+    card.style.animation = 'teamCardIn 0.35s cubic-bezier(0.34,1.3,0.64,1) both';
+    document.body.style.overflow = 'hidden';
+    _teamCardSound(true);
+  };
+
+  window.closeTeamCard = function(e) {
+    if (e.target === document.getElementById('teamCardOverlay')) closeTeamCardDirect();
+  };
+
+  window.closeTeamCardDirect = function() {
+    const overlay = document.getElementById('teamCardOverlay');
+    const card    = document.getElementById('teamCard');
+    if (!overlay.classList.contains('active')) return;
+    _teamCardSound(false);
+    card.style.animation = 'teamCardOut 0.25s cubic-bezier(0.4,0,0.6,1) both';
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      card.style.animation = '';
+      document.body.style.overflow = '';
+    }, 240);
+  };
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeTeamCardDirect();
+  });
 
   waitForMainPageAndShow();
 })();
