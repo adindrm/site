@@ -256,7 +256,7 @@
       box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
     }
 
-    /* Hint label pulsing above door — REPLACED by door glow blink below */
+    /* Hint label pulsing above door - REPLACED by door glow blink below */
 
     /* Game-style hint: portal glow + separate sparkle element */
     .door-portal.door-waiting {
@@ -303,7 +303,7 @@
     .door-room {
       position: absolute;
       inset: 0;
-      background: #fff;  /* match hero bg — hides border seam */
+      background: #fff;  /* match hero bg - hides border seam */
       z-index: 1;
     }
     /* When open, room goes dark */
@@ -357,7 +357,7 @@
       100% { transform: translateX(0); }
     }
 
-    /* Door knob — REMOVED */
+    /* Door knob - REMOVED */
     /* ── TEAM BLOCK (dalam sec-contact) ──────────────────────── */
   .team-block {
     margin-top: 40px;
@@ -786,7 +786,7 @@
       color: #111;
       background: #fff;
     }
-    /* legacy sub-buttons hidden — replaced by second dropdown */
+    /* legacy sub-buttons hidden - replaced by second dropdown */
     .works-filter-sub { display: none !important; }
     .works-grid { display: flex; flex-direction: column; gap: 0; width: 100%; }
 
@@ -1011,7 +1011,7 @@
     #logoWrap.visible { opacity: 1; }
     #logoWrap img { display: block; width: 100%; height: 100%; }
 
-    /* Navbar door overlay — replaces logo when center door opens */
+    /* Navbar door overlay - replaces logo when center door opens */
     #navDoorOverlay {
       position: absolute;
       top: 0; left: 0;
@@ -1393,7 +1393,7 @@
     }
     .theme-toggle-btn:hover { background: rgba(0,0,0,0.07); transform: scale(1.12) rotate(12deg); }
     .theme-toggle-btn svg { width: 14px; height: 14px; display: block; stroke: currentColor; }
-    /* Dark mode — icon dan border putih */
+    /* Dark mode - icon dan border putih */
     body.dark-mode .theme-toggle-btn {
       color: #fff;             /* Membuat warna matahari menjadi putih */
       border-color: #333;      /* Border tombol bulatnya */
@@ -1442,7 +1442,7 @@
   /* ── STORE ── */
   #sec-store .section-inner { padding-top: 80px; padding-bottom: 60px; display: flex; flex-direction: column; gap: 0; }
 
-  /* Animasi awal — semua tersembunyi */
+  /* Animasi awal - semua tersembunyi */
   .store-header {
     margin-bottom: 8px;
     opacity: 0; transform: translateY(20px);
@@ -2109,7 +2109,7 @@
   const screen = document.getElementById('langPickerScreen');
   if (!screen) return;
 
-  // Selalu tampilkan picker di awal — bahasa dipilih setiap kunjungan
+  // Selalu tampilkan picker di awal - bahasa dipilih setiap kunjungan
   // (hapus saved check agar picker selalu muncul)
   window._langPickerDone = false;
   window._langPickerCallback = null;
@@ -4078,7 +4078,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
     return (sw && sw.checked) ? 'id' : 'en';
   }
 
-  // ── CSV Parser — handle newline di dalam quoted cell ──
+  // ── CSV Parser - handle newline di dalam quoted cell ──
   function parseCSVAll(text) {
     const rows = [];
     let cur = '', inQ = false, row = [];
@@ -4276,7 +4276,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
   }
 
   function toggleFilter2(show) {
-    // no-op — handled by dropdown visibility
+    // no-op - handled by dropdown visibility
   }
 
   // ── Render Grid ──
@@ -4826,7 +4826,7 @@ document.getElementById('nav-toggle').addEventListener('change', function() {
 })();
 
 // ═══════════════════════════════════════════════════════════
-//  STORE — Load & Admin
+//  STORE - Load & Admin
 // ═══════════════════════════════════════════════════════════
 (function() {
   let allStore       = [];
@@ -5518,7 +5518,7 @@ function setMenuIcon(sectionId) {
 
   }
 
-  // Click sound for lang toggle — reuse global audioCtx to avoid AudioContext limit
+  // Click sound for lang toggle - reuse global audioCtx to avoid AudioContext limit
   function playLangClick() {
     try {
       if (!audioCtx) return;
@@ -5649,7 +5649,7 @@ function setMenuIcon(sectionId) {
     let letterRaf = null;
 
     // ── Text collision rects (updated on resize) ──
-    // Uses inline <span> inside each element — getBoundingClientRect on inline
+    // Uses inline <span> inside each element - getBoundingClientRect on inline
     // element gives the real rendered text width, not the full container width.
     let textRects = [];
     function updateTextRects() {
@@ -5728,7 +5728,7 @@ function setMenuIcon(sectionId) {
         if (now - lastBurstTime < 0.06) return;
         lastBurstTime = now;
 
-        // Short crisp crack — noise burst + pitched click
+        // Short crisp crack - noise burst + pitched click
         const bufSize = audioCtx.sampleRate * 0.06;
         const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
         const data = buf.getChannelData(0);
@@ -5781,7 +5781,7 @@ function setMenuIcon(sectionId) {
       } catch(e) {}
     }
 
-    // "Haaa" healing sound when hands meet — warm rising chord
+    // "Haaa" healing sound when hands meet - warm rising chord
     function playClapSound() {
       try {
         if (!audioCtx) return;
@@ -5802,7 +5802,7 @@ function setMenuIcon(sectionId) {
         g1.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
         osc1.start(t); osc1.stop(t + 0.9);
 
-        // Harmonic fifth above — "aaa" vowel resonance
+        // Harmonic fifth above - "aaa" vowel resonance
         const osc2 = audioCtx.createOscillator();
         const g2   = audioCtx.createGain();
         osc2.connect(g2); g2.connect(audioCtx.destination);
@@ -5988,14 +5988,14 @@ function setMenuIcon(sectionId) {
         l.y     += l.vy;
         l.angle += l.rot;
 
-        // Hit bottom — burst, sound, remove
+        // Hit bottom - burst, sound, remove
         if (l.y + l.size * 0.5 >= canvasH) {
           burstLetter(l);
           flyingLetters.splice(i, 1);
           continue;
         }
 
-        // Wall bounce — left & right
+        // Wall bounce - left & right
         const hw = l.size * 0.4;
         if (l.x - hw < 0) {
           l.x = hw;
@@ -6007,7 +6007,7 @@ function setMenuIcon(sectionId) {
           playHitSound();
         }
 
-        // Check collision with textRects — bounce sideways, vy never goes negative
+        // Check collision with textRects - bounce sideways, vy never goes negative
         if (!l.hit) {
           for (const r of textRects) {
             if (
@@ -6179,7 +6179,7 @@ function setMenuIcon(sectionId) {
       }
     }
 
-    /* ── FIXED POSITION — center, above eyebrow, a bit higher ── */
+    /* ── FIXED POSITION - center, above eyebrow, a bit higher ── */
     function getDoorPos() {
       const heroRect = heroSection.getBoundingClientRect();
       let y;
@@ -6209,7 +6209,7 @@ function setMenuIcon(sectionId) {
       const bodyH  = H * 0.36;
       const bodyY  = headCY + headR * 0.85;
 
-      // Arm dimensions — slim, same height as body, flush to body sides
+      // Arm dimensions - slim, same height as body, flush to body sides
       const armW   = headR * 0.22;       // slim arm
       const armH   = bodyH * 0.88;       // tangan lebih turun
       const armY   = bodyY + bodyH * 0.12;
@@ -6348,7 +6348,7 @@ function setMenuIcon(sectionId) {
         ctx.fillStyle = '#fff'; ctx.fill();
         ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5; ctx.stroke();
 
-        // Arms — glow sebelum gambar lengan
+        // Arms - glow sebelum gambar lengan
         const armGlowR = armW * 2.2;
         [[leftPivotX + shakeX, pivotY + armH * 0.5], [rightPivotX + shakeX, pivotY + armH * 0.5]].forEach(([ax, ay]) => {
           const ag = ctx.createRadialGradient(ax, ay, 0, ax, ay, armGlowR);
@@ -6361,7 +6361,7 @@ function setMenuIcon(sectionId) {
         drawArmRotated(leftPivotX  + shakeX, pivotY, armW, armH, armW * 0.45,  leftAngle);
         drawArmRotated(rightPivotX + shakeX, pivotY, armW, armH, armW * 0.45, rightAngle);
 
-        // Head — ikut napas kalau tidur
+        // Head - ikut napas kalau tidur
         const headY = isSleep ? headCY + Math.sin(elapsed * 1.2) * 1.2 : headCY;
         ctx.beginPath();
         ctx.arc(cx, headY, headR, 0, Math.PI * 2);
@@ -6380,7 +6380,7 @@ function setMenuIcon(sectionId) {
         const eyeW  = headR * 0.34;
         const eyeOX = headR * 0.34, eyeOY = -headR * 0.08;
         if (isSleep) {
-          // Mata tertutup — garis lurus
+          // Mata tertutup - garis lurus
           [cx - eyeOX, cx + eyeOX].forEach(ex => {
             ctx.beginPath();
             ctx.moveTo(ex - eyeW * 0.38, headY + eyeOY);
@@ -6433,7 +6433,7 @@ function setMenuIcon(sectionId) {
         ctx.scale(scaleFactor, scaleFactor);
         ctx.translate(-cx, -H * 0.6);
 
-        // Figure stays visible the whole time — no fade out
+        // Figure stays visible the whole time - no fade out
         drawFigure(fadeIn, elapsed);
 
         ctx.restore();
@@ -6461,7 +6461,7 @@ function setMenuIcon(sectionId) {
         const cycleT   = elapsed % CYCLE;
         const handsOn  = cycleT >= CLAP_TIME && cycleT < ARM_RETURN;
 
-        // Glow ujung tangan saat bertemu (sesi letter & ball saja, bukan sleep) — medium
+        // Glow ujung tangan saat bertemu (sesi letter & ball saja, bukan sleep) - medium
         if (handsOn && sessionMode !== 'sleep' && fadeIn >= 1) {
           // Midpoint kedua ujung tangan dalam canvas-space dengan scaleFactor
           const scale = 0.4 + 0.6 * fadeIn;
@@ -6519,7 +6519,7 @@ function setMenuIcon(sectionId) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const t = audioCtx.currentTime;
 
-        // Noise burst — woody knock body
+        // Noise burst - woody knock body
         const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.25, audioCtx.sampleRate);
         const data = buf.getChannelData(0);
         for (let i = 0; i < data.length; i++) {
@@ -6586,7 +6586,7 @@ function setMenuIcon(sectionId) {
         if (!audioCtx) return;
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const t = audioCtx.currentTime;
-        // Noise burst — thud body
+        // Noise burst - thud body
         const bufSize = audioCtx.sampleRate * 0.5;
         const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
         const data = buf.getChannelData(0);
@@ -6714,7 +6714,7 @@ function setMenuIcon(sectionId) {
 
       raf = requestAnimationFrame(loop);
 
-      // Return stop function — saat dipanggil, trigger ledakan
+      // Return stop function - saat dipanggil, trigger ledakan
       return function stop() {
         if (!exploded) {
           exploded = true;
@@ -6727,6 +6727,7 @@ function setMenuIcon(sectionId) {
 
     function openDoor(portal, canvas, pos, stopCanvasRef) {
       portal.classList.add('door-visible');
+      if (typeof window.aiiFabSetDoorHidden === 'function') window.aiiFabSetDoorHidden(true);
       startWindSound();
       doorSessionCount++;
       const mod = doorSessionCount % 3;
@@ -6763,6 +6764,7 @@ function setMenuIcon(sectionId) {
         if (old.hintTimer) clearTimeout(old.hintTimer);
         old.portal.classList.remove('door-visible');
         old.portal.classList.add('door-hiding');
+        if (typeof window.aiiFabSetDoorHidden === 'function') window.aiiFabSetDoorHidden(false);
         old.stopCanvas();
         hideNavDoor();
         if (old.hint  && old.hint.parentNode)    old.hint.parentNode.removeChild(old.hint);
@@ -6837,6 +6839,7 @@ function setMenuIcon(sectionId) {
           stopWindSound(1.5);
           portal.classList.remove('door-visible');
           portal.classList.add('door-hiding');
+          if (typeof window.aiiFabSetDoorHidden === 'function') window.aiiFabSetDoorHidden(false);
           stopCanvasRef.fn();
           if (activeDoor && activeDoor.portal === portal) activeDoor = null;
           // Buka daun navbar setelah pintu tengah benar-benar tertutup
@@ -6881,6 +6884,7 @@ function setMenuIcon(sectionId) {
         if (activeDoor.hintTimer) clearTimeout(activeDoor.hintTimer);
         activeDoor.portal.classList.remove('door-visible');
         activeDoor.portal.classList.add('door-hiding');
+        if (typeof window.aiiFabSetDoorHidden === 'function') window.aiiFabSetDoorHidden(false);
         activeDoor.stopCanvas();
         if (activeDoor.hit && activeDoor.hit.parentNode) activeDoor.hit.parentNode.removeChild(activeDoor.hit);
         stopWindSound(0.8);
@@ -7416,12 +7420,12 @@ function setMenuIcon(sectionId) {
     const W = cvs.width, H = cvs.height;
     const cx = W / 2;
 
-    // Eye layout — matching door figure proportions scaled to 36px circle
+    // Eye layout - matching door figure proportions scaled to 36px circle
     const eyeW  = W * 0.16;
     const eyeOX = W * 0.18;
     const eyeY  = H * 0.46;
 
-    // Natural blink scheduler — varied interval, occasional double-blink
+    // Natural blink scheduler - varied interval, occasional double-blink
     const BLINK_DUR = 110; // ms per single blink
     let blinkStart  = null;
     let isDouble    = false;
@@ -7468,7 +7472,7 @@ function setMenuIcon(sectionId) {
       }
 
       if (blinkPhase === 3) {
-        // Second blink — slightly faster
+        // Second blink - slightly faster
         const dur = BLINK_DUR * 0.85;
         if (age < dur) {
           return Math.max(Math.sin((age / dur) * Math.PI), 0.03);
@@ -7499,7 +7503,7 @@ function setMenuIcon(sectionId) {
 
       ctx.clearRect(0, 0, W2, H2);
 
-      // Background circle — dark
+      // Background circle - dark
       ctx.beginPath();
       ctx.arc(cx2, cy2, R2, 0, Math.PI * 2);
       ctx.fillStyle = '#111';
@@ -7577,7 +7581,7 @@ function setMenuIcon(sectionId) {
         noiseNode.connect(bpf); bpf.connect(noiseGain); noiseGain.connect(actx.destination);
         noiseNode.start(now); noiseNode.stop(now + 0.4);
 
-        // ── Layer 2: arc flash — beberapa burst oscillator pendek ──
+        // ── Layer 2: arc flash - beberapa burst oscillator pendek ──
         [0, 0.04, 0.09, 0.15, 0.21].forEach((offset, i) => {
           const o = actx.createOscillator();
           const g = actx.createGain();
@@ -7592,7 +7596,7 @@ function setMenuIcon(sectionId) {
           o.start(now + offset); o.stop(now + offset + 0.07);
         });
 
-        // ── Layer 3: low thump — benturan listrik ──
+        // ── Layer 3: low thump - benturan listrik ──
         const oLow = actx.createOscillator();
         const gLow = actx.createGain();
         oLow.connect(gLow); gLow.connect(actx.destination);
@@ -7603,7 +7607,7 @@ function setMenuIcon(sectionId) {
         gLow.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
         oLow.start(now); oLow.stop(now + 0.22);
 
-        // ── Layer 4: high crackle bursts — percikan api ──
+        // ── Layer 4: high crackle bursts - percikan api ──
         [0.01, 0.06, 0.13, 0.19, 0.27, 0.32].forEach(offset => {
           const ob = actx.createOscillator();
           const gb = actx.createGain();
@@ -7649,7 +7653,7 @@ function setMenuIcon(sectionId) {
     const responseEl= document.getElementById('hackerResponse');
     const ctx       = canvas.getContext('2d');
 
-    // ── Shared AudioContext — satu untuk semua suara hacker ──
+    // ── Shared AudioContext - satu untuk semua suara hacker ──
     let _hac = null;
     function getHAC() {
       if (!_hac || _hac.state === 'closed') {
@@ -7792,7 +7796,7 @@ function setMenuIcon(sectionId) {
           o.start(t); o.stop(t + 0.09);
         });
 
-        // Phase 3: carrier lock — ascending sweep
+        // Phase 3: carrier lock - ascending sweep
         const sweep = ac.createOscillator();
         const sweepG = ac.createGain();
         sweep.connect(sweepG); sweepG.connect(ac.destination);
@@ -7952,7 +7956,7 @@ function setMenuIcon(sectionId) {
         src.connect(bpf); bpf.connect(sg); sg.connect(ac.destination);
         src.start(now); src.stop(now + 0.1);
 
-        // Final low thud — session terminated
+        // Final low thud - session terminated
         const thud = ac.createOscillator();
         const tg   = ac.createGain();
         thud.connect(tg); tg.connect(ac.destination);
@@ -7969,7 +7973,7 @@ function setMenuIcon(sectionId) {
         const ac = getHAC();
         const now = ac.currentTime;
 
-        // Phase 1: descending chime — kebalikan dari access granted
+        // Phase 1: descending chime - kebalikan dari access granted
         [1047, 784, 659, 440, 330].forEach((f, i) => {
           const o = ac.createOscillator(); const g = ac.createGain();
           o.connect(g); g.connect(ac.destination);
@@ -7980,7 +7984,7 @@ function setMenuIcon(sectionId) {
           o.start(t); o.stop(t + 0.33);
         });
 
-        // Phase 2: static burst — koneksi putus
+        // Phase 2: static burst - koneksi putus
         const bLen = Math.floor(ac.sampleRate * 0.12);
         const buf  = ac.createBuffer(1, bLen, ac.sampleRate);
         const dd   = buf.getChannelData(0);
@@ -7992,7 +7996,7 @@ function setMenuIcon(sectionId) {
         src.connect(bpf); bpf.connect(sg); sg.connect(ac.destination);
         src.start(now + 0.55); src.stop(now + 0.68);
 
-        // Phase 3: heavy thud akhir — power off
+        // Phase 3: heavy thud akhir - power off
         const thud = ac.createOscillator(); const tg = ac.createGain();
         thud.connect(tg); tg.connect(ac.destination);
         thud.type = 'sine';
@@ -8033,7 +8037,7 @@ function setMenuIcon(sectionId) {
     }
 
     function playHackerEnter() {
-      // Enter key = "command executed" — data burst + confirm tone
+      // Enter key = "command executed" - data burst + confirm tone
       try {
         const ac = getHAC();
         const now = ac.currentTime;
@@ -8067,7 +8071,7 @@ function setMenuIcon(sectionId) {
       window._isAdmin = true;
       document.body.classList.add('admin-mode');
 
-      // Admin badge di header — ganti teks "aiidentity" jadi "admin"
+      // Admin badge di header - ganti teks "aiidentity" jadi "admin"
       const headerTitle = document.getElementById('headerTitle');
       if (headerTitle) {
         // Simpan teks asli untuk restore saat logout
@@ -8333,7 +8337,7 @@ function setMenuIcon(sectionId) {
       } catch(e) {}
     }
 
-    // Forward ref for glitch stop — will be assigned by glitch engine below
+    // Forward ref for glitch stop - will be assigned by glitch engine below
     let stopGlitch = () => {};
 
     input.addEventListener('keydown', (e) => {
@@ -8385,7 +8389,7 @@ function setMenuIcon(sectionId) {
             input.placeholder = 'enter command...';
           }
         } else {
-          // Already admin — cek logout command
+          // Already admin - cek logout command
           if (val.toLowerCase() === 'logout') {
             // Reset role ke visitor
             window._isAdmin = false;
@@ -8523,7 +8527,7 @@ function setMenuIcon(sectionId) {
     closeBtn.removeEventListener('click', closeHacker);
     closeBtn.addEventListener('click', closeHackerWithGlitch);
 
-    // Expose to outer scope — include startGlitch so it runs on every open
+    // Expose to outer scope - include startGlitch so it runs on every open
     window.triggerHackerOverlay = function() { openHacker(); startGlitch(); };
     window.closeHackerOverlay   = function() { stopGlitch(); closeHacker(); };
   })();
@@ -8558,7 +8562,7 @@ function setMenuIcon(sectionId) {
     canvas.height = window.innerHeight;
     const ctx = canvas.getContext('2d');
 
-    // Suara firework — hissing rise + pop
+    // Suara firework - hissing rise + pop
     function fwSound(x, y) {
       try {
         const ac  = new (window.AudioContext || window.webkitAudioContext)();
@@ -8684,7 +8688,7 @@ function setMenuIcon(sectionId) {
     const ctx = canvas.getContext('2d');
     const isDark = document.body.classList.contains('dark-mode');
 
-    // Suara jetpack — thrust noise
+    // Suara jetpack - thrust noise
     function jpSound() {
       try {
         const ac = new (window.AudioContext || window.webkitAudioContext)();
@@ -8728,7 +8732,7 @@ function setMenuIcon(sectionId) {
     }
 
     function drawJetpackFigure(x, y, size, flicker, col, flameCols) {
-      // Body — minimalis Cinzel-style stick figure
+      // Body - minimalis Cinzel-style stick figure
       ctx.save();
       ctx.strokeStyle = col;
       ctx.lineWidth = size * 0.09;
@@ -8759,7 +8763,7 @@ function setMenuIcon(sectionId) {
       ctx.lineTo(x + size * 0.14, y + size * 0.36);
       ctx.stroke();
 
-      // Jetpack pack — di punggung
+      // Jetpack pack - di punggung
       ctx.fillStyle = col;
       ctx.fillRect(x + size * 0.1, y - size * 0.35, size * 0.18, size * 0.32);
 
@@ -9143,6 +9147,7 @@ function setMenuIcon(sectionId) {
   let idleTimer   = null;
   let logoClicks  = 0;
   let logoResetTimer = null;
+  let _typingStopped = true; // true sebelum widget pernah tampil
 
   // ── Helpers ────────────────────────────────────────────────
   function scrollChat() {
@@ -9172,6 +9177,7 @@ function setMenuIcon(sectionId) {
     const thinkBubble = showThinking();
     const delay = Math.min(600 + text.length * 18, 1800);
     setTimeout(() => {
+      if (_typingStopped) { thinkBubble.remove(); return; }
       thinkBubble.remove();
       const b = document.createElement('div');
       b.className = 'ai-bubble';
@@ -9181,6 +9187,7 @@ function setMenuIcon(sectionId) {
       let i = 0;
       const rawText = text.replace(/\n/g, '\n'); // keep newlines
       function step() {
+        if (_typingStopped) return; // widget sudah ditutup -- hentikan, jangan bunyikan tick lagi
         if (i <= rawText.length) {
           b.innerHTML = rawText.slice(0, i).replace(/\n/g, '<br>') + '<span class="ai-cursor"></span>';
           if (i > 0 && rawText[i-1] !== '\n') playTypeTick();
@@ -9200,7 +9207,7 @@ function setMenuIcon(sectionId) {
   function runSeq(lines, onDone) {
     let i = 0;
     function next() {
-      if (i >= lines.length) { if (onDone) onDone(); return; }
+      if (_typingStopped || i >= lines.length) { if (onDone) onDone(); return; }
       typeIntoBubble(lines[i], () => {
         i++;
         setTimeout(next, 420);
@@ -9244,7 +9251,7 @@ function setMenuIcon(sectionId) {
             }, 400);
           }
         } else if (branch.next === null) {
-          // conversation ends here — auto dismiss
+          // conversation ends here - auto dismiss
           setTimeout(hideVisitor, 2200);
         }
       });
@@ -9258,6 +9265,7 @@ function setMenuIcon(sectionId) {
     if (_showVisitorLock) return;
     _showVisitorLock = true;
     shown = true;
+    _typingStopped = false;
     chatArea.innerHTML = '';
     replyBox.style.display = 'none';
     // Hide aiidentity widget if shown
@@ -9283,6 +9291,7 @@ function setMenuIcon(sectionId) {
   }
 
   function hideVisitor() {
+    _typingStopped = true; // langsung hentikan suara ketik, jangan tunggu animasi tutup
     visitor.classList.remove('visible');
     setTimeout(() => {
       shown      = false;
@@ -9301,6 +9310,16 @@ function setMenuIcon(sectionId) {
   }
 
   dismiss.addEventListener('click', () => { playDismiss(); hideVisitor(); });
+
+  // Jaring pengaman: kalau class 'visible' dilepas dari luar (misal saat
+  // widget aiidentity membuka & memaksa tutup aii.entity), pastikan suara
+  // ketik tetap ikut berhenti meski bukan lewat hideVisitor().
+  const _selfVisObs = new MutationObserver(() => {
+    if (!visitor.classList.contains('visible')) {
+      _typingStopped = true;
+    }
+  });
+  _selfVisObs.observe(visitor, { attributes: true, attributeFilter: ['class'] });
 
   // ── Idle trigger ───────────────────────────────────────────
   function resetIdle() {
@@ -9582,7 +9601,7 @@ function setMenuIcon(sectionId) {
    ABOUT PHOTO SLIDESHOW
    Fetch photo_id dari Google Sheet tab "about",
    tampilkan via Google Drive thumbnail, bergantian random.
-   Setiap gambar tunggu onload sebelum fade — tidak pernah
+   Setiap gambar tunggu onload sebelum fade - tidak pernah
    menampilkan gambar yang belum selesai di-load.
 ══════════════════════════════════ */
 (function() {
@@ -9627,7 +9646,7 @@ function setMenuIcon(sectionId) {
     return toUrl(queue[qIdx]);
   }
 
-  // Loop utama — async agar bisa await onload
+  // Loop utama - async agar bisa await onload
   async function loop() {
     running = true;
     while (running) {
@@ -9635,7 +9654,7 @@ function setMenuIcon(sectionId) {
       const incoming = current === 'A' ? imgB : imgA;
       const outgoing = current === 'A' ? imgA : imgB;
 
-      // Preload gambar berikutnya ke layer idle — tunggu sampai siap
+      // Preload gambar berikutnya ke layer idle - tunggu sampai siap
       await preload(incoming, nextUrl());
 
       // Tunggu interval sebelum mulai fade
@@ -9984,7 +10003,7 @@ function setMenuIcon(sectionId) {
   #aiiSendBtn:hover { background: #333; transform: scale(1.08); }
   #aiiSendBtn:active { transform: scale(0.95); }
 
-  /* ── FAB — avatar mini ── */
+  /* ── FAB - avatar mini ── */
   #aiiFab {
     position: fixed;
     left: 20px; bottom: 20px;
@@ -10003,6 +10022,8 @@ function setMenuIcon(sectionId) {
   #aiiFab.aii-fab-show { display: flex; animation: aiiFabIn 0.4s cubic-bezier(0.34,1.4,0.64,1) both; }
   #aiiFab:hover { transform: scale(1.1); }
   #aiiFab:active { transform: scale(0.95); }
+  /* Force-hide: easter egg pintu terbuka / widget aii.entity muncul */
+  #aiiFab.aii-fab-hide-override { display: none !important; }
   /* FAB sleep: gentle bob animation */
   #aiiFab.aii-fab-sleeping {
     animation: aiiFabIn 0.4s cubic-bezier(0.34,1.4,0.64,1) both, aiiFabSleepBob 3s ease-in-out 0.4s infinite;
@@ -10066,18 +10087,76 @@ function setMenuIcon(sectionId) {
     pointer-events: none;
     font-family: 'Cinzel', serif;
     font-size: 9px;
-    color: #555;
     line-height: 1;
     letter-spacing: 0;
+    height: 20px;
+    overflow: visible;
   }
   #aiiFabZzz.aii-fab-zzz-show { display: flex; gap: 1px; align-items: flex-end; }
-  #aiiFabZzz span { display: inline-block; animation: fabZzz 2s ease-in-out infinite; }
+  #aiiFabZzz span {
+    display: inline-block;
+    animation: fabZzz 2.2s ease-in-out infinite;
+    /* mode terang: isi hitam, pinggiran putih tipis */
+    color: #111;
+    -webkit-text-stroke: 0.5px #fff;
+    text-shadow: 0 0 1px #fff, 0 0 0.5px #fff;
+  }
+  body.dark-mode #aiiFabZzz span {
+    /* mode gelap: isi putih, pinggiran hitam tipis */
+    color: #fff;
+    -webkit-text-stroke: 0.5px #111;
+    text-shadow: 0 0 1px #111, 0 0 0.5px #111;
+  }
   #aiiFabZzz span:nth-child(1) { font-size: 7px; animation-delay: 0s; }
   #aiiFabZzz span:nth-child(2) { font-size: 9px; animation-delay: 0.4s; }
   #aiiFabZzz span:nth-child(3) { font-size: 6px; animation-delay: 0.8s; }
   @keyframes fabZzz {
-    0%,100% { opacity: 0.15; transform: translateY(0); }
-    50%     { opacity: 0.8;  transform: translateY(-5px); }
+    0%   { opacity: 0;    transform: translateY(4px) scale(0.8); }
+    18%  { opacity: 0.9;  transform: translateY(-2px) scale(1); }
+    65%  { opacity: 0.55; transform: translateY(-9px) scale(1); }
+    100% { opacity: 0;    transform: translateY(-15px) scale(0.85); }
+  }
+
+  /* ── FAB hint bubble dekoratif (muncul acak saat idle, tanpa glitch) ── */
+  #aiiFabHintBubble {
+    position: fixed;
+    left: 14px;
+    bottom: 54px;
+    z-index: 9000;
+    display: none;
+    pointer-events: none;
+    background: #111;
+    color: #fff;
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    border-radius: 10px 10px 10px 3px;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+  }
+  #aiiFabHintBubble::after {
+    content: '';
+    position: absolute;
+    left: 14px; bottom: -6px;
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #111;
+  }
+  #aiiFabHintBubble.aii-fab-hint-show {
+    display: block;
+    animation: fabHintPop 0.4s cubic-bezier(0.34,1.4,0.64,1) both,
+               fabHintFloat 2.6s ease-in-out 0.4s infinite;
+  }
+  @keyframes fabHintPop {
+    from { opacity: 0; transform: translateY(6px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes fabHintFloat {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-3px); }
   }
 
   /* ── Mobile ── */
@@ -10121,7 +10200,7 @@ function setMenuIcon(sectionId) {
   </div>
 </div>
 
-<!-- FAB — mini avatar -->
+<!-- FAB - mini avatar -->
 <button id="aiiFab" title="Butuh bantuan?">
   <canvas id="aiiFabCanvas" width="26" height="26"></canvas>
 </button>
@@ -10129,10 +10208,12 @@ function setMenuIcon(sectionId) {
 <div id="aiiFabZzz"><span>z</span><span>z</span><span>z</span></div>
 <!-- FAB wake bubble melayang -->
 <div id="aiiFabWakeBubble"></div>
+<!-- FAB hint bubble dekoratif (muncul acak saat idle) -->
+<div id="aiiFabHintBubble"><span id="aiiFabHintText"></span></div>
 
 <script>
 /* ══════════════════════════════════════════════════════════
-   AIIDENTITY ASSISTANT v2 — full logic
+   AIIDENTITY ASSISTANT v2 - full logic
    ══════════════════════════════════════════════════════════ */
 (function() {
   'use strict';
@@ -10173,7 +10254,7 @@ function setMenuIcon(sectionId) {
     } catch(e) {}
   }
   function soundAppear() {
-    // Soft chime — two rising notes
+    // Soft chime - two rising notes
     playTone(440, 'sine', 0.06, 0.25, 0);
     playTone(660, 'sine', 0.05, 0.3, 0.18);
   }
@@ -10216,6 +10297,11 @@ function setMenuIcon(sectionId) {
   function soundFabOpen() {
     playTone(500, 'sine', 0.05, 0.22, 0);
   }
+  function soundHintPoke() {
+    // Bubble dekoratif muncul -- pop ringan, dua nada kecil
+    playTone(560, 'sine', 0.045, 0.12, 0);
+    playTone(740, 'sine', 0.035, 0.14, 0.08);
+  }
 
   // ── Session memory ────────────────────────────────────────
   const SESSION_KEY = 'aiidentity_session';
@@ -10246,7 +10332,7 @@ function setMenuIcon(sectionId) {
       ],
       branches: {
         services: {
-          seq: ["AIIDENTITY offers brand identity, print design, typography, motion graphics, art direction, UI/digital, and studio photography.", "Each service is crafted with intention — built to make your brand stand out."],
+          seq: ["AIIDENTITY offers brand identity, print design, typography, motion graphics, art direction, UI/digital, and studio photography.", "Each service is crafted with intention - built to make your brand stand out."],
           nav: { label: "See Services →", section: "sec-services" },
           followup: [
             { label: "Tell me about branding", key: "branding" },
@@ -10256,7 +10342,7 @@ function setMenuIcon(sectionId) {
           ]
         },
         works: {
-          seq: ["The portfolio spans branding, editorial, motion, and digital projects.", "Each piece is a story — told through form, type, and space."],
+          seq: ["The portfolio spans branding, editorial, motion, and digital projects.", "Each piece is a story - told through form, type, and space."],
           nav: { label: "View Works →", section: "sec-works" },
           followup: [
             { label: "I want something like this", key: "contact"  },
@@ -10264,7 +10350,7 @@ function setMenuIcon(sectionId) {
           ]
         },
         studio: {
-          seq: ["The studio offers product photography, video, and self-photo sessions.", "Pricing depends on scope — the best way to get a quote is to reach out directly."],
+          seq: ["The studio offers product photography, video, and self-photo sessions.", "Pricing depends on scope - the best way to get a quote is to reach out directly."],
           nav: { label: "Get in Touch →", section: "sec-contact" },
           followup: [
             { label: "What else is offered?", key: "services" },
@@ -10295,14 +10381,14 @@ function setMenuIcon(sectionId) {
           nav: null, followup: null, end: false, switchLang: 'id'
         },
         contact: {
-          seq: ["Great! Let's connect.", "You can reach out via email — or head to the contact section."],
+          seq: ["Great! Let's connect.", "You can reach out via email - or head to the contact section."],
           nav: { label: "Go to Contact →", section: "sec-contact" },
           followup: null, end: true
         },
       },
       contextGreet: {
         'sec-works':    "Enjoying the portfolio? I can tell you more about any of these projects.",
-        'sec-services': "Exploring the services? Ask me anything — I can help narrow it down.",
+        'sec-services': "Exploring the services? Ask me anything - I can help narrow it down.",
         'sec-contact':  "Ready to connect? I can help you know what to say.",
         'sec-about':    "Getting to know AIIDENTITY? Feel free to ask anything.",
         'sec-store':    "Browsing the store? I can help you find the right piece.",
@@ -10323,7 +10409,7 @@ function setMenuIcon(sectionId) {
       ],
       branches: {
         services: {
-          seq: ["AIIDENTITY menawarkan brand identity, desain cetak, tipografi, grafis gerak, arahan seni, UI/digital, dan fotografi studio.", "Setiap layanan dibuat dengan niat — dirancang agar merek kamu tampil berbeda."],
+          seq: ["AIIDENTITY menawarkan brand identity, desain cetak, tipografi, grafis gerak, arahan seni, UI/digital, dan fotografi studio.", "Setiap layanan dibuat dengan niat - dirancang agar merek kamu tampil berbeda."],
           nav: { label: "Lihat Layanan →", section: "sec-services" },
           followup: [
             { label: "Ceritakan soal branding", key: "branding" },
@@ -10333,7 +10419,7 @@ function setMenuIcon(sectionId) {
           ]
         },
         works: {
-          seq: ["Portofolio mencakup branding, editorial, motion, dan proyek digital.", "Setiap karya adalah sebuah cerita — diceritakan lewat bentuk, teks, dan ruang."],
+          seq: ["Portofolio mencakup branding, editorial, motion, dan proyek digital.", "Setiap karya adalah sebuah cerita - diceritakan lewat bentuk, teks, dan ruang."],
           nav: { label: "Lihat Karya →", section: "sec-works" },
           followup: [
             { label: "Saya ingin seperti ini", key: "contact"  },
@@ -10341,7 +10427,7 @@ function setMenuIcon(sectionId) {
           ]
         },
         studio: {
-          seq: ["Studio menawarkan foto produk, video, dan sesi foto mandiri.", "Harga tergantung lingkup — cara terbaik mendapat penawaran adalah menghubungi langsung."],
+          seq: ["Studio menawarkan foto produk, video, dan sesi foto mandiri.", "Harga tergantung lingkup - cara terbaik mendapat penawaran adalah menghubungi langsung."],
           nav: { label: "Hubungi Kami →", section: "sec-contact" },
           followup: [
             { label: "Apa lagi yang ditawarkan?", key: "services" },
@@ -10372,14 +10458,14 @@ function setMenuIcon(sectionId) {
           nav: null, followup: null, end: false, switchLang: 'en'
         },
         contact: {
-          seq: ["Bagus! Mari terhubung.", "Kamu bisa menghubungi via email — atau langsung ke bagian kontak."],
+          seq: ["Bagus! Mari terhubung.", "Kamu bisa menghubungi via email - atau langsung ke bagian kontak."],
           nav: { label: "Ke Halaman Kontak →", section: "sec-contact" },
           followup: null, end: true
         },
       },
       contextGreet: {
         'sec-works':    "Menikmati portofolionya? Saya bisa ceritakan lebih soal karya-karya ini.",
-        'sec-services': "Menjelajahi layanan? Tanya apa saja — saya bisa bantu mempersempitnya.",
+        'sec-services': "Menjelajahi layanan? Tanya apa saja - saya bisa bantu mempersempitnya.",
         'sec-contact':  "Siap terhubung? Saya bisa bantu kamu tahu apa yang harus disampaikan.",
         'sec-about':    "Mengenal AIIDENTITY? Jangan ragu bertanya apa saja.",
         'sec-store':    "Menjelajahi toko? Saya bisa bantu menemukan karya yang tepat.",
@@ -10425,7 +10511,7 @@ function setMenuIcon(sectionId) {
 
     ctx2.clearRect(0, 0, W, H);
 
-    // Circle background — white with black outline
+    // Circle background - white with black outline
     ctx2.beginPath();
     ctx2.arc(cx, cy, R, 0, Math.PI * 2);
     ctx2.fillStyle = '#fff';
@@ -10435,7 +10521,7 @@ function setMenuIcon(sectionId) {
     ctx2.stroke();
 
     const s = avatarState;
-    // Eye parameters — smaller kotak hitam
+    // Eye parameters - smaller kotak hitam
     const eyeSize = W * 0.09;
     const eyeOX   = W * 0.185;
     const eyeY    = cy * 0.95;
@@ -10455,7 +10541,7 @@ function setMenuIcon(sectionId) {
     const sleepClose = s.sleepAmt;
     const finalOpenAmt = openAmt * (1 - sleepClose);
 
-    // Draw square eyes — black, smaller
+    // Draw square eyes - black, smaller
     [cx - eyeOX, cx + eyeOX].forEach(ex => {
       const eH = eyeSize * 2 * Math.max(finalOpenAmt, 0.04);
       const eW = eyeSize * 1.8;
@@ -10528,6 +10614,7 @@ function setMenuIcon(sectionId) {
   let _closeTimer   = null;
   let _fabSleepTimer = null;
   let _fabWakeTimer  = null;
+  let _fabHintTimer  = null;
   let _isSleeping   = false;
   let _isFabSleeping = false;
   let _shown        = false;
@@ -10535,6 +10622,44 @@ function setMenuIcon(sectionId) {
   // DOM refs untuk FAB sleep elements
   const fabZzz       = document.getElementById('aiiFabZzz');
   const fabWakeBubble = document.getElementById('aiiFabWakeBubble');
+  const fabHintBubble = document.getElementById('aiiFabHintBubble');
+  const fabHintText   = document.getElementById('aiiFabHintText');
+
+  // ── FAB hint bubble dekoratif: muncul ACAK saat idle, independen dari siklus tidur ──
+  const HINT_MIN_DELAY = 8000;   // jeda acak minimum sebelum muncul (ms)
+  const HINT_MAX_DELAY = 20000;  // jeda acak maksimum sebelum muncul (ms)
+  const HINT_SHOW_DUR  = 4000;   // lama bubble tampil (ms)
+
+  function scheduleFabHint() {
+    clearTimeout(_fabHintTimer);
+    const delay = HINT_MIN_DELAY + Math.random() * (HINT_MAX_DELAY - HINT_MIN_DELAY);
+    _fabHintTimer = setTimeout(showFabHint, delay);
+  }
+
+  function showFabHint() {
+    const fabVisible = fab.classList.contains('aii-fab-show');
+    const wakeBubbleActive = fabWakeBubble && fabWakeBubble.classList.contains('aii-fab-wake-show');
+    // Jangan tampil kalau FAB tidak terlihat (termasuk saat disembunyikan
+    // paksa oleh easter egg pintu / aii.entity), widget sedang terbuka,
+    // sedang tidur, atau wake bubble lain sedang aktif -- coba lagi nanti.
+    if (!fabVisible || fabForceHidden() || _shown || _isFabSleeping || wakeBubbleActive) {
+      scheduleFabHint();
+      return;
+    }
+    const lang = getLang();
+    fabHintText.textContent = lang === 'id' ? 'Butuh bantuan?' : 'Need help?';
+    fabHintBubble.classList.add('aii-fab-hint-show');
+    soundHintPoke();
+    setTimeout(() => {
+      fabHintBubble.classList.remove('aii-fab-hint-show');
+      scheduleFabHint();
+    }, HINT_SHOW_DUR);
+  }
+
+  function stopFabHint() {
+    clearTimeout(_fabHintTimer);
+    if (fabHintBubble) fabHintBubble.classList.remove('aii-fab-hint-show');
+  }
 
   // ── FAB sleep logic (saat widget TERTUTUP) ────────────────
   function enterFabSleep() {
@@ -10577,9 +10702,9 @@ function setMenuIcon(sectionId) {
     clearTimeout(_fabSleepTimer);
     clearTimeout(_fabWakeTimer);
     if (fabWakeBubble) fabWakeBubble.classList.remove('aii-fab-wake-show');
-    if (!_shown && fab.classList.contains('aii-fab-show')) {
+    if (!_shown && !fabForceHidden() && fab.classList.contains('aii-fab-show')) {
       _fabSleepTimer = setTimeout(() => {
-        if (!_shown) enterFabSleep();
+        if (!_shown && !fabForceHidden()) enterFabSleep();
       }, SLEEP_DELAY);
     }
   }
@@ -10592,7 +10717,7 @@ function setMenuIcon(sectionId) {
     }, AUTOCLOSE_DELAY);
   }
 
-  // (sleep logic dipindah ke FAB — lihat enterFabSleep/wakeUpFab di atas)
+  // (sleep logic dipindah ke FAB - lihat enterFabSleep/wakeUpFab di atas)
 
   // Reset idle on any user interaction with the widget
   function bindWidgetInteraction() {
@@ -10647,7 +10772,7 @@ function setMenuIcon(sectionId) {
 
   // ── Mutual hide: aiidentity widget ↔ aii.entity widget ───
   // When this widget (aiidentity) shows, hide aii.entity (aiVisitor)
-  // When aii.entity shows, hide aiidentity — handled via MutationObserver
+  // When aii.entity shows, hide aiidentity - handled via MutationObserver
   function hideAiiEntityWidget() {
     const visitor = document.getElementById('aiVisitor');
     if (visitor && visitor.classList.contains('visible')) {
@@ -10668,17 +10793,33 @@ function setMenuIcon(sectionId) {
     if (logoAlt) logoAlt.style.opacity = '1';
   }
 
+  // ── FAB force-hide: disembunyikan paksa saat easter egg pintu terbuka
+  //    atau saat widget aii.entity muncul. Independen dari state show/sleep. ──
+  function fabForceHidden() {
+    return fab.classList.contains('aii-fab-hide-override');
+  }
+  function setFabHidden(hidden) {
+    if (!fab) return;
+    if (hidden) fab.classList.add('aii-fab-hide-override');
+    else fab.classList.remove('aii-fab-hide-override');
+  }
+  // Jembatan global -- dipanggil oleh script easter egg pintu (terpisah)
+  // saat pintu terbuka/tertutup, supaya FAB ikut tersembunyi/muncul lagi.
+  window.aiiFabSetDoorHidden = setFabHidden;
+
   // Watch aii.entity visibility and react
   const _aiiEntityEl = document.getElementById('aiVisitor');
   if (_aiiEntityEl) {
     const _entityObs = new MutationObserver(() => {
       if (_aiiEntityEl.classList.contains('visible')) {
-        // aii.entity appeared → hide aiidentity widget, swap logo
+        // aii.entity appeared → hide aiidentity widget, swap logo, sembunyikan FAB
         if (_shown) hideWidget();
         setLogoForAiiEntity();
+        setFabHidden(true);
       } else {
-        // aii.entity hid → restore main logo
+        // aii.entity hid → restore main logo, tampilkan FAB lagi
         setLogoForAiidentity();
+        setFabHidden(false);
       }
     });
     _entityObs.observe(_aiiEntityEl, { attributes: true, attributeFilter: ['class'] });
@@ -10708,11 +10849,13 @@ function setMenuIcon(sectionId) {
     scrollChat();
     return b;
   }
+  let _typingStopped = false;
   function typeIntoBubble(text, cb) {
     resetIdleTimers();
     const thinkBubble = showThinking();
     const delay = Math.min(500 + text.length * 14, 1400);
     setTimeout(() => {
+      if (_typingStopped) { thinkBubble.remove(); return; }
       thinkBubble.remove();
       const b = document.createElement('div');
       b.className = 'aii-bubble';
@@ -10721,6 +10864,7 @@ function setMenuIcon(sectionId) {
       scrollChat();
       let i = 0;
       function step() {
+        if (_typingStopped) return; // widget sudah ditutup -- hentikan, jangan bunyikan tick lagi
         if (i <= text.length) {
           b.innerHTML = text.slice(0,i).replace(/\n/g,'<br>') + '<span class="aii-cursor"></span>';
           if (i > 0 && text[i-1] !== '\n') soundTypeTick();
@@ -10739,7 +10883,7 @@ function setMenuIcon(sectionId) {
   function runSeq(lines, onDone) {
     let i = 0;
     function next() {
-      if (i >= lines.length) { if (onDone) onDone(); return; }
+      if (_typingStopped || i >= lines.length) { if (onDone) onDone(); return; }
       typeIntoBubble(lines[i], () => { i++; setTimeout(next, 350); });
     }
     next();
@@ -10875,6 +11019,7 @@ function setMenuIcon(sectionId) {
   // ── Show / Hide widget ────────────────────────────────────
   function showWidget(isReturn) {
     if (_shown) return;
+    _typingStopped = false;
     // Stop FAB sleep state dulu
     clearTimeout(_fabSleepTimer);
     clearTimeout(_fabWakeTimer);
@@ -10923,6 +11068,7 @@ function setMenuIcon(sectionId) {
   }
 
   function hideWidget() {
+    _typingStopped = true; // langsung hentikan suara ketik, jangan tunggu animasi tutup
     soundDismiss();
     widget.classList.remove('aii-visible');
     clearTimeout(_closeTimer);
@@ -10943,6 +11089,7 @@ function setMenuIcon(sectionId) {
       }
       // Mulai FAB sleep timer
       resetFabSleepTimer();
+      scheduleFabHint();
     }, 600);
   }
 
@@ -10953,6 +11100,7 @@ function setMenuIcon(sectionId) {
     soundFabOpen();
     clearTimeout(_fabSleepTimer);
     clearTimeout(_fabWakeTimer);
+    stopFabHint();
     _isFabSleeping = false;
     fab.classList.remove('aii-fab-sleeping');
     if (fabZzz) fabZzz.classList.remove('aii-fab-zzz-show');
@@ -10985,6 +11133,7 @@ function setMenuIcon(sectionId) {
         fab.classList.add('aii-fab-show');
         startAvatarLoop();
         resetFabSleepTimer();
+        scheduleFabHint();
         return;
       }
       startAvatarLoop();
