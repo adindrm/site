@@ -106,6 +106,117 @@
       color: #111; text-transform: uppercase;
     }
 
+    /* ── LANG PICKER SCREEN ── */
+    #langPickerScreen {
+      position: fixed; inset: 0;
+      z-index: 9500;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(18px) saturate(1.2);
+      -webkit-backdrop-filter: blur(18px) saturate(1.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    #langPickerScreen.lp-show { opacity: 1; pointer-events: all; }
+    #langPickerScreen.lp-exit { opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
+    .lp-inner {
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+      transform: translateY(20px);
+      transition: transform 0.7s cubic-bezier(0.34,1.2,0.64,1);
+    }
+    #langPickerScreen.lp-show .lp-inner { transform: translateY(0); }
+    .lp-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(7px, 0.8vw, 9px);
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: lpFadeUp 0.5s ease 0.4s both;
+    }
+    .lp-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(22px, 4vw, 52px);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 48px;
+      text-align: center;
+      line-height: 1.1;
+      opacity: 0;
+      animation: lpFadeUp 0.6s ease 0.55s both;
+    }
+    .lp-divider {
+      width: 40px; height: 1px;
+      background: rgba(255,255,255,0.4);
+      margin: 0 auto 48px;
+      transform: scaleX(0);
+      animation: lpScaleIn 0.5s ease 0.7s both;
+    }
+    .lp-choices {
+      display: flex; gap: 20px;
+      opacity: 0;
+      animation: lpFadeUp 0.6s ease 0.85s both;
+    }
+    .lp-btn {
+      position: relative;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(9px, 1vw, 11px);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #fff;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.6);
+      padding: 18px 44px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: color 0.25s ease, transform 0.2s ease;
+    }
+    .lp-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: #fff;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      z-index: 0;
+    }
+    .lp-btn:hover::before { transform: translateY(0); }
+    .lp-btn:hover { color: #111; }
+    .lp-btn span { position: relative; z-index: 1; }
+    .lp-btn:active { transform: scale(0.97); }
+    .lp-btn.lp-selected { background: #fff; color: #111; animation: lpBtnPulse 0.35s ease both; }
+    @keyframes lpBtnPulse {
+      0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); }
+    }
+    #langPickerScreen::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px);
+      pointer-events: none; z-index: 1;
+    }
+    .lp-inner { position: relative; z-index: 2; }
+    @keyframes lpFadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes lpScaleIn {
+      from { transform: scaleX(0); } to { transform: scaleX(1); }
+    }
+    .lp-pixel {
+      position: fixed; width: 5px; height: 5px;
+      background: #fff; border-radius: 1px;
+      pointer-events: none; z-index: 9600;
+      animation: lpPixelBurst 0.55s ease-out both;
+    }
+    @keyframes lpPixelBurst {
+      0% { opacity: 1; transform: translate(0,0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.2); }
+    }
+
 
 
     /* ══ RANDOM DOOR ══ */
@@ -249,8 +360,8 @@
     /* Door knob — REMOVED */
     /* ── TEAM BLOCK (dalam sec-contact) ──────────────────────── */
   .team-block {
-    margin-top: 50px;
-    padding-top: 50px;
+    margin-top: 40px;
+    padding-top: 32px;
     border-top: 1px solid #e8e8e8;
     width: 100%;
   }
@@ -263,7 +374,7 @@
   }
   .team-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 24px 16px;
     justify-items: center;
     width: 100%;
@@ -287,7 +398,7 @@
   .team-member:hover { transform: translateY(-4px); }
   .team-avatar-wrap {
     width: 64px; height: 64px;
-    border-radius: 50%;S
+    border-radius: 50%;
     overflow: hidden;
     background: #eee;
     border: 2px solid #111;
@@ -300,10 +411,10 @@
     border-radius: 50%;
   }
   .team-member-name {
-    font-size: 7px;
+    font-size: 9px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgb(255, 255, 255);
+    color: #111;
     font-weight: 600;
     text-align: center;
   }
@@ -1218,66 +1329,66 @@
       pointer-events: all;
     }
 
-    .lang-switch { display: inline-block; }
-    .lang-switch input { display: none; }
-    .lang-switch {
-      --sw: 44px;
-      --sh: 22px;
-      --cd: 18px;
-      --off: calc((var(--sh) - var(--cd)) / 2);
-    }
-    .lang-slider {
-      width: var(--sw);
-      height: var(--sh);
-      background: #111;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.28s cubic-bezier(0.27,0.2,0.25,1.51);
-    }
-    /* unchecked = EN (kiri, gelap), checked = ID (kanan, abu) */
-    .lang-switch input:checked + .lang-slider { background: #bbb; }
-    .lang-circle {
-      width: var(--cd);
-      height: var(--cd);
-      background: #fff;
+    /* ── DARK/LIGHT MODE TOGGLE ── */
+    .theme-toggle-wrap { display: flex; align-items: center; margin-right: 10px; }
+    .theme-toggle-btn {
+      width: 32px; height: 32px;
       border-radius: 50%;
-      position: absolute;
-      left: var(--off);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-      transition: left 0.28s cubic-bezier(0.27,0.2,0.25,1.51);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .lang-switch input:checked + .lang-slider .lang-circle {
-      left: calc(var(--sw) - var(--cd) - var(--off));
-    }
-    /* text inside circle */
-    .lang-circle-text {
-      font-family: 'Cinzel', serif;
-      font-size: 6px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      background: none;
+      border: 1px solid rgba(0,0,0,0.2);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s, transform 0.25s;
       color: #111;
-      position: absolute;
-      line-height: 1;
-      transition: opacity 0.15s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
-      user-select: none;
+      padding: 0;
+      outline: none;
     }
-    /* unchecked = EN tampil */
-    .lang-circle-text.en { opacity: 1; transform: scale(1); }
-    .lang-circle-text.id { opacity: 0; transform: scale(0.5); }
-    /* checked = ID tampil */
-    .lang-switch input:checked + .lang-slider .lang-circle .lang-circle-text.en {
-      opacity: 0; transform: scale(0.5);
+    .theme-toggle-btn:hover { background: rgba(0,0,0,0.07); transform: scale(1.12) rotate(12deg); }
+    .theme-toggle-btn svg { width: 14px; height: 14px; display: block; stroke: currentColor; }
+    /* Dark mode — icon dan border putih */
+    body.dark-mode .theme-toggle-btn {
+      color: #fff;             /* Membuat warna matahari menjadi putih */
+      border-color: #333;      /* Border tombol bulatnya */
     }
-    .lang-switch input:checked + .lang-slider .lang-circle .lang-circle-text.id {
-      opacity: 1; transform: scale(1);
-    }
+    body.dark-mode .theme-toggle-btn svg { stroke: #000000; }
+    body.dark-mode .theme-toggle-btn:hover { background: rgba(255,255,255,0.12); }
+    .theme-toggle-btn svg { stroke: #111; }
+    /* Dark mode global */
+    body.dark-mode { background: #0a0a0a; color: #e8e8e8; }
+    body.dark-mode #siteHeader { background: rgba(10,10,10,0.92); border-bottom-color: rgba(255,255,255,0.08); }
+    body.dark-mode #mainPage { background: #0a0a0a; }
+    body.dark-mode .section { background: #0a0a0a; color: #e8e8e8; }
+    body.dark-mode #sec-hero { background: #0a0a0a; }
+    body.dark-mode #sec-about { background: #111; }
+    body.dark-mode .section-label { color: #666; }
+    body.dark-mode .section-title { color: #e8e8e8; }
+    body.dark-mode .hero-eyebrow-inner { color: #888; }
+    body.dark-mode .hero-name-inner { color: #e8e8e8; }
+    body.dark-mode .hero-tagline-inner { color: #aaa; }
+    body.dark-mode .hero-divider { background: #333; }
+    body.dark-mode .hero-cta { color: #e8e8e8; border-color: #e8e8e8; }
+    body.dark-mode .hero-cta:hover { background: #e8e8e8; color: #0a0a0a; }
+    body.dark-mode .menu-btn { color: #e8e8e8; }
+    body.dark-mode .overlay-menu { background: #0d0d0d; }
+    body.dark-mode .menu-link { color: #ccc; }
+    body.dark-mode .service-card { border-color: #222; background: #111; }
+    body.dark-mode .service-title { color: #e8e8e8; }
+    body.dark-mode .service-desc { color: #888; }
+    body.dark-mode .work-item { background: #111; }
+    body.dark-mode .contact-email { color: #e8e8e8; }
+    body.dark-mode .social-link { color: #aaa; border-color: #333; }
+    body.dark-mode .social-link:hover { color: #e8e8e8; border-color: #e8e8e8; }
+    body.dark-mode .team-block { border-top-color: #222; }
+    body.dark-mode .team-block-label { color: #666; }
+    body.dark-mode .team-member-name { color: #e8e8e8; }
+    body.dark-mode .team-avatar-wrap { border-color: #e8e8e8; background: #222; }
+    body.dark-mode .vline { background: linear-gradient(to bottom, transparent 0%, #444 25%, #444 75%, transparent 100%); }
+    body.dark-mode .site-footer { color: #555; }
+    body.dark-mode #langPickerScreen { background: rgba(0,0,0,0.01); }
+    body.dark-mode .lp-title { color: #e8e8e8; }
+    body.dark-mode .lp-btn { color: #e8e8e8; border-color: #e8e8e8; }
+    body.dark-mode .lp-btn::before { background: #e8e8e8; }
+    body.dark-mode .lp-btn:hover { color: #0a0a0a; }
 
   /* ── STORE ── */
   #sec-store .section-inner { padding-top: 80px; padding-bottom: 60px; display: flex; flex-direction: column; gap: 0; }
@@ -1444,18 +1555,29 @@
     <div id="headerTitle"></div>
   </div>
   <div id="headerRight">
-    <div class="lang-toggle-wrap" id="langToggleWrap">
-      <label class="lang-switch">
-        <input type="checkbox" id="langSwitch">
-        <div class="lang-slider">
-          <div class="lang-circle">
-            <span class="lang-circle-text en">EN</span>
-            <span class="lang-circle-text id">ID</span>
-          </div>
-        </div>
-      </label>
+    <div class="theme-toggle-wrap" id="langToggleWrap">
+      <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle dark/light mode" onclick="toggleTheme()">
+        <!-- Sun icon (shown in dark mode) -->
+        <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" 
+       stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"
+       style="display:none;">
+          <circle cx="12" cy="12" r="4"/>
+          <line x1="12" y1="2" x2="12" y2="5"/>
+          <line x1="12" y1="19" x2="12" y2="22"/>
+          <line x1="2" y1="12" x2="5" y2="12"/>
+          <line x1="19" y1="12" x2="22" y2="12"/>
+          <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/>
+          <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+          <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/>
+          <line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
+        </svg>
+        <!-- Moon icon (shown in light mode) -->
+        <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
     </div>
-        <label for="nav-toggle" class="menu-btn" aria-label="Menu">
+    <label for="nav-toggle" class="menu-btn" aria-label="Menu">
       <i id="menuPageIcon" class="fa-solid fa-house"></i>
     </label>
   </div>
@@ -1509,6 +1631,19 @@
   </div>
 </div>
 
+
+<!-- Lang Picker Screen -->
+<div id="langPickerScreen">
+  <div class="lp-inner">
+    <p class="lp-eyebrow">Select Your Language</p>
+    <h2 class="lp-title">Choose<br>Language</h2>
+    <div class="lp-divider"></div>
+    <div class="lp-choices">
+      <button class="lp-btn" id="lpBtnEN" onclick="pickLang('en')"><span>English</span></button>
+      <button class="lp-btn" id="lpBtnID" onclick="pickLang('id')"><span>Indonesia</span></button>
+    </div>
+  </div>
+</div>
 
 <!-- Welcome overlay -->
 <div id="welcomeOverlay"><span id="welcomeText">Welcome</span></div>
@@ -1864,9 +1999,9 @@
 
             <div class="team-member" onclick="openTeamCard(0)">
               <div class="team-avatar-wrap">
-                <img src="https://drive.google.com/uc?export=view&id=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlso" alt="Adi Indra" onerror="this.src='https://ui-avatars.com/api/?name=Andi+Pratama&background=111&color=fff&size=80'"/>
+                <img src="https://drive.google.com/uc?export=view&id=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlso" alt="Adi Indra " onerror="this.src='https://ui-avatars.com/api/?name=Andi+Pratama&background=111&color=fff&size=80'"/>
               </div>
-              <div class="team-member-name">Adi Indra</div>
+              <div class="team-member-name">Adi Indra </div>
               <div class="team-member-role">Creative Director</div>
             </div>
 
@@ -1919,6 +2054,191 @@
    HERO VERTICAL LINES
 ══════════════════════════════════ */
 (function() {
+  const screen = document.getElementById('langPickerScreen');
+  if (!screen) return;
+
+  // Selalu tampilkan picker di awal — bahasa dipilih setiap kunjungan
+  // (hapus saved check agar picker selalu muncul)
+  window._langPickerDone = false;
+  window._langPickerCallback = null;
+
+  // Tampilkan picker segera
+  setTimeout(() => {
+    screen.classList.add('lp-show');
+    _lpSound('appear');
+  }, 300);
+
+  // Suara picker
+  function _lpSound(type) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const t = ctx.currentTime;
+      if (type === 'appear') {
+        [0, 0.18].forEach((delay, i) => {
+          const osc = ctx.createOscillator();
+          const g   = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(i === 0 ? 220 : 330, t + delay);
+          g.gain.setValueAtTime(0, t + delay);
+          g.gain.linearRampToValueAtTime(0.06, t + delay + 0.03);
+          g.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.18);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(t + delay); osc.stop(t + delay + 0.2);
+        });
+        setTimeout(() => ctx.close(), 1000);
+      } else if (type === 'hover') {
+        const osc = ctx.createOscillator();
+        const g   = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(480, t);
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.05, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t); osc.stop(t + 0.12);
+        setTimeout(() => ctx.close(), 500);
+      } else if (type === 'select') {
+        [0, 0.1, 0.2].forEach((delay, i) => {
+          const osc = ctx.createOscillator();
+          const g   = ctx.createGain();
+          osc.type = 'square';
+          const freqs = [330, 440, 660];
+          osc.frequency.setValueAtTime(freqs[i], t + delay);
+          g.gain.setValueAtTime(0, t + delay);
+          g.gain.linearRampToValueAtTime(0.08, t + delay + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.14);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(t + delay); osc.stop(t + delay + 0.16);
+        });
+        setTimeout(() => ctx.close(), 1000);
+      }
+    } catch(e) {}
+  }
+
+  // Hover sound pada buttons
+  document.querySelectorAll('.lp-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', () => _lpSound('hover'));
+  });
+
+  // Pixel burst animasi
+  function spawnPixels(x, y) {
+    for (let i = 0; i < 18; i++) {
+      const px = document.createElement('div');
+      px.className = 'lp-pixel';
+      const angle = (i / 18) * Math.PI * 2;
+      const dist  = 40 + Math.random() * 90;
+      px.style.left = x + 'px';
+      px.style.top  = y + 'px';
+      px.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      px.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+      px.style.animationDuration = (0.4 + Math.random() * 0.2) + 's';
+      document.body.appendChild(px);
+      setTimeout(() => px.remove(), 700);
+    }
+  }
+
+  // _proceedCallback dipanggil dari welcome flow jika picker masih aktif
+  window._langPickerDone = false;
+  window._langPickerCallback = null;
+
+  window.pickLang = function(lang) {
+    if (window._langPickerDone) return;
+    window._langPickerDone = true;
+
+    // Simpan pilihan
+    localStorage.setItem('aiidentity_lang', lang);
+
+    // Visual: button selected
+    const btn = document.getElementById(lang === 'en' ? 'lpBtnEN' : 'lpBtnID');
+    btn.classList.add('lp-selected');
+
+    // Pixel burst
+    const r = btn.getBoundingClientRect();
+    spawnPixels(r.left + r.width / 2, r.top + r.height / 2);
+
+    // Suara select
+    _lpSound('select');
+
+    // Apply bahasa
+    if (typeof animateLangSwitch === 'function') {
+      animateLangSwitch(lang);
+    } else if (typeof applyLang === 'function') {
+      applyLang(lang);
+    }
+    const toggle = document.getElementById('langSwitch');
+    if (toggle) toggle.checked = (lang === 'id');
+
+    // Exit animation
+    setTimeout(() => {
+      screen.classList.add('lp-exit');
+      setTimeout(() => {
+        screen.style.display = 'none';
+        // Panggil callback dari welcome flow jika ada
+        if (typeof window._langPickerCallback === 'function') {
+          window._langPickerCallback();
+          window._langPickerCallback = null;
+        }
+      }, 520);
+    }, 380);
+  };
+})();
+
+/* ══════════════════════════════════
+   DARK / LIGHT MODE
+══════════════════════════════════ */
+(function() {
+  const saved = localStorage.getItem('aiidentity_theme') || 'light';
+
+  function applyTheme(mode, animate) {
+    const sun  = document.getElementById('iconSun');
+    const moon = document.getElementById('iconMoon');
+    if (mode === 'dark') {
+      document.body.classList.add('dark-mode');
+      if (sun)  sun.style.display  = 'block';
+      if (moon) moon.style.display = 'none';
+    } else {
+      document.body.classList.remove('dark-mode');
+      if (sun)  sun.style.display  = 'none';
+      if (moon) moon.style.display = 'block';
+    }
+    if (animate) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.style.transform = 'scale(0.8) rotate(20deg)';
+        setTimeout(() => { btn.style.transform = ''; }, 200);
+      }
+    }
+  }
+
+  // Apply theme class segera (sebelum DOM penuh) agar tidak flicker
+  if (saved === 'dark') document.body.classList.add('dark-mode');
+
+  // Apply icon setelah DOM siap
+  window.addEventListener('DOMContentLoaded', function() {
+    applyTheme(saved, false);
+  });
+  // Fallback jika DOMContentLoaded sudah lewat
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(() => applyTheme(saved, false), 0);
+  }
+
+  window.toggleTheme = function() {
+    const isDark = document.body.classList.contains('dark-mode');
+    const next = isDark ? 'light' : 'dark';
+    applyTheme(next, true);
+    localStorage.setItem('aiidentity_theme', next);
+  };
+})();
+
+// Dummy langSwitch agar kode lama tidak error
+(function() {
+  if (!document.getElementById('langSwitch')) {
+    const inp = document.createElement('input');
+    inp.type = 'checkbox'; inp.id = 'langSwitch'; inp.style.display = 'none';
+    document.body.appendChild(inp);
+  }
+})();
+(function() {
   const container = document.getElementById('vlineContainer');
   if (!container) return;
   const LINE_COUNT = 5;
@@ -1967,7 +2287,7 @@
 })();
 
 /* ══════════════════════════════════
-   AUDIO
+   LANG PICKER
 ══════════════════════════════════ */
 let audioCtx = null;
 function initAudio() { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -3097,18 +3417,27 @@ function showLogo() {
               wOverlay.style.transition = 'opacity 0.8s ease';
               wOverlay.style.opacity = '0';
 
-              // setelah welcome hilang, munculkan mainPage + nav
-              setTimeout(() => {
+              function proceedToMain() {
                 const mainPage = document.getElementById('mainPage');
                 mainPage.classList.add('visible');
                 playSoundPageReveal();
                 showBlobMenu();
-
-                // Tampilkan hero sebagai halaman pertama
                 setTimeout(() => {
                   navigateToPage('sec-hero', false);
                 }, 120);
+              }
 
+              setTimeout(() => {
+                // Jika lang picker masih aktif, tunggu via callback
+                const picker = document.getElementById('langPickerScreen');
+                const pickerActive = picker &&
+                  picker.style.display !== 'none' &&
+                  !window._langPickerDone;
+                if (pickerActive) {
+                  window._langPickerCallback = proceedToMain;
+                } else {
+                  proceedToMain();
+                }
               }, 850);
             }, 1500);
           }, 450);
@@ -9375,10 +9704,9 @@ function setMenuIcon(sectionId) {
     <div id="aiiWakeBubble"></div>
     <div id="aiiChatArea"></div>
     <div id="aiiReplyBox"></div>
-    <div id="aiiInputRow" style="display:none">
-      <input id="aiiTextField" type="text" placeholder="ketik pertanyaanmu..." autocomplete="off" spellcheck="false"/>
-      <button id="aiiSendBtn" title="Kirim">➤</button>
-    </div>
+    <input id="aiiTextField" type="text" style="display:none" autocomplete="off"/>
+    <button id="aiiSendBtn" style="display:none">➤</button>
+    <div id="aiiInputRow" style="display:none!important"></div>
   </div>
 </div>
 
@@ -9489,8 +9817,7 @@ function setMenuIcon(sectionId) {
 
   // ── Language ──────────────────────────────────────────────
   function getLang() {
-    const sw = document.getElementById('langSwitch');
-    return (sw && sw.checked) ? 'id' : 'en';
+    return localStorage.getItem('aiidentity_lang') || 'en';
   }
 
   // ── Content bilingual ─────────────────────────────────────
@@ -9501,10 +9828,10 @@ function setMenuIcon(sectionId) {
       returning: "Welcome back! Still need help?",
       wakePrompt: "Psst... need help with something? 👋",
       firstChoices: [
-        { label: "Design services",   key: "services" },
-        { label: "Portfolio / works", key: "works"    },
-        { label: "Studio & pricing",  key: "studio"   },
-        { label: "Browse on my own",  key: "browse"   },
+        { label: "Design services",   key: "services"  },
+        { label: "Portfolio / works", key: "works"     },
+        { label: "Studio & pricing",  key: "studio"    },
+        { label: "Change language",   key: "changelang"},
       ],
       branches: {
         services: {
@@ -9552,6 +9879,10 @@ function setMenuIcon(sectionId) {
           nav: { label: "See Motion Works →", section: "sec-works" },
           followup: [{ label: "I'm interested", key: "contact" }]
         },
+        changelang: {
+          seq: ["Sure! Switching to Bahasa Indonesia."],
+          nav: null, followup: null, end: false, switchLang: 'id'
+        },
         contact: {
           seq: ["Great! Let's connect.", "You can reach out via email — or head to the contact section."],
           nav: { label: "Go to Contact →", section: "sec-contact" },
@@ -9574,10 +9905,10 @@ function setMenuIcon(sectionId) {
       returning: "Selamat datang kembali! Masih butuh bantuan?",
       wakePrompt: "Psst... ada yang bisa saya bantu? 👋",
       firstChoices: [
-        { label: "Jasa desain",          key: "services" },
-        { label: "Portofolio / karya",   key: "works"    },
-        { label: "Studio & harga",       key: "studio"   },
-        { label: "Jelajah sendiri dulu", key: "browse"   },
+        { label: "Jasa desain",          key: "services"   },
+        { label: "Portofolio / karya",   key: "works"      },
+        { label: "Studio & harga",       key: "studio"     },
+        { label: "Ganti bahasa",         key: "changelang" },
       ],
       branches: {
         services: {
@@ -9624,6 +9955,10 @@ function setMenuIcon(sectionId) {
           seq: ["Grafis Gerak mencakup logo animasi, sistem identitas gerak, animasi media sosial, dan title sequence.", "Gerakan yang membuat merekmu tak terlupakan."],
           nav: { label: "Lihat Karya Motion →", section: "sec-works" },
           followup: [{ label: "Saya tertarik", key: "contact" }]
+        },
+        changelang: {
+          seq: ["Oke! Beralih ke Bahasa Inggris."],
+          nav: null, followup: null, end: false, switchLang: 'en'
         },
         contact: {
           seq: ["Bagus! Mari terhubung.", "Kamu bisa menghubungi via email — atau langsung ke bagian kontak."],
@@ -10028,6 +10363,23 @@ function setMenuIcon(sectionId) {
     if (!branch) return;
     setTimeout(() => {
       runSeq(branch.seq, () => {
+        // Handle language switch
+        if (branch.switchLang) {
+          const newLang = branch.switchLang;
+          localStorage.setItem('aiidentity_lang', newLang);
+          const toggle = document.getElementById('langSwitch');
+          if (toggle) toggle.checked = (newLang === 'id');
+          if (typeof animateLangSwitch === 'function') animateLangSwitch(newLang);
+          else if (typeof applyLang === 'function') applyLang(newLang);
+          // Refresh widget dengan bahasa baru
+          setTimeout(() => {
+            const c2 = content[newLang];
+            statusText.textContent = c2.status;
+            clearReplyBox();
+            showChoices(c2.firstChoices);
+          }, 600);
+          return;
+        }
         if (branch.nav || branch.followup) {
           replyBox.innerHTML = '';
           if (branch.nav) showNavBtn(branch.nav);
@@ -10035,7 +10387,6 @@ function setMenuIcon(sectionId) {
           else replyBox.style.display = branch.nav ? 'flex' : 'none';
         }
         if (branch.end) {
-          setTimeout(() => { inputRow.style.display = 'none'; }, 600);
           setTimeout(hideWidget, 5000);
         }
         const sess = getSession() || {};
@@ -10131,8 +10482,7 @@ function setMenuIcon(sectionId) {
     const lang = getLang();
     const c = content[lang];
     statusText.textContent = c.status;
-    textField.placeholder = c.inputPlaceholder;
-    inputRow.style.display = 'flex';
+    inputRow.style.display = 'none'; // input selalu tersembunyi
 
     widget.classList.add('aii-visible');
     soundAppear();
@@ -10203,31 +10553,42 @@ function setMenuIcon(sectionId) {
   function waitForMainPageAndShow() {
     const mainPageEl = document.getElementById('mainPage');
     if (!mainPageEl) return;
-    const sess = getSession();
-    if (sess && sess.interacted) {
-      fab.classList.add('aii-fab-show');
+
+    function doShow() {
+      // Tunggu lang picker selesai dulu
+      if (!window._langPickerDone) {
+        setTimeout(doShow, 100);
+        return;
+      }
+      const sess = getSession();
+      if (sess && sess.interacted) {
+        fab.classList.add('aii-fab-show');
+        startAvatarLoop();
+        resetFabSleepTimer();
+        return;
+      }
       startAvatarLoop();
-      resetFabSleepTimer();
+      setTimeout(() => showWidget(false), 3500);
+    }
+
+    const sess = getSession();
+    if (mainPageEl.classList.contains('visible')) {
+      doShow();
       return;
     }
     const obs = new MutationObserver(() => {
       if (mainPageEl.classList.contains('visible')) {
         obs.disconnect();
-        startAvatarLoop();
-        setTimeout(() => showWidget(false), 3500);
+        doShow();
       }
     });
     obs.observe(mainPageEl, { attributes: true, attributeFilter: ['class'] });
-    if (mainPageEl.classList.contains('visible')) {
-      startAvatarLoop();
-      setTimeout(() => showWidget(false), 3500);
-    }
   }
 
   // ── TEAM CARD ─────────────────────────────────────────────
   const _teamData = [
     {
-      name: 'Adi Indra',
+      name: 'Adi Indra ',
       role: 'Creative Director',
       img: 'https://ui-avatars.com/api/?name=Andi+Pratama&background=111&color=fff&size=200',
       socials: [
