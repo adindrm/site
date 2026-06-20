@@ -414,7 +414,7 @@
     font-size: 9px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #111;
+    color: #fff;
     font-weight: 600;
     text-align: center;
   }
@@ -496,7 +496,7 @@
 
     /* ── HERO ── */
     #sec-hero { background: #fff; position: relative; }
-    #sec-hero > .section-inner { align-items: center; text-align: center; position: relative; z-index: 2; }
+    #sec-hero > .section-inner { align-items: center; text-align: center; position: relative; z-index: 2; padding-top: 22vh; }
     .hero-scroll-hint { position: absolute; z-index: 2; }
     .hero-eyebrow {
       font-family: 'Cinzel', serif; font-size: clamp(7px, 0.9vw, 10px);
@@ -1329,7 +1329,55 @@
       pointer-events: all;
     }
 
-    /* ── DARK/LIGHT MODE TOGGLE ── */
+    /* ── THEME TRANSITION ── */
+    #themeTransitionOverlay {
+      position: fixed; inset: 0;
+      z-index: 99990;
+      pointer-events: none;
+    }
+    /* Scanline sweep */
+    #themeTransitionOverlay .sweep-line {
+      position: absolute; left: 0; right: 0;
+      height: 3px;
+      background: currentColor;
+      top: 0;
+      transform: translateY(-100%);
+      opacity: 0;
+      animation: sweepDown 0.5s cubic-bezier(0.4,0,0.6,1) both;
+    }
+    @keyframes sweepDown {
+      0%   { transform: translateY(-100%); opacity: 0; }
+      8%   { opacity: 1; }
+      90%  { opacity: 0.8; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+    /* Pixel grid flash */
+    #themeTransitionOverlay .pixel-flash {
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 3px, currentColor 3px, currentColor 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 3px, currentColor 3px, currentColor 4px);
+      opacity: 0;
+      animation: pixelFlash 0.5s ease both;
+    }
+    @keyframes pixelFlash {
+      0%   { opacity: 0; }
+      10%  { opacity: 0.22; }
+      50%  { opacity: 0.08; }
+      100% { opacity: 0; }
+    }
+    /* Vignette pulse */
+    #themeTransitionOverlay .vignette-pulse {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 20%, currentColor 100%);
+      opacity: 0;
+      animation: vignettePulse 0.55s ease both;
+    }
+    @keyframes vignettePulse {
+      0%   { opacity: 0; }
+      15%  { opacity: 0.55; }
+      100% { opacity: 0; }
+    }
     .theme-toggle-wrap { display: flex; align-items: center; margin-right: 10px; }
     .theme-toggle-btn {
       width: 32px; height: 32px;
@@ -1359,6 +1407,7 @@
     body.dark-mode #mainPage { background: #0a0a0a; }
     body.dark-mode .section { background: #0a0a0a; color: #e8e8e8; }
     body.dark-mode #sec-hero { background: #0a0a0a; }
+    body.dark-mode #sec-works { background: #111; }
     body.dark-mode #sec-about { background: #111; }
     body.dark-mode .section-label { color: #666; }
     body.dark-mode .section-title { color: #e8e8e8; }
@@ -1632,6 +1681,9 @@
 </div>
 
 
+<!-- Theme transition overlay -->
+<div id="themeTransitionOverlay"></div>
+
 <!-- Lang Picker Screen -->
 <div id="langPickerScreen">
   <div class="lp-inner">
@@ -1639,8 +1691,8 @@
     <h2 class="lp-title">Choose<br>Language</h2>
     <div class="lp-divider"></div>
     <div class="lp-choices">
-      <button class="lp-btn" id="lpBtnEN" onclick="pickLang('en')"><span>English</span></button>
-      <button class="lp-btn" id="lpBtnID" onclick="pickLang('id')"><span>Indonesia</span></button>
+      <button class="lp-btn" id="lpBtnEN" onclick="event.stopPropagation(); pickLang('en')"><span>English</span></button>
+      <button class="lp-btn" id="lpBtnID" onclick="event.stopPropagation(); pickLang('id')"><span>Indonesia</span></button>
     </div>
   </div>
 </div>
@@ -2189,44 +2241,107 @@
 (function() {
   const saved = localStorage.getItem('aiidentity_theme') || 'light';
 
-  function applyTheme(mode, animate) {
-    const sun  = document.getElementById('iconSun');
-    const moon = document.getElementById('iconMoon');
+  function applyTheme(mode) {
     if (mode === 'dark') {
       document.body.classList.add('dark-mode');
-      if (sun)  sun.style.display  = 'block';
-      if (moon) moon.style.display = 'none';
     } else {
       document.body.classList.remove('dark-mode');
-      if (sun)  sun.style.display  = 'none';
-      if (moon) moon.style.display = 'block';
-    }
-    if (animate) {
-      const btn = document.getElementById('themeToggleBtn');
-      if (btn) {
-        btn.style.transform = 'scale(0.8) rotate(20deg)';
-        setTimeout(() => { btn.style.transform = ''; }, 200);
-      }
     }
   }
 
-  // Apply theme class segera (sebelum DOM penuh) agar tidak flicker
+  // Apply segera agar tidak flicker
   if (saved === 'dark') document.body.classList.add('dark-mode');
-
-  // Apply icon setelah DOM siap
-  window.addEventListener('DOMContentLoaded', function() {
-    applyTheme(saved, false);
-  });
-  // Fallback jika DOMContentLoaded sudah lewat
+  window.addEventListener('DOMContentLoaded', () => applyTheme(saved));
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    setTimeout(() => applyTheme(saved, false), 0);
+    setTimeout(() => applyTheme(saved), 0);
+  }
+
+  // Suara gamer
+  function _themeSound(toDark) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const t = ctx.currentTime;
+      if (toDark) {
+        // Dark: nada turun + glitch pixel
+        [520, 380, 220, 160].forEach((f, i) => {
+          const osc = ctx.createOscillator(), g = ctx.createGain();
+          osc.type = i % 2 === 0 ? 'square' : 'sawtooth';
+          osc.frequency.setValueAtTime(f, t + i * 0.055);
+          g.gain.setValueAtTime(0, t + i * 0.055);
+          g.gain.linearRampToValueAtTime(0.07, t + i * 0.055 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.055 + 0.1);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(t + i * 0.055); osc.stop(t + i * 0.055 + 0.12);
+        });
+        // Low thud
+        const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(80, t + 0.18);
+        o2.frequency.exponentialRampToValueAtTime(40, t + 0.38);
+        g2.gain.setValueAtTime(0, t + 0.18);
+        g2.gain.linearRampToValueAtTime(0.18, t + 0.20);
+        g2.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.start(t + 0.18); o2.stop(t + 0.45);
+      } else {
+        // Light: nada naik + bright ping
+        [160, 280, 440, 660].forEach((f, i) => {
+          const osc = ctx.createOscillator(), g = ctx.createGain();
+          osc.type = i % 2 === 0 ? 'square' : 'sine';
+          osc.frequency.setValueAtTime(f, t + i * 0.055);
+          g.gain.setValueAtTime(0, t + i * 0.055);
+          g.gain.linearRampToValueAtTime(0.06, t + i * 0.055 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.055 + 0.1);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(t + i * 0.055); osc.stop(t + i * 0.055 + 0.12);
+        });
+        // Bright ting
+        const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(880, t + 0.2);
+        o2.frequency.exponentialRampToValueAtTime(1200, t + 0.35);
+        g2.gain.setValueAtTime(0, t + 0.2);
+        g2.gain.linearRampToValueAtTime(0.1, t + 0.22);
+        g2.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.start(t + 0.2); o2.stop(t + 0.48);
+      }
+      setTimeout(() => ctx.close(), 1200);
+    } catch(e) {}
+  }
+
+  // Animasi sweep + pixel flash
+  function _themeAnimate(toDark, onMid) {
+    const overlay = document.getElementById('themeTransitionOverlay');
+    if (!overlay) { onMid(); return; }
+    overlay.style.color = toDark ? '#000' : '#fff';
+    overlay.innerHTML = `
+      <div class="vignette-pulse"></div>
+      <div class="pixel-flash"></div>
+      <div class="sweep-line"></div>
+    `;
+    // Tombol spin
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) {
+      btn.style.transition = 'transform 0.35s cubic-bezier(0.34,1.4,0.64,1)';
+      btn.style.transform  = 'scale(0) rotate(180deg)';
+      setTimeout(() => {
+        btn.style.transform = 'scale(1) rotate(0deg)';
+        setTimeout(() => { btn.style.transition = ''; btn.style.transform = ''; }, 350);
+      }, 200);
+    }
+    // Apply tema di tengah sweep
+    setTimeout(() => onMid(), 190);
+    // Bersihkan
+    setTimeout(() => { overlay.innerHTML = ''; }, 520);
   }
 
   window.toggleTheme = function() {
     const isDark = document.body.classList.contains('dark-mode');
-    const next = isDark ? 'light' : 'dark';
-    applyTheme(next, true);
+    const next   = isDark ? 'light' : 'dark';
     localStorage.setItem('aiidentity_theme', next);
+    _themeSound(!isDark);
+    _themeAnimate(!isDark, () => applyTheme(next));
   };
 })();
 
@@ -5777,7 +5892,7 @@ function setMenuIcon(sectionId) {
           vx:      (Math.random() - 0.5) * 4.5,
           vy:      -(1.2 + Math.random() * 4.0),
           size,
-          color:   '#111',
+          color:   document.body.classList.contains('dark-mode') ? '#fff' : '#111',
           alpha:   1,
           gravity: 0.08 + Math.random() * 0.10,
           rot:     (Math.random() - 0.5) * 0.4,
@@ -5936,7 +6051,7 @@ function setMenuIcon(sectionId) {
         lctx.translate(s.x, s.y);
         lctx.rotate(s.angle);
         lctx.font = `bold ${s.size}px monospace`;
-        lctx.fillStyle = '#111';
+        lctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#111';
         lctx.textAlign = 'center';
         lctx.textBaseline = 'middle';
         lctx.fillText(s.char, 0, 0);
@@ -5947,6 +6062,8 @@ function setMenuIcon(sectionId) {
     }
 
     function ballLoop(now) {
+      const _isDark = document.body.classList.contains('dark-mode');
+      const _doorColor = _isDark ? '#fff' : '#111';
       // Update flying balls
       for (let i = flyingBalls.length - 1; i >= 0; i--) {
         const b = flyingBalls[i];
@@ -5954,7 +6071,7 @@ function setMenuIcon(sectionId) {
         const hw = b.size * 0.5;
         const canvasW = letterCanvas.width;
         const canvasH = letterCanvas.height;
-        const HEADER_H = 56; // batas atas (tinggi header)
+        const HEADER_H = 56;
 
         let bounced = false;
         if (b.x - hw < 0)        { b.x = hw;           b.vx =  Math.abs(b.vx); bounced = true; }
@@ -5966,12 +6083,12 @@ function setMenuIcon(sectionId) {
         // Draw ball
         lctx.beginPath();
         lctx.arc(b.x, b.y, hw, 0, Math.PI * 2);
-        lctx.fillStyle = '#111';
+        lctx.fillStyle = _doorColor;
         lctx.fill();
         // Shine
         lctx.beginPath();
         lctx.arc(b.x - hw * 0.28, b.y - hw * 0.28, hw * 0.28, 0, Math.PI * 2);
-        lctx.fillStyle = 'rgba(255,255,255,0.4)';
+        lctx.fillStyle = _isDark ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.4)';
         lctx.fill();
       }
 
@@ -5986,7 +6103,7 @@ function setMenuIcon(sectionId) {
         lctx.globalAlpha = s.alpha;
         lctx.beginPath();
         lctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        lctx.fillStyle = '#111';
+        lctx.fillStyle = _doorColor;
         lctx.fill();
         lctx.restore();
       }
@@ -6001,7 +6118,7 @@ function setMenuIcon(sectionId) {
         lctx.save();
         lctx.globalAlpha = z.alpha;
         lctx.font = `bold ${z.size}px monospace`;
-        lctx.fillStyle = '#111';
+        lctx.fillStyle = _doorColor;
         lctx.textAlign = 'center';
         lctx.textBaseline = 'middle';
         lctx.fillText('Z', z.x, z.y);
@@ -8225,6 +8342,20 @@ function setMenuIcon(sectionId) {
         if (!val) return;
         input.value = '';
 
+        // ── Easter eggs (prioritas tertinggi) ──
+        if (val.toLowerCase() === 'firework') {
+          playHackerEnter();
+          responseEl.textContent = '> firework\nINITIATING FIREWORK SEQUENCE... ✦';
+          setTimeout(() => { stopGlitch(); closeHacker(); launchFireworks(); }, 600);
+          return;
+        }
+        if (val.toLowerCase() === 'jetpack') {
+          playHackerEnter();
+          responseEl.textContent = '> jetpack\nJETPACK DEPLOYED... ◈';
+          setTimeout(() => { stopGlitch(); closeHacker(); launchJetpack(); }, 600);
+          return;
+        }
+
         if (val.toLowerCase() === 'playpacman') {
             playHackerEnter();
             responseEl.textContent = '> playpacman\nLOADING PAC-MAN... \u25c8';
@@ -8396,6 +8527,286 @@ function setMenuIcon(sectionId) {
     window.triggerHackerOverlay = function() { openHacker(); startGlitch(); };
     window.closeHackerOverlay   = function() { stopGlitch(); closeHacker(); };
   })();
+
+/* ══════════════════════════════════
+   EASTER EGG: FIREWORK & JETPACK
+══════════════════════════════════ */
+(function() {
+
+  // ── Global typed buffer ──────────────────────────────────
+  let _eggBuf = '';
+  const _eggMap = {
+    'firework': () => launchFireworks(),
+    'jetpack':           () => launchJetpack(),
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key.length === 1) {
+      _eggBuf = (_eggBuf + e.key.toLowerCase()).slice(-24);
+      for (const [code, fn] of Object.entries(_eggMap)) {
+        if (_eggBuf.endsWith(code)) { _eggBuf = ''; fn(); break; }
+      }
+    }
+  });
+
+  // ── FIREWORK ─────────────────────────────────────────────
+  window.launchFireworks = function() {
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:99995;pointer-events:none;';
+    document.body.appendChild(canvas);
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+
+    // Suara firework — hissing rise + pop
+    function fwSound(x, y) {
+      try {
+        const ac  = new (window.AudioContext || window.webkitAudioContext)();
+        const t   = ac.currentTime;
+        const isDark = document.body.classList.contains('dark-mode');
+        // Rise
+        const oRise = ac.createOscillator(), gRise = ac.createGain();
+        oRise.type = 'sawtooth';
+        oRise.frequency.setValueAtTime(120, t);
+        oRise.frequency.exponentialRampToValueAtTime(800, t + 0.35);
+        gRise.gain.setValueAtTime(0.04, t);
+        gRise.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+        oRise.connect(gRise); gRise.connect(ac.destination);
+        oRise.start(t); oRise.stop(t + 0.36);
+        // Pop burst
+        for (let i = 0; i < 6; i++) {
+          const o = ac.createOscillator(), g = ac.createGain();
+          const f = 300 + Math.random() * 800;
+          o.type = ['sine','triangle','square'][i % 3];
+          o.frequency.setValueAtTime(f, t + 0.36 + i * 0.018);
+          g.gain.setValueAtTime(0.09, t + 0.36 + i * 0.018);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.36 + i * 0.018 + 0.18);
+          o.connect(g); g.connect(ac.destination);
+          o.start(t + 0.36 + i * 0.018); o.stop(t + 0.36 + i * 0.018 + 0.2);
+        }
+        setTimeout(() => ac.close(), 1500);
+      } catch(e) {}
+    }
+
+    // Partikel
+    const particles = [];
+    const PALETTE_DARK  = ['#fff','#e0e0e0','#b0b0ff','#aaffee','#ffeeaa','#ffd0d0'];
+    const PALETTE_LIGHT = ['#111','#333','#224488','#115544','#883300','#441144'];
+
+    function spawnBurst(x, y) {
+      const isDark = document.body.classList.contains('dark-mode');
+      const palette = isDark ? PALETTE_DARK : PALETTE_LIGHT;
+      const col   = palette[Math.floor(Math.random() * palette.length)];
+      const count = 48 + Math.floor(Math.random() * 32);
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i + Math.random() * 0.2;
+        const speed = 2 + Math.random() * 5;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1, decay: 0.012 + Math.random() * 0.012,
+          size: 2 + Math.random() * 3,
+          color: col,
+          tail: [],
+          gravity: 0.06 + Math.random() * 0.04
+        });
+      }
+      fwSound(x, y);
+    }
+
+    // Spawn jadwal burst
+    const spawnTimes = [];
+    for (let i = 0; i < 22; i++) {
+      spawnTimes.push({
+        t: 300 + Math.random() * 17000,
+        x: window.innerWidth  * (0.1 + Math.random() * 0.8),
+        y: window.innerHeight * (0.05 + Math.random() * 0.55),
+      });
+    }
+    const startTime = performance.now();
+    let ran = [];
+
+    function loop(now) {
+      ctx.fillStyle = 'rgba(0,0,0,0)';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Trail fading
+      ctx.fillStyle = document.body.classList.contains('dark-mode')
+        ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const elapsed = now - startTime;
+
+      // Spawn bursts on schedule
+      spawnTimes.forEach((s, i) => {
+        if (!ran[i] && elapsed >= s.t) { ran[i] = true; spawnBurst(s.x, s.y); }
+      });
+
+      // Draw particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.vy += p.gravity;
+        p.x  += p.vx;
+        p.y  += p.vy;
+        p.vx *= 0.98;
+        p.vy *= 0.98;
+        p.life -= p.decay;
+        if (p.life <= 0) { particles.splice(i, 1); continue; }
+        ctx.save();
+        ctx.globalAlpha = p.life;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      if (elapsed < 20000) {
+        requestAnimationFrame(loop);
+      } else {
+        // Fade out canvas
+        canvas.style.transition = 'opacity 1s ease';
+        canvas.style.opacity = '0';
+        setTimeout(() => canvas.remove(), 1100);
+      }
+    }
+    requestAnimationFrame(loop);
+  };
+
+  // ── JETPACK ──────────────────────────────────────────────
+  window.launchJetpack = function() {
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:99995;pointer-events:none;';
+    document.body.appendChild(canvas);
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+    const isDark = document.body.classList.contains('dark-mode');
+
+    // Suara jetpack — thrust noise
+    function jpSound() {
+      try {
+        const ac = new (window.AudioContext || window.webkitAudioContext)();
+        const t  = ac.currentTime;
+        const buf = ac.createBuffer(1, ac.sampleRate * 0.4, ac.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.4;
+        const src = ac.createBufferSource();
+        src.buffer = buf;
+        const lp = ac.createBiquadFilter();
+        lp.type = 'lowpass'; lp.frequency.value = 280;
+        const g = ac.createGain();
+        g.gain.setValueAtTime(0.18, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+        src.connect(lp); lp.connect(g); g.connect(ac.destination);
+        src.start(t); src.stop(t + 0.4);
+        setTimeout(() => ac.close(), 1000);
+      } catch(e) {}
+    }
+
+    // Spawn banyak jetpack orang
+    const JETPACKS = [];
+    const count = 12 + Math.floor(Math.random() * 8);
+    const col = isDark ? '#fff' : '#111';
+    const flameCols = ['#ffaa00','#ff6600','#ff3300','#ffcc00'];
+
+    for (let i = 0; i < count; i++) {
+      JETPACKS.push({
+        x:    Math.random() * canvas.width,
+        y:    canvas.height + 30 + Math.random() * 80,
+        vx:   (Math.random() - 0.5) * 1.8,
+        vy:   -(3.5 + Math.random() * 3),
+        size: 16 + Math.random() * 14,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.04 + Math.random() * 0.04,
+        flameSize: 0,
+        delay: Math.random() * 400,
+        born: performance.now() + Math.random() * 400,
+      });
+      jpSound();
+    }
+
+    function drawJetpackFigure(x, y, size, flicker, col, flameCols) {
+      // Body — minimalis Cinzel-style stick figure
+      ctx.save();
+      ctx.strokeStyle = col;
+      ctx.lineWidth = size * 0.09;
+      ctx.lineCap = 'round';
+
+      // Head
+      ctx.beginPath();
+      ctx.arc(x, y - size * 0.55, size * 0.14, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Body
+      ctx.beginPath();
+      ctx.moveTo(x, y - size * 0.4);
+      ctx.lineTo(x, y + size * 0.1);
+      ctx.stroke();
+
+      // Arms out
+      ctx.beginPath();
+      ctx.moveTo(x - size * 0.22, y - size * 0.22);
+      ctx.lineTo(x + size * 0.22, y - size * 0.22);
+      ctx.stroke();
+
+      // Legs
+      ctx.beginPath();
+      ctx.moveTo(x, y + size * 0.1);
+      ctx.lineTo(x - size * 0.14, y + size * 0.36);
+      ctx.moveTo(x, y + size * 0.1);
+      ctx.lineTo(x + size * 0.14, y + size * 0.36);
+      ctx.stroke();
+
+      // Jetpack pack — di punggung
+      ctx.fillStyle = col;
+      ctx.fillRect(x + size * 0.1, y - size * 0.35, size * 0.18, size * 0.32);
+
+      // Flame
+      const fH = size * (0.3 + flicker * 0.25);
+      const grad = ctx.createLinearGradient(x + size * 0.19, y, x + size * 0.19, y + fH);
+      grad.addColorStop(0, flameCols[0]);
+      grad.addColorStop(0.5, flameCols[1]);
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.ellipse(x + size * 0.19, y - size * 0.05, size * 0.06, fH * 0.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    const startTime = performance.now();
+    let soundInterval = setInterval(jpSound, 280);
+
+    function loop(now) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const elapsed = now - startTime;
+
+      JETPACKS.forEach(jp => {
+        if (now < jp.born) return;
+        jp.x += jp.vx;
+        jp.y += jp.vy;
+        jp.wobble += jp.wobbleSpeed;
+        jp.x += Math.sin(jp.wobble) * 0.6;
+        const flicker = 0.5 + Math.sin(now * 0.04) * 0.5;
+        drawJetpackFigure(jp.x, jp.y, jp.size, flicker, col, flameCols);
+      });
+
+      if (elapsed < 20000) {
+        requestAnimationFrame(loop);
+      } else {
+        clearInterval(soundInterval);
+        canvas.style.transition = 'opacity 0.8s ease';
+        canvas.style.opacity = '0';
+        setTimeout(() => canvas.remove(), 900);
+      }
+    }
+    requestAnimationFrame(loop);
+  };
+
+})();
 
 (function() {
   const IDLE_DELAY   = 660000; // 11 menit
@@ -10194,9 +10605,17 @@ function setMenuIcon(sectionId) {
   }
 
   // ── Click outside to close ────────────────────────────────
+  let _handlingChoice = false;
   document.addEventListener('click', function(e) {
     if (!_shown) return;
+    if (_handlingChoice) return;
+    // Jika target sudah tidak ada di DOM (misal button yang dihapus), abaikan
+    if (!e.target.isConnected) return;
+    // Jika klik di dalam widget atau fab, abaikan
     if (widget.contains(e.target) || fab.contains(e.target)) return;
+    // Jika klik di lang picker, abaikan
+    const picker = document.getElementById('langPickerScreen');
+    if (picker && picker.contains(e.target)) return;
     hideWidget();
   }, { passive: true });
 
@@ -10354,14 +10773,16 @@ function setMenuIcon(sectionId) {
 
   // ── Handle scripted choices ───────────────────────────────
   function handleChoice(key, label) {
+    _handlingChoice = true;
     clearReplyBox();
     wakeBubble.classList.remove('aii-wake-show');
     addBubble(label, 'aii-user-bubble');
     resetIdleTimers();
     const lang = getLang();
     const branch = content[lang].branches[key];
-    if (!branch) return;
+    if (!branch) { _handlingChoice = false; return; }
     setTimeout(() => {
+      _handlingChoice = false;
       runSeq(branch.seq, () => {
         // Handle language switch
         if (branch.switchLang) {
@@ -10371,7 +10792,6 @@ function setMenuIcon(sectionId) {
           if (toggle) toggle.checked = (newLang === 'id');
           if (typeof animateLangSwitch === 'function') animateLangSwitch(newLang);
           else if (typeof applyLang === 'function') applyLang(newLang);
-          // Refresh widget dengan bahasa baru
           setTimeout(() => {
             const c2 = content[newLang];
             statusText.textContent = c2.status;
