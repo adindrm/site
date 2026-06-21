@@ -5643,6 +5643,7 @@ function setMenuIcon(sectionId) {
     let activeDoor     = null;
     let doorTimer      = null;
     let doorSessionCount = 0;
+    let _doorCycleActive = false; // guard agar startDoorCycle() tidak pernah dobel jalan
 
     const DOOR_W = 52;
     const DOOR_H = 80;
@@ -6772,6 +6773,10 @@ function setMenuIcon(sectionId) {
     }
 
     function spawnDoor() {
+      // Jangan ganggu sesi yang sedang berlangsung (sudah diketuk atau sedang membuka/terbuka).
+      // Cuma pintu yang masih idle (belum pernah diketuk) yang boleh diganti otomatis.
+      if (activeDoor && activeDoor.engaged) return;
+
       if (activeDoor) {
         const old = activeDoor;
         activeDoor = null;
@@ -6836,6 +6841,10 @@ function setMenuIcon(sectionId) {
         opened = true;
         clearTimeout(hintTimer);
         portal.classList.remove('door-waiting');
+        // Hentikan timer idle SEKARANG -- jangan biarkan timer itu memunculkan
+        // pintu baru selagi sesi ini masih berjalan (mencegah sesi bertabrakan/terputus).
+        clearInterval(doorTimer);
+        doorTimer = null;
 
         // 1. Tutup daun navbar
         showNavDoor();
@@ -6865,6 +6874,9 @@ function setMenuIcon(sectionId) {
               clearInterval(doorTimer);
               doorTimer = null;
               setTimeout(() => {
+                // Cek ulang -- jangan nyalakan timer kalau user sudah pindah dari hero
+                // selama jeda 1.2 detik ini (mencegah timer nyala lagi sesudah stopDoorCycle()).
+                if (!heroSection.classList.contains('page-active') || !_doorCycleActive) return;
                 spawnDoor();
                 doorTimer = setInterval(spawnDoor, 27000);
               }, 1200);
@@ -6879,6 +6891,7 @@ function setMenuIcon(sectionId) {
       hit.addEventListener('click', () => {
         if (knockCount >= 3) return;
         knockCount++;
+        if (activeDoor) activeDoor.engaged = true; // sesi mulai diketuk -- lindungi dari timer idle
         playKnockSound();
         showKnockText(pos, knockCount);
         if (knockCount >= 3) setTimeout(doOpen, 350);
@@ -6888,11 +6901,14 @@ function setMenuIcon(sectionId) {
     }
 
     function startDoorCycle() {
+      if (_doorCycleActive) return; // sudah berjalan -- jangan mulai dobel
+      _doorCycleActive = true;
       spawnDoor();
       doorTimer = setInterval(spawnDoor, 40000);
     }
 
     function stopDoorCycle() {
+      _doorCycleActive = false;
       clearTimeout(doorTimer); clearInterval(doorTimer); doorTimer = null;
       if (activeDoor) {
         if (activeDoor.closeTimer) clearTimeout(activeDoor.closeTimer);
@@ -6911,7 +6927,7 @@ function setMenuIcon(sectionId) {
 
     const heroObserver = new MutationObserver(() => {
       if (heroSection.classList.contains('page-active')) {
-        if (!doorTimer) startDoorCycle();
+        if (!_doorCycleActive) startDoorCycle();
       } else {
         stopDoorCycle();
       }
