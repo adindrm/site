@@ -2239,7 +2239,20 @@
    DARK / LIGHT MODE
 ══════════════════════════════════ */
 (function() {
-  const saved = localStorage.getItem('aiidentity_theme') || 'light';
+  const saved = 'light'; // selalu mulai dengan mode terang setiap kali halaman dimuat
+
+  function updateThemeIcon(mode) {
+    const sun  = document.getElementById('iconSun');
+    const moon = document.getElementById('iconMoon');
+    if (!sun || !moon) return;
+    if (mode === 'dark') {
+      sun.style.display  = '';      // matahari tampil di mode gelap (klik untuk balik ke terang)
+      moon.style.display = 'none';
+    } else {
+      sun.style.display  = 'none';
+      moon.style.display = '';      // bulan tampil di mode terang (klik untuk ke gelap)
+    }
+  }
 
   function applyTheme(mode) {
     if (mode === 'dark') {
@@ -2247,10 +2260,12 @@
     } else {
       document.body.classList.remove('dark-mode');
     }
+    updateThemeIcon(mode);
   }
 
   // Apply segera agar tidak flicker
   if (saved === 'dark') document.body.classList.add('dark-mode');
+  updateThemeIcon(saved);
   window.addEventListener('DOMContentLoaded', () => applyTheme(saved));
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     setTimeout(() => applyTheme(saved), 0);
