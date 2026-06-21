@@ -285,10 +285,8 @@
       animation: knockFloat 1.6s ease-out forwards;
     }
 
-    @media (prefers-color-scheme: dark) {
-  .knock-text {
-      color: #f5f5f5;
-      }
+    .dark .knock-text {
+      color: #e0e0e0; /* Warna terang pilihan Anda untuk mode gelap */
     }
     @keyframes knockFloat {
       0%   { opacity: 0;   transform: translateY(0)    scale(0.8); }
