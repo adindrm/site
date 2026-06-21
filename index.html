@@ -285,9 +285,7 @@
       animation: knockFloat 1.6s ease-out forwards;
     }
 
-    .dark .knock-text {
-      color: #e0e0e0; /* Warna terang pilihan Anda untuk mode gelap */
-    }
+    
     @keyframes knockFloat {
       0%   { opacity: 0;   transform: translateY(0)    scale(0.8); }
       15%  { opacity: 1;   transform: translateY(-6px)  scale(1.05); }
@@ -1442,6 +1440,7 @@
     body.dark-mode .lp-btn { color: #e8e8e8; border-color: #e8e8e8; }
     body.dark-mode .lp-btn::before { background: #e8e8e8; }
     body.dark-mode .lp-btn:hover { color: #0a0a0a; }
+    body.dark-mode .knock-text { color: #e8e8e8; }
 
   /* ── STORE ── */
   #sec-store .section-inner { padding-top: 80px; padding-bottom: 60px; display: flex; flex-direction: column; gap: 0; }
