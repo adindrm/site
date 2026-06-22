@@ -1583,10 +1583,124 @@
   .store-btn-disabled { color: #2a2a2a; border-color: #1e1e1e; cursor: not-allowed; }
   .store-btn-disabled:hover { color: #2a2a2a; border-color: #1e1e1e; background: none; }
 
+  /* ══ CLOCK WIDGET ══ */
+  #clockWidget {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    margin-right: 10px;
+    cursor: pointer;
+    user-select: none;
+    gap: 1px;
+    padding: 5px 10px;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 6px;
+    background: rgba(0,0,0,0.03);
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  #clockWidget:hover {
+    background: rgba(0,0,0,0.07);
+    border-color: rgba(0,0,0,0.22);
+    transform: scale(1.03);
+  }
+  #clockWidget:active { transform: scale(0.97); }
+  #clockTime {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #111;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  #clockDate {
+    font-family: 'Cinzel', serif;
+    font-size: 7.5px;
+    letter-spacing: 0.22em;
+    color: #888;
+    text-transform: uppercase;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  /* dark mode clock */
+  body.dark-mode #clockWidget {
+    border-color: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+  }
+  body.dark-mode #clockWidget:hover {
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.22);
+  }
+  body.dark-mode #clockTime { color: #e8e8e8; }
+  body.dark-mode #clockDate { color: #666; }
+
+  /* ── CLOCK EASTER EGG ── */
+  #clockWidget.egg-scramble #clockTime,
+  #clockWidget.egg-scramble #clockDate { color: #e53; }
+  #clockWidget.egg-countdown {
+    border-color: rgba(220,50,30,0.5);
+    background: rgba(220,50,30,0.07);
+  }
+  #clockWidget.egg-countdown #clockTime { color: #e53; }
+  #clockWidget.egg-countdown #clockDate { color: #c44; letter-spacing: 0.3em; }
+
+  /* Bomb flash overlay on clock */
+  #clockWidget::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255,80,0,0.0);
+    border-radius: 6px;
+    pointer-events: none;
+    transition: background 0.08s;
+  }
+  #clockWidget.egg-tick::after {
+    background: rgba(255,80,0,0.18);
+  }
+
+  /* Screen shake */
+  @keyframes screenShake {
+    0%   { transform: translate(0,0) rotate(0deg); }
+    8%   { transform: translate(-8px, 6px) rotate(-1.2deg); }
+    16%  { transform: translate(10px, -8px) rotate(1.5deg); }
+    24%  { transform: translate(-12px, 4px) rotate(-1deg); }
+    32%  { transform: translate(8px, 10px) rotate(0.8deg); }
+    40%  { transform: translate(-6px, -6px) rotate(-1.5deg); }
+    48%  { transform: translate(12px, 2px) rotate(1.2deg); }
+    56%  { transform: translate(-10px, 8px) rotate(-0.5deg); }
+    64%  { transform: translate(6px, -10px) rotate(0.9deg); }
+    72%  { transform: translate(-4px, 6px) rotate(-0.7deg); }
+    80%  { transform: translate(8px, -4px) rotate(0.4deg); }
+    90%  { transform: translate(-3px, 3px) rotate(-0.2deg); }
+    100% { transform: translate(0,0) rotate(0deg); }
+  }
+  #mainPage.screen-shake { animation: screenShake 0.7s cubic-bezier(0.36,0.07,0.19,0.97) both; }
+
+  /* Explosion particles */
+  .boom-particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 99999;
+  }
+  /* Flash overlay */
+  #boomFlash {
+    position: fixed; inset: 0; z-index: 99998;
+    background: #fff;
+    opacity: 0; pointer-events: none;
+    animation: none;
+  }
+  @keyframes boomFlashAnim {
+    0%   { opacity: 0.98; }
+    30%  { opacity: 0.7; }
+    100% { opacity: 0; }
+  }
   </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
+<div id="boomFlash"></div>
 
 <!-- Audio tracks -->
 <audio id="audioStart" src="https://raw.githubusercontent.com/adindrm/site/90a8082b2792dc68fc6324c3e5938ac916363930/jazzstart.webm" preload="auto" loop></audio>
@@ -1607,6 +1721,11 @@
     <div id="headerTitle"></div>
   </div>
   <div id="headerRight">
+    <!-- CLOCK WIDGET -->
+    <div id="clockWidget" title="Klik untuk... sesuatu 🤫">
+      <div id="clockTime">00:00:00</div>
+      <div id="clockDate">Sen, 01 Jan</div>
+    </div>
     <div class="theme-toggle-wrap" id="langToggleWrap">
       <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle dark/light mode" onclick="toggleTheme()">
         <!-- Sun icon (shown in dark mode) -->
@@ -11341,6 +11460,767 @@ function setMenuIcon(sectionId) {
   });
 
   waitForMainPageAndShow();
+})();
+</script>
+
+<!-- ══ CLOCK WIDGET + EASTER EGG BOMB ══ -->
+<script>
+(function() {
+  const timeEl = document.getElementById('clockTime');
+  const dateEl = document.getElementById('clockDate');
+  const widget = document.getElementById('clockWidget');
+  const flash  = document.getElementById('boomFlash');
+
+  const DAYS_ID   = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const MONTHS_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function realTime() {
+    const d = new Date();
+    return {
+      timeStr: pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),
+      dateStr: DAYS_ID[d.getDay()]+', '+pad(d.getDate())+' '+MONTHS_ID[d.getMonth()],
+    };
+  }
+
+  // ── Normal clock ──
+  let clockInterval = null;
+  function startClock() {
+    if (clockInterval) return;
+    const tick = () => { const r=realTime(); timeEl.textContent=r.timeStr; dateEl.textContent=r.dateStr; };
+    tick();
+    clockInterval = setInterval(tick, 1000);
+  }
+  startClock();
+
+  // ── AudioContext ──
+  function getAC() {
+    if (!window._boomAC) try { window._boomAC = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
+    return window._boomAC;
+  }
+
+  // ── Sounds ──
+  function sndTick(n) {
+    const ac=getAC(); if(!ac) return;
+    const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
+    o.type='square'; o.frequency.value=300+(10-n)*60;
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.22,t+0.008);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+0.11);
+  }
+
+  function sndScramble() {
+    const ac=getAC(); if(!ac) return;
+    const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
+    o.type='sawtooth'; o.frequency.setValueAtTime(60+Math.random()*500,t);
+    o.frequency.linearRampToValueAtTime(40+Math.random()*600,t+0.06);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.08,t+0.008);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.07);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+0.08);
+  }
+
+  function sndHoldCharge(progress) {
+    // rising whine as hold progress 0→1
+    const ac=getAC(); if(!ac) return;
+    const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
+    o.type='sawtooth'; o.frequency.value=80+progress*800;
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.06+progress*0.1,t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.07);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+0.08);
+  }
+
+  function sndBoom() {
+    const ac=getAC(); if(!ac) return;
+    // Sub-bass punch
+    [0, 0.03, 0.07].forEach((delay, i) => {
+      const t=ac.currentTime+delay;
+      const len=Math.ceil(ac.sampleRate*1.2);
+      const buf=ac.createBuffer(1,len,ac.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let s=0;s<len;s++) d[s]=(Math.random()*2-1)*Math.pow(Math.max(0,1-s/(len*0.7)),1.2);
+      const src=ac.createBufferSource(); src.buffer=buf;
+      const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=120-i*20;
+      const g=ac.createGain();
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(i===0?1.2:0.6,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001,t+1.0);
+      src.connect(lp); lp.connect(g); g.connect(ac.destination); src.start(t);
+    });
+    // Mid crackle
+    const t2=ac.currentTime;
+    const o2=ac.createOscillator(), g2=ac.createGain();
+    o2.type='sawtooth'; o2.frequency.setValueAtTime(800,t2);
+    o2.frequency.exponentialRampToValueAtTime(30,t2+0.4);
+    g2.gain.setValueAtTime(0,t2); g2.gain.linearRampToValueAtTime(0.7,t2+0.005);
+    g2.gain.exponentialRampToValueAtTime(0.001,t2+0.45);
+    o2.connect(g2); g2.connect(ac.destination); o2.start(t2); o2.stop(t2+0.46);
+    // High shrapnel
+    for(let i=0;i<5;i++){
+      const td=ac.currentTime+i*0.04;
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type='triangle'; o.frequency.value=1200+Math.random()*2000;
+      g.gain.setValueAtTime(0,td); g.gain.linearRampToValueAtTime(0.08,td+0.005);
+      g.gain.exponentialRampToValueAtTime(0.001,td+0.12);
+      o.connect(g); g.connect(ac.destination); o.start(td); o.stop(td+0.13);
+    }
+  }
+
+  function sndRumble(dur) {
+    // slow building rumble during countdown
+    const ac=getAC(); if(!ac) return;
+    const t=ac.currentTime;
+    const len=Math.ceil(ac.sampleRate*dur);
+    const buf=ac.createBuffer(1,len,ac.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let s=0;s<len;s++) d[s]=(Math.random()*2-1)*0.4*(s/len);
+    const src=ac.createBufferSource(); src.buffer=buf;
+    const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=60;
+    const g=ac.createGain();
+    g.gain.setValueAtTime(0.001,t); g.gain.linearRampToValueAtTime(0.3,t+dur*0.8);
+    g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    src.connect(lp); lp.connect(g); g.connect(ac.destination); src.start(t);
+    return src;
+  }
+
+  // ── DEBRIS: capture all visible elements, turn them into flying shards ──
+  function shatterScreen() {
+    const main = document.getElementById('mainPage');
+    if (!main) return;
+
+    // collect all rendered leaf elements
+    const allEls = main.querySelectorAll(
+      'a, button, img, p, h1, h2, h3, span, div.hero-name, div.hero-tagline, ' +
+      'div.hero-eyebrow, div.hero-cta, div.service-card, div.work-item, ' +
+      'div.contact-inner, #headerTitle, #headerLogo, #clockWidget, #clockTime, #clockDate,' +
+      'div.section-label, div.section-title, div.about-photo, div.stat-num, div.stat-label'
+    );
+
+    const W = window.innerWidth, H = window.innerHeight;
+    const epicX = W/2, epicY = H/2; // blast epicenter = screen center
+
+    const shards = [];
+
+    allEls.forEach(el => {
+      try {
+        const rect = el.getBoundingClientRect();
+        if (rect.width < 2 || rect.height < 2) return;
+        if (rect.bottom < 0 || rect.top > H || rect.right < 0 || rect.left > W) return;
+
+        const cx = rect.left + rect.width/2;
+        const cy = rect.top  + rect.height/2;
+        const dx = cx - epicX;
+        const dy = cy - epicY;
+        const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+
+        // clone element as a fixed overlay shard
+        const shard = document.createElement('div');
+        const cs    = window.getComputedStyle(el);
+
+        shard.style.cssText = `
+          position:fixed;
+          left:${rect.left}px; top:${rect.top}px;
+          width:${rect.width}px; height:${rect.height}px;
+          background:${cs.backgroundColor==='rgba(0, 0, 0, 0)'?'rgba(200,200,200,0.15)':cs.backgroundColor};
+          color:${cs.color};
+          font:${cs.font};
+          letter-spacing:${cs.letterSpacing};
+          border:${cs.border};
+          border-radius:${cs.borderRadius};
+          overflow:hidden;
+          pointer-events:none;
+          z-index:99990;
+          display:flex; align-items:center; justify-content:center;
+          transform-origin:center center;
+          will-change:transform,opacity;
+          text-transform:${cs.textTransform};
+          font-family:${cs.fontFamily};
+          font-size:${cs.fontSize};
+          font-weight:${cs.fontWeight};
+          white-space:nowrap;
+          box-sizing:border-box;
+          padding:${cs.padding};
+        `;
+        shard.textContent = el.textContent.trim().slice(0,40);
+
+        document.body.appendChild(shard);
+
+        // physics: fly outward from epicenter
+        const speed   = 4 + Math.random()*12;
+        const normDx  = dx/dist, normDy = dy/dist;
+        const vx      = normDx*speed*W*0.003 + (Math.random()-0.5)*6;
+        const vy      = normDy*speed*H*0.003 + (Math.random()-0.5)*6 + 2; // gravity bias
+        const spin    = (Math.random()-0.5)*720;
+        const gravity = 0.18 + Math.random()*0.25;
+        const dur     = 0.8 + Math.random()*1.2;
+
+        shards.push({el:shard, vx, vy, spin, gravity, dur, t:0, startDelay: Math.random()*0.15});
+
+        // also shatter the original by hiding it
+        el.style.transition = 'none';
+        el.style.visibility = 'hidden';
+
+      } catch(e){}
+    });
+
+    // also add pure debris chunks (broken concrete/glass look)
+    const colors = ['#ccc','#aaa','#888','#ddd','#bbb','#eee','rgba(255,200,100,0.8)','rgba(255,100,50,0.9)'];
+    for(let i=0;i<120;i++){
+      const shard = document.createElement('div');
+      const angle = Math.random()*Math.PI*2;
+      const dist2 = 20 + Math.random()*Math.min(W,H)*0.55;
+      const ox = epicX + Math.cos(angle)*dist2*0.1;
+      const oy = epicY + Math.sin(angle)*dist2*0.1;
+      const w  = 3 + Math.random()*22;
+      const h  = 2 + Math.random()*14;
+      const col = colors[Math.floor(Math.random()*colors.length)];
+      const speed = 5+Math.random()*18;
+      const vx = Math.cos(angle)*speed*(W*0.004) + (Math.random()-0.5)*4;
+      const vy = Math.sin(angle)*speed*(H*0.004) - Math.random()*5;
+      const spin = (Math.random()-0.5)*900;
+      const grav = 0.2+Math.random()*0.3;
+      const dur  = 0.6+Math.random()*1.4;
+      shard.style.cssText=`
+        position:fixed; left:${ox}px; top:${oy}px;
+        width:${w}px; height:${h}px;
+        background:${col};
+        pointer-events:none; z-index:99991;
+        border-radius:${Math.random()>0.6?'0':'2px'};
+        opacity:1; will-change:transform,opacity;
+      `;
+      document.body.appendChild(shard);
+      shards.push({el:shard, vx, vy:vy-2, spin, gravity:grav, dur, t:0, startDelay:Math.random()*0.08});
+    }
+
+    // Animate all shards with rAF
+    let startTime = null;
+    const TOTAL_DUR = 2800; // ms total before cleanup
+
+    function animateShards(ts) {
+      if (!startTime) startTime = ts;
+      const elapsed = (ts - startTime) / 1000;
+
+      let anyAlive = false;
+      shards.forEach(s => {
+        const age = elapsed - s.startDelay;
+        if (age < 0) { anyAlive=true; return; }
+        if (age > s.dur) { s.el.style.opacity='0'; return; }
+        anyAlive = true;
+        const pct = age / s.dur;
+        const tx  = s.vx * age * 60;
+        const ty  = s.vy * age * 60 + 0.5 * s.gravity * age*age * 3600;
+        const rot = s.spin * pct;
+        const op  = Math.max(0, 1 - pct*pct*1.2);
+        s.el.style.transform = `translate(${tx}px,${ty}px) rotate(${rot}deg) scale(${1-pct*0.4})`;
+        s.el.style.opacity = op;
+      });
+
+      if (elapsed*1000 < TOTAL_DUR) requestAnimationFrame(animateShards);
+      else shards.forEach(s => { try{s.el.remove();}catch(e){} });
+    }
+    requestAnimationFrame(animateShards);
+
+    // restore original elements after animation
+    setTimeout(() => {
+      allEls.forEach(el => { el.style.visibility=''; });
+    }, TOTAL_DUR);
+
+    return TOTAL_DUR;
+  }
+
+  // ── Screen shake (multi-wave) ──
+  function doShake() {
+    const mp = document.getElementById('mainPage');
+    if (!mp) return;
+    let t0 = null;
+    const DUR = 900;
+    function frame(ts) {
+      if(!t0) t0=ts;
+      const p=(ts-t0)/DUR;
+      if(p>=1){ mp.style.transform=''; return; }
+      const amp = 18*(1-p*p);
+      const x   = (Math.random()-0.5)*amp*2;
+      const y   = (Math.random()-0.5)*amp;
+      const r   = (Math.random()-0.5)*3*(1-p);
+      mp.style.transform=`translate(${x}px,${y}px) rotate(${r}deg)`;
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ── Flash ──
+  function doFlash() {
+    flash.style.animation='none'; void flash.offsetWidth;
+    flash.style.animation='boomFlashAnim 0.5s ease-out both';
+  }
+
+  // ── Widget charge visual ──
+  let chargeBar = null;
+  function showChargeBar(progress) {
+    if (!chargeBar) {
+      chargeBar = document.createElement('div');
+      chargeBar.style.cssText=`
+        position:absolute; bottom:0; left:0; height:2px;
+        background:linear-gradient(90deg,#ff4400,#ffaa00,#fff);
+        pointer-events:none; z-index:1;
+        transition:width 0.05s linear;
+        border-radius:0 0 6px 6px;
+      `;
+      widget.style.position='relative';
+      widget.appendChild(chargeBar);
+    }
+    chargeBar.style.width=(progress*100)+'%';
+    // widget glow
+    const glow = Math.floor(progress*20);
+    widget.style.boxShadow=`0 0 ${glow}px ${Math.floor(glow/2)}px rgba(255,80,0,${progress*0.6})`;
+    widget.style.borderColor=`rgba(255,${Math.floor(150-progress*100)},0,${0.3+progress*0.7})`;
+  }
+  function hideChargeBar() {
+    if (chargeBar) { chargeBar.style.width='0'; chargeBar.remove(); chargeBar=null; }
+    widget.style.boxShadow='';
+    widget.style.borderColor='';
+  }
+
+  // ── Scramble digits ──
+  const DIGS='0123456789';
+  function randD(){ return DIGS[Math.floor(Math.random()*10)]; }
+  function scrambleDisplay() {
+    const hh=document.getElementById('cHH'),
+          mm=document.getElementById('cMM'),
+          ss=document.getElementById('cSS');
+    if(hh) hh.textContent=randD()+randD();
+    if(mm) mm.textContent=randD()+randD();
+    if(ss) ss.textContent=randD()+randD();
+    // also scramble if flat text
+    if(!hh){
+      let s=''; const cur=timeEl.textContent;
+      for(let i=0;i<cur.length;i++) s+=cur[i]===':'?':':randD();
+      timeEl.textContent=s;
+    }
+    sndScramble();
+  }
+
+  // ── STATE MACHINE ──
+  // Trigger: 3 clicks → 4th click HOLD 10s → BOOM
+  let clickCount   = 0;
+  let clickReset   = null;
+  let holdTimer    = null;
+  let holdInterval = null;
+  let holdStart    = null;
+  let eggActive    = false;
+  let eggTimers    = [];
+  let scrambleInt  = null;
+  let rumbleSrc    = null;
+  let HOLD_REQUIRED= 10000; // 10 seconds
+
+  function resetAll() {
+    clickCount=0;
+    clearTimeout(clickReset); clickReset=null;
+    clearHold();
+    clearEgg();
+  }
+
+  function clearHold() {
+    clearTimeout(holdTimer); holdTimer=null;
+    clearInterval(holdInterval); holdInterval=null;
+    holdStart=null;
+    hideChargeBar();
+  }
+
+  function clearEgg() {
+    eggTimers.forEach(t=>clearTimeout(t)); eggTimers=[];
+    clearInterval(scrambleInt); scrambleInt=null;
+    eggActive=false;
+    widget.classList.remove('egg-scramble','egg-countdown','egg-tick');
+  }
+
+  // ── Click colour feedback on clock digits ──
+  // click 1 → detik merah, click 2 → menit+detik merah, click 3 → semua merah
+  // Warna jam = format HH:MM:SS — kita bungkus dengan spans
+  function buildClockSpans() {
+    // hanya sekali
+    if (timeEl.querySelector('span')) return;
+    const t = timeEl.textContent || '00:00:00';
+    // HH : MM : SS
+    timeEl.innerHTML =
+      `<span id="cHH">${t.slice(0,2)}</span>` +
+      `<span class="csep">:</span>` +
+      `<span id="cMM">${t.slice(3,5)}</span>` +
+      `<span class="csep">:</span>` +
+      `<span id="cSS">${t.slice(6,8)}</span>`;
+  }
+  buildClockSpans();
+
+  // patch startClock to update spans
+  const _origStartClock = startClock;
+  function startClock() {
+    if (clockInterval) return;
+    buildClockSpans();
+    const tick = () => {
+      const r = realTime();
+      const hh=document.getElementById('cHH'),
+            mm=document.getElementById('cMM'),
+            ss=document.getElementById('cSS');
+      if(hh) hh.textContent=r.timeStr.slice(0,2);
+      if(mm) mm.textContent=r.timeStr.slice(3,5);
+      if(ss) ss.textContent=r.timeStr.slice(6,8);
+      dateEl.textContent=r.dateStr;
+    };
+    tick();
+    clockInterval = setInterval(tick, 1000);
+  }
+  // restart with span-aware version
+  clearInterval(clockInterval); clockInterval=null;
+  startClock();
+
+  function applyClickColour(n) {
+    // n=0 → reset, n=1 → SS red, n=2 → MM+SS red, n=3 → HH+MM+SS red
+    const hh=document.getElementById('cHH'),
+          mm=document.getElementById('cMM'),
+          ss=document.getElementById('cSS');
+    if(!hh||!mm||!ss) return;
+    const RED = '#e53';
+    const NORM = ''; // inherit
+    hh.style.color = n>=3 ? RED : NORM;
+    mm.style.color = n>=2 ? RED : NORM;
+    ss.style.color = n>=1 ? RED : NORM;
+    // subtle pulse on newly turned red
+    const changed = n===1?ss : n===2?mm : n===3?hh : null;
+    if(changed){
+      changed.style.transition='color 0.12s';
+      changed.style.textShadow=`0 0 8px ${RED}`;
+      setTimeout(()=>changed.style.textShadow='',400);
+    }
+  }
+  function resetClickColour() {
+    applyClickColour(0);
+    const hh=document.getElementById('cHH'),
+          mm=document.getElementById('cMM'),
+          ss=document.getElementById('cSS');
+    if(hh){hh.style.color='';hh.style.textShadow='';}
+    if(mm){mm.style.color='';mm.style.textShadow='';}
+    if(ss){ss.style.color='';ss.style.textShadow='';}
+  }
+
+  // Pointer down → check if 4th click, then start hold
+  widget.addEventListener('pointerdown', function(e) {
+    const ac=getAC(); if(ac&&ac.state==='suspended') ac.resume();
+
+    if (eggActive) return;
+
+    clickCount++;
+    clearTimeout(clickReset);
+
+    if (clickCount < 4) {
+      // colour feedback: 1→SS, 2→MM, 3→HH
+      applyClickColour(clickCount);
+      // reset counter if no more clicks in 3s
+      clickReset = setTimeout(()=>{
+        clickCount=0;
+        resetClickColour();
+      }, 3000);
+      return;
+    }
+
+    // 4th click → start HOLD countdown
+    clickCount=0;
+    resetClickColour();
+    holdStart = Date.now();
+    dateEl.textContent = 'TAHAN...';
+    widget.classList.add('egg-scramble');
+    clearInterval(clockInterval); clockInterval=null;
+
+    // Start scramble during hold
+    scrambleInt = setInterval(scrambleDisplay, 80);
+    rumbleSrc = null;
+
+    holdInterval = setInterval(() => {
+      const elapsed = Date.now() - holdStart;
+      const progress = Math.min(elapsed / HOLD_REQUIRED, 1);
+      showChargeBar(progress);
+      sndHoldCharge(progress);
+
+      if (progress >= 1) {
+        clearHold();
+        triggerCountdown();
+      }
+    }, 50);
+  });
+
+  widget.addEventListener('pointerup',    cancelHold);
+  widget.addEventListener('pointerleave', cancelHold);
+  widget.addEventListener('pointercancel',cancelHold);
+
+  function cancelHold() {
+    if (!holdStart) return;
+    clearHold();
+    clearInterval(scrambleInt); scrambleInt=null;
+    widget.classList.remove('egg-scramble','egg-countdown','egg-tick');
+    resetClickColour();
+    startClock();
+    clickCount=0;
+  }
+
+  // ── Countdown 10→0 ──
+  function triggerCountdown() {
+    clearInterval(scrambleInt); scrambleInt=null;
+    eggActive=true;
+    widget.classList.remove('egg-scramble');
+    widget.classList.add('egg-countdown');
+    // rebuild inner text flat for countdown display
+    timeEl.innerHTML='<span id="cHH">00</span><span class="csep">:</span><span id="cMM">00</span><span class="csep">:</span><span id="cSS">10</span>';
+    dateEl.textContent = 'BOM AKTIF';
+
+    let count=10;
+    rumbleSrc = sndRumble(11);
+
+    function tick() {
+      if(!eggActive) return;
+      const ss=document.getElementById('cSS'),
+            mm=document.getElementById('cMM');
+      if(ss) ss.textContent=pad(count);
+      if(mm) { mm.textContent='00'; mm.style.color='#e53'; }
+      const hh=document.getElementById('cHH');
+      if(hh) { hh.textContent='00'; hh.style.color='#e53'; }
+      if(ss) ss.style.color='#e53';
+      sndTick(count);
+
+      widget.classList.add('egg-tick');
+      eggTimers.push(setTimeout(()=>widget.classList.remove('egg-tick'),130));
+
+      // increasing shake as countdown nears 0
+      if(count<=3){
+        const mp=document.getElementById('mainPage');
+        if(mp){
+          const amt=6+(3-count)*8;
+          mp.style.transform=`translate(${(Math.random()-0.5)*amt}px,${(Math.random()-0.5)*amt*0.5}px)`;
+          setTimeout(()=>mp.style.transform='',80);
+        }
+      }
+
+      if(count<=0){ doExplode(); return; }
+      count--;
+      eggTimers.push(setTimeout(tick,1000));
+    }
+    tick();
+  }
+
+  // ── Detect current active section ──
+  function getActiveSection() {
+    return document.querySelector('.section.page-active');
+  }
+
+  // ── Recovery: flash kedua → animasi masuk section aktif ──
+  function recoverSection() {
+    // flash kedua
+    doFlash();
+
+    const sec = getActiveSection();
+    if (!sec) {
+      // fallback tanpa section
+      clearEgg();
+      widget.classList.remove('egg-countdown','egg-tick');
+      widget.style.boxShadow=''; widget.style.borderColor='';
+      const mp=document.getElementById('mainPage');
+      if(mp) mp.style.transform='';
+      startClock();
+      return;
+    }
+
+    // Sembunyikan dulu semua elemen animatable dalam section
+    const animEls = sec.querySelectorAll(
+      '.hero-eyebrow, .hero-name, .hero-divider, .hero-tagline, .hero-cta, .hero-scroll-hint,' +
+      '.about-photo, .about-content, .about-photo-accent,' +
+      '.service-card, .works-header, .work-item, .works-cat-heading, .works-sub-heading,' +
+      '.contact-inner, .store-header, .store-tabs, .store-card, .store-sub-desc'
+    );
+
+    // Reset semua elemen ke keadaan tersembunyi (posisi awal animasi)
+    animEls.forEach(el => {
+      el.style.transition = 'none';
+      el.style.opacity    = '0';
+      if (el.classList.contains('hero-divider')) {
+        el.style.transform = 'scaleX(0)';
+      } else if (el.classList.contains('about-photo')) {
+        el.style.transform = 'translateX(-40px)';
+      } else if (el.classList.contains('about-content')) {
+        el.style.transform = 'translateX(40px)';
+      } else {
+        el.style.transform = 'translateY(30px)';
+      }
+      el.style.visibility = '';
+    });
+
+    const mp=document.getElementById('mainPage');
+    if(mp) mp.style.transform='';
+
+    // Widget reset
+    clearEgg();
+    widget.classList.remove('egg-countdown','egg-tick');
+    widget.style.boxShadow=''; widget.style.borderColor='';
+
+    // Flash selesai ~0.5s → mulai animasi masuk
+    setTimeout(() => {
+      startClock();
+      // Force reflow lalu lepas inline style agar CSS transition section aktif berjalan
+      void sec.offsetWidth;
+      animEls.forEach((el, i) => {
+        el.style.transition = '';
+        el.style.opacity    = '';
+        el.style.transform  = '';
+      });
+    }, 550);
+  }
+
+  // ── THE BIG BOOM ──
+  function doExplode() {
+    timeEl.innerHTML = '<span style="color:#e53;letter-spacing:0.05em">** BOOM **</span>';
+    dateEl.textContent = '----------';
+
+    // 1) Flash putih
+    doFlash();
+
+    // 2) Boom sound
+    sndBoom();
+
+    // 3) Heavy shake
+    doShake();
+
+    // 4) Shatter all elements (60ms delay supaya flash sempat muncul)
+    setTimeout(()=>{ shatterScreen(); }, 60);
+
+    // 5) Particle debris wave
+    spawnDebrisWave();
+
+    // 6) Flash kedua + recovery dengan animasi masuk section (setelah 4s)
+    eggTimers.push(setTimeout(()=>{
+      recoverSection();
+    }, 4000));
+  }
+
+  // ── Debris wave: pure particle system, no emojis ──
+  function spawnDebrisWave() {
+    const W=window.innerWidth, H=window.innerHeight;
+    const epicX=W/2, epicY=H/2;
+    const container=document.createElement('div');
+    container.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:99995;overflow:hidden;';
+    document.body.appendChild(container);
+
+    // Shockwave ring
+    const ring=document.createElement('div');
+    ring.style.cssText=`
+      position:absolute;
+      left:${epicX}px; top:${epicY}px;
+      width:4px; height:4px;
+      margin-left:-2px; margin-top:-2px;
+      border-radius:50%;
+      border:3px solid rgba(255,160,60,0.9);
+      pointer-events:none;
+      animation:shockwaveExpand 0.7s ease-out both;
+    `;
+    // inject keyframe
+    if(!document.getElementById('_shockwaveKF')){
+      const st=document.createElement('style'); st.id='_shockwaveKF';
+      st.textContent=`@keyframes shockwaveExpand{
+        0%{transform:scale(1);opacity:0.9;border-width:6px;}
+        100%{transform:scale(${Math.max(W,H)/2});opacity:0;border-width:1px;}
+      }`;
+      document.head.appendChild(st);
+    }
+    container.appendChild(ring);
+
+    // Second delayed ring
+    setTimeout(()=>{
+      const r2=ring.cloneNode();
+      r2.style.border='2px solid rgba(255,220,120,0.6)';
+      r2.style.animation='shockwaveExpand 1s ease-out both';
+      container.appendChild(r2);
+    },120);
+
+    // Particle burst in multiple waves
+    const PALETTE = [
+      '#ff6600','#ff4400','#ff8800','#ffcc00','#ffee88',
+      '#fff','#ddd','#aaa','#888',
+      'rgba(200,220,255,0.9)','rgba(255,180,60,0.95)'
+    ];
+
+    function spawnBurst(cx,cy,count,baseSpeed,delay){
+      setTimeout(()=>{
+        for(let i=0;i<count;i++){
+          const p=document.createElement('div');
+          const angle=Math.random()*Math.PI*2;
+          const speed=baseSpeed*(0.4+Math.random()*0.9);
+          const size=2+Math.random()*9;
+          const col=PALETTE[Math.floor(Math.random()*PALETTE.length)];
+          const dur=0.5+Math.random()*1.1;
+          const gravity=0.25+Math.random()*0.35;
+          // elongated along velocity = spark
+          const isSpark=Math.random()>0.5;
+          const w=isSpark?size*0.35:size, h=isSpark?size*2.5:size;
+          const initAngleDeg=angle*(180/Math.PI);
+
+          p.style.cssText=`
+            position:absolute;
+            left:${cx}px; top:${cy}px;
+            width:${w}px; height:${h}px;
+            background:${col};
+            border-radius:${isSpark?'50px':'2px'};
+            transform-origin:center;
+            transform:rotate(${initAngleDeg}deg);
+            box-shadow:0 0 ${size*1.5}px ${col};
+            pointer-events:none;
+          `;
+          container.appendChild(p);
+
+          // physics rAF
+          const vx=Math.cos(angle)*speed;
+          const vy=Math.sin(angle)*speed;
+          let t0=null, alive=true;
+          function anim(ts){
+            if(!alive)return;
+            if(!t0)t0=ts;
+            const age=(ts-t0)/1000;
+            if(age>dur){ p.remove(); return; }
+            const pct=age/dur;
+            const px2=cx+vx*age*55;
+            const py2=cy+vy*age*55+0.5*gravity*age*age*3500;
+            const op=Math.max(0,1-pct*1.4);
+            const sc=Math.max(0,1-pct*0.6);
+            p.style.left=px2+'px'; p.style.top=py2+'px';
+            p.style.opacity=op;
+            p.style.transform=`rotate(${initAngleDeg+pct*360*Math.sign(vx)}deg) scale(${sc})`;
+            requestAnimationFrame(anim);
+          }
+          requestAnimationFrame(anim);
+        }
+      }, delay);
+    }
+
+    // Primary burst from center
+    spawnBurst(epicX, epicY, 200, 14, 0);
+    // Secondary bursts from random points around screen
+    setTimeout(()=>spawnBurst(epicX*0.3, epicY*0.4, 80, 10, 0),150);
+    setTimeout(()=>spawnBurst(epicX*1.7, epicY*0.3, 80, 10, 0),220);
+    setTimeout(()=>spawnBurst(epicX*0.4, epicY*1.6, 80, 10, 0),280);
+    setTimeout(()=>spawnBurst(epicX*1.6, epicY*1.7, 80, 10, 0),350);
+    // Final debris rain
+    setTimeout(()=>spawnBurst(epicX, epicY*0.2, 60, 6, 0),500);
+
+    // Heat shimmer overlay
+    const haze=document.createElement('div');
+    haze.style.cssText=`
+      position:fixed;inset:0;pointer-events:none;z-index:99993;
+      background:radial-gradient(ellipse at 50% 50%, rgba(255,120,20,0.18) 0%, transparent 70%);
+      animation:hazeOut 5s ease-out both;
+    `;
+    if(!document.getElementById('_hazeKF')){
+      const st=document.createElement('style'); st.id='_hazeKF';
+      st.textContent='@keyframes hazeOut{0%{opacity:1}100%{opacity:0}}';
+      document.head.appendChild(st);
+    }
+    document.body.appendChild(haze);
+
+    setTimeout(()=>{ container.remove(); haze.remove(); }, 4000);
+  }
+
 })();
 </script>
 </body>
