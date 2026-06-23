@@ -513,6 +513,19 @@
     /* ── HERO ── */
     #sec-hero { background: #fff; position: relative; }
     #sec-hero > .section-inner { align-items: center; text-align: center; position: relative; z-index: 2; padding-top: 22vh; }
+
+    /* ── Hero fluid background canvas (light mode only) ── */
+    #heroArtCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.5s;
+    }
+    body.dark-mode #heroArtCanvas { opacity: 0; pointer-events: none; }
     .hero-scroll-hint { position: absolute; z-index: 2; }
     .hero-eyebrow {
       font-family: 'Cinzel', serif; font-size: clamp(7px, 0.9vw, 10px);
@@ -554,7 +567,7 @@
       pointer-events: none;
     }
     .hero-scroll-hint::after { display: none; }
-    /* ── Hero vertical lines (hanya di sec-hero) ── */
+    /* ── Hero stars (hanya di sec-hero) ── */
     .vline-container {
       position: absolute;
       inset: 0;
@@ -567,20 +580,24 @@
     .section.page-active .vline-container { opacity: 1; }
     .vline {
       position: absolute;
-      top: 50%;
-      transform: translateY(-50%) scaleY(0);
-      width: 1px;
-      height: 28%;
-      background: linear-gradient(to bottom, transparent 0%, #aaa 25%, #aaa 75%, transparent 100%);
-      transform-origin: top;
+      color: #fff;
+      pointer-events: none;
+      display: none;
+      background: transparent;
+      line-height: 1;
+      font-style: normal;
+      text-shadow: 0 0 6px rgba(255,255,255,0.9), 0 0 14px rgba(255,255,255,0.5);
+    }
+    body.dark-mode .vline {
+      display: block;
     }
     @keyframes vlineGrow {
-      0%   { transform: translateY(-50%) scaleY(0); transform-origin: top;    opacity: 0; }
-      10%  { opacity: 1; }
-      45%  { transform: translateY(-50%) scaleY(1); transform-origin: top;    opacity: 1; }
-      55%  { transform: translateY(-50%) scaleY(1); transform-origin: bottom; opacity: 1; }
-      90%  { opacity: 0.3; }
-      100% { transform: translateY(-50%) scaleY(0); transform-origin: bottom; opacity: 0; }
+      0%   { opacity: 0; transform: scale(0) rotate(0deg); }
+      10%  { opacity: 0.9; transform: scale(1.1) rotate(12deg); }
+      40%  { opacity: 0.7; transform: scale(0.95) rotate(-6deg); }
+      60%  { opacity: 0.6; transform: scale(1.02) rotate(3deg); }
+      85%  { opacity: 0.3; transform: scale(1) rotate(0deg); }
+      100% { opacity: 0; transform: scale(0) rotate(-10deg); }
     }
     .section.page-active .hero-eyebrow, .section.page-active .hero-name,
     .section.page-active .hero-tagline, .section.page-active .hero-cta,
@@ -1642,7 +1659,7 @@
   #clockWidget {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
     margin-right: 10px;
     cursor: pointer;
@@ -1655,6 +1672,7 @@
     transition: background 0.2s, border-color 0.2s, transform 0.15s;
     position: relative;
     overflow: hidden;
+    text-align: center;
   }
   #clockWidget:hover {
     background: rgba(0,0,0,0.07);
@@ -1882,6 +1900,7 @@
 
   <!-- HERO -->
   <section class="section" id="sec-hero">
+    <canvas id="heroArtCanvas"></canvas>
     <div class="vline-container" id="vlineContainer"></div>
     <div id="doorContainer"></div>
     <div class="section-inner">
@@ -2599,45 +2618,77 @@
 (function() {
   const container = document.getElementById('vlineContainer');
   if (!container) return;
-  const LINE_COUNT = 5;
+  const STAR_COUNT = 8;
 
-  // Buat elemen garis
-  for (let i = 0; i < LINE_COUNT; i++) {
-    const el = document.createElement('div');
+  // Tidak perlu filter SVG — pakai CSS drop-shadow
+
+  // Buat elemen bintang sebagai span teks ✦
+  for (let i = 0; i < STAR_COUNT; i++) {
+    const el = document.createElement('span');
     el.className = 'vline';
+    el.textContent = '✦';
     container.appendChild(el);
   }
 
-  const lineEls = container.querySelectorAll('.vline');
+  const starEls = Array.from(container.querySelectorAll('.vline'));
 
-  function spawnLine(el, delay) {
-    setTimeout(function go() {
-      const left    = Math.random() * 90 + 5;          // 5%–95%
-      const dur     = 5000 + Math.random() * 5000;     // 5–10 detik
-      const opScale = 0.07 + Math.random() * 0.12;     // opacity tipis
+  function spawnStar(el) {
+    // Saat animasi selesai, spawn ulang
+    function schedule() {
+      const wait = 1500 + Math.random() * 3000;
+      setTimeout(() => doSpawn(), wait);
+    }
 
-      el.style.left                    = left + '%';
-      el.style.opacity                 = opScale;
-      el.style.animationName           = 'none';
-      el.style.animationDuration       = dur + 'ms';
-      void el.offsetWidth;
-      el.style.animationName           = 'vlineGrow';
-      el.style.animationTimingFunction = 'ease-in-out';
-      el.style.animationFillMode       = 'both';
+    function doSpawn() {
+      // Jangan spawn kalau bukan dark mode
+      if (!document.body.classList.contains('dark-mode')) {
+        schedule();
+        return;
+      }
 
-      // Respawn setelah selesai + jeda panjang agar tidak rapat
-      setTimeout(go, dur + 2500 + Math.random() * 4000);
-    }, delay);
+      const size = 8 + Math.random() * 10;             // 8–18px font-size
+      const dur  = 3000 + Math.random() * 4000;        // 3–7 detik
+
+      el.style.cssText = [
+        'position:absolute',
+        'color:#fff',
+        'pointer-events:none',
+        'display:block',
+        'background:transparent',
+        'line-height:1',
+        'text-shadow:0 0 6px rgba(255,255,255,0.9),0 0 14px rgba(255,255,255,0.5)',
+        `left:${Math.random() * 86 + 5}%`,
+        `top:${Math.random() * 68 + 10}%`,
+        `font-size:${size}px`,
+        'opacity:0',
+        'animation:none',
+      ].join(';') + ';';
+
+      // Force reflow lalu mulai animasi
+      void el.getBoundingClientRect();
+
+      el.style.animation = `vlineGrow ${dur}ms ease-in-out forwards`;
+
+      // Setelah animasi selesai, respawn
+      el.addEventListener('animationend', function handler() {
+        el.removeEventListener('animationend', handler);
+        el.style.animation = 'none';
+        el.style.opacity = '0';
+        schedule();
+      }, { once: true });
+    }
+
+    doSpawn();
   }
 
-  // Mulai setelah hero text muncul (~1.5 detik setelah page-active)
-  // Cek kapan sec-hero dapat class page-active
   const heroEl = document.getElementById('sec-hero');
   function tryStart() {
     if (heroEl && heroEl.classList.contains('page-active')) {
-      lineEls.forEach((el, i) => spawnLine(el, 1500 + i * 900 + Math.random() * 1200));
+      // Stagger awal tiap bintang
+      starEls.forEach((el, i) => {
+        setTimeout(() => spawnStar(el), 800 + i * 500 + Math.random() * 600);
+      });
     } else {
-      // Coba lagi tiap 200ms
       setTimeout(tryStart, 200);
     }
   }
@@ -12396,6 +12447,238 @@ function setMenuIcon(sectionId) {
     setTimeout(()=>{ container.remove(); haze.remove(); }, 4000);
   }
 
+})();
+</script>
+
+<script>
+/* ── Hero Fluid Background (light mode only) ── */
+(function() {
+  const heroEl    = document.getElementById('sec-hero');
+  const artCanvas = document.getElementById('heroArtCanvas');
+  if (!artCanvas || !heroEl) return;
+  const ctx = artCanvas.getContext('2d');
+
+  let W, H, animId, running = false;
+
+  function resize() {
+    W = artCanvas.width  = heroEl.offsetWidth  || window.innerWidth;
+    H = artCanvas.height = heroEl.offsetHeight || window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const CFG = {
+    dustCount  : 7,
+    waveHeight : 55,
+    gravity    : 0.22,
+    dustColors : [
+      { r: 17,  g: 17,  b: 17  },
+      { r: 44,  g: 44,  b: 44  },
+      { r: 68,  g: 68,  b: 68  },
+      { r: 85,  g: 85,  b: 85  },
+      { r: 102, g: 102, b: 102 }
+    ],
+    waveColors : ['rgba(0,0,0,0.05)', 'rgba(85,85,85,0.05)', 'rgba(153,153,153,0.05)'],
+    dripColors : ['#333333', '#555555', '#777777']
+  };
+
+  const dustArr = [], dripArr = [], splashArr = [], waveArr = [];
+
+  class Dust {
+    constructor() { this.reset(); this.y = Math.random() * H; }
+    reset() {
+      this.size         = Math.random() * 6 + 6;
+      this.x            = Math.random() * W;
+      this.y            = H + 50;
+      this.normalSpeed  = Math.random() * 0.5 + 0.4;
+      this.waterSpeed   = 3.5;
+      this.speed        = this.waterSpeed;
+      this.drift        = (Math.random() - 0.5) * 0.1;
+      this.baseColor    = CFG.dustColors[Math.floor(Math.random() * CFG.dustColors.length)];
+      this.currentAlpha = 1.0; this.targetAlpha = 1.0;
+      this.hasShed = false; this.hasEmerged = false;
+      this.wobbleAngle      = Math.random() * Math.PI * 2;
+      this.wobbleSpeed      = Math.random() * 0.05 + 0.03;
+      this.wobbleRangeWater = Math.random() * 0.4 + 0.3;
+      this.wobbleRangeAir   = Math.random() * 0.08 + 0.04;
+      this.willExplode = Math.random() > 0.5;
+      this.explodeAtY  = Math.random() * (H - CFG.waveHeight - 50) + 20;
+    }
+    update(waveY) {
+      this.wobbleAngle += this.wobbleSpeed;
+      if (this.y > waveY) {
+        this.speed = this.waterSpeed;
+        this.x += Math.sin(this.wobbleAngle) * this.wobbleRangeWater + this.drift;
+        this.targetAlpha = 1.0;
+      } else {
+        this.speed = this.normalSpeed;
+        this.x += Math.sin(this.wobbleAngle) * this.wobbleRangeAir + this.drift;
+        this.targetAlpha = 0.75;
+        if (this.willExplode && this.y <= this.explodeAtY) {
+          const sc = `rgba(${this.baseColor.r},${this.baseColor.g},${this.baseColor.b},${this.currentAlpha})`;
+          burst(this.x, this.y, sc, 'emergence');
+          dripArr.push(new Drip(this.x, this.y + 2, waveY, CFG.dripColors[Math.floor(Math.random() * CFG.dripColors.length)]));
+          this.reset(); return;
+        }
+      }
+      this.currentAlpha += (this.targetAlpha - this.currentAlpha) * 0.1;
+      this.y -= this.speed;
+      if (this.y < -50) this.reset();
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${this.baseColor.r},${this.baseColor.g},${this.baseColor.b},${this.currentAlpha})`;
+      ctx.fill();
+    }
+  }
+
+  class Drip {
+    constructor(x, y, targetY, color) {
+      this.x = x + (Math.random() - 0.5) * 4;
+      this.y = y; this.targetY = targetY; this.color = color;
+      this.vy = 0.3; this.width = Math.random() * 0.5 + 0.8;
+      this.height = this.width * 2.5; this.isDead = false;
+    }
+    update() {
+      this.vy += CFG.gravity; this.y += this.vy;
+      if (this.y >= this.targetY) {
+        this.isDead = true;
+        burst(this.x, this.targetY, this.color, 'impact');
+        waveArr.push({ currentX: this.x, speed: (Math.random() > 0.5 ? 1 : -1) * 0.8,
+          amplitude: -2.5, spreadWidth: 30, frequency: 0.04, bounceCount: 0, maxBounces: 4 });
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.ellipse(this.x, this.y, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+      ctx.fillStyle = this.color; ctx.fill();
+    }
+  }
+
+  class Splash {
+    constructor(x, y, color, type) {
+      this.x = x; this.y = y; this.color = color;
+      this.size = Math.random() * 1.0 + 0.4;
+      this.alpha = 1; this.isDead = false;
+      if (type === 'emergence') {
+        const a = (Math.random() - 0.5) * Math.PI * 2, f = Math.random() * 1.2 + 0.6;
+        this.vx = Math.sin(a) * f; this.vy = Math.cos(a) * f;
+        this.drag = 0.96; this.fadeSpeed = Math.random() * 0.02 + 0.03;
+      } else {
+        this.vx = (Math.random() - 0.5) * 1.2; this.vy = -(Math.random() * 0.8 + 0.4);
+        this.drag = 0.96; this.fadeSpeed = 0.05;
+      }
+    }
+    update() {
+      this.vx *= this.drag; this.vy *= this.drag;
+      this.vy += CFG.gravity * 0.2;
+      this.x += this.vx; this.y += this.vy;
+      this.alpha -= this.fadeSpeed;
+      if (this.alpha <= 0) this.isDead = true;
+    }
+    draw() {
+      ctx.save(); ctx.globalAlpha = this.alpha;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color; ctx.fill(); ctx.restore();
+    }
+  }
+
+  function burst(x, y, color, type) {
+    const count = type === 'emergence' ? Math.floor(Math.random() * 4) + 5 : 2;
+    for (let i = 0; i < count; i++) splashArr.push(new Splash(x, y, color, type));
+  }
+
+  function fluidDisplacement(x) {
+    let d = 0;
+    for (const w of waveArr) {
+      const dx = x - w.currentX;
+      d += w.amplitude * Math.exp(-(dx * dx) / (2 * w.spreadWidth * w.spreadWidth)) * Math.cos(dx * w.frequency);
+    }
+    return d;
+  }
+
+  function updateWaves() {
+    for (let i = waveArr.length - 1; i >= 0; i--) {
+      const w = waveArr[i];
+      w.currentX += w.speed;
+      if (w.currentX <= 0 || w.currentX >= W) {
+        w.speed *= -1; w.amplitude *= 0.85; w.bounceCount++;
+      }
+      if (w.maxBounces && w.bounceCount >= w.maxBounces) waveArr.splice(i, 1);
+    }
+  }
+
+  function drawWave(offsetY, color) {
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    const now = performance.now();
+    for (let x = 0; x <= W; x += 2) {
+      const fd  = fluidDisplacement(x);
+      const amb = Math.sin(x * 0.005 + now * 0.0006) * 3.5
+                + Math.cos(x * 0.012 - now * 0.0012) * Math.sin(x * 0.006 + now * 0.0006) * 1.5;
+      ctx.lineTo(x, H - CFG.waveHeight + offsetY + fd + amb);
+    }
+    ctx.lineTo(W, H); ctx.closePath();
+    ctx.fillStyle = color; ctx.fill();
+  }
+
+  for (let i = 0; i < CFG.dustCount; i++) dustArr.push(new Dust());
+
+  function tick() {
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H);
+    updateWaves();
+
+    dustArr.forEach(dust => {
+      const waveY = H - CFG.waveHeight + fluidDisplacement(dust.x);
+      dust.update(waveY); dust.draw();
+
+      if (dust.y <= waveY + 8 && dust.y >= waveY - 12 && !dust.hasEmerged) {
+        const sc = `rgba(${dust.baseColor.r},${dust.baseColor.g},${dust.baseColor.b},0.6)`;
+        burst(dust.x, waveY - 2, sc, 'emergence');
+        waveArr.push({ currentX: dust.x, speed: -1.4, amplitude: -14, spreadWidth: 60, frequency: 0.02, bounceCount: 0 });
+        waveArr.push({ currentX: dust.x, speed:  1.4, amplitude: -14, spreadWidth: 60, frequency: 0.02, bounceCount: 0 });
+        dust.hasEmerged = true;
+      }
+      if (dust.y <= waveY - 140 && dust.y >= waveY - 220 && !dust.hasShed) {
+        dripArr.push(new Drip(dust.x, dust.y + 5, waveY, CFG.dripColors[Math.floor(Math.random() * CFG.dripColors.length)]));
+        dust.hasShed = true;
+      }
+      if (dust.y < waveY - 250) dust.hasShed = false;
+      if (dust.y > waveY + 40 || dust.y > H) { dust.hasEmerged = false; dust.hasShed = false; }
+    });
+
+    for (let i = dripArr.length - 1; i >= 0; i--) {
+      const d = dripArr[i]; d.update();
+      d.isDead ? dripArr.splice(i, 1) : d.draw();
+    }
+    for (let i = splashArr.length - 1; i >= 0; i--) {
+      const s = splashArr[i]; s.update();
+      s.isDead ? splashArr.splice(i, 1) : s.draw();
+    }
+
+    drawWave(16, CFG.waveColors[2]);
+    drawWave(8,  CFG.waveColors[1]);
+    drawWave(0,  CFG.waveColors[0]);
+
+    animId = requestAnimationFrame(tick);
+  }
+
+  function start() { if (!running) { running = true; resize(); tick(); } }
+  function stop()  { running = false; if (animId) cancelAnimationFrame(animId); ctx.clearRect(0, 0, W, H); }
+
+  function checkState() {
+    const isDark   = document.body.classList.contains('dark-mode');
+    const isActive = heroEl.classList.contains('page-active');
+    (isDark || !isActive) ? stop() : start();
+  }
+
+  const obs = new MutationObserver(checkState);
+  obs.observe(heroEl,        { attributes: true, attributeFilter: ['class'] });
+  obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+  checkState();
 })();
 </script>
 </body>
