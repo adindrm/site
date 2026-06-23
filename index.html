@@ -970,7 +970,7 @@
     #sec-contact > .section-inner { align-items: center; text-align: center; }
     #sec-contact .section-label { color: #555; }
     #sec-contact .section-title { color: #fff; }
-    .contact-sub { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.2em; color: #666; margin-bottom: 32px; }
+    .contact-sub { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.2em; color: #666; margin-bottom: 52px; }
     .contact-email {
       display: inline-block; font-family: 'Cinzel', serif;
       font-size: clamp(16px, 2.5vw, 28px); font-weight: 700;
@@ -979,25 +979,54 @@
       transition: border-color 0.3s, color 0.3s;
     }
     .contact-email:hover { color: #ccc; border-color: #ccc; }
-    .contact-logo-wrap {
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 5px;
+    /* ── LSW CANVAS ── */
+    .lsw-canvas {
+      position: relative;
+      width: 280px; height: 280px;
+      background: transparent;
+      margin: 0 auto;
     }
-    .contact-logo-img {
-      max-height: clamp(198px, 8vw, 240px);
-      width: auto; max-width: 430px;
-      object-fit: contain;
+    .lsw-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: contain; display: block;
+      -webkit-mask-image: radial-gradient(circle at 50.07% 27.88%, transparent 0 18.6%, #fff 18.9% 100%);
+              mask-image: radial-gradient(circle at 50.07% 27.88%, transparent 0 18.6%, #fff 18.9% 100%);
       filter: brightness(0) invert(1);
     }
-    .contact-socials { display: flex; gap: 28px; justify-content: center; margin-top: 52px; flex-wrap: wrap; }
-    .social-link {
-      font-family: 'Cinzel', serif; font-size: 9px;
-      letter-spacing: 0.25em; color: #555; text-transform: uppercase;
-      text-decoration: none; transition: color 0.3s;
-      display: flex; align-items: center; gap: 6px;
+    .lsw-pos {
+      position: absolute;
+      left: 50.07%; top: 27.88%;
+      transform: translate(-50%, -50%);
     }
-    .social-link i { font-size: 13px; }
-    .social-link:hover { color: #fff; }
+    .lswbtn-main {
+      transform: scale(0.43); transform-origin: center;
+      display: flex; flex-direction: column; gap: 0.5em;
+    }
+    .lswbtn-up, .lswbtn-down { display: flex; flex-direction: row; gap: .5em; }
+    .lswbtn-card1,.lswbtn-card2,.lswbtn-card3,.lswbtn-card4 {
+      width:90px; height:90px; outline:none; border:none; background:#fff;
+      box-shadow: rgba(50,50,93,.25) 0 2px 5px -1px, rgba(0,0,0,.3) 0 1px 3px -1px;
+      transition:.2s ease-in-out; padding:0; cursor:pointer;
+    }
+    .lswbtn-card1 { border-radius:90px 5px 5px 5px; }
+    .lswbtn-card2 { border-radius:5px 90px 5px 5px; }
+    .lswbtn-card3 { border-radius:5px 5px 5px 90px; }
+    .lswbtn-card4 { border-radius:5px 5px 90px 5px; }
+    /* icon fill colors */
+    .lswbtn-ig    { margin-top:1.5em; margin-left:1.2em;  fill:#111; }
+    .lswbtn-tiktok{ margin-top:1.5em; margin-left:-.9em;  fill:#010101; }
+    .lswbtn-wa    { margin-top:-.6em; margin-left:1.2em;  fill:#111; }
+    .lswbtn-email { margin-top:-.9em; margin-left:-1.2em; fill:#555; }
+    /* hover states */
+    .lswbtn-card1:hover { scale:1.1; background-color:#111; }
+    .lswbtn-card1:hover .lswbtn-ig { fill:#fff; }
+    .lswbtn-card2:hover { scale:1.1; background-color:#010101; }
+    .lswbtn-card2:hover .lswbtn-tiktok { fill:#fff; }
+    .lswbtn-card3:hover { scale:1.1; background-color:#111; }
+    .lswbtn-card3:hover .lswbtn-wa { fill:#fff; }
+    .lswbtn-card4:hover { scale:1.1; background-color:#555; }
+    .lswbtn-card4:hover .lswbtn-email { fill:#fff; }
     .contact-inner {
       opacity: 0; transform: translateY(30px);
       transition: opacity 0.8s ease, transform 0.8s ease;
@@ -2184,16 +2213,28 @@
         <p class="section-label">Contact</p>
         <h2 class="section-title">Let's Work<br>Together.</h2>
         <p class="contact-sub">Have a project in mind? Reach out.</p>
-        <div class="contact-logo-wrap">
-          <img src="logo.png" alt="AIIDENTITY" class="contact-logo-img" onerror="this.style.display='none';document.getElementById('contact-logo-fallback').style.display='block'"/>
-          <span id="contact-logo-fallback" style="display:none;font-family:'Cinzel',serif;font-size:clamp(18px,3vw,32px);font-weight:700;letter-spacing:0.18em;color:#fff;">AIIDENTITY</span>
-        </div>
-        <div class="contact-socials">
-          <a href="https://www.instagram.com/aiidentity_studio/" class="social-link"><i class="fa-brands fa-instagram"></i> Instagram</a>
-          <a href="https://wa.me/62081524440619" class="social-link"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
-          <a href="https://www.tiktok.com/@aiidentity_studio" class="social-link"><i class="fa-brands fa-tiktok"></i> TikTok</a>
-          <a href="https://x.com/aiidentity_studio" class="social-link"><i class="fa-brands fa-x-twitter"></i> X</a>
-          <a href="mailto:aiidentity@icloud.com" class="social-link"><i class="fa-solid fa-envelope"></i> Email</a>
+        <div class="lsw-canvas">
+          <img class="lsw-img" src="logo.png" alt="AIIDENTITY">
+          <div class="lsw-pos">
+            <div class="lswbtn-main">
+              <div class="lswbtn-up">
+                <button class="lswbtn-card1" aria-label="Instagram" onclick="window.open('https://www.instagram.com/aiidentity_studio/','_blank')">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0,0,256,256" width="30" height="30" class="lswbtn-ig"><g transform="scale(8,8)"><path d="M11.46875,5c-3.55078,0 -6.46875,2.91406 -6.46875,6.46875v9.0625c0,3.55078 2.91406,6.46875 6.46875,6.46875h9.0625c3.55078,0 6.46875,-2.91406 6.46875,-6.46875v-9.0625c0,-3.55078 -2.91406,-6.46875 -6.46875,-6.46875zM11.46875,7h9.0625c2.47266,0 4.46875,1.99609 4.46875,4.46875v9.0625c0,2.47266 -1.99609,4.46875 -4.46875,4.46875h-9.0625c-2.47266,0 -4.46875,-1.99609 -4.46875,-4.46875v-9.0625c0,-2.47266 1.99609,-4.46875 4.46875,-4.46875zM21.90625,9.1875c-0.50391,0 -0.90625,0.40234 -0.90625,0.90625c0,0.50391 0.40234,0.90625 0.90625,0.90625c0.50391,0 0.90625,-0.40234 0.90625,-0.90625c0,-0.50391 -0.40234,-0.90625 -0.90625,-0.90625zM16,10c-3.30078,0 -6,2.69922 -6,6c0,3.30078 2.69922,6 6,6c3.30078,0 6,-2.69922 6,-6c0,-3.30078 -2.69922,-6 -6,-6zM16,12c2.22266,0 4,1.77734 4,4c0,2.22266 -1.77734,4 -4,4c-2.22266,0 -4,-1.77734 -4,-4c0,-2.22266 1.77734,-4 4,-4z"></path></g></svg>
+                </button>
+                <button class="lswbtn-card2" aria-label="TikTok" onclick="window.open('https://www.tiktok.com/@aiidentity_studio','_blank')">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="30" height="30" class="lswbtn-tiktok"><path d="M38.5 13.5c-3.5-1-6-4-6.5-7.5h-6v28.5c-.5 3-3 5.5-6 5.5-3.3 0-6-2.7-6-6s2.7-6 6-6c.6 0 1.1.1 1.6.2V22c-.5-.1-1.1-.1-1.6-.1-6.6 0-12 5.4-12 12s5.4 12 12 12c6.6 0 12-5.4 12-12V22.4c2.3 1.5 5 2.4 7.9 2.4V19c-1.5 0-2.9-.5-4.4-1.4l3.5-4.1z"/></svg>
+                </button>
+              </div>
+              <div class="lswbtn-down">
+                <button class="lswbtn-card3" aria-label="WhatsApp" onclick="window.open('https://wa.me/6281524440619','_blank')">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="30" height="30" class="lswbtn-wa"><path d="M24 4C12.95 4 4 12.95 4 24c0 3.74 1.02 7.24 2.78 10.27L4 44l10-2.72C17.02 43.04 20.42 44 24 44c11.05 0 20-8.95 20-20S35.05 4 24 4zm0 36c-3.3 0-6.38-.9-9.02-2.48l-.64-.38-6.63 1.74 1.77-6.46-.42-.67C7.96 29.27 7 26.74 7 24 7 14.61 14.61 7 24 7s17 7.61 17 17-7.61 17-17 17zm9.28-12.88c-.5-.25-2.96-1.46-3.42-1.63-.46-.17-.79-.25-1.12.25-.33.5-1.29 1.63-1.58 1.96-.29.33-.58.37-1.08.12-.5-.25-2.12-.78-4.04-2.49-1.49-1.33-2.5-2.97-2.79-3.47-.29-.5-.03-.77.22-1.02.22-.22.5-.58.75-.87.25-.29.33-.5.5-.83.17-.33.08-.62-.04-.87-.12-.25-1.12-2.71-1.54-3.71-.4-.97-.81-.84-1.12-.86-.29-.01-.62-.01-.96-.01s-.87.12-1.33.62c-.46.5-1.75 1.71-1.75 4.17s1.79 4.84 2.04 5.17c.25.33 3.52 5.37 8.52 7.53 1.19.51 2.12.82 2.84 1.05 1.2.38 2.28.33 3.14.2.96-.14 2.96-1.21 3.38-2.38.42-1.17.42-2.17.29-2.38-.12-.21-.46-.33-.96-.58z"/></svg>
+                </button>
+                <button class="lswbtn-card4" aria-label="Email" onclick="window.location.href='mailto:aiidentity@icloud.com'">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="30" height="30" class="lswbtn-email"><path d="M40 8H8C5.79 8 4 9.79 4 12v24c0 2.21 1.79 4 4 4h32c2.21 0 4-1.79 4-4V12c0-2.21-1.79-4-4-4zm0 8L24 26 8 16v-4l16 10 16-10v4z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- TEAM -->
