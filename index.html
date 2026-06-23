@@ -990,8 +990,8 @@
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: contain; display: block;
-      -webkit-mask-image: radial-gradient(circle at 50.07% 27.88%, transparent 0 18.6%, #fff 18.9% 100%);
-              mask-image: radial-gradient(circle at 50.07% 27.88%, transparent 0 18.6%, #fff 18.9% 100%);
+      -webkit-mask-image: radial-gradient(circle at 50.07% 27.88%, transparent 0 22.6%, #fff 18.9% 100%);
+              mask-image: radial-gradient(circle at 50.07% 27.88%, transparent 0 22.6%, #fff 18.9% 100%);
       filter: brightness(0) invert(1);
     }
     .lsw-pos {
@@ -1000,12 +1000,12 @@
       transform: translate(-50%, -50%);
     }
     .lswbtn-main {
-      transform: scale(0.43); transform-origin: center;
+      transform: scale(0.56); transform-origin: center;
       display: flex; flex-direction: column; gap: 0.5em;
     }
     .lswbtn-up, .lswbtn-down { display: flex; flex-direction: row; gap: .5em; }
     .lswbtn-card1,.lswbtn-card2,.lswbtn-card3,.lswbtn-card4 {
-      width:90px; height:90px; outline:none; border:none; background:#fff;
+      width:90px; height:90px; outline:none; border:1px solid #000000; background:#fff;
       box-shadow: rgba(50,50,93,.25) 0 2px 5px -1px, rgba(0,0,0,.3) 0 1px 3px -1px;
       transition:.2s ease-in-out; padding:0; cursor:pointer;
     }
