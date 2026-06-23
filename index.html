@@ -361,6 +361,22 @@
 
     /* Door knob — REMOVED */
     /* ── TEAM BLOCK (dalam sec-contact) ──────────────────────── */
+  .partner-block {
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid #e8e8e8;
+    width: 100%;
+  }
+  .partner-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: center;
+    margin-top: 24px;
+  }
+  .partner-avatar-wrap img {
+    border-radius: 50%;
+  }
   .team-block {
     margin-top: 40px;
     padding-top: 32px;
@@ -430,7 +446,7 @@
     z-index: 10000;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; pointer-events: none;
-    transition: opacity 0.25s;
+    transition: opacity 0.18s;
     backdrop-filter: blur(4px);
   }
   .team-card-overlay.active { opacity: 1; pointer-events: all; }
@@ -441,18 +457,16 @@
     width: min(300px, calc(100vw - 32px));
     display: flex; flex-direction: column; align-items: center; gap: 8px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.22);
-    transform: scale(0.92) translateY(12px);
-    transition: transform 0.3s cubic-bezier(0.34,1.3,0.64,1);
+    transform-origin: center center;
     position: relative;
   }
-  .team-card-overlay.active .team-card { transform: scale(1) translateY(0); }
   @keyframes teamCardIn {
     from { opacity: 0; transform: scale(0.88) translateY(20px); }
     to   { opacity: 1; transform: scale(1) translateY(0); }
   }
   @keyframes teamCardOut {
-    from { opacity: 1; transform: scale(1) translateY(0); }
-    to   { opacity: 0; transform: scale(0.92) translateY(12px); }
+    from { transform: scale(1);    opacity: 1; }
+    to   { transform: scale(0.08); opacity: 0; }
   }
   .team-card-close {
     position: absolute; top: 14px; right: 16px;
@@ -965,12 +979,24 @@
       transition: border-color 0.3s, color 0.3s;
     }
     .contact-email:hover { color: #ccc; border-color: #ccc; }
-    .contact-socials { display: flex; gap: 28px; justify-content: center; margin-top: 52px; }
+    .contact-logo-wrap {
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 8px;
+    }
+    .contact-logo-img {
+      max-height: clamp(48px, 8vw, 90px);
+      width: auto; max-width: 280px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+    .contact-socials { display: flex; gap: 28px; justify-content: center; margin-top: 52px; flex-wrap: wrap; }
     .social-link {
       font-family: 'Cinzel', serif; font-size: 9px;
-      letter-spacing: 0.35em; color: #555; text-transform: uppercase;
+      letter-spacing: 0.25em; color: #555; text-transform: uppercase;
       text-decoration: none; transition: color 0.3s;
+      display: flex; align-items: center; gap: 6px;
     }
+    .social-link i { font-size: 13px; }
     .social-link:hover { color: #fff; }
     .contact-inner {
       opacity: 0; transform: translateY(30px);
@@ -2158,12 +2184,16 @@
         <p class="section-label">Contact</p>
         <h2 class="section-title">Let's Work<br>Together.</h2>
         <p class="contact-sub">Have a project in mind? Reach out.</p>
-        <a href="mailto:aiidentity@icloud.com" class="contact-email">aiidentity@icloud.com</a>
+        <div class="contact-logo-wrap">
+          <img src="logo.png" alt="AIIDENTITY" class="contact-logo-img" onerror="this.style.display='none';document.getElementById('contact-logo-fallback').style.display='block'"/>
+          <span id="contact-logo-fallback" style="display:none;font-family:'Cinzel',serif;font-size:clamp(18px,3vw,32px);font-weight:700;letter-spacing:0.18em;color:#fff;">AIIDENTITY</span>
+        </div>
         <div class="contact-socials">
-          <a href="#" class="social-link">Instagram</a>
-          <a href="#" class="social-link">Behance</a>
-          <a href="#" class="social-link">Dribbble</a>
-          <a href="#" class="social-link">LinkedIn</a>
+          <a href="https://www.instagram.com/aiidentity_studio/" class="social-link"><i class="fa-brands fa-instagram"></i> Instagram</a>
+          <a href="https://wa.me/62081524440619" class="social-link"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+          <a href="https://www.tiktok.com/@aiidentity_studio" class="social-link"><i class="fa-brands fa-tiktok"></i> TikTok</a>
+          <a href="https://x.com/aiidentity_studio" class="social-link"><i class="fa-brands fa-x-twitter"></i> X</a>
+          <a href="mailto:aiidentity@icloud.com" class="social-link"><i class="fa-solid fa-envelope"></i> Email</a>
         </div>
 
         <!-- TEAM -->
@@ -2206,6 +2236,30 @@
           </div>
         </div>
 
+        <!-- MITRA -->
+        <div class="team-block partner-block">
+          <p class="team-block-label">Partners</p>
+          <div class="partner-grid">
+
+            <div class="team-member" onclick="openPartnerCard(0)">
+              <div class="team-avatar-wrap partner-avatar-wrap">
+                <img src="mitra/gema.png" alt="Gema" onerror="this.src='https://ui-avatars.com/api/?name=Gema&background=222&color=fff&size=80'"/>
+              </div>
+              <div class="team-member-name">Gema</div>
+            </div>
+
+            <div class="team-member" onclick="openPartnerCard(1)">
+              <div class="team-avatar-wrap partner-avatar-wrap">
+                <img src="mitra/puncaktangan.png" alt="Puncak Tangan" onerror="this.src='https://ui-avatars.com/api/?name=PT&background=222&color=fff&size=80'"/>
+              </div>
+              <div class="team-member-name">Puncak Tangan</div>
+            </div>
+
+          </div>
+        </div>
+
+        
+
       </div>
     </div>
     <footer class="site-footer">All Rights Reserved AIIDENTITY</footer>
@@ -2220,6 +2274,17 @@
     <div class="team-card-name" id="teamCardName"></div>
     <div class="team-card-role" id="teamCardRole"></div>
     <div class="team-card-socials" id="teamCardSocials"></div>
+  </div>
+</div>
+
+<!-- PARTNER CARD OVERLAY -->
+<div class="team-card-overlay" id="partnerCardOverlay" onclick="closePartnerCard(event)">
+  <div class="team-card" id="partnerCard">
+    <button class="team-card-close" onclick="closePartnerCardDirect()">✕</button>
+    <div class="team-card-avatar"><img id="partnerCardImg" src="" alt=""/></div>
+    <div class="team-card-name" id="partnerCardName"></div>
+    <div class="team-card-role" id="partnerCardRole"></div>
+    <div class="team-card-socials" id="partnerCardSocials"></div>
   </div>
 </div>
 
@@ -5465,6 +5530,7 @@ function setMenuIcon(sectionId) {
       'contact-label':   'Contact',
       'contact-title':   "Let's Work<br>Together.",
       'contact-sub':     'Have a project in mind? Reach out.',
+      'partner-label':   'Partners',
       'team-label':      'The Team',
       'footer':          'All Rights Reserved AIIDENTITY',
       'menu-home':       'Home',
@@ -5538,6 +5604,7 @@ function setMenuIcon(sectionId) {
       'contact-label':   'Kontak',
       'contact-title':   'Mari Bekerja<br>Bersama.',
       'contact-sub':     'Punya proyek? Hubungi saya.',
+      'partner-label':   'Mitra',
       'team-label':      'Tim Kami',
       'footer':          'Hak Cipta Dilindungi AIIDENTITY',
       'menu-home':       'Beranda',
@@ -5638,8 +5705,9 @@ function setMenuIcon(sectionId) {
       contactSection.querySelector('.section-label').textContent = t['contact-label'];
       contactSection.querySelector('.section-title').innerHTML = t['contact-title'];
       contactSection.querySelector('.contact-sub').textContent = t['contact-sub'];
-      const teamLbl = contactSection.querySelector('.team-block-label');
-      if (teamLbl) teamLbl.textContent = t['team-label'];
+      const allTeamLbls = contactSection.querySelectorAll('.team-block-label');
+      if (allTeamLbls[0]) allTeamLbls[0].textContent = t['team-label'];
+      if (allTeamLbls[1]) allTeamLbls[1].textContent = t['partner-label'];
       const footer = contactSection.querySelector('.site-footer');
       if (footer) footer.textContent = t['footer'];
     }
@@ -11357,9 +11425,8 @@ function setMenuIcon(sectionId) {
       role: 'Creative Director',
       img: 'profiltim/adiindra.png',
       socials: [
-        { label: 'Instagram', url: '#' },
-        { label: 'Behance',   url: '#' },
-        { label: 'LinkedIn',  url: '#' }
+        { label: 'Instagram', url: 'https://www.instagram.com/ad_indrm/', icon: 'fa-brands fa-instagram' },
+        { label: 'WhatsApp',  url: 'https://wa.me/6281524440619', icon: 'fa-brands fa-whatsapp' }
       ]
     },
     {
@@ -11367,8 +11434,8 @@ function setMenuIcon(sectionId) {
       role: 'Visual Designer',
       img: 'profiltim/amil.png',
       socials: [
-        { label: 'Instagram', url: '#' },
-        { label: 'Dribbble',  url: '#' }
+        { label: 'Instagram', url: 'https://www.instagram.com/amil_amd/', icon: 'fa-brands fa-instagram' },
+        { label: 'WhatsApp',  url: 'https://wa.me/6281524440619', icon: 'fa-brands fa-whatsapp' }
       ]
     },
     {
@@ -11376,8 +11443,8 @@ function setMenuIcon(sectionId) {
       role: 'Brand Strategist',
       img: 'profiltim/pujipurnama.png',
       socials: [
-        { label: 'LinkedIn',  url: '#' },
-        { label: 'Twitter',   url: '#' }
+        { label: 'Instagram', url: 'https://www.instagram.com/pujipurnamasr/', icon: 'fa-brands fa-instagram' },
+        { label: 'WhatsApp',  url: 'https://wa.me/6281524440619', icon: 'fa-brands fa-whatsapp' }
       ]
     },
     {
@@ -11385,8 +11452,28 @@ function setMenuIcon(sectionId) {
       role: 'Motion Designer',
       img: 'profiltim/syahdan.png',
       socials: [
-        { label: 'Instagram', url: '#' },
-        { label: 'Behance',   url: '#' }
+        { label: 'Instagram', url: 'https://www.instagram.com/syahdan_1506/', icon: 'fa-brands fa-instagram' },
+        { label: 'WhatsApp',  url: 'https://wa.me/6281524440619', icon: 'fa-brands fa-whatsapp' }
+      ]
+    }
+  ];
+
+  // Partner data
+  const _partnerData = [
+    {
+      name: 'Gema',
+      role: 'Partner Brand',
+      img: 'mitra/gema.png',
+      socials: [
+        { label: 'Instagram', url: 'https://www.instagram.com/gemavisual.studio/', icon: 'fa-brands fa-instagram' }
+      ]
+    },
+    {
+      name: 'Puncak Tangan',
+      role: 'Partner Brand',
+      img: 'mitra/puncaktangan.png',
+      socials: [
+        { label: 'Instagram', url: 'https://www.instagram.com/puncaktangan.id/', icon: 'fa-brands fa-instagram' }
       ]
     }
   ];
@@ -11428,12 +11515,12 @@ function setMenuIcon(sectionId) {
     document.getElementById('teamCardRole').textContent = d.role;
     const soc = document.getElementById('teamCardSocials');
     soc.innerHTML = d.socials.map(s =>
-      `<a class="team-card-social" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`
+      `<a class="team-card-social" href="${s.url}" target="_blank" rel="noopener">${s.icon ? `<i class="${s.icon}"></i> ` : ''}${s.label}</a>`
     ).join('');
     const overlay = document.getElementById('teamCardOverlay');
     const card    = document.getElementById('teamCard');
     overlay.classList.add('active');
-    card.style.animation = 'teamCardIn 0.35s cubic-bezier(0.34,1.3,0.64,1) both';
+    card.style.animation = 'teamCardIn 0.35s cubic-bezier(0.34,1.3,0.64,1) forwards';
     document.body.style.overflow = 'hidden';
     _teamCardSound(true);
   };
@@ -11447,16 +11534,65 @@ function setMenuIcon(sectionId) {
     const card    = document.getElementById('teamCard');
     if (!overlay.classList.contains('active')) return;
     _teamCardSound(false);
-    card.style.animation = 'teamCardOut 0.25s cubic-bezier(0.4,0,0.6,1) both';
+    card.style.animation = 'none';
+    void card.offsetWidth;
+    card.style.animation = 'teamCardOut 0.2s ease-in forwards';
     setTimeout(() => {
+      card.style.visibility = 'hidden';
       overlay.classList.remove('active');
-      card.style.animation = '';
-      document.body.style.overflow = '';
-    }, 240);
+      setTimeout(() => {
+        card.style.animation = '';
+        card.style.visibility = '';
+        document.body.style.overflow = '';
+      }, 200);
+    }, 200);
+  };
+
+  // ── PARTNER CARD ──────────────────────────────────────────
+  window.openPartnerCard = function(idx) {
+    const d = _partnerData[idx];
+    if (!d) return;
+    document.getElementById('partnerCardImg').src  = d.img;
+    document.getElementById('partnerCardImg').alt  = d.name;
+    document.getElementById('partnerCardName').textContent = d.name;
+    document.getElementById('partnerCardRole').textContent = d.role;
+    const soc = document.getElementById('partnerCardSocials');
+    soc.innerHTML = d.socials.map(s =>
+      `<a class="team-card-social" href="${s.url}" target="_blank" rel="noopener">${s.icon ? `<i class="${s.icon}"></i> ` : ''}${s.label}</a>`
+    ).join('');
+    const overlay = document.getElementById('partnerCardOverlay');
+    const card    = document.getElementById('partnerCard');
+    overlay.classList.add('active');
+    card.style.animation = 'teamCardIn 0.35s cubic-bezier(0.34,1.3,0.64,1) forwards';
+    document.body.style.overflow = 'hidden';
+    _teamCardSound(true);
+  };
+
+  window.closePartnerCard = function(e) {
+    if (e.target === document.getElementById('partnerCardOverlay')) closePartnerCardDirect();
+  };
+
+  window.closePartnerCardDirect = function() {
+    const overlay = document.getElementById('partnerCardOverlay');
+    const card    = document.getElementById('partnerCard');
+    if (!overlay.classList.contains('active')) return;
+    _teamCardSound(false);
+    card.style.animation = 'none';
+    void card.offsetWidth;
+    card.style.animation = 'teamCardOut 0.2s ease-in forwards';
+    setTimeout(() => {
+      card.style.visibility = 'hidden';
+      overlay.classList.remove('active');
+      setTimeout(() => {
+        card.style.animation = '';
+        card.style.visibility = '';
+        document.body.style.overflow = '';
+      }, 200);
+    }, 200);
   };
 
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeTeamCardDirect();
+    if (e.key === 'Escape') { closeTeamCardDirect(); closePartnerCardDirect(); }
   });
 
   waitForMainPageAndShow();
@@ -11485,13 +11621,6 @@ function setMenuIcon(sectionId) {
 
   // ── Normal clock ──
   let clockInterval = null;
-  function startClock() {
-    if (clockInterval) return;
-    const tick = () => { const r=realTime(); timeEl.textContent=r.timeStr; dateEl.textContent=r.dateStr; };
-    tick();
-    clockInterval = setInterval(tick, 1000);
-  }
-  startClock();
 
   // ── AudioContext ──
   function getAC() {
@@ -11718,12 +11847,9 @@ function setMenuIcon(sectionId) {
     }
     requestAnimationFrame(animateShards);
 
-    // restore original elements after animation
-    setTimeout(() => {
-      allEls.forEach(el => { el.style.visibility=''; });
-    }, TOTAL_DUR);
-
-    return TOTAL_DUR;
+    // Do NOT auto-restore here — recoverSection controls visibility timing
+    // Return the hidden element list so caller can restore them
+    return { dur: TOTAL_DUR, hiddenEls: Array.from(allEls) };
   }
 
   // ── Screen shake (multi-wave) ──
@@ -11849,12 +11975,19 @@ function setMenuIcon(sectionId) {
   }
   buildClockSpans();
 
-  // patch startClock to update spans
-  const _origStartClock = startClock;
+  // ── Span-aware startClock (definitive) ──
   function startClock() {
-    if (clockInterval) return;
-    buildClockSpans();
-    const tick = () => {
+    clearInterval(clockInterval); clockInterval = null;
+    // Rebuild spans setiap kali (bersihkan innerHTML lama)
+    const r0 = realTime();
+    timeEl.innerHTML =
+      `<span id="cHH">${r0.timeStr.slice(0,2)}</span>` +
+      `<span class="csep">:</span>` +
+      `<span id="cMM">${r0.timeStr.slice(3,5)}</span>` +
+      `<span class="csep">:</span>` +
+      `<span id="cSS">${r0.timeStr.slice(6,8)}</span>`;
+    dateEl.textContent = r0.dateStr;
+    clockInterval = setInterval(() => {
       const r = realTime();
       const hh=document.getElementById('cHH'),
             mm=document.getElementById('cMM'),
@@ -11863,12 +11996,8 @@ function setMenuIcon(sectionId) {
       if(mm) mm.textContent=r.timeStr.slice(3,5);
       if(ss) ss.textContent=r.timeStr.slice(6,8);
       dateEl.textContent=r.dateStr;
-    };
-    tick();
-    clockInterval = setInterval(tick, 1000);
+    }, 1000);
   }
-  // restart with span-aware version
-  clearInterval(clockInterval); clockInterval=null;
   startClock();
 
   function applyClickColour(n) {
@@ -12009,65 +12138,66 @@ function setMenuIcon(sectionId) {
   }
 
   // ── Recovery: flash kedua → animasi masuk section aktif ──
-  function recoverSection() {
-    // flash kedua
-    doFlash();
-
-    const sec = getActiveSection();
-    if (!sec) {
-      // fallback tanpa section
-      clearEgg();
-      widget.classList.remove('egg-countdown','egg-tick');
-      widget.style.boxShadow=''; widget.style.borderColor='';
-      const mp=document.getElementById('mainPage');
-      if(mp) mp.style.transform='';
-      startClock();
-      return;
-    }
-
-    // Sembunyikan dulu semua elemen animatable dalam section
-    const animEls = sec.querySelectorAll(
-      '.hero-eyebrow, .hero-name, .hero-divider, .hero-tagline, .hero-cta, .hero-scroll-hint,' +
-      '.about-photo, .about-content, .about-photo-accent,' +
-      '.service-card, .works-header, .work-item, .works-cat-heading, .works-sub-heading,' +
-      '.contact-inner, .store-header, .store-tabs, .store-card, .store-sub-desc'
-    );
-
-    // Reset semua elemen ke keadaan tersembunyi (posisi awal animasi)
-    animEls.forEach(el => {
-      el.style.transition = 'none';
-      el.style.opacity    = '0';
-      if (el.classList.contains('hero-divider')) {
-        el.style.transform = 'scaleX(0)';
-      } else if (el.classList.contains('about-photo')) {
-        el.style.transform = 'translateX(-40px)';
-      } else if (el.classList.contains('about-content')) {
-        el.style.transform = 'translateX(40px)';
-      } else {
-        el.style.transform = 'translateY(30px)';
-      }
-      el.style.visibility = '';
-    });
-
-    const mp=document.getElementById('mainPage');
+  function recoverSection(hiddenEls) {
+    hiddenEls = hiddenEls || [];
+    const mp = document.getElementById('mainPage');
     if(mp) mp.style.transform='';
 
-    // Widget reset
+    // Widget reset & jam kembali
     clearEgg();
     widget.classList.remove('egg-countdown','egg-tick');
     widget.style.boxShadow=''; widget.style.borderColor='';
+    startClock();  // jam langsung kembali normal
 
-    // Flash selesai ~0.5s → mulai animasi masuk
+    // Flash kedua — elemen masih visibility:hidden dari shatterScreen
+    doFlash();
+
+    const sec = getActiveSection();
+
+    // Setelah flash selesai (~600ms): posisikan elemen di "start" animasi masuk, baru tampilkan
     setTimeout(() => {
-      startClock();
-      // Force reflow lalu lepas inline style agar CSS transition section aktif berjalan
-      void sec.offsetWidth;
-      animEls.forEach((el, i) => {
-        el.style.transition = '';
-        el.style.opacity    = '';
-        el.style.transform  = '';
+      // Kumpulkan elemen animatable di section aktif
+      const animEls = sec ? Array.from(sec.querySelectorAll(
+        '.hero-eyebrow, .hero-name, .hero-divider, .hero-tagline, .hero-cta, .hero-scroll-hint,' +
+        '.about-photo, .about-content, .about-photo-accent,' +
+        '.service-card, .works-header, .work-item, .works-cat-heading, .works-sub-heading,' +
+        '.contact-inner, .store-header, .store-tabs, .store-card, .store-sub-desc'
+      )) : [];
+
+      // Set semua ke posisi awal animasi (masih invisible) — transition off
+      animEls.forEach(el => {
+        el.style.transition  = 'none';
+        el.style.opacity     = '0';
+        el.style.visibility  = '';  // tampilkan tapi opacity 0
+        if (el.classList.contains('hero-divider')) {
+          el.style.transform = 'scaleX(0)';
+        } else if (el.classList.contains('about-photo')) {
+          el.style.transform = 'translateX(-40px)';
+        } else if (el.classList.contains('about-content')) {
+          el.style.transform = 'translateX(40px)';
+        } else {
+          el.style.transform = 'translateY(30px)';
+        }
       });
-    }, 550);
+
+      // Restore semua el yang di-hide shatter tapi BUKAN animEls (header, nav, dll)
+      hiddenEls.forEach(el => {
+        if (!animEls.includes(el)) {
+          el.style.visibility = '';
+        }
+      });
+
+      // Satu frame berikutnya: lepas inline style → CSS transition section berjalan
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          animEls.forEach(el => {
+            el.style.transition = '';
+            el.style.opacity    = '';
+            el.style.transform  = '';
+          });
+        });
+      });
+    }, 620);
   }
 
   // ── THE BIG BOOM ──
@@ -12085,14 +12215,18 @@ function setMenuIcon(sectionId) {
     doShake();
 
     // 4) Shatter all elements (60ms delay supaya flash sempat muncul)
-    setTimeout(()=>{ shatterScreen(); }, 60);
+    let _hiddenEls = [];
+    setTimeout(()=>{
+      const result = shatterScreen();
+      if (result && result.hiddenEls) _hiddenEls = result.hiddenEls;
+    }, 60);
 
     // 5) Particle debris wave
     spawnDebrisWave();
 
-    // 6) Flash kedua + recovery dengan animasi masuk section (setelah 4s)
+    // 6) Flash kedua + recovery (setelah 4s)
     eggTimers.push(setTimeout(()=>{
-      recoverSection();
+      recoverSection(_hiddenEls);
     }, 4000));
   }
 
@@ -12209,7 +12343,7 @@ function setMenuIcon(sectionId) {
     haze.style.cssText=`
       position:fixed;inset:0;pointer-events:none;z-index:99993;
       background:radial-gradient(ellipse at 50% 50%, rgba(255,120,20,0.18) 0%, transparent 70%);
-      animation:hazeOut 5s ease-out both;
+      animation:hazeOut 2s ease-out both;
     `;
     if(!document.getElementById('_hazeKF')){
       const st=document.createElement('style'); st.id='_hazeKF';
