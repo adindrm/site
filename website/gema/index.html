@@ -363,10 +363,145 @@ html, body {
   .fp-body { padding:20px 14px 56px; }
   .form-group input[type=text],
   .form-group input[type=email],
-  .form-group textarea { font-size:16px; } /* cegah zoom di iOS */
+  .form-group textarea { font-size:16px; }
   .opt-item { font-size:13px; }
   .fp-studio-tag { font-size:10px; }
 }
+
+/* ── Progress Bar ── */
+#formProgress {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--dark);
+  padding: 10px 20px 8px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.fp-prog-info {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px;
+}
+.fp-prog-label { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em; }
+.fp-prog-count { font-size: 11px; color: var(--lime); font-weight: 700; }
+.fp-prog-track {
+  width: 100%; height: 3px; background: var(--border-soft); border-radius: 99px; overflow: hidden;
+}
+.fp-prog-fill {
+  height: 100%; background: var(--lime); border-radius: 99px;
+  width: 0%; transition: width 0.4s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 8px var(--lime-glow);
+}
+
+/* ── Char counter ── */
+.char-counter {
+  font-size: 11px; color: var(--text-dim);
+  text-align: right; margin-top: 4px;
+  transition: color 0.2s;
+}
+.char-counter.warn { color: #f0a000; }
+.char-counter.over { color: #e05050; }
+
+/* ── Validasi error state ── */
+.form-group.error input,
+.form-group.error textarea {
+  border-color: #e05050 !important;
+  box-shadow: 0 0 0 3px rgba(224,80,80,0.15) !important;
+}
+.form-group .err-msg {
+  font-size: 11.5px; color: #e05050; margin-top: 5px; display: none;
+}
+.form-group.error .err-msg { display: block; }
+
+/* ── Opt-item bounce saat dipilih ── */
+@keyframes opt-bounce {
+  0%  { transform: scale(1); }
+  40% { transform: scale(1.06); }
+  70% { transform: scale(0.97); }
+  100%{ transform: scale(1); }
+}
+.opt-item.bouncing { animation: opt-bounce 0.35s ease; }
+
+/* ── Tombol WA disabled ── */
+.btn-wa:disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Scroll to top ── */
+#scrollTop {
+  position: fixed; bottom: 28px; right: 20px; z-index: 500;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--lime); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 12px var(--lime-glow);
+  opacity: 0; transform: translateY(12px) scale(0.85);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+#scrollTop.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+#scrollTop:hover { filter: brightness(1.1); }
+#scrollTop svg { width: 18px; height: 18px; fill: #111; }
+
+/* ── Modal Konfirmasi ── */
+#modalKonfirmasi {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#modalKonfirmasi.show { opacity: 1; pointer-events: auto; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; width: 100%; max-width: 480px;
+  max-height: 80vh; overflow-y: auto;
+  padding: 28px 24px; position: relative;
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.3s ease;
+}
+#modalKonfirmasi.show .modal-box { transform: translateY(0) scale(1); }
+.modal-box::-webkit-scrollbar { width: 3px; }
+.modal-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.modal-title {
+  font-size: 17px; font-weight: 800; color: var(--text);
+  margin-bottom: 4px;
+}
+.modal-subtitle {
+  font-size: 12px; color: var(--text-muted); margin-bottom: 20px;
+}
+.modal-row {
+  display: flex; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.modal-row:last-of-type { border-bottom: none; }
+.modal-key {
+  font-size: 12px; color: var(--text-muted); font-weight: 600;
+  min-width: 130px; flex-shrink: 0; padding-top: 1px;
+}
+.modal-val {
+  font-size: 13px; color: var(--text); line-height: 1.5; word-break: break-word;
+}
+.modal-actions {
+  display: flex; gap: 10px; margin-top: 22px;
+}
+.modal-btn-cancel {
+  flex: 1; padding: 12px;
+  background: transparent; border: 1.5px solid var(--border-soft);
+  border-radius: 10px; color: var(--text-muted);
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: border-color 0.2s, color 0.2s;
+}
+.modal-btn-cancel:hover { border-color: var(--lime); color: var(--lime); }
+.modal-btn-send {
+  flex: 2; padding: 12px;
+  background: var(--lime); border: none;
+  border-radius: 10px; color: #111;
+  font-size: 14px; font-weight: 800; font-family: inherit;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  gap: 8px; transition: filter 0.2s;
+}
+.modal-btn-send:hover { filter: brightness(1.08); }
 
 /* ── Layar MASUK ── */
 #introScreen {
@@ -442,6 +577,15 @@ html, body {
   <!-- Body -->
   <div class="fp-body">
 
+    <!-- Progress bar -->
+    <div id="formProgress">
+      <div class="fp-prog-info">
+        <span class="fp-prog-label">PROGRESS PENGISIAN</span>
+        <span class="fp-prog-count" id="progCount">0 / 8 field</span>
+      </div>
+      <div class="fp-prog-track"><div class="fp-prog-fill" id="progFill"></div></div>
+    </div>
+
     <div class="fp-intro">
       Halo! Terima kasih telah memilih layanan desain logo kami.<br>
       Mohon isi formulir ini dengan jelas agar kami dapat menciptakan logo yang sesuai dengan identitas brand Anda.
@@ -458,20 +602,24 @@ html, body {
 
     <div class="form-group">
       <label><span class="req">*</span> Nama Lengkap</label>
-      <textarea id="f-nama" rows="2"></textarea>
+      <textarea id="f-nama" rows="2" maxlength="120" oninput="updateProgress();countChar(this,'cnt-nama',120)"></textarea>
+      <div class="char-counter" id="cnt-nama">0 / 120</div>
+      <div class="err-msg">Nama lengkap wajib diisi</div>
     </div>
 
     <div class="form-group">
       <label><span class="req">*</span> Masukkan email Anda</label>
-      <input type="email" id="f-email">
+      <input type="email" id="f-email" oninput="updateProgress()">
+      <div class="err-msg">Email tidak valid</div>
     </div>
 
     <div class="form-group">
       <label><span class="req">*</span> Masukkan nomor telepon Anda</label>
       <div class="phone-wrap">
         <div class="phone-flag">🇮🇩 +62</div>
-        <input type="text" id="f-phone" placeholder="81234567890">
+        <input type="text" id="f-phone" placeholder="81234567890" oninput="this.value=this.value.replace(/\D/g,'');updateProgress()">
       </div>
+      <div class="err-msg">Nomor telepon wajib diisi (hanya angka)</div>
     </div>
 
     <!-- SEKSI 2: Brand -->
@@ -483,22 +631,26 @@ html, body {
 
     <div class="form-group">
       <label><span class="req">*</span> Nama brand/produk</label>
-      <input type="text" id="f-brand">
+      <input type="text" id="f-brand" oninput="updateProgress()">
+      <div class="err-msg">Nama brand wajib diisi</div>
     </div>
 
     <div class="form-group">
       <label><span class="req">*</span> Jenis produk</label>
       <div class="options-list">
-        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Fashion"><span class="opt-box"></span>Fashion</label>
-        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Kuliner"><span class="opt-box"></span>Kuliner</label>
-        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Teknologi"><span class="opt-box"></span>Teknologi</label>
-        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Lainnya"><span class="opt-box"></span>Lainnya</label>
+        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Fashion" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Fashion</label>
+        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Kuliner" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Kuliner</label>
+        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Teknologi" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Teknologi</label>
+        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Lainnya" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Lainnya</label>
       </div>
+      <div class="err-msg">Pilih jenis produk</div>
     </div>
 
     <div class="form-group">
       <label><span class="req">*</span> Visi/filosofi brand</label>
-      <textarea id="f-visi"></textarea>
+      <textarea id="f-visi" maxlength="400" oninput="updateProgress();countChar(this,'cnt-visi',400)"></textarea>
+      <div class="char-counter" id="cnt-visi">0 / 400</div>
+      <div class="err-msg">Visi brand wajib diisi</div>
     </div>
 
     <!-- SEKSI 3: Desain -->
@@ -511,31 +663,34 @@ html, body {
     <div class="form-group">
       <label><span class="req">*</span> Jenis logo yang diinginkan</label>
       <div class="options-list wrap">
-        <label class="opt-item"><input type="checkbox" name="logo" value="Wordmark"><span class="opt-box"></span>Wordmark (berbasis teks)</label>
-        <label class="opt-item"><input type="checkbox" name="logo" value="Lettermark"><span class="opt-box"></span>Lettermark (Inisial)</label>
-        <label class="opt-item"><input type="checkbox" name="logo" value="Symbol/Iconic"><span class="opt-box"></span>Symbol/Iconic</label>
-        <label class="opt-item"><input type="checkbox" name="logo" value="Maskot"><span class="opt-box"></span>Maskot (karakter)</label>
-        <label class="opt-item"><input type="checkbox" name="logo" value="Kombinasi"><span class="opt-box"></span>Kombinasi (teks + simbol)</label>
+        <label class="opt-item"><input type="checkbox" name="logo" value="Wordmark" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Wordmark (berbasis teks)</label>
+        <label class="opt-item"><input type="checkbox" name="logo" value="Lettermark" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Lettermark (Inisial)</label>
+        <label class="opt-item"><input type="checkbox" name="logo" value="Symbol/Iconic" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Symbol/Iconic</label>
+        <label class="opt-item"><input type="checkbox" name="logo" value="Maskot" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Maskot (karakter)</label>
+        <label class="opt-item"><input type="checkbox" name="logo" value="Kombinasi" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Kombinasi (teks + simbol)</label>
       </div>
       <div class="hint">Bisa memilih lebih dari satu</div>
+      <div class="err-msg">Pilih minimal satu jenis logo</div>
     </div>
 
     <div class="form-group">
       <label><span class="req">*</span> Warna yang diinginkan</label>
-      <input type="text" id="f-warna">
+      <input type="text" id="f-warna" oninput="updateProgress()">
       <div class="hint">Tuliskan warna tertentu atau warna umum yang ingin digunakan</div>
+      <div class="err-msg">Warna wajib diisi</div>
     </div>
 
     <div class="form-group">
       <label><span class="req">*</span> Gaya design yang diinginkan</label>
       <div class="options-list">
-        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Minimalis"><span class="opt-box"></span>Minimalis</label>
-        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Modern"><span class="opt-box"></span>Modern</label>
-        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Vintage"><span class="opt-box"></span>Vintage</label>
-        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Playful"><span class="opt-box"></span>Playful</label>
-        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Elegan"><span class="opt-box"></span>Elegan</label>
-        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Lainnya"><span class="opt-box"></span>Lainnya</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Minimalis" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Minimalis</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Modern" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Modern</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Vintage" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Vintage</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Playful" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Playful</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Elegan" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Elegan</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Lainnya" onchange="updateProgress();bounceOpt(this)"><span class="opt-box"></span>Lainnya</label>
       </div>
+      <div class="err-msg">Pilih gaya design</div>
     </div>
 
     <!-- SEKSI 4: Referensi -->
@@ -547,22 +702,25 @@ html, body {
 
     <div class="form-group">
       <label>Apakah anda memiliki contoh logo yang disukai sebagai referensi?</label>
-      <textarea id="f-ref"></textarea>
+      <textarea id="f-ref" maxlength="300" oninput="countChar(this,'cnt-ref',300)"></textarea>
+      <div class="char-counter" id="cnt-ref">0 / 300</div>
       <div class="hint">Silahkan upload link referensi atau jelaskan nama brand yang dijadikan acuan</div>
     </div>
 
     <div class="form-group">
       <label>Hal-hal yang tidak anda sukai dalam design logo (jika ada)</label>
-      <textarea id="f-nolike"></textarea>
+      <textarea id="f-nolike" maxlength="300" oninput="countChar(this,'cnt-nolike',300)"></textarea>
+      <div class="char-counter" id="cnt-nolike">0 / 300</div>
       <div class="hint">Warna, bentuk, jenis font, dll yang anda tidak inginkan</div>
     </div>
 
     <div class="form-group">
       <label>Apakah ada pesan khusus atau catatan tambahan untuk designer?</label>
-      <textarea id="f-pesan"></textarea>
+      <textarea id="f-pesan" maxlength="400" oninput="countChar(this,'cnt-pesan',400)"></textarea>
+      <div class="char-counter" id="cnt-pesan">0 / 400</div>
     </div>
 
-    <button class="btn-wa" id="btnWA" onclick="kirimWA()">
+    <button class="btn-wa visible" id="btnWA" onclick="bukaKonfirmasi()" disabled>
       <svg class="wa-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       Kirim di WhatsApp
     </button>
@@ -571,6 +729,27 @@ html, body {
       &copy; Hak Cipta Dilindungi oleh <strong>Gema Visual Studio</strong>
     </div>
 
+  </div>
+</div>
+
+<!-- Scroll to top -->
+<button id="scrollTop" onclick="document.getElementById('formPage').scrollTo({top:0,behavior:'smooth'})">
+  <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
+</button>
+
+<!-- Modal Konfirmasi -->
+<div id="modalKonfirmasi">
+  <div class="modal-box">
+    <div class="modal-title">Konfirmasi Data</div>
+    <div class="modal-subtitle">Pastikan semua data sudah benar sebelum dikirim.</div>
+    <div id="modalRows"></div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="tutupKonfirmasi()">Ubah</button>
+      <button class="modal-btn-send" onclick="kirimWA()">
+        <svg style="width:18px;height:18px;fill:#111;flex-shrink:0" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Ya, Kirim Sekarang
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1219,31 +1398,198 @@ function showForm() {
       const footer = document.getElementById('formFooter');
       if (footer) footer.classList.add('visible');
     }, afterAll + 120);
+
+    // Restore isian dari localStorage jika ada
+    setTimeout(restoreProgress, 100);
   });
 }
 
 // ══════════════════════════════════════════════════
 //  KIRIM WHATSAPP
 // ══════════════════════════════════════════════════
-function kirimWA() {
-  const nama    = document.getElementById('f-nama').value.trim();
-  const email   = document.getElementById('f-email').value.trim();
-  const phone   = document.getElementById('f-phone').value.trim();
-  const brand   = document.getElementById('f-brand').value.trim();
-  const visi    = document.getElementById('f-visi').value.trim();
-  const warna   = document.getElementById('f-warna').value.trim();
-  const ref     = document.getElementById('f-ref').value.trim();
-  const nolike  = document.getElementById('f-nolike').value.trim();
-  const pesan   = document.getElementById('f-pesan').value.trim();
+// ══════════════════════════════════════════════════
+//  FORM UTILS
+// ══════════════════════════════════════════════════
 
-  const jenis   = document.querySelector('input[name="jenis"]:checked');
-  const gaya    = document.querySelector('input[name="gaya"]:checked');
-  const logoArr = [...document.querySelectorAll('input[name="logo"]:checked')].map(e => e.value);
+// Char counter
+function countChar(el, counterId, max) {
+  const len = el.value.length;
+  const counter = document.getElementById(counterId);
+  if (!counter) return;
+  counter.textContent = len + ' / ' + max;
+  counter.classList.remove('warn','over');
+  if (len >= max) counter.classList.add('over');
+  else if (len >= max * 0.8) counter.classList.add('warn');
+}
 
-  if (!nama || !email || !phone || !brand) {
-    alert('Mohon isi semua field yang wajib diisi (*)');
+// Bounce animasi saat pilih radio/checkbox
+function bounceOpt(input) {
+  const label = input.closest('.opt-item');
+  if (!label) return;
+  label.classList.remove('bouncing');
+  void label.offsetWidth;
+  label.classList.add('bouncing');
+  label.addEventListener('animationend', () => label.classList.remove('bouncing'), {once:true});
+}
+
+// Cek semua field wajib & update progress bar + disabled btn
+const WAJIB_TOTAL = 8;
+function updateProgress() {
+  const nama  = document.getElementById('f-nama').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const brand = document.getElementById('f-brand').value.trim();
+  const visi  = document.getElementById('f-visi').value.trim();
+  const warna = document.getElementById('f-warna').value.trim();
+  const jenis = document.querySelector('input[name="jenis"]:checked');
+  const gaya  = document.querySelector('input[name="gaya"]:checked');
+  const logo  = document.querySelectorAll('input[name="logo"]:checked').length > 0;
+
+  const checks = [!!nama, !!email, !!phone, !!brand, !!visi, !!warna, !!jenis, !!gaya && logo];
+  const filled = checks.filter(Boolean).length;
+
+  document.getElementById('progFill').style.width = (filled / WAJIB_TOTAL * 100) + '%';
+  document.getElementById('progCount').textContent = filled + ' / ' + WAJIB_TOTAL + ' field';
+
+  // Aktifkan tombol hanya jika semua terisi
+  document.getElementById('btnWA').disabled = (filled < WAJIB_TOTAL);
+
+  // Simpan ke localStorage
+  saveProgress();
+}
+
+// localStorage — simpan & restore
+function saveProgress() {
+  const data = {
+    nama:  document.getElementById('f-nama').value,
+    email: document.getElementById('f-email').value,
+    phone: document.getElementById('f-phone').value,
+    brand: document.getElementById('f-brand').value,
+    visi:  document.getElementById('f-visi').value,
+    warna: document.getElementById('f-warna').value,
+    ref:   document.getElementById('f-ref').value,
+    nolike:document.getElementById('f-nolike').value,
+    pesan: document.getElementById('f-pesan').value,
+    jenis: document.querySelector('input[name="jenis"]:checked')?.value || '',
+    gaya:  document.querySelector('input[name="gaya"]:checked')?.value || '',
+    logo:  [...document.querySelectorAll('input[name="logo"]:checked')].map(e=>e.value),
+  };
+  try { localStorage.setItem('gvs_form', JSON.stringify(data)); } catch(e){}
+}
+
+function restoreProgress() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem('gvs_form')); } catch(e){}
+  if (!data) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val||''; };
+  set('f-nama', data.nama); set('f-email', data.email); set('f-phone', data.phone);
+  set('f-brand', data.brand); set('f-visi', data.visi); set('f-warna', data.warna);
+  set('f-ref', data.ref); set('f-nolike', data.nolike); set('f-pesan', data.pesan);
+  if (data.jenis) { const r = document.querySelector(`input[name="jenis"][value="${data.jenis}"]`); if(r) r.checked=true; }
+  if (data.gaya)  { const r = document.querySelector(`input[name="gaya"][value="${data.gaya}"]`); if(r) r.checked=true; }
+  (data.logo||[]).forEach(v => { const c = document.querySelector(`input[name="logo"][value="${v}"]`); if(c) c.checked=true; });
+  // Refresh char counters
+  ['f-nama','f-visi','f-ref','f-nolike','f-pesan'].forEach(id => {
+    const el = document.getElementById(id);
+    const map = {'f-nama':'cnt-nama','f-visi':'cnt-visi','f-ref':'cnt-ref','f-nolike':'cnt-nolike','f-pesan':'cnt-pesan'};
+    const max = {'f-nama':120,'f-visi':400,'f-ref':300,'f-nolike':300,'f-pesan':400};
+    if(el) countChar(el, map[id], max[id]);
+  });
+  updateProgress();
+}
+
+// Scroll-to-top visibility
+document.getElementById('formPage').addEventListener('scroll', function() {
+  const btn = document.getElementById('scrollTop');
+  if (this.scrollTop > 300) btn.classList.add('show');
+  else btn.classList.remove('show');
+});
+
+// ── Modal Konfirmasi ──
+function bukaKonfirmasi() {
+  const nama  = document.getElementById('f-nama').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const brand = document.getElementById('f-brand').value.trim();
+  const visi  = document.getElementById('f-visi').value.trim();
+  const warna = document.getElementById('f-warna').value.trim();
+  const ref   = document.getElementById('f-ref').value.trim();
+  const nolike= document.getElementById('f-nolike').value.trim();
+  const pesan = document.getElementById('f-pesan').value.trim();
+  const jenis = document.querySelector('input[name="jenis"]:checked');
+  const gaya  = document.querySelector('input[name="gaya"]:checked');
+  const logoArr = [...document.querySelectorAll('input[name="logo"]:checked')].map(e=>e.value);
+
+  // Validasi detail
+  let valid = true;
+  const checks = [
+    { id:'f-nama', grp: document.getElementById('f-nama').closest('.form-group'), ok: !!nama },
+    { id:'f-email', grp: document.getElementById('f-email').closest('.form-group'), ok: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) },
+    { id:'f-phone', grp: document.getElementById('f-phone').closest('.form-group'), ok: phone.length >= 8 },
+    { id:'f-brand', grp: document.getElementById('f-brand').closest('.form-group'), ok: !!brand },
+    { id:'f-visi',  grp: document.getElementById('f-visi').closest('.form-group'),  ok: !!visi },
+    { id:'f-warna', grp: document.getElementById('f-warna').closest('.form-group'), ok: !!warna },
+  ];
+  checks.forEach(c => {
+    if (!c.ok) { c.grp.classList.add('error'); valid = false; }
+    else c.grp.classList.remove('error');
+  });
+  // Radio jenis
+  const grpJenis = document.querySelector('input[name="jenis"]').closest('.form-group');
+  if (!jenis) { grpJenis.classList.add('error'); valid = false; } else grpJenis.classList.remove('error');
+  // Checkbox logo
+  const grpLogo = document.querySelector('input[name="logo"]').closest('.form-group');
+  if (!logoArr.length) { grpLogo.classList.add('error'); valid = false; } else grpLogo.classList.remove('error');
+  // Radio gaya
+  const grpGaya = document.querySelector('input[name="gaya"]').closest('.form-group');
+  if (!gaya) { grpGaya.classList.add('error'); valid = false; } else grpGaya.classList.remove('error');
+
+  if (!valid) {
+    document.querySelector('.form-group.error')?.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
+
+  // Isi modal
+  const rows = [
+    ['Nama Lengkap', nama],
+    ['Email', email],
+    ['No. Telepon', '+62' + phone],
+    ['Nama Brand', brand],
+    ['Jenis Produk', jenis.value],
+    ['Visi Brand', visi],
+    ['Jenis Logo', logoArr.join(', ')],
+    ['Warna', warna],
+    ['Gaya Design', gaya.value],
+    ['Referensi', ref || '-'],
+    ['Tidak Disukai', nolike || '-'],
+    ['Pesan Tambahan', pesan || '-'],
+  ];
+  document.getElementById('modalRows').innerHTML = rows.map(([k,v]) =>
+    `<div class="modal-row"><div class="modal-key">${k}</div><div class="modal-val">${v}</div></div>`
+  ).join('');
+
+  document.getElementById('modalKonfirmasi').classList.add('show');
+}
+
+function tutupKonfirmasi() {
+  document.getElementById('modalKonfirmasi').classList.remove('show');
+}
+
+// ── Kirim WA ──
+function kirimWA() {
+  tutupKonfirmasi();
+  const nama   = document.getElementById('f-nama').value.trim();
+  const email  = document.getElementById('f-email').value.trim();
+  const phone  = document.getElementById('f-phone').value.trim();
+  const brand  = document.getElementById('f-brand').value.trim();
+  const visi   = document.getElementById('f-visi').value.trim();
+  const warna  = document.getElementById('f-warna').value.trim();
+  const ref    = document.getElementById('f-ref').value.trim();
+  const nolike = document.getElementById('f-nolike').value.trim();
+  const pesan  = document.getElementById('f-pesan').value.trim();
+  const jenis  = document.querySelector('input[name="jenis"]:checked');
+  const gaya   = document.querySelector('input[name="gaya"]:checked');
+  const logoArr= [...document.querySelectorAll('input[name="logo"]:checked')].map(e=>e.value);
 
   const msg =
 `*GEMA Visual Studio - Brief Logo*
@@ -1263,6 +1609,9 @@ Gaya Design: ${gaya ? gaya.value : '-'}
 Referensi Logo: ${ref || '-'}
 Yang Tidak Disukai: ${nolike || '-'}
 Pesan Tambahan: ${pesan || '-'}`;
+
+  // Hapus localStorage setelah kirim
+  try { localStorage.removeItem('gvs_form'); } catch(e){}
 
   const waNumber = '6285655645711';
   window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
