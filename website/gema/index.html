@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=block" rel="stylesheet">
 <title>Gema Visual Studio</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -60,7 +60,7 @@ html, body { width:100%; height:100%; background:#262726; font-family:'Segoe UI'
 html, body {
   width:100%; height:100%;
   background: var(--dark);
-  font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
   overflow: hidden;
 }
 
@@ -383,9 +383,9 @@ html, body {
   font-size:clamp(28px,8vw,52px); font-weight:800;
   letter-spacing:0.18em; text-transform:uppercase;
   background:none; border:none; cursor:pointer;
-  padding:18px 48px;
-  position:relative;
-  transition: letter-spacing 0.3s ease, opacity 0.3s ease;
+  padding:18px 48px; position:relative;
+  opacity: 0;
+  transition: opacity 0.3s ease, letter-spacing 0.3s ease;
 }
 #btnMasuk::after {
   content:'';
@@ -446,7 +446,7 @@ html, body {
       Halo! Terima kasih telah memilih layanan desain logo kami.<br>
       Mohon isi formulir ini dengan jelas agar kami dapat menciptakan logo yang sesuai dengan identitas brand Anda.
       <br><br>
-      <strong>Isi dengan sebenar-benarnya</strong> — form ini menjadi acuan utama designer.
+      <strong>Isi dengan sebenar-benarnya</strong> - form ini menjadi acuan utama designer.
     </div>
 
     <!-- SEKSI 1: Identitas -->
@@ -1246,30 +1246,33 @@ function kirimWA() {
   }
 
   const msg =
-`*GEMA Visual Studio — Brief Logo*
+`*GEMA Visual Studio - Brief Logo*
 
-👤 *Nama Lengkap:* ${nama}
-📧 *Email:* ${email}
-📱 *Nomor Telepon:* +62${phone}
+Nama Lengkap: ${nama}
+Email: ${email}
+Nomor Telepon: +62${phone}
 
-🏷️ *Nama Brand/Produk:* ${brand}
-🛍️ *Jenis Produk:* ${jenis ? jenis.value : '-'}
-💡 *Visi/Filosofi Brand:* ${visi || '-'}
+Nama Brand/Produk: ${brand}
+Jenis Produk: ${jenis ? jenis.value : '-'}
+Visi/Filosofi Brand: ${visi || '-'}
 
-🎨 *Jenis Logo:* ${logoArr.length ? logoArr.join(', ') : '-'}
-🎨 *Warna yang Diinginkan:* ${warna || '-'}
-✏️ *Gaya Design:* ${gaya ? gaya.value : '-'}
+Jenis Logo: ${logoArr.length ? logoArr.join(', ') : '-'}
+Warna yang Diinginkan: ${warna || '-'}
+Gaya Design: ${gaya ? gaya.value : '-'}
 
-🔗 *Referensi Logo:* ${ref || '-'}
-🚫 *Yang Tidak Disukai:* ${nolike || '-'}
-📝 *Pesan Tambahan:* ${pesan || '-'}`;
+Referensi Logo: ${ref || '-'}
+Yang Tidak Disukai: ${nolike || '-'}
+Pesan Tambahan: ${pesan || '-'}`;
 
   const waNumber = '6285655645711';
   window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// ══════════════════════════════════════════════════
-//  PAUSE / RESUME saat pindah tab
+// Munculkan tombol MASUK setelah font Nunito siap — cegah flash fallback font
+document.fonts.load('800 1em Nunito').finally(() => {
+  const btn = document.getElementById('btnMasuk');
+  if (btn) btn.style.opacity = '1';
+});
 // ══════════════════════════════════════════════════
 const _allAudio = [sndWriting, sndArsir, sndSplash, sndBg];
 // Catat mana yang sedang aktif saat tab ditinggal
