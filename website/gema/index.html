@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Gema Visual Studio</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -37,123 +37,335 @@ html, body { width:100%; height:100%; background:#262726; font-family:'Segoe UI'
 }
 #formPage.visible { opacity:1; transform: scale(1) translateY(0); }
 
-.form-card {
-  background:#fff; border-radius:16px; max-width:560px; margin:0 auto;
-  box-shadow:0 2px 20px rgba(0,0,0,0.08); overflow:hidden;
+/* ══════════════════════════════
+   SECFORM — redesign
+══════════════════════════════ */
+:root {
+  --lime: #cbf000;
+  --lime-dim: rgba(203,240,0,0.12);
+  --lime-glow: rgba(203,240,0,0.35);
+  --dark: #111210;
+  --card-bg: #181a17;
+  --surface: #1f211d;
+  --surface2: #252722;
+  --border: rgba(203,240,0,0.18);
+  --border-soft: rgba(255,255,255,0.07);
+  --text: #eceee8;
+  --text-muted: #7a7d72;
+  --text-dim: #4a4d43;
+  --radius: 14px;
+  --radius-sm: 9px;
 }
 
-.header-img {
-  width:100%; height:200px; background:#111;
-  display:flex; align-items:center; justify-content:center;
-  position:relative; overflow:hidden;
-}
-.header-img .ghost {
-  font-size:52px; animation: ghostFloat 3s ease-in-out infinite;
-}
-@keyframes ghostFloat {
-  0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);}
+html, body {
+  width:100%; height:100%;
+  background: var(--dark);
+  font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
 }
 
-.form-body { padding:28px 24px 32px; }
-
-.form-title {
-  font-size:22px; font-weight:700; color:#111; margin-bottom:6px;
-  opacity:0; transform:translateY(16px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+#formPage {
+  display:none; opacity:0;
+  height: 100vh; overflow-y: auto;
+  scroll-behavior: smooth;
+  padding: 0;
+  transform: translateY(20px);
+  transition: opacity 1s cubic-bezier(.25,0.1,.25,1),
+              transform 1s cubic-bezier(.25,0.1,.25,1);
 }
-.form-subtitle {
-  font-size:13px; color:#666; line-height:1.65; margin-bottom:24px;
-  opacity:0; transform:translateY(16px);
+#formPage.visible { opacity:1; transform:translateY(0); }
+
+/* Scrollbar custom */
+#formPage::-webkit-scrollbar { width:4px; }
+#formPage::-webkit-scrollbar-track { background:transparent; }
+#formPage::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+/* ── Hero header ── */
+.fp-hero {
+  width:100%; position:relative;
+  min-height:220px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-end;
+  padding: 0 0 32px;
+  overflow:hidden;
+  background: var(--dark);
+}
+.fp-hero-img {
+  position:absolute; inset:0;
+  background:#0d0f0c;
+  overflow:hidden;
+}
+.fp-hero-img img {
+  width:100%; height:100%; object-fit:cover;
+  opacity:0.45; display:block;
+  transition: opacity 0.4s;
+}
+.fp-hero-overlay {
+  position:absolute; inset:0;
+  background: linear-gradient(to bottom,
+    rgba(17,18,16,0.1) 0%,
+    rgba(17,18,16,0.5) 55%,
+    rgba(17,18,16,1) 100%);
+}
+/* Garis aksen lime berjalan di bawah hero */
+.fp-hero-line {
+  position:absolute; bottom:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg,
+    transparent 0%, var(--lime) 30%, var(--lime) 70%, transparent 100%);
+  opacity:0.5;
+}
+.fp-hero-content {
+  position:relative; z-index:2;
+  text-align:center; padding:0 24px;
+}
+.fp-studio-tag {
+  display:inline-flex; align-items:center; gap:7px;
+  background:var(--lime-dim); border:1px solid var(--border);
+  border-radius:999px; padding:5px 14px;
+  font-size:11px; font-weight:600; letter-spacing:0.1em;
+  color:var(--lime); text-transform:uppercase; margin-bottom:14px;
+  opacity:0; transform:translateY(10px);
   transition: opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s;
 }
-.form-title.visible, .form-subtitle.visible { opacity:1; transform:translateY(0); }
+.fp-studio-tag.visible { opacity:1; transform:translateY(0); }
+.fp-studio-tag::before {
+  content:''; width:6px; height:6px; border-radius:50%;
+  background:var(--lime);
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%{ opacity:0.4; transform:scale(0.7); }
+}
+.fp-title {
+  font-size: clamp(26px, 6vw, 38px);
+  font-weight: 700; color: #fff;
+  line-height: 1.15; letter-spacing:-0.01em;
+  opacity:0; transform:translateY(14px);
+  transition: opacity 0.55s ease 0.2s, transform 0.55s ease 0.2s;
+}
+.fp-title span { color:var(--lime); }
+.fp-title.visible { opacity:1; transform:translateY(0); }
 
+/* ── Body wrapper ── */
+.fp-body {
+  max-width: 580px; margin: 0 auto;
+  padding: 28px 20px 64px;
+}
+
+/* ── Intro text ── */
+.fp-intro {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--lime);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  margin-bottom: 32px;
+  font-size: 13.5px; line-height: 1.75; color: var(--text-muted);
+  opacity:0; transform:translateY(14px);
+  transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+}
+.fp-intro.visible { opacity:1; transform:translateY(0); }
+.fp-intro strong { color: var(--lime); font-weight:600; }
+
+/* ── Section divider ── */
+.fp-section {
+  display:flex; align-items:center; gap:10px;
+  margin: 28px 0 18px;
+  opacity:0; transform:translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.fp-section.visible { opacity:1; transform:translateY(0); }
+.fp-section-num {
+  width:26px; height:26px; border-radius:50%;
+  background:var(--lime); color:#111;
+  font-size:12px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.fp-section-label {
+  font-size:11px; font-weight:600; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--lime);
+}
+.fp-section-line {
+  flex:1; height:1px; background:var(--border-soft);
+}
+
+/* ── Form group ── */
 .form-group {
-  margin-bottom:20px;
-  opacity:0; transform:translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  margin-bottom: 20px;
+  opacity:0; transform:translateY(18px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
 }
 .form-group.visible { opacity:1; transform:translateY(0); }
 
 .form-group label {
-  display:block; font-size:13px; font-weight:600; color:#222; margin-bottom:7px;
+  display:block; font-size:13px; font-weight:600;
+  color: var(--text); margin-bottom:8px; line-height:1.4;
 }
-.form-group label .req { color:#c0392b; margin-right:3px; }
+.form-group label .req { color:var(--lime); margin-right:3px; }
 
+/* Inputs */
 .form-group input[type=text],
 .form-group input[type=email],
 .form-group textarea {
-  width:100%; padding:10px 12px; border:1.5px solid #dde1e7;
-  border-radius:8px; font-size:14px; color:#222; background:#fff;
-  resize:vertical; outline:none; font-family:inherit;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  width:100%; padding:12px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  font-size:14px; color: var(--text);
+  font-family:inherit; resize:vertical; outline:none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
-.form-group input:focus, .form-group textarea:focus {
-  border-color:#cbf000; box-shadow:0 0 0 3px rgba(203,240,0,0.2);
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--text-dim); }
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--lime);
+  box-shadow: 0 0 0 3px var(--lime-glow);
+  background: var(--surface2);
 }
-.form-group textarea { min-height:90px; }
+.form-group textarea { min-height:88px; }
 
-.phone-wrap { display:flex; gap:8px; align-items:center; }
+/* Phone */
+.phone-wrap { display:flex; gap:8px; align-items:stretch; }
 .phone-flag {
-  display:flex; align-items:center; gap:5px;
-  border:1.5px solid #dde1e7; border-radius:8px;
-  padding:10px 10px; font-size:13px; color:#333;
-  background:#fafafa; white-space:nowrap;
+  display:flex; align-items:center; gap:6px;
+  background:var(--surface2); border:1.5px solid var(--border-soft);
+  border-radius:var(--radius-sm); padding:0 13px;
+  font-size:13px; color:var(--text-muted); white-space:nowrap; flex-shrink:0;
 }
 .phone-wrap input { flex:1; }
 
-.options-list { display:flex; flex-direction:column; gap:9px; }
-.options-list.wrap { flex-direction:row; flex-wrap:wrap; gap:10px 22px; }
+/* Radio/Checkbox */
+.options-list { display:flex; flex-direction:column; gap:8px; }
+.options-list.wrap { flex-direction:row; flex-wrap:wrap; gap:8px 16px; }
+
 .opt-item {
-  display:flex; align-items:center; gap:9px;
-  cursor:pointer; font-size:14px; color:#333; user-select:none;
+  display:flex; align-items:center; gap:10px;
+  cursor:pointer; font-size:14px; color:var(--text-muted);
+  user-select:none; padding:9px 13px;
+  background:var(--surface); border:1.5px solid var(--border-soft);
+  border-radius:var(--radius-sm);
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
+.options-list.wrap .opt-item { flex:0 0 auto; }
+.opt-item:hover { border-color:var(--border); color:var(--text); }
 .opt-item input[type=radio],
 .opt-item input[type=checkbox] { display:none; }
 .opt-box {
-  width:18px; height:18px; border:2px solid #ccc; border-radius:4px;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  width:16px; height:16px; border:2px solid var(--text-dim);
+  border-radius:4px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
   transition: border-color 0.2s, background 0.2s;
 }
 .opt-radio .opt-box { border-radius:50%; }
-.opt-item input:checked + .opt-box { border-color:#cbf000; background:#cbf000; }
-.opt-item input:checked + .opt-box::after {
-  content:''; width:7px; height:7px; background:#222;
+.opt-item input:checked ~ .opt-box {
+  border-color:var(--lime); background:var(--lime);
+}
+.opt-item input:checked ~ .opt-box::after {
+  content:''; width:6px; height:6px; background:#111;
   border-radius:50%; display:block;
 }
-.opt-item input[type=checkbox]:checked + .opt-box::after {
-  content:'✓'; font-size:11px; font-weight:800; color:#222;
+.opt-item input[type=checkbox]:checked ~ .opt-box::after {
+  content:'✓'; font-size:10px; font-weight:900; color:#111;
   border-radius:0; width:auto; height:auto; background:transparent;
 }
-
-.hint { font-size:11px; color:#999; margin-top:5px; }
-
-.btn-wa {
-  width:100%; padding:14px; border:none; border-radius:10px;
-  background:#25D366; color:#fff; font-size:15px; font-weight:700;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-  gap:9px; font-family:inherit; margin-top:8px;
-  opacity:0; transform:translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease, background 0.2s, box-shadow 0.2s;
+.opt-item:has(input:checked) {
+  border-color:var(--border);
+  background:var(--lime-dim);
+  color:var(--lime);
 }
-.btn-wa.visible { opacity:1; transform:translateY(0); }
-.btn-wa:hover { background:#1ebe5d; box-shadow:0 4px 18px rgba(37,211,102,0.4); }
-.btn-wa:active { transform:scale(0.98); }
-.wa-icon { width:20px; height:20px; fill:#fff; flex-shrink:0; }
 
+.hint { font-size:11.5px; color:var(--text-dim); margin-top:6px; line-height:1.5; }
+
+/* ── Tombol WA — glow lime ── */
+.btn-wa {
+  --glow-color: rgb(203, 240, 0);
+  --glow-spread-color: rgba(180, 220, 0, 0.75);
+  --enhanced-glow-color: rgb(225, 255, 100);
+  --btn-color: rgb(60, 75, 0);
+
+  width: 100%; margin-top: 28px;
+  padding: 1em 3em;
+  border: .25em solid var(--glow-color);
+  color: var(--glow-color);
+  font-size: 15px; font-weight: 700;
+  font-family: inherit; letter-spacing: 0.01em;
+  background-color: var(--btn-color);
+  border-radius: 1em;
+  outline: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 0 1em .25em var(--glow-color),
+              0 0 4em 1em var(--glow-spread-color),
+              inset 0 0 .75em .25em var(--glow-color);
+  text-shadow: 0 0 .5em var(--glow-color);
+  position: relative;
+  transition: all 0.3s;
+  opacity: 0; transform: translateY(18px);
+}
+.btn-wa.visible { opacity: 1; transform: translateY(0); }
+
+.btn-wa::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  top: 120%; left: 0;
+  height: 100%; width: 100%;
+  background-color: var(--glow-spread-color);
+  filter: blur(2em);
+  opacity: .7;
+  transform: perspective(1.5em) rotateX(35deg) scale(1, .6);
+}
+.btn-wa:hover {
+  color: var(--btn-color);
+  background-color: var(--glow-color);
+  box-shadow: 0 0 1em .25em var(--glow-color),
+              0 0 4em 2em var(--glow-spread-color),
+              inset 0 0 .75em .25em var(--glow-color);
+}
+.btn-wa:hover .wa-icon { fill: var(--btn-color); }
+.btn-wa:active {
+  box-shadow: 0 0 0.6em .25em var(--glow-color),
+              0 0 2.5em 2em var(--glow-spread-color),
+              inset 0 0 .5em .25em var(--glow-color);
+  transform: scale(0.98) translateY(0) !important;
+}
+.wa-icon { width: 20px; height: 20px; fill: var(--glow-color); flex-shrink: 0; transition: fill 0.3s; }
+
+/* ── Footer ── */
 .form-footer {
-  text-align:center; font-size:12px; color:#aaa;
-  padding:16px 0 4px; opacity:0;
-  transition: opacity 0.5s ease 0.2s;
+  text-align:center; font-size:12px; color:var(--text-dim);
+  padding:20px 0 6px;
+  opacity:0; transition: opacity 0.5s ease 0.2s;
 }
 .form-footer.visible { opacity:1; }
-.form-footer a { color:#25D366; text-decoration:none; }
+.form-footer strong { color:var(--text-muted); }
 
+/* ── Floating lime orbs (dekoratif) ── */
+.fp-orb {
+  position:fixed; border-radius:50%; pointer-events:none; z-index:0;
+  background: radial-gradient(circle, var(--lime-glow) 0%, transparent 70%);
+  filter: blur(40px);
+  animation: orb-drift 12s ease-in-out infinite alternate;
+}
+.fp-orb-1 { width:320px; height:320px; top:-80px; right:-80px; opacity:0.4; animation-duration:14s; }
+.fp-orb-2 { width:220px; height:220px; bottom:120px; left:-60px; opacity:0.25; animation-duration:10s; animation-direction:alternate-reverse; }
+@keyframes orb-drift {
+  0%{ transform:translate(0,0) scale(1); }
+  100%{ transform:translate(20px,30px) scale(1.12); }
+}
+
+/* ── Responsive ── */
 @media(max-width:480px){
-  .form-body { padding:18px 14px 22px; }
-  .form-title { font-size:18px; }
-  #c { max-width:75vw; }
-  .header-img { height:150px; }
+  .fp-hero { min-height:180px; }
+  .fp-title { font-size:22px; }
+  .fp-body { padding:20px 14px 56px; }
+  .form-group input[type=text],
+  .form-group input[type=email],
+  .form-group textarea { font-size:16px; } /* cegah zoom di iOS */
+  .opt-item { font-size:13px; }
+  .fp-studio-tag { font-size:10px; }
 }
 
 /* ── Layar MASUK ── */
@@ -209,113 +421,156 @@ html, body { width:100%; height:100%; background:#262726; font-family:'Segoe UI'
 </div>
 
 <div id="formPage">
-  <div class="form-card">
-    <div class="header-img">
-      <img src="sampul.jpg" alt="Gema Visual Studio" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.parentNode.querySelector('.ghost').style.display='flex';">
-      <span class="ghost" style="display:none;position:absolute;font-size:52px;">👻</span>
+
+  <!-- Orbs dekoratif -->
+  <div class="fp-orb fp-orb-1"></div>
+  <div class="fp-orb fp-orb-2"></div>
+
+  <!-- Hero header -->
+  <div class="fp-hero">
+    <div class="fp-hero-img">
+      <img src="sampul.jpg" alt="Gema Visual Studio" onerror="this.style.display='none'">
     </div>
-    <div class="form-body">
-      <div class="form-title">Gema Visual Studio Form</div>
-      <div class="form-subtitle">
-        Halo! Terima kasih telah memilih layanan desain logo kami.<br><br>
-        Mohon isi formulir di bawah ini dengan jelas agar kami dapat menciptakan logo yang sesuai dengan identitas dan visi brand Anda.<br><br>
-        Isi form ini dengan sebenar-benarnya, karena form ini akan menjadi acuan designer dalam membuat logo anda
-      </div>
+    <div class="fp-hero-overlay"></div>
+    <div class="fp-hero-line"></div>
+    <div class="fp-hero-content">
+      <div class="fp-studio-tag">Gema Visual Studio</div>
+      <div class="fp-title">Form <span>Brief</span> Logo</div>
+    </div>
+  </div>
 
-      <div class="form-group">
-        <label><span class="req">*</span> Nama Lengkap</label>
-        <textarea id="f-nama" rows="2"></textarea>
-      </div>
+  <!-- Body -->
+  <div class="fp-body">
 
-      <div class="form-group">
-        <label><span class="req">*</span> Masukkan email Anda</label>
-        <input type="email" id="f-email">
-      </div>
+    <div class="fp-intro">
+      Halo! Terima kasih telah memilih layanan desain logo kami.<br>
+      Mohon isi formulir ini dengan jelas agar kami dapat menciptakan logo yang sesuai dengan identitas brand Anda.
+      <br><br>
+      <strong>Isi dengan sebenar-benarnya</strong> — form ini menjadi acuan utama designer.
+    </div>
 
-      <div class="form-group">
-        <label><span class="req">*</span> Masukkan nomor telepon Anda</label>
-        <div class="phone-wrap">
-          <div class="phone-flag">🇮🇩 +62</div>
-          <input type="text" id="f-phone" placeholder="81234567890">
-        </div>
-      </div>
+    <!-- SEKSI 1: Identitas -->
+    <div class="fp-section">
+      <div class="fp-section-num">1</div>
+      <div class="fp-section-label">Identitas Anda</div>
+      <div class="fp-section-line"></div>
+    </div>
 
-      <div class="form-group">
-        <label><span class="req">*</span> Nama brand/produk</label>
-        <input type="text" id="f-brand">
-      </div>
+    <div class="form-group">
+      <label><span class="req">*</span> Nama Lengkap</label>
+      <textarea id="f-nama" rows="2"></textarea>
+    </div>
 
-      <div class="form-group">
-        <label><span class="req">*</span> Jenis produk</label>
-        <div class="options-list">
-          <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Fashion"><span class="opt-box"></span>Fashion</label>
-          <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Kuliner"><span class="opt-box"></span>Kuliner</label>
-          <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Teknologi"><span class="opt-box"></span>Teknologi</label>
-          <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Lainnya"><span class="opt-box"></span>Lainnya</label>
-        </div>
-      </div>
+    <div class="form-group">
+      <label><span class="req">*</span> Masukkan email Anda</label>
+      <input type="email" id="f-email">
+    </div>
 
-      <div class="form-group">
-        <label><span class="req">*</span> Visi/filosofi brand</label>
-        <textarea id="f-visi"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label><span class="req">*</span> Jenis logo yang diinginkan</label>
-        <div class="options-list wrap">
-          <label class="opt-item"><input type="checkbox" name="logo" value="Wordmark"><span class="opt-box"></span>Wordmark (berbasis teks)</label>
-          <label class="opt-item"><input type="checkbox" name="logo" value="Lettermark"><span class="opt-box"></span>Lettermark (Inisial)</label>
-          <label class="opt-item"><input type="checkbox" name="logo" value="Symbol/Iconic"><span class="opt-box"></span>Symbol/Iconic</label>
-          <label class="opt-item"><input type="checkbox" name="logo" value="Maskot"><span class="opt-box"></span>Maskot (karakter)</label>
-          <label class="opt-item"><input type="checkbox" name="logo" value="Kombinasi"><span class="opt-box"></span>Kombinasi (teks + simbol)</label>
-        </div>
-        <div class="hint">Bisa memilih lebih dari satu</div>
-      </div>
-
-      <div class="form-group">
-        <label><span class="req">*</span> Warna yang diinginkan</label>
-        <input type="text" id="f-warna">
-        <div class="hint">Tuliskan warna tertentu atau warna umum yang ingin digunakan</div>
-      </div>
-
-      <div class="form-group">
-        <label><span class="req">*</span> Gaya design yang diinginkan</label>
-        <div class="options-list">
-          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Minimalis"><span class="opt-box"></span>Minimalis</label>
-          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Modern"><span class="opt-box"></span>Modern</label>
-          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Vintage"><span class="opt-box"></span>Vintage</label>
-          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Playful"><span class="opt-box"></span>Playful</label>
-          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Elegan"><span class="opt-box"></span>Elegan</label>
-          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Lainnya"><span class="opt-box"></span>Lainnya</label>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Apakah anda memiliki contoh logo yang disukai sebagai referensi ?</label>
-        <textarea id="f-ref"></textarea>
-        <div class="hint">Silahkan upload link referensi atau jelaskan nama brand yang di jadikan acuan</div>
-      </div>
-
-      <div class="form-group">
-        <label>Hal - hal yang tidak anda sukai dalam design logo (jika ada)</label>
-        <textarea id="f-nolike"></textarea>
-        <div class="hint">Warna, bentuk, jenis font, dll yang anda tidak inginkan</div>
-      </div>
-
-      <div class="form-group">
-        <label>Apakah ada pesan khusus atau catatan tambahan untuk designer ?</label>
-        <textarea id="f-pesan"></textarea>
-      </div>
-
-      <button class="btn-wa" id="btnWA" onclick="kirimWA()">
-        <svg class="wa-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Kirim di WhatsApp
-      </button>
-
-      <div class="form-footer" id="formFooter">
-        &copy; Hak Cipta Dilindungi oleh <strong>Gema Visual Studio</strong>
+    <div class="form-group">
+      <label><span class="req">*</span> Masukkan nomor telepon Anda</label>
+      <div class="phone-wrap">
+        <div class="phone-flag">🇮🇩 +62</div>
+        <input type="text" id="f-phone" placeholder="81234567890">
       </div>
     </div>
+
+    <!-- SEKSI 2: Brand -->
+    <div class="fp-section">
+      <div class="fp-section-num">2</div>
+      <div class="fp-section-label">Tentang Brand</div>
+      <div class="fp-section-line"></div>
+    </div>
+
+    <div class="form-group">
+      <label><span class="req">*</span> Nama brand/produk</label>
+      <input type="text" id="f-brand">
+    </div>
+
+    <div class="form-group">
+      <label><span class="req">*</span> Jenis produk</label>
+      <div class="options-list">
+        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Fashion"><span class="opt-box"></span>Fashion</label>
+        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Kuliner"><span class="opt-box"></span>Kuliner</label>
+        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Teknologi"><span class="opt-box"></span>Teknologi</label>
+        <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Lainnya"><span class="opt-box"></span>Lainnya</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label><span class="req">*</span> Visi/filosofi brand</label>
+      <textarea id="f-visi"></textarea>
+    </div>
+
+    <!-- SEKSI 3: Desain -->
+    <div class="fp-section">
+      <div class="fp-section-num">3</div>
+      <div class="fp-section-label">Preferensi Desain</div>
+      <div class="fp-section-line"></div>
+    </div>
+
+    <div class="form-group">
+      <label><span class="req">*</span> Jenis logo yang diinginkan</label>
+      <div class="options-list wrap">
+        <label class="opt-item"><input type="checkbox" name="logo" value="Wordmark"><span class="opt-box"></span>Wordmark (berbasis teks)</label>
+        <label class="opt-item"><input type="checkbox" name="logo" value="Lettermark"><span class="opt-box"></span>Lettermark (Inisial)</label>
+        <label class="opt-item"><input type="checkbox" name="logo" value="Symbol/Iconic"><span class="opt-box"></span>Symbol/Iconic</label>
+        <label class="opt-item"><input type="checkbox" name="logo" value="Maskot"><span class="opt-box"></span>Maskot (karakter)</label>
+        <label class="opt-item"><input type="checkbox" name="logo" value="Kombinasi"><span class="opt-box"></span>Kombinasi (teks + simbol)</label>
+      </div>
+      <div class="hint">Bisa memilih lebih dari satu</div>
+    </div>
+
+    <div class="form-group">
+      <label><span class="req">*</span> Warna yang diinginkan</label>
+      <input type="text" id="f-warna">
+      <div class="hint">Tuliskan warna tertentu atau warna umum yang ingin digunakan</div>
+    </div>
+
+    <div class="form-group">
+      <label><span class="req">*</span> Gaya design yang diinginkan</label>
+      <div class="options-list">
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Minimalis"><span class="opt-box"></span>Minimalis</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Modern"><span class="opt-box"></span>Modern</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Vintage"><span class="opt-box"></span>Vintage</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Playful"><span class="opt-box"></span>Playful</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Elegan"><span class="opt-box"></span>Elegan</label>
+        <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Lainnya"><span class="opt-box"></span>Lainnya</label>
+      </div>
+    </div>
+
+    <!-- SEKSI 4: Referensi -->
+    <div class="fp-section">
+      <div class="fp-section-num">4</div>
+      <div class="fp-section-label">Referensi & Catatan</div>
+      <div class="fp-section-line"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Apakah anda memiliki contoh logo yang disukai sebagai referensi?</label>
+      <textarea id="f-ref"></textarea>
+      <div class="hint">Silahkan upload link referensi atau jelaskan nama brand yang dijadikan acuan</div>
+    </div>
+
+    <div class="form-group">
+      <label>Hal-hal yang tidak anda sukai dalam design logo (jika ada)</label>
+      <textarea id="f-nolike"></textarea>
+      <div class="hint">Warna, bentuk, jenis font, dll yang anda tidak inginkan</div>
+    </div>
+
+    <div class="form-group">
+      <label>Apakah ada pesan khusus atau catatan tambahan untuk designer?</label>
+      <textarea id="f-pesan"></textarea>
+    </div>
+
+    <button class="btn-wa" id="btnWA" onclick="kirimWA()">
+      <svg class="wa-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Kirim di WhatsApp
+    </button>
+
+    <div class="form-footer" id="formFooter">
+      &copy; Hak Cipta Dilindungi oleh <strong>Gema Visual Studio</strong>
+    </div>
+
   </div>
 </div>
 
@@ -934,13 +1189,36 @@ function showForm() {
   fp.style.display = 'block';
   requestAnimationFrame(() => {
     fp.classList.add('visible');
-    setTimeout(() => document.querySelector('.form-title').classList.add('visible'), 100);
-    setTimeout(() => document.querySelector('.form-subtitle').classList.add('visible'), 200);
-    const groups = document.querySelectorAll('.form-group');
-    groups.forEach((g, i) => setTimeout(() => g.classList.add('visible'), 300 + i * 70));
-    const afterAll = 300 + groups.length * 70 + 100;
-    setTimeout(() => document.getElementById('btnWA').classList.add('visible'), afterAll);
-    setTimeout(() => document.getElementById('formFooter').classList.add('visible'), afterAll + 100);
+
+    // Hero elements
+    setTimeout(() => {
+      const tag = document.querySelector('.fp-studio-tag');
+      const title = document.querySelector('.fp-title');
+      if (tag) tag.classList.add('visible');
+      if (title) title.classList.add('visible');
+    }, 80);
+
+    // Intro box
+    setTimeout(() => {
+      const intro = document.querySelector('.fp-intro');
+      if (intro) intro.classList.add('visible');
+    }, 220);
+
+    // Sections & form groups — stagger semua sekaligus
+    const staggerEls = document.querySelectorAll('.fp-section, .form-group');
+    staggerEls.forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), 350 + i * 55);
+    });
+
+    const afterAll = 350 + staggerEls.length * 55 + 80;
+    setTimeout(() => {
+      const btn = document.getElementById('btnWA');
+      if (btn) btn.classList.add('visible');
+    }, afterAll);
+    setTimeout(() => {
+      const footer = document.getElementById('formFooter');
+      if (footer) footer.classList.add('visible');
+    }, afterAll + 120);
   });
 }
 
@@ -989,6 +1267,25 @@ function kirimWA() {
   const waNumber = '6281234567890';
   window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
 }
+
+// ══════════════════════════════════════════════════
+//  PAUSE / RESUME saat pindah tab
+// ══════════════════════════════════════════════════
+const _allAudio = [sndWriting, sndArsir, sndSplash, sndBg];
+// Catat mana yang sedang aktif saat tab ditinggal
+let _pausedByHidden = [];
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // Tab tidak aktif — pause semua yang sedang main
+    _pausedByHidden = _allAudio.filter(a => !a.paused);
+    _pausedByHidden.forEach(a => a.pause());
+  } else {
+    // Tab aktif kembali — resume hanya yang tadi dipause oleh kita
+    _pausedByHidden.forEach(a => a.play().catch(()=>{}));
+    _pausedByHidden = [];
+  }
+});
 </script>
 </body>
 </html>
