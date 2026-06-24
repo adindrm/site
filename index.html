@@ -1408,73 +1408,74 @@
       position: fixed; inset: 0;
       z-index: 99990;
       pointer-events: none;
-    }
-    /* Scanline sweep */
-    #themeTransitionOverlay .sweep-line {
-      position: absolute; left: 0; right: 0;
-      height: 3px;
-      background: currentColor;
-      top: 0;
-      transform: translateY(-100%);
+      background: transparent;
       opacity: 0;
-      animation: sweepDown 0.5s cubic-bezier(0.4,0,0.6,1) both;
+      transition: opacity 0.35s ease;
     }
-    @keyframes sweepDown {
-      0%   { transform: translateY(-100%); opacity: 0; }
-      8%   { opacity: 1; }
-      90%  { opacity: 0.8; }
-      100% { transform: translateY(100vh); opacity: 0; }
-    }
-    /* Pixel grid flash */
-    #themeTransitionOverlay .pixel-flash {
-      position: absolute; inset: 0;
-      background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 3px, currentColor 3px, currentColor 4px),
-        repeating-linear-gradient(90deg, transparent, transparent 3px, currentColor 3px, currentColor 4px);
-      opacity: 0;
-      animation: pixelFlash 0.5s ease both;
-    }
-    @keyframes pixelFlash {
-      0%   { opacity: 0; }
-      10%  { opacity: 0.22; }
-      50%  { opacity: 0.08; }
-      100% { opacity: 0; }
-    }
-    /* Vignette pulse */
-    #themeTransitionOverlay .vignette-pulse {
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse at center, transparent 20%, currentColor 100%);
-      opacity: 0;
-      animation: vignettePulse 0.55s ease both;
-    }
-    @keyframes vignettePulse {
-      0%   { opacity: 0; }
-      15%  { opacity: 0.55; }
-      100% { opacity: 0; }
-    }
+    #themeTransitionOverlay.fade-in  { opacity: 1; }
+    #themeTransitionOverlay.fade-out { opacity: 0; }
     .theme-toggle-wrap { display: flex; align-items: center; margin-right: 10px; }
-    .theme-toggle-btn {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: none;
-      border: 1px solid rgba(0,0,0,0.2);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s, border-color 0.2s, transform 0.25s;
-      color: #111;
-      padding: 0;
-      outline: none;
+    /* ── Theme switch ── */
+    .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+    .switch #themeToggleInput { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #2196f3;
+      transition: 0.4s; z-index: 0; overflow: hidden;
     }
-    .theme-toggle-btn:hover { background: rgba(0,0,0,0.07); transform: scale(1.12) rotate(12deg); }
-    .theme-toggle-btn svg { width: 14px; height: 14px; display: block; stroke: currentColor; }
-    /* Dark mode — icon dan border putih */
-    body.dark-mode .theme-toggle-btn {
-      color: #fff;             /* Membuat warna matahari menjadi putih */
-      border-color: #333;      /* Border tombol bulatnya */
+    .sun-moon {
+      position: absolute; height: 20px; width: 20px;
+      left: 3px; bottom: 3px;
+      background-color: yellow;
+      transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1), background-color 0.4s ease;
     }
-    body.dark-mode .theme-toggle-btn svg { stroke: #000000; }
-    body.dark-mode .theme-toggle-btn:hover { background: rgba(255,255,255,0.12); }
-    .theme-toggle-btn svg { stroke: #111; }
+    #themeToggleInput:checked + .slider { background-color: black; }
+    #themeToggleInput:checked + .slider .sun-moon {
+      transform: translateX(20px);
+      background-color: white;
+    }
+    .moon-dot { opacity: 0; transition: 0.4s; fill: gray; }
+    #themeToggleInput:checked + .slider .sun-moon .moon-dot { opacity: 1; }
+    .slider.round { border-radius: 26px; }
+    .slider.round .sun-moon { border-radius: 50%; }
+    #moon-dot-1 { left: 8px; top: 2px; position: absolute; width: 5px; height: 5px; z-index: 4; }
+    #moon-dot-2 { left: 2px; top: 8px; position: absolute; width: 8px; height: 8px; z-index: 4; }
+    #moon-dot-3 { left: 12px; top: 14px; position: absolute; width: 3px; height: 3px; z-index: 4; }
+    #light-ray-1 { left: -6px; top: -6px; position: absolute; width: 33px; height: 33px; z-index: -1; fill: white; opacity: 10%; }
+    #light-ray-2 { left: -50%; top: -50%; position: absolute; width: 42px; height: 42px; z-index: -1; fill: white; opacity: 10%; }
+    #light-ray-3 { left: -14px; top: -14px; position: absolute; width: 46px; height: 46px; z-index: -1; fill: white; opacity: 10%; }
+    .cloud-light { position: absolute; fill: #eee; animation: cloud-move 6s infinite; }
+    .cloud-dark  { position: absolute; fill: #ccc; animation: cloud-move 6s infinite 1s; }
+    #cloud-1 { left: 23px; top: 11px; width: 30px; }
+    #cloud-2 { left: 34px; top: 8px;  width: 16px; }
+    #cloud-3 { left: 14px; top: 18px; width: 23px; }
+    #cloud-4 { left: 28px; top: 14px; width: 30px; }
+    #cloud-5 { left: 37px; top: 11px; width: 16px; }
+    #cloud-6 { left: 17px; top: 20px; width: 23px; }
+    @keyframes cloud-move {
+      0%   { transform: translateX(0); }
+      40%  { transform: translateX(3px); }
+      80%  { transform: translateX(-3px); }
+      100% { transform: translateX(0); }
+    }
+    .switch-stars { transform: translateY(-26px); opacity: 0; transition: 0.4s; }
+    .switch-star {
+      fill: white; position: absolute;
+      transition: 0.4s;
+      animation: star-twinkle 2s infinite;
+    }
+    #themeToggleInput:checked + .slider .switch-stars { transform: translateY(0); opacity: 1; }
+    #sw-star-1 { width: 15px; top: 2px;  left: 2px;  animation-delay: 0.3s; }
+    #sw-star-2 { width: 5px;  top: 12px; left: 2px; }
+    #sw-star-3 { width: 9px;  top: 15px; left: 8px;  animation-delay: 0.6s; }
+    #sw-star-4 { width: 14px; top: 0px;  left: 14px; animation-delay: 1.3s; }
+    @keyframes star-twinkle {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.2); }
+      80%  { transform: scale(0.8); }
+      100% { transform: scale(1); }
+    }
     /* Dark mode global */
     body.dark-mode { background: #0a0a0a; color: #e8e8e8; }
     body.dark-mode #siteHeader { background: rgba(10,10,10,0.92); border-bottom-color: rgba(255,255,255,0.08); }
@@ -1707,8 +1708,11 @@
     background: rgba(255,255,255,0.09);
     border-color: rgba(255,255,255,0.22);
   }
-  body.dark-mode #clockTime { color: #e8e8e8; }
-  body.dark-mode #clockDate { color: #666; }
+  @media (max-width: 600px) {
+    #clockWidget { padding: 3px 7px; gap: 0px; }
+    #clockTime { font-size: 10px; }
+    #clockDate { font-size: 6px; letter-spacing: 0.15em; }
+  }
 
   /* ── CLOCK EASTER EGG ── */
   #clockWidget.egg-scramble #clockTime,
@@ -1800,26 +1804,31 @@
       <div id="clockDate">Sen, 01 Jan</div>
     </div>
     <div class="theme-toggle-wrap" id="langToggleWrap">
-      <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle dark/light mode" onclick="toggleTheme()">
-        <!-- Sun icon (shown in dark mode) -->
-        <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" 
-       stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"
-       style="display:none;">
-          <circle cx="12" cy="12" r="4"/>
-          <line x1="12" y1="2" x2="12" y2="5"/>
-          <line x1="12" y1="19" x2="12" y2="22"/>
-          <line x1="2" y1="12" x2="5" y2="12"/>
-          <line x1="19" y1="12" x2="22" y2="12"/>
-          <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/>
-          <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
-          <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/>
-          <line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
-        </svg>
-        <!-- Moon icon (shown in light mode) -->
-        <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </button>
+      <label class="switch">
+        <input id="themeToggleInput" type="checkbox" />
+        <div class="slider round">
+          <div class="sun-moon">
+            <svg id="moon-dot-1" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="moon-dot-2" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="moon-dot-3" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="light-ray-1" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="light-ray-2" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="light-ray-3" class="light-ray" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="cloud-1" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="cloud-2" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="cloud-3" class="cloud-dark" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="cloud-4" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="cloud-5" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+            <svg id="cloud-6" class="cloud-light" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"/></svg>
+          </div>
+          <div class="switch-stars">
+            <svg id="sw-star-1" class="switch-star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"/></svg>
+            <svg id="sw-star-2" class="switch-star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"/></svg>
+            <svg id="sw-star-3" class="switch-star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"/></svg>
+            <svg id="sw-star-4" class="switch-star" viewBox="0 0 20 20"><path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z"/></svg>
+          </div>
+        </div>
+      </label>
     </div>
     <label for="nav-toggle" class="menu-btn" aria-label="Menu">
       <i id="menuPageIcon" class="fa-solid fa-house"></i>
@@ -2486,37 +2495,32 @@
    DARK / LIGHT MODE
 ══════════════════════════════════ */
 (function() {
-  const saved = 'light'; // selalu mulai dengan mode terang setiap kali halaman dimuat
+  function getAutoMode() {
+    const h = new Date().getHours();
+    return (h >= 18 || h < 6) ? 'dark' : 'light';
+  }
 
   function updateThemeIcon(mode) {
-    const sun  = document.getElementById('iconSun');
-    const moon = document.getElementById('iconMoon');
-    if (!sun || !moon) return;
-    if (mode === 'dark') {
-      sun.style.display  = '';      // matahari tampil di mode gelap (klik untuk balik ke terang)
-      moon.style.display = 'none';
-    } else {
-      sun.style.display  = 'none';
-      moon.style.display = '';      // bulan tampil di mode terang (klik untuk ke gelap)
-    }
+    const inp = document.getElementById('themeToggleInput');
+    if (inp) inp.checked = (mode === 'dark');
   }
 
   function applyTheme(mode) {
-    if (mode === 'dark') {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
+    if (mode === 'dark') document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
     updateThemeIcon(mode);
   }
 
-  // Apply segera agar tidak flicker
-  if (saved === 'dark') document.body.classList.add('dark-mode');
-  updateThemeIcon(saved);
-  window.addEventListener('DOMContentLoaded', () => applyTheme(saved));
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    setTimeout(() => applyTheme(saved), 0);
-  }
+  // Init — pakai waktu sekarang
+  const initMode = getAutoMode();
+  applyTheme(initMode);
+  window.addEventListener('DOMContentLoaded', () => applyTheme(initMode));
+
+  // Cek tiap menit — auto switch saat jam berubah (hanya jika user tidak override manual)
+  let manualOverride = false;
+  setInterval(() => {
+    if (!manualOverride) applyTheme(getAutoMode());
+  }, 60000);
 
   // Suara gamer
   function _themeSound(toDark) {
@@ -2572,39 +2576,46 @@
     } catch(e) {}
   }
 
-  // Animasi sweep + pixel flash
+  // Animasi fade halus
   function _themeAnimate(toDark, onMid) {
     const overlay = document.getElementById('themeTransitionOverlay');
     if (!overlay) { onMid(); return; }
-    overlay.style.color = toDark ? '#000' : '#fff';
-    overlay.innerHTML = `
-      <div class="vignette-pulse"></div>
-      <div class="pixel-flash"></div>
-      <div class="sweep-line"></div>
-    `;
-    // Tombol spin
-    const btn = document.getElementById('themeToggleBtn');
-    if (btn) {
-      btn.style.transition = 'transform 0.35s cubic-bezier(0.34,1.4,0.64,1)';
-      btn.style.transform  = 'scale(0) rotate(180deg)';
+    overlay.style.background = toDark ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.18)';
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.22s ease';
+    // fade in tipis
+    requestAnimationFrame(() => {
+      overlay.style.opacity = '1';
       setTimeout(() => {
-        btn.style.transform = 'scale(1) rotate(0deg)';
-        setTimeout(() => { btn.style.transition = ''; btn.style.transform = ''; }, 350);
-      }, 200);
-    }
-    // Apply tema di tengah sweep
-    setTimeout(() => onMid(), 190);
-    // Bersihkan
-    setTimeout(() => { overlay.innerHTML = ''; }, 520);
+        onMid(); // terapkan tema di puncak fade
+        overlay.style.transition = 'opacity 0.3s ease';
+        overlay.style.opacity = '0';
+      }, 220);
+    });
   }
 
   window.toggleTheme = function() {
     const isDark = document.body.classList.contains('dark-mode');
     const next   = isDark ? 'light' : 'dark';
-    localStorage.setItem('aiidentity_theme', next);
+    manualOverride = true;
+    // Reset override saat jam berganti ke boundary berikutnya (6 atau 18)
+    const now = new Date();
+    const nextBoundary = new Date();
+    const h = now.getHours();
+    if (h >= 18) nextBoundary.setHours(24, 0, 0, 0); // tengah malam → 06:00 besok
+    else if (h < 6) nextBoundary.setHours(6, 0, 0, 0);
+    else nextBoundary.setHours(18, 0, 0, 0);
+    const msUntil = nextBoundary - now;
+    setTimeout(() => { manualOverride = false; applyTheme(getAutoMode()); }, msUntil);
     _themeSound(!isDark);
     _themeAnimate(!isDark, () => applyTheme(next));
   };
+
+  // Wire checkbox switch ke toggleTheme
+  window.addEventListener('DOMContentLoaded', () => {
+    const inp = document.getElementById('themeToggleInput');
+    if (inp) inp.addEventListener('change', () => toggleTheme());
+  });
 })();
 
 // Dummy langSwitch agar kode lama tidak error
@@ -12461,8 +12472,8 @@ function setMenuIcon(sectionId) {
   let W, H, animId, running = false;
 
   function resize() {
-    W = artCanvas.width  = heroEl.offsetWidth  || window.innerWidth;
-    H = artCanvas.height = heroEl.offsetHeight || window.innerHeight;
+    W = artCanvas.width  = window.innerWidth;
+    H = artCanvas.height = window.innerHeight;
   }
   window.addEventListener('resize', resize);
   resize();
@@ -12545,7 +12556,7 @@ function setMenuIcon(sectionId) {
       if (this.y >= this.targetY) {
         this.isDead = true;
         burst(this.x, this.targetY, this.color, 'impact');
-        waveArr.push({ currentX: this.x, speed: (Math.random() > 0.5 ? 1 : -1) * 0.8,
+        addWave({ currentX: this.x, speed: (Math.random() > 0.5 ? 1 : -1) * 0.8,
           amplitude: -2.5, spreadWidth: 30, frequency: 0.04, bounceCount: 0, maxBounces: 4 });
       }
     }
@@ -12584,6 +12595,11 @@ function setMenuIcon(sectionId) {
     }
   }
 
+  function addWave(wave) {
+    if (waveArr.length >= 12) waveArr.splice(0, 1);
+    waveArr.push(wave);
+  }
+
   function burst(x, y, color, type) {
     const count = type === 'emergence' ? Math.floor(Math.random() * 4) + 5 : 2;
     for (let i = 0; i < count; i++) splashArr.push(new Splash(x, y, color, type));
@@ -12596,6 +12612,16 @@ function setMenuIcon(sectionId) {
       d += w.amplitude * Math.exp(-(dx * dx) / (2 * w.spreadWidth * w.spreadWidth)) * Math.cos(dx * w.frequency);
     }
     return d;
+  }
+
+  // Tiap frame, kalau total energi ombak terlalu besar, kurangi amplitude semua wave perlahan
+  function dampWavesIfNeeded() {
+    const samplePoints = [W * 0.25, W * 0.5, W * 0.75];
+    const maxDisp = Math.max(...samplePoints.map(x => Math.abs(fluidDisplacement(x))));
+    if (maxDisp > 18) {
+      const dampFactor = 1 - (maxDisp - 18) / maxDisp * 0.08;
+      for (const w of waveArr) w.amplitude *= dampFactor;
+    }
   }
 
   function updateWaves() {
@@ -12629,6 +12655,7 @@ function setMenuIcon(sectionId) {
     if (!running) return;
     ctx.clearRect(0, 0, W, H);
     updateWaves();
+    dampWavesIfNeeded();
 
     dustArr.forEach(dust => {
       const waveY = H - CFG.waveHeight + fluidDisplacement(dust.x);
@@ -12637,8 +12664,8 @@ function setMenuIcon(sectionId) {
       if (dust.y <= waveY + 8 && dust.y >= waveY - 12 && !dust.hasEmerged) {
         const sc = `rgba(${dust.baseColor.r},${dust.baseColor.g},${dust.baseColor.b},0.6)`;
         burst(dust.x, waveY - 2, sc, 'emergence');
-        waveArr.push({ currentX: dust.x, speed: -1.4, amplitude: -14, spreadWidth: 60, frequency: 0.02, bounceCount: 0 });
-        waveArr.push({ currentX: dust.x, speed:  1.4, amplitude: -14, spreadWidth: 60, frequency: 0.02, bounceCount: 0 });
+        addWave({ currentX: dust.x, speed: -1.4, amplitude: -14, spreadWidth: 60, frequency: 0.02, bounceCount: 0 });
+        addWave({ currentX: dust.x, speed:  1.4, amplitude: -14, spreadWidth: 60, frequency: 0.02, bounceCount: 0 });
         dust.hasEmerged = true;
       }
       if (dust.y <= waveY - 140 && dust.y >= waveY - 220 && !dust.hasShed) {
@@ -12665,20 +12692,30 @@ function setMenuIcon(sectionId) {
     animId = requestAnimationFrame(tick);
   }
 
-  function start() { if (!running) { running = true; resize(); tick(); } }
-  function stop()  { running = false; if (animId) cancelAnimationFrame(animId); ctx.clearRect(0, 0, W, H); }
+  function start() {
+    if (!running) { running = true; resize(); tick(); }
+  }
+  function stop() {
+    running = false;
+    if (animId) cancelAnimationFrame(animId);
+    ctx.clearRect(0, 0, W, H);
+  }
 
   function checkState() {
     const isDark   = document.body.classList.contains('dark-mode');
     const isActive = heroEl.classList.contains('page-active');
-    (isDark || !isActive) ? stop() : start();
+    if (!isDark && isActive) start(); else stop();
   }
 
   const obs = new MutationObserver(checkState);
   obs.observe(heroEl,        { attributes: true, attributeFilter: ['class'] });
   obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-  checkState();
+  // Polling fallback — cek tiap 300ms sampai animasi jalan
+  const pollId = setInterval(() => {
+    checkState();
+    if (running) clearInterval(pollId);
+  }, 300);
 })();
 </script>
 </body>
