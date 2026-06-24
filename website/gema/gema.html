@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800&display=swap" rel="stylesheet">
+<title>Gema Visual Studio</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#262726; font-family:'Segoe UI',system-ui,sans-serif; overflow:hidden; }
+#formPage { overflow-y:auto; height:100vh; }
+
+#loadingScreen {
+  position:fixed; inset:0; background:#fff; z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column;
+  transition: opacity 1.7s cubic-bezier(.45,0,.2,1),
+              transform 1.7s cubic-bezier(.45,0,.2,1),
+              filter 1.7s cubic-bezier(.45,0,.2,1);
+  will-change: opacity, transform, filter;
+}
+#loadingScreen.fade-out {
+  opacity:0;
+  transform: scale(1.04);
+  filter: blur(8px);
+  pointer-events:none;
+}
+#paintCanvas { position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:1; }
+.logo-wrap { position:relative; z-index:2; display:flex; align-items:center; justify-content:center; width:100%; }
+#c { max-width:60vw; display:block; }
+
+#formPage {
+  display:none; opacity:0;
+  padding:24px 16px 48px;
+  transform: scale(0.985) translateY(6px);
+  transition: opacity 1s cubic-bezier(.25,0.1,.25,1), transform 1s cubic-bezier(.25,0.1,.25,1);
+}
+#formPage.visible { opacity:1; transform: scale(1) translateY(0); }
+
+.form-card {
+  background:#fff; border-radius:16px; max-width:560px; margin:0 auto;
+  box-shadow:0 2px 20px rgba(0,0,0,0.08); overflow:hidden;
+}
+
+.header-img {
+  width:100%; height:200px; background:#111;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.header-img .ghost {
+  font-size:52px; animation: ghostFloat 3s ease-in-out infinite;
+}
+@keyframes ghostFloat {
+  0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);}
+}
+
+.form-body { padding:28px 24px 32px; }
+
+.form-title {
+  font-size:22px; font-weight:700; color:#111; margin-bottom:6px;
+  opacity:0; transform:translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.form-subtitle {
+  font-size:13px; color:#666; line-height:1.65; margin-bottom:24px;
+  opacity:0; transform:translateY(16px);
+  transition: opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s;
+}
+.form-title.visible, .form-subtitle.visible { opacity:1; transform:translateY(0); }
+
+.form-group {
+  margin-bottom:20px;
+  opacity:0; transform:translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.form-group.visible { opacity:1; transform:translateY(0); }
+
+.form-group label {
+  display:block; font-size:13px; font-weight:600; color:#222; margin-bottom:7px;
+}
+.form-group label .req { color:#c0392b; margin-right:3px; }
+
+.form-group input[type=text],
+.form-group input[type=email],
+.form-group textarea {
+  width:100%; padding:10px 12px; border:1.5px solid #dde1e7;
+  border-radius:8px; font-size:14px; color:#222; background:#fff;
+  resize:vertical; outline:none; font-family:inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus, .form-group textarea:focus {
+  border-color:#cbf000; box-shadow:0 0 0 3px rgba(203,240,0,0.2);
+}
+.form-group textarea { min-height:90px; }
+
+.phone-wrap { display:flex; gap:8px; align-items:center; }
+.phone-flag {
+  display:flex; align-items:center; gap:5px;
+  border:1.5px solid #dde1e7; border-radius:8px;
+  padding:10px 10px; font-size:13px; color:#333;
+  background:#fafafa; white-space:nowrap;
+}
+.phone-wrap input { flex:1; }
+
+.options-list { display:flex; flex-direction:column; gap:9px; }
+.options-list.wrap { flex-direction:row; flex-wrap:wrap; gap:10px 22px; }
+.opt-item {
+  display:flex; align-items:center; gap:9px;
+  cursor:pointer; font-size:14px; color:#333; user-select:none;
+}
+.opt-item input[type=radio],
+.opt-item input[type=checkbox] { display:none; }
+.opt-box {
+  width:18px; height:18px; border:2px solid #ccc; border-radius:4px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  transition: border-color 0.2s, background 0.2s;
+}
+.opt-radio .opt-box { border-radius:50%; }
+.opt-item input:checked + .opt-box { border-color:#cbf000; background:#cbf000; }
+.opt-item input:checked + .opt-box::after {
+  content:''; width:7px; height:7px; background:#222;
+  border-radius:50%; display:block;
+}
+.opt-item input[type=checkbox]:checked + .opt-box::after {
+  content:'✓'; font-size:11px; font-weight:800; color:#222;
+  border-radius:0; width:auto; height:auto; background:transparent;
+}
+
+.hint { font-size:11px; color:#999; margin-top:5px; }
+
+.btn-wa {
+  width:100%; padding:14px; border:none; border-radius:10px;
+  background:#25D366; color:#fff; font-size:15px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  gap:9px; font-family:inherit; margin-top:8px;
+  opacity:0; transform:translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease, background 0.2s, box-shadow 0.2s;
+}
+.btn-wa.visible { opacity:1; transform:translateY(0); }
+.btn-wa:hover { background:#1ebe5d; box-shadow:0 4px 18px rgba(37,211,102,0.4); }
+.btn-wa:active { transform:scale(0.98); }
+.wa-icon { width:20px; height:20px; fill:#fff; flex-shrink:0; }
+
+.form-footer {
+  text-align:center; font-size:12px; color:#aaa;
+  padding:16px 0 4px; opacity:0;
+  transition: opacity 0.5s ease 0.2s;
+}
+.form-footer.visible { opacity:1; }
+.form-footer a { color:#25D366; text-decoration:none; }
+
+@media(max-width:480px){
+  .form-body { padding:18px 14px 22px; }
+  .form-title { font-size:18px; }
+  #c { max-width:75vw; }
+  .header-img { height:150px; }
+}
+
+/* ── Layar MASUK ── */
+#introScreen {
+  position:fixed; inset:0; background:#111; z-index:99999;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:0;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+#introScreen.hide {
+  opacity:0; transform:scale(1.03); pointer-events:none;
+}
+#btnMasuk {
+  color:#fff; font-family:'Nunito', 'Segoe UI', system-ui, sans-serif;
+  font-size:clamp(28px,8vw,52px); font-weight:800;
+  letter-spacing:0.18em; text-transform:uppercase;
+  background:none; border:none; cursor:pointer;
+  padding:18px 48px;
+  position:relative;
+  transition: letter-spacing 0.3s ease, opacity 0.3s ease;
+}
+#btnMasuk::after {
+  content:'';
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  width:0; height:2px; background:#fff;
+  transition: width 0.35s ease;
+}
+#btnMasuk:hover { letter-spacing:0.28em; }
+#btnMasuk:hover::after { width:60%; }
+#introHint {
+  color:rgba(255,255,255,0.28); font-size:11px;
+  letter-spacing:0.12em; font-family:'Segoe UI',system-ui,sans-serif;
+  margin-top:10px; text-transform:uppercase;
+  animation: hintPulse 2.4s ease-in-out infinite;
+}
+@keyframes hintPulse {
+  0%,100%{ opacity:0.28; } 50%{ opacity:0.6; }
+}
+</style>
+</head>
+<body>
+
+<div id="introScreen">
+  <button id="btnMasuk" onclick="handleMasuk()">Masuk</button>
+  <div id="introHint">ketuk untuk memulai</div>
+</div>
+
+<div id="loadingScreen">
+  <canvas id="paintCanvas"></canvas>
+  <div class="logo-wrap">
+    <canvas id="c"></canvas>
+  </div>
+</div>
+
+<div id="formPage">
+  <div class="form-card">
+    <div class="header-img">
+      <img src="sampul.jpg" alt="Gema Visual Studio" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.parentNode.querySelector('.ghost').style.display='flex';">
+      <span class="ghost" style="display:none;position:absolute;font-size:52px;">👻</span>
+    </div>
+    <div class="form-body">
+      <div class="form-title">Gema Visual Studio Form</div>
+      <div class="form-subtitle">
+        Halo! Terima kasih telah memilih layanan desain logo kami.<br><br>
+        Mohon isi formulir di bawah ini dengan jelas agar kami dapat menciptakan logo yang sesuai dengan identitas dan visi brand Anda.<br><br>
+        Isi form ini dengan sebenar-benarnya, karena form ini akan menjadi acuan designer dalam membuat logo anda
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span> Nama Lengkap</label>
+        <textarea id="f-nama" rows="2"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span> Masukkan email Anda</label>
+        <input type="email" id="f-email">
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span> Masukkan nomor telepon Anda</label>
+        <div class="phone-wrap">
+          <div class="phone-flag">🇮🇩 +62</div>
+          <input type="text" id="f-phone" placeholder="81234567890">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span> Nama brand/produk</label>
+        <input type="text" id="f-brand">
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span> Jenis produk</label>
+        <div class="options-list">
+          <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Fashion"><span class="opt-box"></span>Fashion</label>
+          <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Kuliner"><span class="opt-box"></span>Kuliner</label>
+          <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Teknologi"><span class="opt-box"></span>Teknologi</label>
+          <label class="opt-item opt-radio"><input type="radio" name="jenis" value="Lainnya"><span class="opt-box"></span>Lainnya</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span> Visi/filosofi brand</label>
+        <textarea id="f-visi"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span> Jenis logo yang diinginkan</label>
+        <div class="options-list wrap">
+          <label class="opt-item"><input type="checkbox" name="logo" value="Wordmark"><span class="opt-box"></span>Wordmark (berbasis teks)</label>
+          <label class="opt-item"><input type="checkbox" name="logo" value="Lettermark"><span class="opt-box"></span>Lettermark (Inisial)</label>
+          <label class="opt-item"><input type="checkbox" name="logo" value="Symbol/Iconic"><span class="opt-box"></span>Symbol/Iconic</label>
+          <label class="opt-item"><input type="checkbox" name="logo" value="Maskot"><span class="opt-box"></span>Maskot (karakter)</label>
+          <label class="opt-item"><input type="checkbox" name="logo" value="Kombinasi"><span class="opt-box"></span>Kombinasi (teks + simbol)</label>
+        </div>
+        <div class="hint">Bisa memilih lebih dari satu</div>
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span> Warna yang diinginkan</label>
+        <input type="text" id="f-warna">
+        <div class="hint">Tuliskan warna tertentu atau warna umum yang ingin digunakan</div>
+      </div>
+
+      <div class="form-group">
+        <label><span class="req">*</span> Gaya design yang diinginkan</label>
+        <div class="options-list">
+          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Minimalis"><span class="opt-box"></span>Minimalis</label>
+          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Modern"><span class="opt-box"></span>Modern</label>
+          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Vintage"><span class="opt-box"></span>Vintage</label>
+          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Playful"><span class="opt-box"></span>Playful</label>
+          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Elegan"><span class="opt-box"></span>Elegan</label>
+          <label class="opt-item opt-radio"><input type="radio" name="gaya" value="Lainnya"><span class="opt-box"></span>Lainnya</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Apakah anda memiliki contoh logo yang disukai sebagai referensi ?</label>
+        <textarea id="f-ref"></textarea>
+        <div class="hint">Silahkan upload link referensi atau jelaskan nama brand yang di jadikan acuan</div>
+      </div>
+
+      <div class="form-group">
+        <label>Hal - hal yang tidak anda sukai dalam design logo (jika ada)</label>
+        <textarea id="f-nolike"></textarea>
+        <div class="hint">Warna, bentuk, jenis font, dll yang anda tidak inginkan</div>
+      </div>
+
+      <div class="form-group">
+        <label>Apakah ada pesan khusus atau catatan tambahan untuk designer ?</label>
+        <textarea id="f-pesan"></textarea>
+      </div>
+
+      <button class="btn-wa" id="btnWA" onclick="kirimWA()">
+        <svg class="wa-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Kirim di WhatsApp
+      </button>
+
+      <div class="form-footer" id="formFooter">
+        &copy; Hak Cipta Dilindungi oleh <strong>Gema Visual Studio</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script>
+// ══════════════════════════════════════════════════
+//  SOUND ENGINE  (mp3 efek + Tone.js untuk stamp)
+// ══════════════════════════════════════════════════
+let audioReady = false;
+let stampSynth;
+let effectsMuted = false; // jadi true permanen setelah logo full hitam
+
+// Efek suara nyata (file mp3, satu direktori dengan file ini)
+const sndWriting = new Audio('writing.mp3');   // menulis tepi logo
+sndWriting.loop = true;
+sndWriting.volume = 0.55;
+sndWriting.preload = 'auto';
+
+const sndArsir = new Audio('arsir.mp3');       // proses arsir
+sndArsir.loop = false; // loop manual supaya bisa selalu skip 1 detik awal
+sndArsir.volume = 0.5;
+sndArsir.preload = 'auto';
+const ARSIR_TRIM_START = 1; // detik yang dipotong dari awal file arsir.mp3
+let arsirActive = false;
+sndArsir.addEventListener('ended', () => {
+  if (arsirActive && audioReady && !effectsMuted) {
+    sndArsir.currentTime = ARSIR_TRIM_START;
+    sndArsir.play().catch(()=>{});
+  }
+});
+
+const sndSplash = new Audio('splash.mp3');     // cat muncrat
+sndSplash.loop = true;
+sndSplash.volume = 0.55;
+sndSplash.preload = 'auto';
+
+// Musik latar belakang
+const sndBg = new Audio('musikbg.mp3');
+sndBg.loop = true;
+sndBg.volume = 0;
+sndBg.preload = 'auto';
+
+async function initAudio() {
+  if (audioReady) return;
+  await Tone.start();
+  audioReady = true;
+
+  stampSynth = new Tone.Synth({
+    oscillator: { type: 'sine' },
+    envelope: { attack: 0.01, decay: 0.4, sustain: 0.05, release: 0.6 }
+  }).toDestination();
+  stampSynth.volume.value = -6;
+}
+
+async function handleMasuk() {
+  // Init audio context via gesture nyata
+  await initAudio();
+
+  // Efek suara tombol MASUK — dua nada singkat naik (klik + konfirmasi)
+  try {
+    const clickSynth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.005, decay: 0.18, sustain: 0, release: 0.1 }
+    }).toDestination();
+    clickSynth.volume.value = -4;
+    clickSynth.triggerAttackRelease('G4', '0.12');
+    setTimeout(() => clickSynth.triggerAttackRelease('C5', '0.18'), 120);
+  } catch(e){}
+
+  // Fade-out dan sembunyikan layar intro
+  const intro = document.getElementById('introScreen');
+  intro.classList.add('hide');
+  setTimeout(() => { intro.style.display = 'none'; }, 850);
+
+  // Mulai musik latar dengan fade-in halus
+  sndBg.currentTime = 0;
+  sndBg.volume = 0.32;
+  sndBg.play().catch(()=>{});
+
+  // Reset timer animasi tepat saat mulai jalan
+  START = performance.now();
+  transitionDone = false;
+  stampPlayed = false;
+  lastOutlineKey = null;
+  splatInited = false;
+
+  // Jalankan animasi loading
+  requestAnimationFrame(frame);
+}
+
+// ── Fade helper (sangat singkat, cukup untuk hilangkan "pop/klik") ──
+const FADE_IN  = 0.08;  // detik
+const FADE_OUT = 0.12;  // detik
+let _audioCtx = null;
+const _gainNodes = new WeakMap();
+
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+
+function getGain(audioEl) {
+  if (_gainNodes.has(audioEl)) return _gainNodes.get(audioEl);
+  const ac = getAudioCtx();
+  const src = ac.createMediaElementSource(audioEl);
+  const gain = ac.createGain();
+  src.connect(gain);
+  gain.connect(ac.destination);
+  gain.gain.value = 0;
+  _gainNodes.set(audioEl, gain);
+  return gain;
+}
+
+function fadeIn(audioEl, targetVol) {
+  if (!audioReady || effectsMuted) return;
+  const ac  = getAudioCtx();
+  const gain = getGain(audioEl);
+  const now  = ac.currentTime;
+  gain.gain.cancelScheduledValues(now);
+  gain.gain.setValueAtTime(gain.gain.value, now);
+  gain.gain.linearRampToValueAtTime(targetVol, now + FADE_IN);
+  if (audioEl.paused) {
+    audioEl.volume = 1; // volume dikelola gain node
+    audioEl.play().catch(()=>{});
+  }
+}
+
+function fadeOut(audioEl, cb) {
+  const ac   = getAudioCtx();
+  const gain = getGain(audioEl);
+  const now  = ac.currentTime;
+  gain.gain.cancelScheduledValues(now);
+  gain.gain.setValueAtTime(gain.gain.value, now);
+  gain.gain.linearRampToValueAtTime(0, now + FADE_OUT);
+  setTimeout(() => {
+    if (!audioEl.paused) { audioEl.pause(); audioEl.currentTime = 0; }
+    if (cb) cb();
+  }, FADE_OUT * 1000 + 20);
+}
+
+function safePlay(audioEl) {
+  if (!audioReady || effectsMuted) return;
+  const vol = audioEl._targetVol ?? audioEl.volume;
+  fadeIn(audioEl, vol);
+}
+function safeStop(audioEl) {
+  fadeOut(audioEl);
+}
+
+// ── Suara menulis tepi logo ──────────────────────────────────────────────
+function startOutlineSound() {
+  if (!audioReady || effectsMuted) return;
+  try {
+    const ac   = getAudioCtx();
+    const gain = getGain(sndWriting);
+    const now  = ac.currentTime;
+    // Fade out cepat dulu, reset, lalu fade in (agar restart tidak klik)
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setValueAtTime(gain.gain.value, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.05);
+    setTimeout(() => {
+      sndWriting.pause();
+      sndWriting.currentTime = 0;
+      if (!audioReady || effectsMuted) return;
+      sndWriting.volume = 1;
+      sndWriting.play().catch(()=>{});
+      const ac2 = getAudioCtx();
+      const g2  = getGain(sndWriting);
+      const n2  = ac2.currentTime;
+      g2.gain.cancelScheduledValues(n2);
+      g2.gain.setValueAtTime(0, n2);
+      g2.gain.linearRampToValueAtTime(1.0, n2 + FADE_IN);
+    }, 60);
+  } catch(e){}
+}
+function stopOutlineSound() { fadeOut(sndWriting); }
+
+// ── Suara arsir ──────────────────────────────────────────────────────────
+function playHatchSound() {
+  if (!audioReady || effectsMuted) return;
+  arsirActive = true;
+  if (sndArsir.paused) {
+    sndArsir.currentTime = ARSIR_TRIM_START;
+    sndArsir.volume = 1;
+    sndArsir.play().catch(()=>{});
+    const ac = getAudioCtx(), g = getGain(sndArsir), now = ac.currentTime;
+    g.gain.cancelScheduledValues(now);
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(1.0, now + FADE_IN);
+  }
+}
+function stopHatchSound() {
+  arsirActive = false;
+  fadeOut(sndArsir);
+}
+
+function playSplatSound() {
+  if (!audioReady || effectsMuted) return;
+  const gain = getGain(sndSplash);
+  const ac = getAudioCtx(), now = ac.currentTime;
+  gain.gain.cancelScheduledValues(now);
+  gain.gain.setValueAtTime(gain.gain.value, now);
+  gain.gain.linearRampToValueAtTime(1.0, now + FADE_IN);
+  if (sndSplash.paused) { sndSplash.volume = 1; sndSplash.play().catch(()=>{}); }
+}
+function stopSplatSound() { fadeOut(sndSplash); }
+
+function playStampSound() {
+  if (!audioReady) return;
+  try { stampSynth.triggerAttackRelease('C3', '0.4'); } catch(e){}
+}
+
+// Setelah logo benar-benar fill hitam (fillA mencapai 1), fade-out semua efek
+function muteAllEffectsIfFilled(fillA) {
+  if (fillA >= 1 && !effectsMuted) {
+    effectsMuted = true;
+    stopOutlineSound();
+    stopHatchSound();
+    stopSplatSound();
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  LOGO CANVAS  (lebih kecil: 620x220)
+// ══════════════════════════════════════════════════
+const W = 520, H = 185;
+const canvas = document.getElementById('c');
+canvas.width = W; canvas.height = H;
+canvas.style.width = Math.min(W, window.innerWidth * 0.60) + 'px';
+const ctx = canvas.getContext('2d');
+
+const VX = 67, VY = 215, VW = 468, VH = 175;
+const SX = W / VW, SY = H / VH;
+
+const RAW = {
+  g:   "M1340 3595 c-100 -28 -156 -71 -278 -216 -170 -203 -214 -310 -192 -469 29 -206 159 -387 351 -488 164 -88 329 -88 502 -1 180 91 265 312 175 457 -49 79 -235 161 -385 170 -75 4 -86 2 -127 -22 -87 -51 -113 -171 -50 -237 58 -61 146 -59 220 5 57 49 87 54 118 22 51 -50 27 -169 -46 -231 -49 -42 -90 -55 -168 -55 -118 0 -209 61 -269 182 -43 86 -54 152 -49 302 8 221 65 331 191 367 69 20 131 -17 197 -114 39 -58 100 -90 159 -85 85 8 141 70 141 155 0 82 -112 196 -238 243 -75 28 -181 34 -252 15z",
+  d1:  "M2533 3110 c-78 -35 -110 -119 -73 -194 38 -79 143 -109 216 -61 62 41 83 138 44 203 -21 34 -87 72 -125 72 -11 0 -39 -9 -62 -20z",
+  mae: "M4601 3609 c-54 -28 -90 -77 -125 -171 -17 -47 -46 -99 -81 -143 -97 -124 -118 -157 -137 -217 -23 -76 -23 -113 2 -216 24 -100 25 -134 5 -172 -20 -39 -53 -60 -93 -60 -26 0 -43 9 -72 38 -62 62 -63 91 -9 337 19 90 20 110 11 201 -23 216 -65 308 -161 357 -65 32 -108 34 -160 7 -54 -27 -75 -66 -111 -210 -37 -150 -47 -178 -71 -190 -53 -29 -112 19 -154 125 -37 91 -68 133 -119 156 -57 26 -93 24 -157 -8 -92 -47 -157 -162 -173 -308 -8 -68 8 -185 40 -296 37 -130 22 -194 -52 -225 -34 -14 -38 -13 -117 23 -75 35 -89 38 -169 38 -84 0 -89 -1 -180 -49 -120 -63 -142 -69 -183 -51 -78 32 -84 105 -20 245 23 50 40 105 43 135 3 44 -1 57 -32 105 -67 104 -80 138 -67 181 7 23 24 47 44 61 34 24 61 26 257 18 71 -3 93 0 135 19 124 55 169 164 97 236 -56 56 -143 49 -269 -24 -105 -60 -126 -67 -254 -80 -110 -11 -165 -33 -203 -84 -59 -77 -51 -180 24 -305 45 -77 62 -142 51 -192 -4 -20 -32 -80 -62 -135 -54 -99 -54 -101 -54 -187 0 -81 2 -88 31 -125 42 -53 105 -83 174 -83 73 0 115 12 234 67 154 71 208 65 384 -46 154 -96 305 -66 385 78 25 43 31 68 34 130 4 67 -1 94 -41 235 -55 193 -60 258 -20 305 33 40 74 42 103 5 11 -14 34 -69 52 -122 46 -141 61 -166 112 -191 119 -57 210 10 262 194 44 157 90 214 142 180 63 -42 66 -148 11 -375 -43 -178 -30 -263 58 -360 57 -63 123 -93 219 -98 95 -5 147 7 211 51 96 64 112 138 78 363 -20 133 -14 172 37 260 49 83 85 161 100 217 22 85 79 111 128 58 27 -29 106 -217 137 -325 16 -59 16 -110 -2 -340 -4 -48 -2 -93 5 -116 22 -74 129 -141 198 -124 74 18 103 67 103 172 0 66 -4 77 -60 189 -59 115 -61 122 -80 263 -27 195 -42 248 -102 360 -96 180 -140 227 -224 236 -38 4 -59 0 -93 -17z",
+  d2:  "M4591 3012 c-47 -24 -72 -61 -79 -117 -6 -59 16 -106 66 -137 100 -61 226 6 226 120 0 116 -112 186 -213 134z"
+};
+
+const MA = 0.1 * SX, MD = -0.1 * SY, ME = -VX * SX, MF = (600 - VY) * SY;
+
+function drawGlyphPath(key, fill) {
+  ctx.save();
+  ctx.transform(MA, 0, 0, MD, ME, MF);
+  const p = new Path2D(RAW[key]);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(p); }
+  ctx.restore();
+}
+
+const ns = 'http://www.w3.org/2000/svg';
+const hiddenSVG = document.createElementNS(ns, 'svg');
+hiddenSVG.style.cssText = 'position:fixed;opacity:0;pointer-events:none;width:1px;height:1px';
+document.body.appendChild(hiddenSVG);
+
+function svgPathEl(key) {
+  const el = document.createElementNS(ns, 'path');
+  el.setAttribute('d', RAW[key]);
+  hiddenSVG.appendChild(el);
+  return el;
+}
+const ELS = { g: svgPathEl('g'), d1: svgPathEl('d1'), mae: svgPathEl('mae'), d2: svgPathEl('d2') };
+
+function samplePath(key, n) {
+  const el = ELS[key];
+  const len = el.getTotalLength();
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    const p = el.getPointAtLength(i / n * len);
+    pts.push([p.x * MA + ME, p.y * MD + MF]);
+  }
+  return pts;
+}
+const SAMPLES = {
+  g: samplePath('g', 700), d1: samplePath('d1', 150),
+  mae: samplePath('mae', 1400), d2: samplePath('d2', 150),
+};
+
+function rasterizeGlyph(key) {
+  const oc = document.createElement('canvas');
+  oc.width = W; oc.height = H;
+  const ox = oc.getContext('2d');
+  ox.save(); ox.transform(MA, 0, 0, MD, ME, MF);
+  ox.fillStyle = '#000'; ox.fill(new Path2D(RAW[key])); ox.restore();
+  return ox.getImageData(0, 0, W, H);
+}
+function isInside(imgData, px, py) {
+  if (px < 0 || py < 0 || px >= W || py >= H) return false;
+  return imgData.data[(py * W + px) * 4 + 3] > 20;
+}
+
+function hatchGlyph(key, baseAngleDeg, spacing) {
+  const imgData = rasterizeGlyph(key);
+  const diag = Math.ceil(Math.sqrt(W * W + H * H));
+  const lines = [];
+  for (let d = -diag; d < diag; d += spacing) {
+    const jitter = (Math.random() - 0.5) * 4;
+    const rad = (baseAngleDeg + jitter) * Math.PI / 180;
+    const cosA = Math.cos(rad), sinA = Math.sin(rad);
+    const cx2 = W / 2, cy2 = H / 2;
+    const ox2 = cx2 + d * cosA, oy2 = cy2 + d * sinA;
+    const steps = diag * 2;
+    let inSeg = false, sx = 0, sy = 0;
+    for (let s = -steps; s <= steps; s++) {
+      const px = Math.round(ox2 - s * sinA);
+      const py = Math.round(oy2 + s * cosA);
+      const inside = isInside(imgData, px, py);
+      if (inside && !inSeg) { inSeg = true; sx = px; sy = py; }
+      else if (!inside && inSeg) { inSeg = false; lines.push([sx, sy, px, py]); }
+    }
+    if (inSeg) lines.push([sx, sy, ox2 - steps * sinA, oy2 + steps * cosA]);
+  }
+  return lines;
+}
+
+const BASE_ANGLE = 45;
+const SPACING = 0.6;
+const KEYS_ORDER = ['g', 'mae', 'd1', 'd2'];
+const HATCH_PER_GLYPH = {};
+for (const key of KEYS_ORDER) {
+  const lines = hatchGlyph(key, BASE_ANGLE, SPACING);
+  for (let i = lines.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [lines[i], lines[j]] = [lines[j], lines[i]];
+  }
+  HATCH_PER_GLYPH[key] = lines;
+}
+
+// ══════════════════════════════════════════════════
+//  PAINT SPLAT CANVAS
+// ══════════════════════════════════════════════════
+const pc = document.getElementById('paintCanvas');
+const pctx = pc.getContext('2d');
+function resizePaint() { pc.width = window.innerWidth; pc.height = window.innerHeight; }
+resizePaint();
+window.addEventListener('resize', resizePaint);
+
+const LIME = '#cbf000';
+let splatQueue = [];
+let splatInited = false;
+
+// Organic splat: scale + rotation animation, blob-based shape
+function makeSplatDef(x, y, r) {
+  const numPetals = 6 + Math.floor(Math.random() * 7);
+  const petals = [];
+  for (let i = 0; i < numPetals; i++) {
+    const angle = (i / numPetals) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+    const dist  = r * (0.55 + Math.random() * 0.65);
+    const pr    = r * (0.28 + Math.random() * 0.44);
+    petals.push({ angle, dist, r: pr });
+  }
+  const numDrips = 1 + Math.floor(Math.random() * 3);
+  const drips = [];
+  for (let i = 0; i < numDrips; i++) {
+    // drips go mostly downward
+    const angle = Math.PI * 0.3 + Math.random() * Math.PI * 1.4;
+    const len   = r * (0.6 + Math.random() * 1.4);
+    const w     = r * (0.06 + Math.random() * 0.11);
+    drips.push({ angle, len, w });
+  }
+  const rot = (Math.random() - 0.5) * 0.6;
+  return { x, y, r, petals, drips, rot, scale: 0, alpha: 0, done: false };
+}
+
+function initSplatQueue(PW, PH) {
+  splatQueue = [];
+  // Hex-grid layout so every pixel of screen is reachable
+  // Cell size chosen so r = cellSize covers adjacent cells when overlapping
+  const cellW = PW / 7;
+  const cellH = PH / 5;
+  for (let row = 0; row < 6; row++) {
+    const offsetX = (row % 2) * cellW * 0.5;
+    const cols = row % 2 === 0 ? 8 : 7;
+    for (let col = 0; col < cols; col++) {
+      const cx = offsetX + col * cellW + (Math.random() - 0.5) * cellW * 0.35;
+      const cy = row * cellH + (Math.random() - 0.5) * cellH * 0.35;
+      // radius large enough to overlap neighbours = covers gaps
+      const r = Math.min(cellW, cellH) * (0.72 + Math.random() * 0.40);
+      splatQueue.push(makeSplatDef(cx, cy, r));
+    }
+  }
+  // Layer 2: medium accent splats scattered randomly
+  const accent = 55 + Math.floor(Math.random() * 25);
+  for (let i = 0; i < accent; i++) {
+    const x = Math.random() * PW;
+    const y = Math.random() * PH;
+    const r = Math.min(PW, PH) * (0.03 + Math.random() * 0.09);
+    splatQueue.push(makeSplatDef(x, y, r));
+  }
+  // Shuffle so base + accent interleave
+  for (let i = splatQueue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [splatQueue[i], splatQueue[j]] = [splatQueue[j], splatQueue[i]];
+  }
+  splatInited = true;
+}
+
+function drawSplat(s) {
+  if (s.alpha <= 0 || s.scale <= 0) return;
+  pctx.save();
+  pctx.globalAlpha = s.alpha;
+  pctx.fillStyle = LIME;
+  pctx.translate(s.x, s.y);
+  pctx.rotate(s.rot);
+  pctx.scale(s.scale, s.scale);
+  // Core blob
+  pctx.beginPath(); pctx.arc(0, 0, s.r, 0, Math.PI * 2); pctx.fill();
+  // Petals
+  for (const p of s.petals) {
+    const px = Math.cos(p.angle) * p.dist;
+    const py = Math.sin(p.angle) * p.dist;
+    pctx.beginPath(); pctx.arc(px, py, p.r, 0, Math.PI * 2); pctx.fill();
+  }
+  // Drips (drawn after scale so they stretch naturally)
+  for (const d of s.drips) {
+    pctx.save();
+    pctx.rotate(d.angle);
+    pctx.beginPath();
+    pctx.ellipse(0, d.len * 0.5, d.w, d.len * 0.55, 0, 0, Math.PI * 2);
+    pctx.fill();
+    pctx.beginPath(); pctx.arc(0, d.len, d.w * 0.75, 0, Math.PI * 2); pctx.fill();
+    pctx.restore();
+  }
+  pctx.restore();
+}
+
+// Easing: fast pop then settle
+function easeOutBack(t) {
+  const c1 = 1.70158, c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+}
+
+function drawPaintSplats(paintProgress, now) {
+  const PW = pc.width, PH = pc.height;
+  if (paintProgress <= 0) { pctx.clearRect(0,0,PW,PH); stopSplatSound(); return; }
+  if (!splatInited) initSplatQueue(PW, PH);
+
+  const totalVisible = Math.floor(paintProgress * splatQueue.length);
+
+  // Animate scale & alpha for each visible splat
+  for (let i = 0; i < totalVisible; i++) {
+    const s = splatQueue[i];
+    if (!s.done) {
+      s.scale = Math.min(1, s.scale + 0.12);           // pop speed
+      s.alpha = Math.min(0.96, s.alpha + 0.09);
+      if (s.scale >= 1 && s.alpha >= 0.96) s.done = true;
+    }
+  }
+
+  // Loop suara splash selama masih ada splat baru bermunculan; stop saat semua sudah muncul
+  if (totalVisible > 0 && totalVisible < splatQueue.length) {
+    playSplatSound();
+  } else {
+    stopSplatSound();
+  }
+
+  pctx.clearRect(0, 0, PW, PH);
+  for (let i = 0; i < totalVisible; i++) drawSplat(splatQueue[i]);
+}
+
+// ══════════════════════════════════════════════════
+//  GRID
+// ══════════════════════════════════════════════════
+function drawGrid(alpha) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha = alpha;
+  const cx = W/2, cy = H/2, sm = 7*SX, lg = 35*SX;
+  ctx.strokeStyle = '#c8d0dc'; ctx.lineWidth = 0.4;
+  for (let x = cx%sm; x<=W; x+=sm) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = cy%sm; y<=H; y+=sm) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.strokeStyle = '#a0b0c8'; ctx.lineWidth = 0.7;
+  for (let x = cx%lg; x<=W; x+=lg) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = cy%lg; y<=H; y+=lg) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.restore();
+}
+
+function drawOutlineProgress(key, progress) {
+  const pts = SAMPLES[key];
+  const n = Math.max(1, Math.floor(progress * pts.length));
+  ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < n; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+  ctx.strokeStyle = '#888'; ctx.lineWidth = 2.0;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+}
+
+// ══════════════════════════════════════════════════
+//  TIMING
+// ══════════════════════════════════════════════════
+const T = {
+  gridIn:         [0,    0.45],
+  g:              [0.45, 2.0],
+  mae:            [2.1,  5.6],
+  d1:             [5.75, 6.3],
+  d2:             [6.45, 7.0],
+  hatchG:         [7.3,  9.65],
+  hatchMae:       [9.9,  13.35],
+  hatchD1:        [13.5, 14.15],
+  hatchD2:        [14.3, 14.65],
+  limeStart:       13.5,
+  limeEnd:         17.3,
+  fillStart:       17.8,
+  fillEnd:         19.3,
+  transitionStart: 20.1,
+  transitionEnd:   22.3,
+};
+
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+function prog(t,t0,t1){return clamp((t-t0)/(t1-t0),0,1);}
+function eio(t){return t<.5?2*t*t:-1+(4-2*t)*t;}
+
+let START = performance.now();
+let transitionDone = false;
+let stampPlayed = false;
+let lastOutlineKey = null;
+
+const OUTLINE_SEGMENTS = [
+  {key:'g', t0:T.g[0], t1:T.g[1]},
+  {key:'mae', t0:T.mae[0], t1:T.mae[1]},
+  {key:'d1', t0:T.d1[0], t1:T.d1[1]},
+  {key:'d2', t0:T.d2[0], t1:T.d2[1]},
+];
+
+function frame(now) {
+  const t = (now - START) / 1000;
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid dihilangkan
+
+  const limeP = prog(t, T.limeStart, T.limeEnd);
+  drawPaintSplats(limeP, now);
+
+  const fillA = prog(t, T.fillStart, T.fillEnd);
+  const outlineAlpha = fillA > 0 ? 1 - fillA : 1;
+
+  // Suara menulis: restart dari awal setiap kali huruf baru mulai digambar
+  let activeOutlineKey = null;
+  for (const s of OUTLINE_SEGMENTS) {
+    if (t >= s.t0 && t <= s.t1) { activeOutlineKey = s.key; break; }
+  }
+  if (activeOutlineKey !== lastOutlineKey) {
+    if (activeOutlineKey) startOutlineSound(); else stopOutlineSound();
+    lastOutlineKey = activeOutlineKey;
+  }
+
+  ctx.save(); ctx.globalAlpha = outlineAlpha;
+  for (const s of [
+    {key:'g', t0:T.g[0], t1:T.g[1]},
+    {key:'mae', t0:T.mae[0], t1:T.mae[1]},
+    {key:'d1', t0:T.d1[0], t1:T.d1[1]},
+    {key:'d2', t0:T.d2[0], t1:T.d2[1]},
+  ]) {
+    if (t < s.t0) continue;
+    drawOutlineProgress(s.key, t >= s.t1 ? 1 : eio(prog(t, s.t0, s.t1)));
+  }
+  ctx.restore();
+
+  if (t >= T.hatchG[0] && t <= T.hatchD2[1]) playHatchSound(); else stopHatchSound();
+
+  for (const hs of [
+    {key:'g',   t0:T.hatchG[0],   t1:T.hatchG[1]},
+    {key:'mae', t0:T.hatchMae[0], t1:T.hatchMae[1]},
+    {key:'d1',  t0:T.hatchD1[0],  t1:T.hatchD1[1]},
+    {key:'d2',  t0:T.hatchD2[0],  t1:T.hatchD2[1]},
+  ]) {
+    if (t < hs.t0) continue;
+    const hp = prog(t, hs.t0, hs.t1);
+    const lines = HATCH_PER_GLYPH[hs.key];
+    const nDraw = Math.floor(hp * lines.length);
+    const hatchAlpha = fillA > 0 ? 1 - fillA : 1;
+    ctx.save(); ctx.globalAlpha = hatchAlpha;
+    ctx.strokeStyle = '#777'; ctx.lineWidth = 0.6; ctx.lineCap = 'round';
+    for (let i = 0; i < nDraw; i++) {
+      const [x0,y0,x1,y1] = lines[i];
+      ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+    }
+    if (nDraw < lines.length && hp > 0) {
+      const frac = (hp * lines.length) - nDraw;
+      const [x0,y0,x1,y1] = lines[nDraw];
+      ctx.beginPath(); ctx.moveTo(x0,y0);
+      ctx.lineTo(x0+(x1-x0)*frac, y0+(y1-y0)*frac); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  if (fillA > 0) {
+    if (!stampPlayed) { playStampSound(); stampPlayed = true; }
+    for (const key of KEYS_ORDER) drawGlyphPath(key, `rgba(17,17,17,${fillA})`);
+  }
+  muteAllEffectsIfFilled(fillA);
+
+  // Transition to form — dipicu sekali, lalu dibiarkan CSS transition
+  // (cubic-bezier, 1.7s) yang menghaluskan crossfade-nya secara native.
+  // Form mulai fade-in BERSAMAAN saat loading screen mulai fade-out,
+  // sehingga keduanya saling tumpang-tindih (crossfade), bukan terputus.
+  if (t >= T.transitionStart && !transitionDone) {
+    transitionDone = true;
+    const ls = document.getElementById('loadingScreen');
+    ls.classList.add('fade-out');
+    showForm();
+    setTimeout(() => { ls.style.display = 'none'; }, 1750);
+    // Musik latar dibiarkan tetap berjalan di halaman form
+    return;
+  }
+
+  if (!transitionDone) requestAnimationFrame(frame);
+}
+
+// frame() sekarang dijalankan oleh handleMasuk() setelah tombol diklik
+
+// ══════════════════════════════════════════════════
+//  SHOW FORM — staggered animation
+// ══════════════════════════════════════════════════
+function showForm() {
+  const fp = document.getElementById('formPage');
+  fp.style.display = 'block';
+  requestAnimationFrame(() => {
+    fp.classList.add('visible');
+    setTimeout(() => document.querySelector('.form-title').classList.add('visible'), 100);
+    setTimeout(() => document.querySelector('.form-subtitle').classList.add('visible'), 200);
+    const groups = document.querySelectorAll('.form-group');
+    groups.forEach((g, i) => setTimeout(() => g.classList.add('visible'), 300 + i * 70));
+    const afterAll = 300 + groups.length * 70 + 100;
+    setTimeout(() => document.getElementById('btnWA').classList.add('visible'), afterAll);
+    setTimeout(() => document.getElementById('formFooter').classList.add('visible'), afterAll + 100);
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  KIRIM WHATSAPP
+// ══════════════════════════════════════════════════
+function kirimWA() {
+  const nama    = document.getElementById('f-nama').value.trim();
+  const email   = document.getElementById('f-email').value.trim();
+  const phone   = document.getElementById('f-phone').value.trim();
+  const brand   = document.getElementById('f-brand').value.trim();
+  const visi    = document.getElementById('f-visi').value.trim();
+  const warna   = document.getElementById('f-warna').value.trim();
+  const ref     = document.getElementById('f-ref').value.trim();
+  const nolike  = document.getElementById('f-nolike').value.trim();
+  const pesan   = document.getElementById('f-pesan').value.trim();
+
+  const jenis   = document.querySelector('input[name="jenis"]:checked');
+  const gaya    = document.querySelector('input[name="gaya"]:checked');
+  const logoArr = [...document.querySelectorAll('input[name="logo"]:checked')].map(e => e.value);
+
+  if (!nama || !email || !phone || !brand) {
+    alert('Mohon isi semua field yang wajib diisi (*)');
+    return;
+  }
+
+  const msg =
+`*GEMA Visual Studio — Brief Logo*
+
+👤 *Nama Lengkap:* ${nama}
+📧 *Email:* ${email}
+📱 *Nomor Telepon:* +62${phone}
+
+🏷️ *Nama Brand/Produk:* ${brand}
+🛍️ *Jenis Produk:* ${jenis ? jenis.value : '-'}
+💡 *Visi/Filosofi Brand:* ${visi || '-'}
+
+🎨 *Jenis Logo:* ${logoArr.length ? logoArr.join(', ') : '-'}
+🎨 *Warna yang Diinginkan:* ${warna || '-'}
+✏️ *Gaya Design:* ${gaya ? gaya.value : '-'}
+
+🔗 *Referensi Logo:* ${ref || '-'}
+🚫 *Yang Tidak Disukai:* ${nolike || '-'}
+📝 *Pesan Tambahan:* ${pesan || '-'}`;
+
+  const waNumber = '6281234567890';
+  window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+</script>
+</body>
+</html>
