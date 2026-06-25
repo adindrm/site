@@ -499,6 +499,18 @@ tbody td.product-name { font-weight: 500; color: var(--gold-pale); }
 
 @media (min-width: 769px) {
   .mobile-nav { display: none !important; }
+
+  /* ── Sembunyikan topbar-row2 di PC ── */
+  .topbar-row2 { display: none !important; }
+
+  /* ── Max-width & centering halaman ── */
+  .page { max-width: 1400px; margin: 0 auto; }
+
+  /* ── KPI grid fix 4 kolom di PC ── */
+  .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+
+  /* ── Chart grid: 2 kolom proporsional di PC ── */
+  .chart-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
 }
 
 /* ── EMPTY STATE ── */
@@ -876,9 +888,7 @@ tbody tr { transition: background 0.15s, opacity 0.2s; }
   <div class="eo-brand">Queen Plastic</div>
   <div class="eo-sub">Dashboard Penjualan</div>
 
-  <!-- Tombol masuk -->
-  <button class="eo-btn" onclick="enterSite()">✦ &nbsp;Masuk&nbsp; ✦</button>
-  <div class="eo-hint">Ketuk di mana saja untuk masuk</div>
+  <div class="eo-hint" style="color:rgba(201,168,76,0.55);font-size:0.72rem;">✦ &nbsp;Ketuk di mana saja untuk masuk&nbsp; ✦</div>
 </div>
 
 <!-- LOADING SCREEN -->
@@ -2014,6 +2024,7 @@ async function fetchStokCSV() {
         tanggal:    r['tanggal'].trim(),
         produk:     r['produk'].trim(),
         jumlah:     cleanNum(r['jumlah masuk'] || r['jumlah'] || 0),
+        hargaModal: cleanNum(r['harga_modal'] || r['harga modal'] || 0),
         keterangan: r['keterangan'] || '',
       }));
     if (fetched.length) {
@@ -3500,6 +3511,7 @@ function saveStokMasukAll() {
       id: Date.now() + saved,
       tanggal, produk: produk.nama,
       jumlah, jumlahPcs,
+      hargaModal: produk.harga_modal || 0,
       keterangan: ketUmum + (isiPerPack > 1 ? ` [${jumlah} pack × ${isiPerPack} = ${jumlahPcs} pcs]` : '')
     });
     saved++;
@@ -3511,6 +3523,10 @@ function saveStokMasukAll() {
   clearStokForm();
   renderStok();
   renderStokKPI();
+  // ── Update arus kas otomatis (stok masuk → Pengeluaran Beli Stok) ──
+  renderAKKPI();
+  renderAKTable();
+  renderAKChart();
 }
 
 // Backward compat
@@ -3957,12 +3973,11 @@ let arusKasData = []; // { tanggal, tipe, kategori, keterangan, jumlah, rowId, a
 
 const AK_KATEGORI = {
   PEMASUKAN:   ['Tambahan Modal', 'Lainnya'],
-  PENGELUARAN: ['Beli Stok', 'Operasional', 'Pribadi', 'Lainnya'],
+  PENGELUARAN: ['Operasional', 'Pribadi', 'Lainnya'],
 };
 
 const AK_KATEGORI_INFO = {
   'Tambahan Modal': 'Dana tambahan dari usaha lain / tabungan pribadi yang masuk ke kas toko.',
-  'Beli Stok':      'Pembelian barang / modal produk dari supplier.',
   'Operasional':    'Biaya operasional toko: listrik, sewa, transport, dll.',
   'Pribadi':        'Pengeluaran pribadi yang diambil dari kas toko (prive/withdrawal).',
   'Lainnya':        'Transaksi lain yang tidak masuk kategori di atas.',
@@ -3991,12 +4006,36 @@ function buildAKOmzetOtomatis() {
   }));
 }
 
-// ── Gabungkan omzet otomatis + manual ──
+// ── Build data stok masuk otomatis dari riwayatStok ──
+function buildAKStokOtomatis() {
+  return riwayatStok.map(r => {
+    // Pakai hargaModal yang di-snapshot saat stok masuk dicatat
+    // Fallback ke master produk untuk data lama yang belum punya snapshot
+    let hargaModal = r.hargaModal || 0;
+    if (!hargaModal) {
+      const produk = PRODUCTS.find(p => p.nama === r.produk);
+      hargaModal = (produk && produk.harga_modal > 0) ? produk.harga_modal : 0;
+    }
+    const jumlah = hargaModal > 0 ? r.jumlah * hargaModal : 0;
+    return {
+      tanggal:    r.tanggal,
+      tipe:       'PENGELUARAN',
+      kategori:   'Beli Stok',
+      keterangan: `Auto – Stok Masuk: ${r.produk} (${r.jumlah} pack)`,
+      jumlah,
+      rowId:      'autostok_' + r.id,
+      auto:       true,
+    };
+  }).filter(d => d.jumlah > 0);
+}
+
+// ── Gabungkan omzet otomatis + stok otomatis + manual ──
 function getAKCombined() {
   const omzetAuto = buildAKOmzetOtomatis();
+  const stokAuto  = buildAKStokOtomatis();
   // Hindari duplikat: kalau ada manual dengan rowId auto_, skip
   const manualOnly = arusKasData.filter(d => !d.auto);
-  return [...omzetAuto, ...manualOnly].sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+  return [...omzetAuto, ...stokAuto, ...manualOnly].sort((a, b) => b.tanggal.localeCompare(a.tanggal));
 }
 
 // ── Set tipe form ──
@@ -4123,6 +4162,8 @@ function renderAKKPI() {
     `Omzet: ${rp(omzetTotal)} · Modal: ${rp(modalTotal)}`;
 
   const stokTotal  = combined.filter(d => d.kategori === 'Beli Stok').reduce((s,d) => s + d.jumlah, 0);
+  // stokManual: hanya yang diinput manual, karena stok auto sudah tercermin lewat HPP di totalProfit
+  const stokManual = combined.filter(d => d.kategori === 'Beli Stok' && !d.auto).reduce((s,d) => s + d.jumlah, 0);
   const opsTotal   = combined.filter(d => d.kategori === 'Operasional').reduce((s,d) => s + d.jumlah, 0);
   const pribTotal  = combined.filter(d => d.kategori === 'Pribadi').reduce((s,d) => s + d.jumlah, 0);
   document.getElementById('ak-kpi-keluar-sub').textContent =
@@ -4130,6 +4171,7 @@ function renderAKKPI() {
 
   // ── Saldo Keuntungan ──
   // Total Profit = (harga_jual − HPP) × qty dari salesData
+  // HPP sudah diperhitungkan di margin, jadi hanya kurangi stok manual + operasional
   let totalProfit = 0;
   for (const d of salesData) {
     const prod = PRODUCTS.find(p => p.nama === d.produk);
@@ -4141,12 +4183,12 @@ function renderAKKPI() {
     totalProfit += marginPck * (d.pck || 0);
     totalProfit += marginEcr * (d.ecr || 0);
   }
-  const saldoUntung = totalProfit - stokTotal - opsTotal;
+  const saldoUntung = totalProfit - stokManual - opsTotal;
   const untungEl = document.getElementById('ak-kpi-untung');
   untungEl.textContent = rp(saldoUntung);
   untungEl.style.color = saldoUntung >= 0 ? '#4DB6AC' : '#EF9A9A';
   document.getElementById('ak-kpi-untung-sub').textContent =
-    `Profit: ${rp(totalProfit)} − Stok: ${rp(stokTotal)} − Ops: ${rp(opsTotal)}`;
+    `Profit: ${rp(totalProfit)} − Ops: ${rp(opsTotal)}${stokManual > 0 ? ' − Stok manual: ' + rp(stokManual) : ''}`;
 
   // ── Saldo Pribadi ──
   const saldoPribadi = saldoUntung - pribTotal;
@@ -4562,6 +4604,9 @@ setTimeout(hideLoadingScreen, 8000);
     }
   };
 
+  // Expose setPlaying agar enterSite() bisa update state isPlaying
+  window.setMusicPlaying = setPlaying;
+
   // Autoplay dihandle oleh enterSite() via overlay
   // Fallback: jika overlay sudah tidak ada (misal reload), restore state dari localStorage
   if (!document.getElementById('entry-overlay')) {
@@ -4592,9 +4637,12 @@ function enterSite() {
   const audio = document.getElementById('bg-music');
   if (audio) {
     audio.play().then(() => {
-      const btn = document.getElementById('music-toggle-btn');
-      if (btn) { btn.textContent = '♫'; btn.title = 'Pause musik'; btn.classList.add('playing'); }
-      localStorage.setItem('qp-music-playing', '1');
+      if (window.setMusicPlaying) window.setMusicPlaying(true);
+      else {
+        const btn = document.getElementById('music-toggle-btn');
+        if (btn) { btn.textContent = '♫'; btn.title = 'Pause musik'; btn.classList.add('playing'); }
+        localStorage.setItem('qp-music-playing', '1');
+      }
     }).catch(() => {});
   }
 
