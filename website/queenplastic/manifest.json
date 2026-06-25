@@ -1,0 +1,28 @@
+{
+  "name": "Queen Plastic Dashboard",
+  "short_name": "Queen Plastic",
+  "description": "Dashboard Penjualan Queen Plastic",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0F0F0F",
+  "theme_color": "#1A1A1A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
