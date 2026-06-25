@@ -103,6 +103,36 @@ select, input[type="text"], input[type="number"], input[type="date"]
 }
 #theme-toggle-btn:hover { background: var(--gold-dim); border-color: var(--gold); }
 body.light-mode #theme-toggle-btn { border-color: rgba(184,134,11,0.4); }
+
+#music-toggle-btn {
+  background: none;
+  border: 1px solid rgba(201,168,76,0.4);
+  color: var(--gold2);
+  cursor: pointer;
+  border-radius: 8px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.35rem;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  position: relative;
+}
+#music-toggle-btn:hover { background: var(--gold-dim); border-color: var(--gold); }
+#music-toggle-btn.playing { border-color: var(--gold); background: var(--gold-dim); }
+#music-toggle-btn.playing::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  border: 1px solid rgba(201,168,76,0.35);
+  animation: music-pulse 2s ease-in-out infinite;
+}
+@keyframes music-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0; transform: scale(1.25); }
+}
+body.light-mode #music-toggle-btn { border-color: rgba(184,134,11,0.4); }
+body.light-mode #music-toggle-btn.playing { background: rgba(184,134,11,0.12); border-color: var(--gold); }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'DM Sans', sans-serif;
@@ -884,6 +914,7 @@ tbody tr { transition: background 0.15s, opacity 0.2s; }
         style="display:none;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold),var(--gold3));color:var(--black);font-weight:700;font-size:0.78rem;border:none;cursor:pointer;border-radius:8px;padding:7px 14px;letter-spacing:0.03em;">
         Install App
       </button>
+      <button id="music-toggle-btn" onclick="toggleMusic()" title="Putar / Pause musik">♪</button>
       <button id="theme-toggle-btn" onclick="toggleTheme()" title="Ganti mode terang/gelap">🌙</button>
       <button class="btn-gold" onclick="resetAndPull()" title="Refresh data dari Google Sheets" style="font-size:0.8rem;">REFRESH</button>
     </div>
@@ -4166,14 +4197,60 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(swURL).catch(() => {});
 }
 
-// ── THEME TOGGLE ──
-function toggleTheme() {
+// ── THEME AUTO-SCHEDULE ──
+// Gelap: 18:00–05:59 | Terang: 06:00–17:59
+// Override manual reset otomatis saat jadwal berganti
+
+let _themeScheduleTimer = null;
+
+function isNightTime(date) {
+  const h = (date || new Date()).getHours();
+  return h >= 18 || h < 6;
+}
+
+function applyTheme(isLight, saveOverride) {
   const body = document.body;
-  const btn = document.getElementById('theme-toggle-btn');
-  const isLight = body.classList.toggle('light-mode');
-  btn.textContent = isLight ? '☀️' : '🌙';
-  btn.title = isLight ? 'Mode Gelap' : 'Mode Terang';
-  localStorage.setItem('qp-theme', isLight ? 'light' : 'dark');
+  const btn  = document.getElementById('theme-toggle-btn');
+  body.classList.toggle('light-mode', isLight);
+  if (btn) {
+    btn.textContent = isLight ? '☀️' : '🌙';
+    btn.title       = isLight ? 'Mode Gelap' : 'Mode Terang';
+  }
+  if (saveOverride !== undefined) {
+    localStorage.setItem('qp-theme', saveOverride ? 'light' : 'dark');
+    localStorage.setItem('qp-theme-override', '1');
+  }
+}
+
+function getScheduledTheme() {
+  const override   = localStorage.getItem('qp-theme-override');
+  const savedTheme = localStorage.getItem('qp-theme');
+  const scheduledLight = !isNightTime();
+  if (override === '1' && savedTheme !== null) {
+    const overrideIsLight = savedTheme === 'light';
+    // Jika jadwal sudah berganti sejak override, buang override
+    if (overrideIsLight !== scheduledLight) {
+      localStorage.removeItem('qp-theme-override');
+      return scheduledLight;
+    }
+    return overrideIsLight;
+  }
+  return scheduledLight;
+}
+
+function toggleTheme() {
+  const isCurrentlyLight = document.body.classList.contains('light-mode');
+  applyTheme(!isCurrentlyLight, !isCurrentlyLight);
+}
+
+function startThemeScheduler() {
+  if (_themeScheduleTimer) clearInterval(_themeScheduleTimer);
+  _themeScheduleTimer = setInterval(() => {
+    if (localStorage.getItem('qp-theme-override') === '1') return;
+    const shouldBeLight    = !isNightTime();
+    const isCurrentlyLight = document.body.classList.contains('light-mode');
+    if (shouldBeLight !== isCurrentlyLight) applyTheme(shouldBeLight);
+  }, 60 * 1000);
 }
 // initTheme dipanggil dari hideLoadingScreen agar tidak trigger transition saat muat
 
@@ -4199,12 +4276,10 @@ function installPWA() {
 // ── Init tema TANPA transition (hindari flicker & gangguan loading screen) ──
 function initTheme() {
   document.body.classList.add('no-transition');
-  const saved = localStorage.getItem('qp-theme');
-  if (saved === 'light') {
-    document.body.classList.add('light-mode');
-    const btn = document.getElementById('theme-toggle-btn');
-    if (btn) { btn.textContent = '☀️'; btn.title = 'Mode Gelap'; }
-  }
+  const isLight = getScheduledTheme();
+  applyTheme(isLight);
+  // Jalankan scheduler otomatis
+  startThemeScheduler();
   // Beri 1 frame agar browser render dulu, baru aktifkan transition kembali
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
@@ -4336,5 +4411,49 @@ setTimeout(hideLoadingScreen, 8000);
     </div>
   </div>
 
-</body>
-</html>
+<!-- AUDIO BACKGROUND MUSIC -->
+<audio id="bg-music" loop preload="auto">
+  <source src="musikbg.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// ── BACKGROUND MUSIC ──
+(function() {
+  const audio = document.getElementById('bg-music');
+  const btn   = document.getElementById('music-toggle-btn');
+  let isPlaying = false;
+
+  // Restore volume preference
+  audio.volume = parseFloat(localStorage.getItem('qp-music-vol') || '0.35');
+
+  function setPlaying(state) {
+    isPlaying = state;
+    btn.textContent = state ? '♫' : '♪';
+    btn.title       = state ? 'Pause musik' : 'Putar musik';
+    btn.classList.toggle('playing', state);
+    localStorage.setItem('qp-music-playing', state ? '1' : '0');
+  }
+
+  window.toggleMusic = function() {
+    if (isPlaying) {
+      audio.pause();
+      setPlaying(false);
+    } else {
+      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    }
+  };
+
+  // Autoplay setelah interaksi pertama user (browser policy)
+  function tryAutoplay() {
+    const pref = localStorage.getItem('qp-music-playing');
+    // Autoplay hanya jika user pernah mainkan sebelumnya
+    if (pref === '1') {
+      audio.play().then(() => setPlaying(true)).catch(() => {});
+    }
+    document.removeEventListener('click', tryAutoplay);
+    document.removeEventListener('touchstart', tryAutoplay);
+  }
+  document.addEventListener('click', tryAutoplay, { once: true });
+  document.addEventListener('touchstart', tryAutoplay, { once: true });
+})();
+</script>
