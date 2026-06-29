@@ -372,13 +372,16 @@ html[data-theme="light"] .foto-choice-btn{color:#4338ca}
 .istirahat-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:20px}
 .istirahat-panel-title{font-size:13px;font-weight:600;color:var(--text-strong);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .istirahat-status{font-size:12px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.istirahat-btns{display:flex;gap:10px;flex-wrap:wrap}
+.istirahat-btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .btn-istirahat{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;gap:7px}
 .btn-ist-mulai{background:linear-gradient(135deg,rgba(245,158,11,.25),rgba(245,158,11,.15));border:1px solid rgba(245,158,11,.35);color:#fcd34d}
 .btn-ist-mulai:not(:disabled):hover{background:linear-gradient(135deg,rgba(245,158,11,.4),rgba(245,158,11,.25));transform:translateY(-1px)}
 .btn-ist-selesai{background:linear-gradient(135deg,rgba(16,185,129,.25),rgba(16,185,129,.15));border:1px solid rgba(16,185,129,.35);color:#34d399}
 .btn-ist-selesai:not(:disabled):hover{background:linear-gradient(135deg,rgba(16,185,129,.4),rgba(16,185,129,.25));transform:translateY(-1px)}
 .btn-istirahat:disabled{opacity:.4;cursor:not-allowed}
+/* ── TIMER ISTIRAHAT ── */
+.ist-timer{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#fcd34d;letter-spacing:-.5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:6px 14px;display:inline-flex;align-items:center;gap:8px}
+.ist-timer-label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
 
 /* ── SHIFT (Bagian 3) ── */
 .badge-shift{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.25)}
@@ -646,6 +649,13 @@ html[data-theme="light"] .foto-choice-btn{color:#4338ca}
             Istirahat
           </div>
           <div class="istirahat-status" id="istirahat-status-text">Belum ada sesi istirahat</div>
+          <div id="ist-timer-wrap" style="display:none;margin-bottom:14px">
+            <div class="ist-timer-label">Waktu Istirahat Berjalan</div>
+            <div class="ist-timer" id="ist-timer-display">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+              <span id="ist-timer-val">00:00:00</span>
+            </div>
+          </div>
           <div class="istirahat-btns">
             <button class="btn-istirahat btn-ist-mulai" id="btn-ist-mulai" onclick="doIstirahatMulai()">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg>
@@ -1923,13 +1933,8 @@ async function konfirmasiCheckIn(){
   const gpsLink = gpsCoords ? `https://maps.google.com/?q=${gpsCoords.lat},${gpsCoords.lng}` : '';
 
   try{
-    let fotoUrl = '';
-    // Upload foto jika ada
-    if(fotoFile){
-      fotoUrl = await uploadFoto(fotoFile, checkInMode ? 'checkin' : 'checkout');
-    }
-
-    // Kirim ke GAS
+    // ✅ FIX: Kirim data absensi KE SERVER DULU (tanpa menunggu foto upload)
+    // Foto akan diupload di background dan URL-nya diupdate via request terpisah
     const params = new URLSearchParams();
     params.append('action',      'absensi');
     params.append('tipe',        checkInMode ? 'checkin' : 'checkout');
@@ -1939,9 +1944,9 @@ async function konfirmasiCheckIn(){
     params.append('status',      'Hadir');
     params.append('gps',         gps);
     params.append('gpsLink',     gpsLink);
-    params.append('foto',        fotoUrl);
+    params.append('foto',        '');  // akan diisi setelah upload selesai
     params.append('keterangan',  keterangan);
-    if(checkInMode && shiftTerpilihId) params.append('shiftId', shiftTerpilihId); // [3.7]
+    if(checkInMode && shiftTerpilihId) params.append('shiftId', shiftTerpilihId);
 
     const res = await fetch(APPS_SCRIPT_URL, {
       method:'POST',
@@ -1953,15 +1958,14 @@ async function konfirmasiCheckIn(){
       showToast(checkInMode ? 'Check In berhasil dicatat! ✓' : 'Check Out berhasil dicatat! ✓', 'success');
       closeModal('modal-checkin');
 
-      // ✅ FIX: update data lokal langsung — tidak perlu menunggu refresh CSV
+      // Update data lokal langsung — foto kosong dulu
       applyAbsensiLocalUpdate({
         id: data.id, username: currentUser.username, tanggal,
         tipe: checkInMode ? 'checkin' : 'checkout',
-        jam: jamStr, status: 'Hadir', gps, gpsLink, foto: fotoUrl, keterangan,
+        jam: jamStr, status: 'Hadir', gps, gpsLink, foto: '', keterangan,
         durasi: data.durasi
       });
       if(checkInMode && shiftTerpilihId){
-        // simpan shift_id di data lokal & cek toleransi keterlambatan (3.12, non-blokir)
         const row = absensiData.find(a=>(a.username||'').toLowerCase()===currentUser.username.toLowerCase() && (a.tanggal||'').slice(0,10)===tanggal);
         if(row) row.shift_id = shiftTerpilihId;
         cekToleransiJamShift(shiftTerpilihId, jamStr);
@@ -1969,7 +1973,26 @@ async function konfirmasiCheckIn(){
       renderCurrentPage();
       updateShiftHeroDisplay();
 
-      // Sinkron ke server di belakang (silent), tidak menimpa tampilan kalau CSV belum update
+      // Upload foto di BACKGROUND — tidak memblokir UI
+      uploadFoto(fotoFile, checkInMode ? 'checkin' : 'checkout').then(fotoUrl => {
+        if(!fotoUrl) return;
+        // Update URL foto di data lokal
+        const row = absensiData.find(a=>(a.username||'').toLowerCase()===currentUser.username.toLowerCase() && (a.tanggal||'').slice(0,10)===tanggal);
+        if(row){
+          if(checkInMode) row.foto_masuk = fotoUrl;
+          else row.foto_keluar = fotoUrl;
+        }
+        // Patch foto URL ke server (silent, tidak memblokir)
+        const p2 = new URLSearchParams();
+        p2.append('action', 'patchAbsensiFoto');
+        p2.append('username', currentUser.username);
+        p2.append('tanggal', tanggal);
+        p2.append('tipe', checkInMode ? 'checkin' : 'checkout');
+        p2.append('foto', fotoUrl);
+        fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p2.toString()}).catch(()=>{});
+      }).catch(()=>{});
+
+      // Sinkron ke server di belakang
       loadAbsensiData(true);
     } else {
       showToast('Gagal: ' + (data.message||'Coba lagi'), 'error');
@@ -2215,6 +2238,41 @@ function syncIstirahatState(){
   istirahatSedangBerjalan = istirahatSesiLog.some(s=>s.mulai&&!s.selesai);
 }
 
+// ── TIMER ISTIRAHAT ──────────────────────────────────────────────────────────
+let _istTimerInterval = null;
+let _istMulaiTimestamp = null; // ms epoch saat sesi mulai
+
+function startIstirahatTimer(jamMulaiStr){
+  stopIstirahatTimer();
+  const now = new Date();
+  const [hh,mm] = jamMulaiStr.split(':').map(Number);
+  // Hitung timestamp mulai berdasarkan jam lokal hari ini
+  const mulaiMs = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0).getTime();
+  _istMulaiTimestamp = mulaiMs;
+
+  const wrap = document.getElementById('ist-timer-wrap');
+  const val  = document.getElementById('ist-timer-val');
+  if(wrap) wrap.style.display = 'block';
+
+  function tick(){
+    const elapsed = Math.max(0, Date.now() - _istMulaiTimestamp);
+    const totalSec = Math.floor(elapsed / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if(val) val.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  tick();
+  _istTimerInterval = setInterval(tick, 1000);
+}
+
+function stopIstirahatTimer(){
+  if(_istTimerInterval){ clearInterval(_istTimerInterval); _istTimerInterval = null; }
+  _istMulaiTimestamp = null;
+  const wrap = document.getElementById('ist-timer-wrap');
+  if(wrap) wrap.style.display = 'none';
+}
+
 // Render panel istirahat
 function renderIstirahatPanel(){
   syncIstirahatState();
@@ -2226,6 +2284,7 @@ function renderIstirahatPanel(){
 
   if(!data || !data.jam_masuk){
     if(panel) panel.style.display='none';
+    stopIstirahatTimer();
     return;
   }
 
@@ -2241,30 +2300,62 @@ function renderIstirahatPanel(){
     const sesiAktif = istirahatSesiLog.find(s=>s.mulai&&!s.selesai);
     statusTeks = `<span style="color:#fcd34d">● Sedang istirahat sejak ${sesiAktif?sesiAktif.mulai:'-'}</span>`;
     if(totalMnt > 0) statusTeks += ` &nbsp;•&nbsp; Total sejauh ini: <strong>${fmtMenit(totalMnt)}</strong> (${nSesi} sesi)`;
-  } else if(nSesi > 0){
-    statusTeks = `Total: <strong>${fmtMenit(totalMnt)}</strong> dari <strong>${nSesi}</strong> sesi`;
-    if(adaAuto) statusTeks += ` &nbsp;<span class="badge-auto-warn">⚠️ Ada sesi lupa diakhiri</span>`;
+    // Mulai/lanjutkan timer
+    if(!_istTimerInterval && sesiAktif) startIstirahatTimer(sesiAktif.mulai);
   } else {
-    statusTeks = '<span style="color:var(--muted)">Belum ada sesi istirahat hari ini</span>';
+    stopIstirahatTimer();
+    if(nSesi > 0){
+      statusTeks = `Total: <strong>${fmtMenit(totalMnt)}</strong> dari <strong>${nSesi}</strong> sesi`;
+      if(adaAuto) statusTeks += ` &nbsp;<span class="badge-auto-warn">⚠️ Ada sesi lupa diakhiri</span>`;
+    } else {
+      statusTeks = '<span style="color:var(--muted)">Belum ada sesi istirahat hari ini</span>';
+    }
   }
   if(statusEl) statusEl.innerHTML = statusTeks;
 
-  if(btnMulai)  btnMulai.disabled  = istirahatSedangBerjalan || sudahCheckout;
-  if(btnSelesai) btnSelesai.disabled = !istirahatSedangBerjalan || sudahCheckout;
+  // Paksa disabled state sinkron dengan state aktual — bukan hanya saat loading
+  if(btnMulai){
+    btnMulai.disabled = istirahatSedangBerjalan || sudahCheckout;
+    btnMulai.style.opacity = (istirahatSedangBerjalan || sudahCheckout) ? '0.4' : '';
+    btnMulai.style.cursor  = (istirahatSedangBerjalan || sudahCheckout) ? 'not-allowed' : '';
+  }
+  if(btnSelesai){
+    btnSelesai.disabled = !istirahatSedangBerjalan || sudahCheckout;
+    btnSelesai.style.opacity = (!istirahatSedangBerjalan || sudahCheckout) ? '0.4' : '';
+    btnSelesai.style.cursor  = (!istirahatSedangBerjalan || sudahCheckout) ? 'not-allowed' : '';
+  }
 }
 
 async function doIstirahatMulai(){
   const data = getAbsensiHariIni();
   if(!data||!data.jam_masuk){ showToast('Check-in dulu sebelum memulai istirahat','warning'); return; }
   if(data.jam_keluar){ showToast('Sudah check-out, tidak bisa mulai istirahat','warning'); return; }
+  if(istirahatSedangBerjalan){ showToast('Istirahat sudah berjalan','warning'); return; }
 
   const btn = document.getElementById('btn-ist-mulai');
+  const btnSelesai = document.getElementById('btn-ist-selesai');
   const origHtml = btn.innerHTML;
-  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block"></div> Memulai...';
+
+  // ✅ FIX: Langsung disable KEDUA tombol sebelum request ke server
+  btn.disabled=true; btn.style.opacity='0.4'; btn.style.cursor='not-allowed';
+  btn.innerHTML='<div class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block"></div> Memulai...';
 
   const now = new Date();
   const jam = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   const tanggal = todayStr();
+
+  // ✅ FIX: Update state lokal SEGERA sebelum menunggu server — sehingga UI langsung reaktif
+  const row = absensiData.find(a=>(a.username||'').toLowerCase()===currentUser.username.toLowerCase()&&(a.tanggal||'').slice(0,10)===tanggal);
+  if(row){
+    let log = [];
+    try{ log = JSON.parse(row.istirahat_log||'[]'); }catch(e){ log=[]; }
+    log.push({mulai:jam, selesai:null, durasi_menit:null, auto:false});
+    row.istirahat_log = JSON.stringify(log);
+    // Langsung update state & timer tanpa menunggu server
+    istirahatSedangBerjalan = true;
+    startIstirahatTimer(jam);
+    if(btnSelesai){ btnSelesai.disabled=false; btnSelesai.style.opacity=''; btnSelesai.style.cursor=''; }
+  }
 
   try{
     const p = new URLSearchParams();
@@ -2275,21 +2366,35 @@ async function doIstirahatMulai(){
     const res = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
     const d = await res.json();
     if(d.success){
-      // Update lokal
-      const row = absensiData.find(a=>(a.username||'').toLowerCase()===currentUser.username.toLowerCase()&&(a.tanggal||'').slice(0,10)===tanggal);
-      if(row){
-        let log = [];
-        try{ log = JSON.parse(row.istirahat_log||'[]'); }catch(e){ log=[]; }
-        log.push({mulai:jam, selesai:null, durasi_menit:null, auto:false});
-        row.istirahat_log = JSON.stringify(log);
-      }
       showToast(`Istirahat dimulai pukul ${jam} ☕`,'info');
       renderIstirahatPanel();
       updateAbsensiBadges();
     } else {
+      // Rollback kalau server gagal
       showToast('Gagal: '+(d.message||'Coba lagi'),'error');
+      if(row){
+        let log = [];
+        try{ log = JSON.parse(row.istirahat_log||'[]'); }catch(e){ log=[]; }
+        log = log.filter(s=>!(s.mulai===jam && !s.selesai));
+        row.istirahat_log = JSON.stringify(log);
+      }
+      istirahatSedangBerjalan = false;
+      stopIstirahatTimer();
+      renderIstirahatPanel();
     }
-  }catch(e){ showToast('Terjadi kesalahan. Periksa koneksi.','error'); }
+  }catch(e){
+    showToast('Terjadi kesalahan. Periksa koneksi.','error');
+    // Rollback
+    if(row){
+      let log = [];
+      try{ log = JSON.parse(row.istirahat_log||'[]'); }catch(e){ log=[]; }
+      log = log.filter(s=>!(s.mulai===jam && !s.selesai));
+      row.istirahat_log = JSON.stringify(log);
+    }
+    istirahatSedangBerjalan = false;
+    stopIstirahatTimer();
+    renderIstirahatPanel();
+  }
   btn.disabled=false; btn.innerHTML=origHtml;
 }
 
@@ -2298,12 +2403,36 @@ async function doIstirahatSelesai(){
   if(!data||!data.jam_masuk||!istirahatSedangBerjalan){ showToast('Tidak ada sesi istirahat yang berjalan','warning'); return; }
 
   const btn = document.getElementById('btn-ist-selesai');
+  const btnMulai = document.getElementById('btn-ist-mulai');
   const origHtml = btn.innerHTML;
-  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block"></div> Menyimpan...';
+
+  // ✅ FIX: Langsung stop timer dan disable tombol sebelum request
+  btn.disabled=true; btn.style.opacity='0.4'; btn.style.cursor='not-allowed';
+  btn.innerHTML='<div class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block"></div> Menyimpan...';
+  stopIstirahatTimer();
 
   const now = new Date();
   const jam = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   const tanggal = todayStr();
+
+  // ✅ FIX: Update state lokal SEGERA
+  const row = absensiData.find(a=>(a.username||'').toLowerCase()===currentUser.username.toLowerCase()&&(a.tanggal||'').slice(0,10)===tanggal);
+  let oldLog = null;
+  if(row){
+    let log = [];
+    try{ log = JSON.parse(row.istirahat_log||'[]'); }catch(e){ log=[]; }
+    oldLog = JSON.stringify(log); // simpan untuk rollback
+    const idx = log.findIndex(s=>s.mulai&&!s.selesai);
+    if(idx>=0){
+      const [hh,mm] = log[idx].mulai.split(':').map(Number);
+      const [hs,ms] = jam.split(':').map(Number);
+      const durMnt = Math.max(0,(hs*60+ms)-(hh*60+mm));
+      log[idx] = {...log[idx], selesai:jam, durasi_menit:durMnt, auto:false};
+    }
+    row.istirahat_log = JSON.stringify(log);
+    istirahatSedangBerjalan = false;
+    if(btnMulai){ btnMulai.disabled=false; btnMulai.style.opacity=''; btnMulai.style.cursor=''; }
+  }
 
   try{
     const p = new URLSearchParams();
@@ -2314,27 +2443,26 @@ async function doIstirahatSelesai(){
     const res = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
     const d = await res.json();
     if(d.success){
-      // Update lokal
-      const row = absensiData.find(a=>(a.username||'').toLowerCase()===currentUser.username.toLowerCase()&&(a.tanggal||'').slice(0,10)===tanggal);
-      if(row){
-        let log = [];
-        try{ log = JSON.parse(row.istirahat_log||'[]'); }catch(e){ log=[]; }
-        const idx = log.findIndex(s=>s.mulai&&!s.selesai);
-        if(idx>=0){
-          const [hh,mm] = log[idx].mulai.split(':').map(Number);
-          const [hs,ms] = jam.split(':').map(Number);
-          const durMnt = Math.max(0,(hs*60+ms)-(hh*60+mm));
-          log[idx] = {...log[idx], selesai:jam, durasi_menit:durMnt, auto:false};
-        }
-        row.istirahat_log = JSON.stringify(log);
-      }
       showToast(`Istirahat selesai. Total: ${d.total_istirahat||''}`, 'success');
       renderIstirahatPanel();
       updateAbsensiBadges();
     } else {
       showToast('Gagal: '+(d.message||'Coba lagi'),'error');
+      // Rollback
+      if(row && oldLog !== null) row.istirahat_log = oldLog;
+      istirahatSedangBerjalan = true;
+      const sesiAktif = istirahatSesiLog.find(s=>s.mulai&&!s.selesai);
+      if(sesiAktif) startIstirahatTimer(sesiAktif.mulai);
+      renderIstirahatPanel();
     }
-  }catch(e){ showToast('Terjadi kesalahan. Periksa koneksi.','error'); }
+  }catch(e){
+    showToast('Terjadi kesalahan. Periksa koneksi.','error');
+    if(row && oldLog !== null) row.istirahat_log = oldLog;
+    istirahatSedangBerjalan = true;
+    const sesiAktif = istirahatSesiLog.find(s=>s.mulai&&!s.selesai);
+    if(sesiAktif) startIstirahatTimer(sesiAktif.mulai);
+    renderIstirahatPanel();
+  }
   btn.disabled=false; btn.innerHTML=origHtml;
 }
 
