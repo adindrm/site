@@ -153,6 +153,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .user-info-sub{font-size:11px;color:var(--muted)}
 .btn-logout{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif}
 .btn-logout:hover{color:#fca5a5;background:rgba(239,68,68,.1)}
+.btn-admin-link{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;text-decoration:none;font-family:'DM Sans',sans-serif;border:1px solid var(--border);margin-bottom:6px;background:var(--tint-02)}
+.btn-admin-link:hover{color:#a5b4fc;background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.25)}
+html[data-theme="light"] .btn-admin-link:hover{color:#4338ca}
 
 /* ── TOPBAR ── */
 .topbar{position:fixed;top:0;left:0;right:0;height:52px;z-index:150;display:flex;align-items:center;padding:0 8px;gap:12px;pointer-events:none}
@@ -520,6 +523,10 @@ html[data-theme="light"] .foto-choice-btn{color:#4338ca}
       </div>
       <nav id="sidebar-nav"></nav>
       <div class="sidebar-footer">
+        <a href="index.html" class="btn-admin-link" id="btn-ke-admin" title="Kembali ke halaman admin" style="display:none">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Dashboard</span>
+        </a>
         <div class="user-info">
           <div class="user-info-name" id="user-name"></div>
           <div class="user-info-sub" id="user-role-sub"></div>
@@ -1599,6 +1606,9 @@ async function initApp(){
   console.log('[DEBUG] currentUser:', JSON.stringify(currentUser));
 
   const isPriv = role==='admin'||role==='owner';
+  // Tampilkan tombol kembali ke dashboard hanya untuk admin/owner
+  const btnAdmin = document.getElementById('btn-ke-admin');
+  if(btnAdmin) btnAdmin.style.display = isPriv ? 'flex' : 'none';
   const navItems = [
     { key:'absensi', label:'Absensi Saya', icon:'clock' },
     { key:'rekap',   label:'Rekap Saya',   icon:'list'  },
