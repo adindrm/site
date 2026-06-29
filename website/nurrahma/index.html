@@ -1556,8 +1556,7 @@ const CSV = {
 };
 // Kontrol Data: dashboard analitik terintegrasi
 
-// Password tetap di kode (tidak disimpan di spreadsheet)
-const PASSWORDS = { admin:'aii19.1.25.1.1.4.13.9.14.14.25.1', owner:'muhammadsulkifly2.1.9.11.8.1.20.9', mitra01:'mitra123', mitra02:'mitra456' };
+// Login diverifikasi server-side via GAS (SHA-256), tidak ada password di kode
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -1869,13 +1868,16 @@ async function doLogin(){
       btn.disabled=false; btn.textContent='Masuk';
       return;
     }
-    // Ambil users dari sheet
-    const users = await fetchCSV(CSV.users);
-    const user = users.find(u=>u.username===username);
-    const correctPass = PASSWORDS[username];
-    if(user && correctPass && correctPass===password){
-      currentUser = {...user};
-      localStorage.setItem('session', JSON.stringify({...user, page:'dashboard'}));
+    const params = new URLSearchParams();
+    params.append('action',   'login');
+    params.append('username', username);
+    params.append('password', password);
+    const res  = await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params.toString() });
+    const data = await res.json();
+    if(data.success && data.user){
+      const u = data.user;
+      currentUser = { username: u.username, nama: u.nama||u.username, role: (u.role||'admin').toLowerCase(), status: u.status||'Aktif' };
+      localStorage.setItem('session', JSON.stringify({...currentUser, page:'dashboard'}));
       logAkses('login');
       document.getElementById('login-page').style.display='none';
       document.getElementById('app').style.display='block';
@@ -1883,7 +1885,7 @@ async function doLogin(){
       await loadAll();
       hideAppLoading();
     } else {
-      err.textContent='Username atau password salah.';
+      err.textContent = data.message || 'Username atau password salah.';
       err.style.display='block';
     }
   } catch(e){
@@ -3736,7 +3738,7 @@ function closeSidebarMobile(){
 // Restore session saat refresh
 (function(){
   const s = JSON.parse(localStorage.getItem('session')||'null');
-  if(s && s.username && PASSWORDS[s.username]){
+  if(s && s.username){
     currentUser = s;
     document.getElementById('login-page').style.display='none';
     document.getElementById('app').style.display='block';
