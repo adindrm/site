@@ -1,0 +1,3446 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<script>
+(function(){
+  try{
+    var h = new Date().getHours();
+    var autoTheme = (h >= 6 && h < 18) ? 'light' : 'dark';
+    var saved = localStorage.getItem('theme');
+    var manualUntil = parseInt(localStorage.getItem('theme_manual_until') || '0');
+    var t = (saved && Date.now() < manualUntil) ? saved : autoTheme;
+    document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NURRAHMA ABSENSI</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#080c14"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="NURRAHMA"/>
+<link rel="apple-touch-icon" href="icons/icon-192x192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c14;
+  --surface:rgba(255,255,255,0.04);
+  --border:rgba(255,255,255,0.08);
+  --text:#e2e8f0;
+  --muted:#64748b;
+  --accent:#6366f1;
+  --accent2:#0ea5e9;
+  --green:#10b981;
+  --amber:#f59e0b;
+  --red:#ef4444;
+  --text-strong:#ffffff;
+  --text-secondary:#cbd5e1;
+  --elevated:#0d1117;
+  --modal-bg:#0f1623;
+  --input-bg:rgba(255,255,255,.05);
+  --tint-02:rgba(255,255,255,.02);
+  --tint-05:rgba(255,255,255,.05);
+  --tint-07:rgba(255,255,255,.07);
+  --tint-10:rgba(255,255,255,.1);
+  --tint-12:rgba(255,255,255,.12);
+}
+html[data-theme="light"]{
+  --bg:#f1f5f9;
+  --surface:#ffffff;
+  --border:#e2e8f0;
+  --text:#334155;
+  --muted:#64748b;
+  --text-strong:#0f172a;
+  --text-secondary:#334155;
+  --elevated:#ffffff;
+  --modal-bg:#ffffff;
+  --input-bg:#f8fafc;
+  --tint-02:rgba(15,23,42,.025);
+  --tint-05:rgba(15,23,42,.04);
+  --tint-07:rgba(15,23,42,.05);
+  --tint-10:rgba(15,23,42,.07);
+  --tint-12:rgba(15,23,42,.09);
+}
+html[data-theme="light"] .glow{opacity:.07}
+html[data-theme="light"] .role-badge.admin{color:#4338ca}
+html[data-theme="light"] .role-badge.owner{color:#a16207}
+html[data-theme="light"] .role-badge.karyawan{color:#0369a1}
+html[data-theme="light"] .nav-item.active{color:#4338ca}
+html[data-theme="light"] .mono{color:#4f46e5}
+html[data-theme="light"] .btn-logout:hover{color:#b91c1c}
+html[data-theme="light"] [style*="color:#34d399"]{color:#15803d!important}
+html[data-theme="light"] [style*="color:#f87171"]{color:#b91c1c!important}
+html[data-theme="light"] [style*="color:#a5b4fc"]{color:#4338ca!important}
+html[data-theme="light"] [style*="color:#7dd3fc"]{color:#0369a1!important}
+html[data-theme="light"] [style*="color:#fcd34d"]{color:#b45309!important}
+html[data-theme="light"] [style*="color:#6ee7b7"]{color:#15803d!important}
+html[data-theme="light"] .badge-hadir{color:#15803d}
+html[data-theme="light"] .badge-izin{color:#b45309}
+html[data-theme="light"] .badge-sakit{color:#0369a1}
+html[data-theme="light"] .badge-cuti{color:#6d28d9}
+html[data-theme="light"] .badge-absen{color:#b91c1c}
+html[data-theme="light"] .filter-btn.active,.pg-btn.active{color:#4338ca}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .25s ease,color .25s ease}
+
+/* ── GLOW ── */
+.glow-wrap{position:fixed;inset:0;pointer-events:none;z-index:0}
+.glow{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15}
+.glow-a{width:500px;height:500px;background:radial-gradient(circle,#6366f1,transparent 70%);top:10%;left:20%}
+.glow-b{width:400px;height:400px;background:radial-gradient(circle,#0ea5e9,transparent 70%);bottom:10%;right:15%}
+
+/* ── LOADING SCREEN ── */
+.app-loading{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .6s ease,visibility .6s ease;overflow:hidden}
+.app-loading.hide{opacity:0;visibility:hidden;pointer-events:none}
+.app-loading::before{content:'';position:absolute;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.18),transparent 70%);top:50%;left:50%;transform:translate(-50%,-60%);animation:glowPulse 2.4s ease-in-out infinite;pointer-events:none}
+@keyframes glowPulse{0%,100%{opacity:.6;transform:translate(-50%,-60%) scale(.95)}50%{opacity:1;transform:translate(-50%,-60%) scale(1.05)}}
+.app-loading-card{display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px 48px;background:var(--surface);border:1px solid var(--border);border-radius:24px;backdrop-filter:blur(24px);box-shadow:0 24px 80px rgba(0,0,0,.25);animation:cardIn .55s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+.app-loading-logo{height:72px;object-fit:contain;filter:drop-shadow(0 4px 18px rgba(99,102,241,.35));animation:logoBreathe 2s ease-in-out infinite}
+@keyframes logoBreathe{0%,100%{transform:scale(.97)}50%{transform:scale(1.03)}}
+.app-loading-label{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text-strong)}
+.app-loading-dots{display:flex;align-items:center;gap:8px}
+.app-loading-dots span{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#0ea5e9);animation:dotBounce 1.2s ease-in-out infinite}
+.app-loading-dots span:nth-child(2){animation-delay:.18s}
+.app-loading-dots span:nth-child(3){animation-delay:.36s}
+@keyframes dotBounce{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1.2);opacity:1}}
+.app-loading-bar{width:180px;height:3px;border-radius:3px;background:var(--tint-10);overflow:hidden;position:relative}
+.app-loading-bar-fill{position:absolute;top:0;left:0;height:100%;width:50%;border-radius:3px;background:linear-gradient(90deg,transparent,#6366f1,#0ea5e9,transparent);animation:barSlide 1.4s ease-in-out infinite}
+@keyframes barSlide{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+
+/* ── LOGIN ── */
+#login-page{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;background:var(--bg)}
+.login-card{position:relative;width:100%;max-width:420px;margin:0 16px}
+.login-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:28px}
+.login-title{text-align:center;font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--text-strong);margin-bottom:6px}
+.login-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px}
+.form-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;backdrop-filter:blur(20px)}
+.form-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:10px 14px;font-size:13px;color:#fca5a5;margin-bottom:16px;display:none}
+.form-label{font-size:13px;color:var(--muted);margin-bottom:7px;display:block}
+.form-input{width:100%;padding:11px 14px;border-radius:11px;background:var(--input-bg);border:1px solid var(--border);color:var(--text-strong);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;margin-bottom:16px}
+.form-input:focus{border-color:var(--accent)}
+.form-select{width:100%;padding:11px 14px;border-radius:11px;background:var(--input-bg);border:1px solid var(--border);color:var(--text-strong);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;margin-bottom:16px;cursor:pointer}
+.form-select:focus{border-color:var(--accent)}
+.btn-primary{width:100%;padding:12px;border-radius:11px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── LAYOUT ── */
+#app{display:none;height:100vh}
+.layout{display:flex;height:100vh;position:relative}
+
+/* ── SIDEBAR ── */
+.sidebar{display:flex;flex-direction:column;height:100%;width:240px;background:var(--elevated);border-right:1px solid var(--border);transition:width .3s;flex-shrink:0;overflow:hidden;position:relative;z-index:10}
+.sidebar.collapsed{width:0;border-right:none}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:14px 12px;border-bottom:1px solid var(--border);min-width:240px}
+.sidebar-logo-text{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text-strong);white-space:nowrap;overflow:hidden}
+.role-badge{margin:10px 10px 4px;padding:7px 10px;border-radius:10px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+.role-badge.admin{background:rgba(99,102,241,.15);color:#a5b4fc}
+.role-badge.owner{background:rgba(234,179,8,.15);color:#fcd34d}
+.role-badge.karyawan{background:rgba(14,165,233,.15);color:#7dd3fc}
+.sidebar nav{flex:1;padding:6px 8px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:11px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;margin-bottom:2px}
+.nav-item:hover{color:var(--text-secondary);background:var(--tint-05)}
+.nav-item.active{background:linear-gradient(135deg,rgba(99,102,241,.3),rgba(79,70,229,.2));color:#c7d2fe}
+.nav-item svg{flex-shrink:0}
+.sidebar-footer{padding:10px;border-top:1px solid var(--border)}
+.user-info{padding:8px 10px;margin-bottom:4px;overflow:hidden}
+.user-info-name{font-size:13px;font-weight:500;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-info-sub{font-size:11px;color:var(--muted)}
+.btn-logout{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif}
+.btn-logout:hover{color:#fca5a5;background:rgba(239,68,68,.1)}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;height:52px;z-index:150;display:flex;align-items:center;padding:0 8px;gap:12px;pointer-events:none}
+.topbar-btn{pointer-events:auto}
+#sidebar-toggle{margin-left:240px;transition:margin-left .3s}
+.layout.sidebar-collapsed #sidebar-toggle{margin-left:0}
+.icon-toggle-btn{width:36px;height:36px;border-radius:10px;background:var(--elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,color .2s;color:var(--muted);flex-shrink:0}
+.icon-toggle-btn:hover{background:var(--tint-12);color:var(--text-strong)}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:32px;padding-top:68px}
+.page{display:none}
+.page.active{display:block}
+.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text-strong);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;transition:background .2s}
+.stat-card:hover{background:var(--tint-07)}
+.stat-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.stat-label{font-size:12px;color:var(--muted);font-weight:500}
+.stat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.stat-value{font-size:clamp(14px,2.2vw,22px);font-weight:700;color:var(--text-strong);font-family:'Syne',sans-serif;line-height:1.2}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.card-title{font-size:13px;font-weight:600;color:var(--text-strong)}
+.card-sub{font-size:11px;color:var(--muted)}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto}
+.table-wrap table tbody tr[onclick]:hover{background:var(--tint-05)}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+th{padding:10px 18px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;white-space:nowrap}
+td{padding:12px 18px;font-size:13px;color:var(--text-secondary);border-bottom:1px solid var(--border)}
+tr:hover td{background:var(--tint-02)}
+tr:last-child td{border-bottom:none}
+.mono{font-family:monospace;font-size:11px;color:#818cf8}
+
+/* ── BADGE ── */
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid transparent}
+.badge-hadir{background:rgba(16,185,129,.15);color:#6ee7b7;border-color:rgba(16,185,129,.25)}
+.badge-izin{background:rgba(245,158,11,.15);color:#fcd34d;border-color:rgba(245,158,11,.25)}
+.badge-sakit{background:rgba(14,165,233,.15);color:#7dd3fc;border-color:rgba(14,165,233,.25)}
+.badge-cuti{background:rgba(139,92,246,.15);color:#c4b5fd;border-color:rgba(139,92,246,.25)}
+.badge-absen{background:rgba(239,68,68,.15);color:#fca5a5;border-color:rgba(239,68,68,.25)}
+.badge-admin{background:rgba(99,102,241,.15);color:#a5b4fc}
+.badge-owner{background:rgba(234,179,8,.15);color:#fcd34d}
+.badge-karyawan{background:rgba(14,165,233,.15);color:#7dd3fc}
+
+/* ── FILTERS ── */
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search-input{width:100%;padding:9px 12px 9px 34px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border);color:var(--text-strong);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--muted)}
+.filter-btn{padding:9px 16px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .2s}
+.filter-btn:hover{background:var(--tint-10);color:var(--text-secondary)}
+.filter-btn.active{background:rgba(99,102,241,.25);color:#a5b4fc;border-color:rgba(99,102,241,.35)}
+.filter-select{padding:9px 12px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border);color:var(--text-strong);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+.filter-select:focus{border-color:var(--accent)}
+
+/* ── ABSENSI CARD (tombol check-in/out) ── */
+.absen-hero{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:20px;position:relative;overflow:hidden}
+.absen-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(14,165,233,.04));pointer-events:none}
+.absen-hero-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.absen-greeting{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--text-strong)}
+.absen-date{font-size:13px;color:var(--muted);margin-top:4px}
+.absen-clock{font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--text-strong);letter-spacing:-1px}
+.absen-clock-sec{color:#6366f1;opacity:.75}
+.absen-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.absen-btn{padding:16px;border-radius:14px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;position:relative;overflow:hidden}
+.absen-btn:disabled{opacity:.4;cursor:not-allowed}
+.absen-btn-in{background:linear-gradient(135deg,rgba(16,185,129,.25),rgba(16,185,129,.15));border:1px solid rgba(16,185,129,.35);color:#34d399}
+.absen-btn-in:not(:disabled):hover{background:linear-gradient(135deg,rgba(16,185,129,.4),rgba(16,185,129,.25));transform:translateY(-1px)}
+.absen-btn-out{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(239,68,68,.12));border:1px solid rgba(239,68,68,.3);color:#f87171}
+.absen-btn-out:not(:disabled):hover{background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(239,68,68,.2));transform:translateY(-1px)}
+.absen-status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.absen-status-item{display:flex;align-items:center;gap:8px;background:var(--tint-05);border:1px solid var(--border);border-radius:10px;padding:8px 12px;flex:1;min-width:120px}
+.absen-status-label{font-size:11px;color:var(--muted);font-weight:500}
+.absen-status-val{font-size:13px;font-weight:600;color:var(--text-strong)}
+
+/* ── STATUS FORM (Izin/Sakit/Cuti) ── */
+.status-form-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px}
+.status-form-title{font-size:13px;font-weight:600;color:var(--text-strong);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.status-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.status-form-full{grid-column:1/-1}
+.inp-label{font-size:12px;color:var(--muted);margin-bottom:5px;display:block;font-weight:500}
+.inp{width:100%;padding:9px 12px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border);color:var(--text-strong);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;resize:vertical}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--muted)}
+.select-inp{width:100%;padding:9px 12px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border);color:var(--text-strong);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+.select-inp:focus{border-color:var(--accent)}
+.form-select option,.filter-select option,.select-inp option{background:var(--elevated);color:var(--text-strong)}
+.btn-submit-status{padding:10px 20px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s;display:flex;align-items:center;gap:7px}
+.btn-submit-status:hover{opacity:.88}
+.btn-submit-status:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── FOTO UPLOAD ── */
+.foto-wrap{display:flex;flex-direction:column;gap:8px}
+.foto-preview{width:100%;height:120px;border-radius:10px;background:var(--tint-05);border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;cursor:pointer;transition:border-color .2s}
+.foto-preview:hover{border-color:var(--accent)}
+.foto-preview img{width:100%;height:100%;object-fit:cover;border-radius:9px}
+.foto-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted)}
+.foto-placeholder span{font-size:11px}
+.foto-input{display:none}
+.foto-choice-btns{display:flex;gap:8px}
+.foto-choice-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 10px;border-radius:9px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.22);color:#a5b4fc;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.foto-choice-btn:hover{background:rgba(99,102,241,.22)}
+html[data-theme="light"] .foto-choice-btn{color:#4338ca}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);pointer-events:none}
+.modal-overlay.open{display:flex;pointer-events:auto}
+.modal-box{background:var(--modal-bg);border:1px solid var(--border);border-radius:20px;width:100%;max-width:480px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.modal-title{font-size:14px;font-weight:600;color:var(--text-strong)}
+.modal-close{width:32px;height:32px;border-radius:8px;background:var(--input-bg);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{color:var(--text-strong);background:var(--tint-12)}
+.modal-body{flex:1;overflow-y:auto;padding:20px}
+.modal-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0}
+.btn-cancel{padding:9px 18px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-cancel:hover{background:var(--tint-05);color:var(--text-strong)}
+.btn-ok{padding:9px 18px;border-radius:10px;border:none;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s;display:flex;align-items:center;gap:6px}
+.btn-ok:hover{opacity:.88}
+.btn-ok:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── CONFIRM MODAL ── */
+#confirm-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);pointer-events:none}
+#confirm-modal.open{display:flex;pointer-events:auto}
+.confirm-box{background:var(--modal-bg);border:1px solid var(--border);border-radius:18px;padding:28px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.confirm-icon{width:52px;height:52px;border-radius:14px;background:rgba(239,68,68,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#ef4444}
+.confirm-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text-strong);margin-bottom:8px}
+.confirm-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.confirm-actions{display:flex;gap:10px;justify-content:center}
+.confirm-btn-cancel{padding:10px 22px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.confirm-btn-cancel:hover{background:var(--tint-05);color:var(--text-strong)}
+.confirm-btn-ok{padding:10px 22px;border-radius:10px;border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+.confirm-btn-ok:hover{opacity:.85}
+
+/* ── TOAST ── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:14px;font-size:13px;font-weight:500;color:#fff;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,.4);pointer-events:auto;transform:translateX(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:340px}
+.toast.show{transform:translateX(0)}
+.toast-success{background:rgba(16,185,129,.85);border:1px solid rgba(16,185,129,.4)}
+.toast-error{background:rgba(239,68,68,.85);border:1px solid rgba(239,68,68,.4)}
+.toast-info{background:rgba(99,102,241,.85);border:1px solid rgba(99,102,241,.4)}
+.toast-warning{background:rgba(245,158,11,.85);border:1px solid rgba(245,158,11,.4)}
+
+/* ── OFFLINE BAR ── */
+.offline-bar{position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:rgba(245,158,11,.95);color:#1c1400;font-size:13px;font-weight:600;text-align:center;display:none;align-items:center;justify-content:center;gap:8px}
+.offline-bar.show{display:flex}
+
+/* ── SIDEBAR OVERLAY MOBILE ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:155;pointer-events:none}
+.sidebar-overlay.show{display:block;pointer-events:auto}
+
+/* ── CLOCK CARD ── */
+.clock-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;overflow:hidden}
+.clock-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(14,165,233,.04));pointer-events:none}
+.clock-left{display:flex;align-items:center;gap:14px}
+.clock-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(14,165,233,.15));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.clock-hm{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--text-strong);letter-spacing:-.5px}
+.clock-sep{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:#6366f1}
+.clock-sec{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:#6366f1;opacity:.75}
+.clock-date{font-size:12px;color:var(--muted);margin-top:5px}
+.clock-right{display:flex;align-items:center;gap:8px}
+.clock-theme-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.clock-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+.theme-toggle-inline{width:36px;height:36px;border-radius:10px;background:var(--input-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,color .2s;color:var(--muted)}
+.theme-toggle-inline:hover{background:var(--tint-12);color:var(--text-strong)}
+
+/* ── BTN REFRESH ── */
+.btn-refresh{padding:8px 14px;border-radius:9px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);color:#a5b4fc;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-refresh:hover{background:rgba(99,102,241,.25)}
+
+/* ── PAGINASI ── */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.pagination-info{font-size:12px;color:var(--muted)}
+.pagination-btns{display:flex;align-items:center;gap:6px}
+.pg-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'DM Sans',sans-serif}
+.pg-btn:hover:not(:disabled){background:var(--tint-07);color:var(--text-strong)}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed}
+.pg-btn.active{background:rgba(99,102,241,.25);border-color:rgba(99,102,241,.4);color:#a5b4fc}
+
+/* ── LOADING / EMPTY ── */
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--muted);font-size:13px;gap:10px}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:60px;color:var(--muted);font-size:13px}
+
+/* ── DETAIL REKAP ── */
+.rekap-detail-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.rekap-detail-row:last-child{border-bottom:none}
+.rekap-detail-label{font-size:12px;color:var(--muted)}
+.rekap-detail-val{font-size:13px;font-weight:600;color:var(--text-strong)}
+
+/* ── GPS STATUS ── */
+.gps-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:4px 9px;border-radius:20px;font-weight:500}
+.gps-ok{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.25)}
+.gps-wait{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.25)}
+.gps-err{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+
+/* ── BADGE TELAT / LEMBUR / ISTIRAHAT (Bagian 2) ── */
+.badge-telat{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
+.badge-lembur{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.25)}
+.badge-istirahat{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.25)}
+.badge-auto-warn{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px dashed rgba(239,68,68,.3)}
+.istirahat-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:20px}
+.istirahat-panel-title{font-size:13px;font-weight:600;color:var(--text-strong);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.istirahat-status{font-size:12px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.istirahat-btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn-istirahat{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;gap:7px}
+.btn-ist-mulai{background:linear-gradient(135deg,rgba(245,158,11,.25),rgba(245,158,11,.15));border:1px solid rgba(245,158,11,.35);color:#fcd34d}
+.btn-ist-mulai:not(:disabled):hover{background:linear-gradient(135deg,rgba(245,158,11,.4),rgba(245,158,11,.25));transform:translateY(-1px)}
+.btn-ist-selesai{background:linear-gradient(135deg,rgba(16,185,129,.25),rgba(16,185,129,.15));border:1px solid rgba(16,185,129,.35);color:#34d399}
+.btn-ist-selesai:not(:disabled):hover{background:linear-gradient(135deg,rgba(16,185,129,.4),rgba(16,185,129,.25));transform:translateY(-1px)}
+.btn-istirahat:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── SHIFT (Bagian 3) ── */
+.badge-shift{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.25)}
+.shift-lock-box{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--tint-05);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:16px;flex-wrap:wrap}
+.shift-lock-label{font-size:11px;color:var(--muted)}
+.shift-lock-val{font-size:13px;font-weight:600;color:var(--text-strong);margin-top:2px}
+.shift-pill-list{display:flex;flex-wrap:wrap;gap:8px}
+.shift-pill{padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);color:var(--text-secondary);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s}
+.shift-pill:hover{background:var(--tint-10)}
+.shift-pill.active{background:rgba(99,102,241,.22);border-color:rgba(99,102,241,.4);color:#a5b4fc;font-weight:600}
+.jadwal-mini-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:20px}
+.jadwal-mini-title{font-size:13px;font-weight:600;color:var(--text-strong);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.jadwal-mini-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.jadwal-mini-row:last-child{border-bottom:none}
+.jadwal-mini-day{color:var(--muted)}
+.jadwal-mini-val{color:var(--text-secondary);font-weight:500}
+.shift-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.shift-form-full{grid-column:1/-1}
+.bulk-assign-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--tint-05);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:18px}
+.bulk-assign-field{display:flex;flex-direction:column;gap:5px;min-width:140px}
+.bulk-assign-field label{font-size:11px;color:var(--muted);font-weight:500}
+.toleransi-badge{font-size:10px;color:var(--muted)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .main{padding:16px;padding-top:64px}
+  #sidebar-toggle{margin-left:0!important}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:170;width:240px!important;transform:translateX(-100%);transition:transform .3s ease}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .absen-actions{grid-template-columns:1fr}
+  .status-form-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .modal-box{max-width:100%!important;border-radius:18px 18px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:92vh}
+  .modal-overlay{align-items:flex-end;padding:0}
+  .filters{flex-direction:column}
+  table{font-size:12px}
+  th,td{padding:9px 10px}
+  #toast-container{bottom:16px;right:16px;left:16px}
+  .toast{max-width:100%}
+  .clock-hm,.clock-sep,.clock-sec{font-size:22px}
+  .clock-icon{width:36px;height:36px}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .page-title{font-size:18px}
+  .confirm-actions{flex-direction:column}
+  .confirm-btn-cancel,.confirm-btn-ok{width:100%}
+  .absen-hero{padding:18px}
+}
+</style>
+</head>
+<body>
+
+<!-- OFFLINE BAR -->
+<div class="offline-bar" id="offline-bar">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+  Tidak ada koneksi internet
+</div>
+
+<!-- LOADING SCREEN -->
+<div class="app-loading" id="app-loading">
+  <div class="app-loading-card">
+    <img class="app-loading-logo" src="logo.png" alt="Logo"/>
+    <span class="app-loading-label">NURRAHMA</span>
+    <div class="app-loading-dots"><span></span><span></span><span></span></div>
+    <div class="app-loading-bar"><div class="app-loading-bar-fill"></div></div>
+  </div>
+</div>
+
+<div class="glow-wrap"><div class="glow glow-a"></div><div class="glow glow-b"></div></div>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="logo.png" alt="Logo" style="height:95px;object-fit:contain"/>
+    </div>
+    <h1 class="login-title">Absensi Karyawan</h1>
+    <p class="login-sub">Masuk untuk mencatat kehadiran Anda</p>
+    <div class="form-box">
+      <div class="form-error" id="login-error">Username atau password salah.</div>
+      <label class="form-label">Username</label>
+      <input class="form-input" id="inp-user" placeholder="Masukkan username" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <label class="form-label">Password</label>
+      <input class="form-input" type="password" id="inp-pass" placeholder="Masukkan password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="btn-primary" id="btn-login" onclick="doLogin()">Masuk</button>
+      <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">
+        Belum punya akun?
+        <button onclick="showRegisterPage()" style="background:none;border:none;color:#a5b4fc;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;margin-left:4px">Daftar Sekarang</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER PAGE -->
+<div id="register-page" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;z-index:100;background:var(--bg);overflow-y:auto;padding:20px 0">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="logo.png" alt="Logo" style="height:95px;object-fit:contain"/>
+    </div>
+    <h1 class="login-title">Daftar Akun</h1>
+    <p class="login-sub">Isi data diri untuk mendaftar sebagai karyawan</p>
+    <div class="form-box">
+      <div class="form-error" id="reg-error"></div>
+      <label class="form-label">Nama Lengkap</label>
+      <input class="form-input" id="reg-nama" placeholder="Masukkan nama lengkap"/>
+      <label class="form-label">Username <span style="color:var(--muted);font-size:11px">(huruf kecil, tanpa spasi)</span></label>
+      <input class="form-input" id="reg-user" placeholder="Contoh: budi123" oninput="this.value=this.value.replace(/\s/g,'').toLowerCase()"/>
+      <label class="form-label">Password</label>
+      <input class="form-input" type="password" id="reg-pass" placeholder="Minimal 6 karakter"/>
+      <label class="form-label">Konfirmasi Password</label>
+      <input class="form-input" type="password" id="reg-pass2" placeholder="Ulangi password"/>
+      <button class="btn-primary" id="btn-register" onclick="doRegister()">Daftar</button>
+      <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">
+        Sudah punya akun?
+        <button onclick="showLoginPage()" style="background:none;border:none;color:#a5b4fc;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;margin-left:4px">Masuk</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="layout" id="layout">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <button id="sidebar-toggle" class="icon-toggle-btn topbar-btn" onclick="toggleSidebar()" title="Toggle Menu">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+    <!-- SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebarMobile()"></div>
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <img src="logo.png" alt="Logo" style="height:36px;object-fit:contain"/>
+        <span class="sidebar-logo-text">NURRAHMA</span>
+      </div>
+      <div class="role-badge" id="role-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span id="role-label">Karyawan</span>
+      </div>
+      <nav id="sidebar-nav"></nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-info-name" id="user-name"></div>
+          <div class="user-info-sub" id="user-role-sub"></div>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>Keluar</span>
+        </button>
+        <!-- [1.11] Tombol Ganti Sandi -->
+        <button class="btn-logout" onclick="openModal('modal-ganti-sandi')" style="color:#a5b4fc">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <span>Ganti Sandi</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- HALAMAN ABSENSI SAYA -->
+      <div class="page" id="page-absensi">
+        <div class="page-title">Absensi Hari Ini</div>
+        <div class="page-sub" id="absensi-sub">Catat kehadiran Anda</div>
+
+        <!-- CLOCK CARD -->
+        <div class="clock-card">
+          <div class="clock-left">
+            <div class="clock-icon">
+              <svg width="22" height="22" fill="none" stroke="#6366f1" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            </div>
+            <div>
+              <div style="display:flex;align-items:baseline;line-height:1">
+                <span class="clock-hm" id="clock-hhmm">00:00</span><span class="clock-sep">:</span><span class="clock-sec" id="clock-ss">00</span>
+              </div>
+              <div class="clock-date" id="clock-date">-</div>
+            </div>
+          </div>
+          <div class="clock-right">
+            <div class="clock-theme-wrap">
+              <span class="clock-label">Tema</span>
+              <button class="theme-toggle-inline" id="theme-toggle-btn" onclick="toggleTheme()" title="Ganti tema">
+                <span id="theme-icon">🌙</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HERO ABSENSI -->
+        <div class="absen-hero" id="absen-hero">
+          <div class="absen-hero-top">
+            <div>
+              <div class="absen-greeting" id="absen-greeting">Selamat datang!</div>
+              <div class="absen-date" id="absen-date-info">-</div>
+            </div>
+            <div id="gps-status" class="gps-badge gps-wait">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              Mendeteksi lokasi...
+            </div>
+          </div>
+          <!-- [3.8] INFO SHIFT HARI INI -->
+          <div class="shift-lock-box" id="shift-lock-box" style="display:none">
+            <div>
+              <div class="shift-lock-label" id="shift-lock-label">Shift Hari Ini</div>
+              <div class="shift-lock-val" id="shift-lock-val">-</div>
+            </div>
+            <span class="badge-shift" id="shift-lock-badge"></span>
+          </div>
+          <div class="absen-actions">
+            <button class="absen-btn absen-btn-in" id="btn-checkin" onclick="doCheckIn()">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+              Check In
+            </button>
+            <button class="absen-btn absen-btn-out" id="btn-checkout" onclick="doCheckOut()">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Check Out
+            </button>
+          </div>
+          <div class="absen-status-row">
+            <div class="absen-status-item">
+              <svg width="14" height="14" fill="none" stroke="#34d399" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+              <div>
+                <div class="absen-status-label">Jam Masuk</div>
+                <div class="absen-status-val" id="info-jam-masuk">-</div>
+              </div>
+            </div>
+            <div class="absen-status-item">
+              <svg width="14" height="14" fill="none" stroke="#f87171" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+              <div>
+                <div class="absen-status-label">Jam Keluar</div>
+                <div class="absen-status-val" id="info-jam-keluar">-</div>
+              </div>
+            </div>
+            <div class="absen-status-item">
+              <svg width="14" height="14" fill="none" stroke="#a5b4fc" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <div>
+                <div class="absen-status-label">Status Hari Ini</div>
+                <div class="absen-status-val" id="info-status-hari">-</div>
+              </div>
+            </div>
+            <div class="absen-status-item">
+              <svg width="14" height="14" fill="none" stroke="#fcd34d" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <div>
+                <div class="absen-status-label">Durasi</div>
+                <div class="absen-status-val" id="info-durasi">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- [2.2/2.3] BADGE TELAT & LEMBUR hari ini -->
+        <div id="absensi-badges-row" style="display:none;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
+
+        <!-- [2.8] PANEL ISTIRAHAT -->
+        <div class="istirahat-panel" id="istirahat-panel" style="display:none">
+          <div class="istirahat-panel-title">
+            <svg width="16" height="16" fill="none" stroke="#fcd34d" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            Istirahat
+          </div>
+          <div class="istirahat-status" id="istirahat-status-text">Belum ada sesi istirahat</div>
+          <div class="istirahat-btns">
+            <button class="btn-istirahat btn-ist-mulai" id="btn-ist-mulai" onclick="doIstirahatMulai()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg>
+              ☕ Mulai Istirahat
+            </button>
+            <button class="btn-istirahat btn-ist-selesai" id="btn-ist-selesai" onclick="doIstirahatSelesai()" disabled>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+              ▶ Selesai Istirahat
+            </button>
+          </div>
+        </div>
+
+        <!-- FORM STATUS IZIN/SAKIT/CUTI -->
+        <div class="status-form-wrap">
+          <div class="status-form-title">
+            <svg width="16" height="16" fill="none" stroke="#a5b4fc" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            Lapor Ketidakhadiran (Izin / Sakit / Cuti)
+          </div>
+          <div class="status-form-grid">
+            <div>
+              <label class="inp-label">Status</label>
+              <select class="select-inp" id="sel-status">
+                <option value="">-- Pilih Status --</option>
+                <option value="Izin">Izin</option>
+                <option value="Sakit">Sakit</option>
+                <option value="Cuti">Cuti</option>
+              </select>
+            </div>
+            <div>
+              <label class="inp-label">Tanggal</label>
+              <input type="date" class="inp" id="inp-tgl-lapor"/>
+            </div>
+            <div class="status-form-full">
+              <label class="inp-label">Keterangan</label>
+              <textarea class="inp" id="inp-ket-lapor" rows="2" placeholder="Opsional - keterangan tambahan"></textarea>
+            </div>
+            <div>
+              <label class="inp-label">Upload Bukti (opsional)</label>
+              <div class="foto-wrap">
+                <div class="foto-preview" id="foto-lapor-preview">
+                  <div class="foto-placeholder">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                    <span>Belum ada foto</span>
+                  </div>
+                </div>
+                <div class="foto-choice-btns">
+                  <button type="button" class="foto-choice-btn" onclick="pilihFoto('foto-lapor-input', true)">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    Ambil Foto
+                  </button>
+                  <button type="button" class="foto-choice-btn" onclick="pilihFoto('foto-lapor-input', false)">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                    Upload Galeri
+                  </button>
+                </div>
+                <input type="file" accept="image/*" class="foto-input" id="foto-lapor-input" onchange="previewFoto(this,'foto-lapor-preview')"/>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-end">
+              <button class="btn-submit-status" id="btn-lapor" onclick="submitLaporan()">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+                Kirim Laporan
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- [3.11] JADWAL SHIFT SAYA (read-only, 7 hari ke depan) -->
+        <div class="jadwal-mini-card">
+          <div class="jadwal-mini-title">
+            <svg width="16" height="16" fill="none" stroke="#a5b4fc" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Jadwal Shift Saya (7 Hari Ke Depan)
+          </div>
+          <div id="jadwal-saya-body"><div class="loading"><div class="spinner"></div> Memuat...</div></div>
+        </div>
+      </div>
+
+      <!-- HALAMAN REKAP SAYA -->
+      <div class="page" id="page-rekap">
+        <div class="page-title">Rekap Absensi</div>
+        <div class="page-sub" id="rekap-sub">Riwayat kehadiran</div>
+
+        <div class="stats-grid" id="rekap-stats"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Riwayat Absensi</div>
+              <div class="card-sub" id="rekap-tbl-sub"></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <select class="filter-select" id="fil-bulan" onchange="renderRekap()">
+                <option value="">Semua Bulan</option>
+              </select>
+              <select class="filter-select" id="fil-status-rekap" onchange="renderRekap()">
+                <option value="">Semua Status</option>
+                <option value="Hadir">Hadir</option>
+                <option value="Izin">Izin</option>
+                <option value="Sakit">Sakit</option>
+                <option value="Cuti">Cuti</option>
+                <option value="Absen">Absen</option>
+              </select>
+              <button class="btn-refresh" onclick="loadAbsensiData(true)">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23,4 23,11 16,11"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 11"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div id="rekap-body"><div class="loading"><div class="spinner"></div> Memuat...</div></div>
+        </div>
+      </div>
+
+      <!-- HALAMAN SEMUA KARYAWAN (admin/owner) -->
+      <div class="page" id="page-semua">
+        <div class="page-title">Absensi Karyawan</div>
+        <div class="page-sub">Rekap kehadiran semua karyawan</div>
+
+        <div class="stats-grid" id="semua-stats"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Data Absensi</div>
+              <div class="card-sub" id="semua-tbl-sub"></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <select class="filter-select" id="fil-bulan-semua" onchange="renderSemua()">
+                <option value="">Semua Bulan</option>
+              </select>
+              <select class="filter-select" id="fil-karyawan" onchange="renderSemua()">
+                <option value="">Semua Karyawan</option>
+              </select>
+              <select class="filter-select" id="fil-status-semua" onchange="renderSemua()">
+                <option value="">Semua Status</option>
+                <option value="Hadir">Hadir</option>
+                <option value="Izin">Izin</option>
+                <option value="Sakit">Sakit</option>
+                <option value="Cuti">Cuti</option>
+                <option value="Absen">Absen</option>
+              </select>
+              <div class="search-wrap" style="flex:none;min-width:160px">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input class="search-input" id="semua-search" placeholder="Cari karyawan..." oninput="renderSemua()"/>
+              </div>
+              <button class="btn-refresh" onclick="loadAbsensiData(true)">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23,4 23,11 16,11"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 11"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div id="semua-body"><div class="loading"><div class="spinner"></div> Memuat...</div></div>
+        </div>
+      </div>
+
+      <!-- HALAMAN KELOLA KARYAWAN (admin/owner) -->
+      <div class="page" id="page-kelola">
+        <div class="page-title">Kelola Karyawan</div>
+        <div class="page-sub">Manajemen akun karyawan</div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Daftar Karyawan</div>
+              <div class="card-sub" id="kelola-sub"></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <div class="search-wrap" style="flex:none;min-width:160px">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input class="search-input" id="kelola-search" placeholder="Cari karyawan..." oninput="renderKelolaKaryawan()"/>
+              </div>
+              <button class="btn-refresh" onclick="loadAbsensiData(true).then(()=>renderKelolaKaryawan())">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23,4 23,11 16,11"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 11"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div id="kelola-body"><div class="loading"><div class="spinner"></div> Memuat...</div></div>
+        </div>
+      </div>
+
+      <!-- [3.9] HALAMAN KELOLA SHIFT (admin/owner) -->
+      <div class="page" id="page-kelola-shift">
+        <div class="page-title">Kelola Shift</div>
+        <div class="page-sub">Atur jam kerja & toleransi telat per shift</div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Tambah Shift Baru</div>
+              <div class="card-sub">Buat shift custom atau gunakan preset</div>
+            </div>
+          </div>
+          <div style="padding:18px 20px">
+            <div id="shift-form-err" class="form-error" style="display:none"></div>
+            <div class="shift-form-grid">
+              <div>
+                <label class="inp-label">Nama Shift</label>
+                <input class="inp" id="shf-nama" placeholder="Contoh: Pagi, Siang, Custom..."/>
+              </div>
+              <div>
+                <label class="inp-label">Toleransi Telat (menit)</label>
+                <input class="inp" type="number" id="shf-toleransi" placeholder="15" value="15"/>
+              </div>
+              <div>
+                <label class="inp-label">Jam Masuk</label>
+                <input class="inp" type="time" id="shf-jam-masuk"/>
+              </div>
+              <div>
+                <label class="inp-label">Jam Keluar</label>
+                <input class="inp" type="time" id="shf-jam-keluar"/>
+              </div>
+              <div>
+                <label class="inp-label">Durasi Kerja (jam)</label>
+                <input class="inp" type="number" id="shf-durasi" placeholder="8" value="8"/>
+              </div>
+              <div style="display:flex;align-items:flex-end">
+                <button class="btn-submit-status" id="btn-tambah-shift" onclick="submitTambahShift()">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Tambah Shift
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Daftar Shift</div>
+              <div class="card-sub" id="kelola-shift-sub"></div>
+            </div>
+            <button class="btn-refresh" onclick="loadShiftData(true)">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23,4 23,11 16,11"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 11"/></svg>
+              Refresh
+            </button>
+          </div>
+          <div id="kelola-shift-body"><div class="loading"><div class="spinner"></div> Memuat...</div></div>
+        </div>
+      </div>
+
+      <!-- [3.10] HALAMAN JADWAL HARIAN (admin/owner) -->
+      <div class="page" id="page-jadwal-harian">
+        <div class="page-title">Jadwal Harian</div>
+        <div class="page-sub">Tetapkan shift karyawan per tanggal</div>
+
+        <!-- BULK ASSIGN -->
+        <div class="bulk-assign-bar">
+          <div class="bulk-assign-field">
+            <label>Tanggal</label>
+            <input class="inp" type="date" id="jh-bulk-tanggal"/>
+          </div>
+          <div class="bulk-assign-field">
+            <label>Shift</label>
+            <select class="select-inp" id="jh-bulk-shift"><option value="">-- Pilih Shift --</option></select>
+          </div>
+          <div class="bulk-assign-field" style="flex:1;min-width:200px">
+            <label>Karyawan (kosongkan = semua karyawan aktif)</label>
+            <select class="select-inp" id="jh-bulk-karyawan" multiple style="height:74px"></select>
+          </div>
+          <button class="btn-submit-status" id="btn-bulk-assign" onclick="submitBulkAssign()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+            Terapkan
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Jadwal Per Tanggal</div>
+              <div class="card-sub" id="jadwal-harian-sub"></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <input class="filter-select" type="date" id="jh-filter-tanggal" onchange="renderJadwalHarian()"/>
+              <button class="btn-refresh" onclick="loadJadwalHarianTanggal()">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23,4 23,11 16,11"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 11"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div id="jadwal-harian-body"><div class="loading"><div class="spinner"></div> Memuat...</div></div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<!-- [1.12] HALAMAN KELOLA KARYAWAN (ditambahkan via JS ke .main) -->
+<!-- [3.9][3.10] HALAMAN KELOLA SHIFT & JADWAL HARIAN ditambahkan di atas -->
+
+<!-- MODAL DETAIL ABSENSI -->
+<div class="modal-overlay" id="modal-detail" onclick="if(event.target===this)closeModal('modal-detail')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="detail-modal-title">Detail Absensi</div>
+      <button class="modal-close" onclick="closeModal('modal-detail')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="detail-modal-body"></div>
+  </div>
+</div>
+
+<!-- MODAL KONFIRMASI CHECK-IN/OUT -->
+<div class="modal-overlay" id="modal-checkin" onclick="if(event.target===this)closeModal('modal-checkin')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="checkin-modal-title">Konfirmasi Check In</div>
+      <button class="modal-close" onclick="closeModal('modal-checkin')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- [3.8] PILIH SHIFT (hanya tampil saat Check In & belum ada jadwal terkunci) -->
+      <div id="modal-shift-pilih-wrap" style="margin-bottom:16px;display:none">
+        <label class="inp-label">Pilih Shift</label>
+        <div class="shift-pill-list" id="modal-shift-pill-list"></div>
+      </div>
+      <!-- [3.8] SHIFT TERKUNCI (jadwal dari admin) -->
+      <div id="modal-shift-locked-wrap" style="margin-bottom:16px;display:none">
+        <label class="inp-label">Shift (sudah dijadwalkan admin)</label>
+        <div style="font-size:13px;color:var(--text-secondary);padding:8px 12px;background:var(--tint-05);border-radius:9px;border:1px solid var(--border)" id="modal-shift-locked-val">-</div>
+      </div>
+      <!-- FOTO BUKTI -->
+      <div style="margin-bottom:16px">
+        <label class="inp-label">Foto Bukti <span style="color:#f87171">*wajib</span></label>
+        <div class="foto-wrap">
+          <div class="foto-preview" id="foto-ci-preview" style="height:160px">
+            <div class="foto-placeholder">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              <span>Belum ada foto</span>
+            </div>
+          </div>
+          <div class="foto-choice-btns">
+            <button type="button" class="foto-choice-btn" onclick="pilihFoto('foto-ci-input', true)">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Ambil Foto
+            </button>
+            <button type="button" class="foto-choice-btn" onclick="pilihFoto('foto-ci-input', false)">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              Upload Galeri
+            </button>
+          </div>
+          <input type="file" accept="image/*" class="foto-input" id="foto-ci-input" onchange="previewFoto(this,'foto-ci-preview')"/>
+        </div>
+      </div>
+      <!-- LOKASI -->
+      <div style="margin-bottom:16px">
+        <label class="inp-label">Lokasi GPS</label>
+        <div id="modal-gps-info" style="font-size:13px;color:var(--muted);padding:8px 12px;background:var(--tint-05);border-radius:9px;border:1px solid var(--border)">Mendeteksi lokasi...</div>
+      </div>
+      <!-- KETERANGAN -->
+      <div>
+        <label class="inp-label">Keterangan <span style="color:var(--muted)">(opsional)</span></label>
+        <textarea class="inp" id="inp-ket-ci" rows="2" placeholder="Opsional"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-checkin')">Batal</button>
+      <button class="btn-ok" id="btn-konfirmasi-ci" onclick="konfirmasiCheckIn()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+        Konfirmasi
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-icon">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="confirm-title" id="confirm-title"></div>
+    <div class="confirm-sub" id="confirm-sub"></div>
+    <div class="confirm-actions">
+      <button class="confirm-btn-cancel" onclick="closeConfirm()">Batal</button>
+      <button class="confirm-btn-ok" id="confirm-ok">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- [1.11] MODAL GANTI SANDI -->
+<div class="modal-overlay" id="modal-ganti-sandi" onclick="if(event.target===this)closeModal('modal-ganti-sandi')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Ganti Password</div>
+      <button class="modal-close" onclick="closeModal('modal-ganti-sandi')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="ganti-sandi-err" class="form-error" style="display:none"></div>
+      <label class="form-label">Password Lama</label>
+      <input class="form-input" type="password" id="gs-lama" placeholder="Masukkan password lama"/>
+      <label class="form-label">Password Baru</label>
+      <input class="form-input" type="password" id="gs-baru" placeholder="Minimal 6 karakter"/>
+      <label class="form-label">Konfirmasi Password Baru</label>
+      <input class="form-input" type="password" id="gs-baru2" placeholder="Ulangi password baru"/>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-ganti-sandi')">Batal</button>
+      <button class="btn-ok" id="btn-simpan-ganti-sandi" onclick="submitGantiSandi()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+        Simpan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- [1.13] MODAL EDIT AKUN KARYAWAN (admin/owner) -->
+<div class="modal-overlay" id="modal-edit-karyawan" onclick="if(event.target===this)closeModal('modal-edit-karyawan')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Edit Akun Karyawan</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-karyawan')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="edit-kar-err" class="form-error" style="display:none"></div>
+      <input type="hidden" id="edit-kar-original-username"/>
+      <label class="form-label">Nama Lengkap</label>
+      <input class="form-input" id="edit-kar-nama" placeholder="Nama lengkap"/>
+      <label class="form-label">Username</label>
+      <input class="form-input" id="edit-kar-username" placeholder="Username (huruf kecil, tanpa spasi)" oninput="this.value=this.value.replace(/\s/g,'').toLowerCase()"/>
+      <label class="form-label">Role</label>
+      <select class="form-select" id="edit-kar-role">
+        <option value="karyawan">Karyawan</option>
+        <option value="admin">Admin</option>
+        <option value="owner">Owner</option>
+      </select>
+      <label class="form-label">Status</label>
+      <select class="form-select" id="edit-kar-status">
+        <option value="Aktif">Aktif</option>
+        <option value="Nonaktif">Nonaktif</option>
+      </select>
+      <div style="background:var(--tint-05);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:4px">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px">Reset Password (opsional)</div>
+        <label class="form-label">Password Baru <span style="color:var(--muted)">(kosongkan = tidak diubah)</span></label>
+        <input class="form-input" type="password" id="edit-kar-pass" placeholder="Isi untuk reset password"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-edit-karyawan')">Batal</button>
+      <button class="btn-ok" id="btn-simpan-edit-karyawan" onclick="submitEditKaryawan()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+        Simpan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- [3.9] MODAL EDIT SHIFT (admin/owner) -->
+<div class="modal-overlay" id="modal-edit-shift" onclick="if(event.target===this)closeModal('modal-edit-shift')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Edit Shift</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-shift')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="edit-shift-err" class="form-error" style="display:none"></div>
+      <input type="hidden" id="edit-shift-id"/>
+      <label class="form-label">Nama Shift</label>
+      <input class="form-input" id="edit-shift-nama" placeholder="Nama shift"/>
+      <label class="form-label">Jam Masuk</label>
+      <input class="form-input" type="time" id="edit-shift-jam-masuk"/>
+      <label class="form-label">Jam Keluar</label>
+      <input class="form-input" type="time" id="edit-shift-jam-keluar"/>
+      <label class="form-label">Durasi Kerja (jam)</label>
+      <input class="form-input" type="number" id="edit-shift-durasi" placeholder="8"/>
+      <label class="form-label">Toleransi Telat (menit)</label>
+      <input class="form-input" type="number" id="edit-shift-toleransi" placeholder="15"/>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-edit-shift')">Batal</button>
+      <button class="btn-ok" id="btn-simpan-edit-shift" onclick="submitEditShift()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+        Simpan
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzTU8FXiZzKanjXp4hEeToRfLn5r6DHipi1kfwGHuteM5rUrv9h9PY0oevpw1r94sWt/exec';
+
+// CSV URLs — ganti gid= sesuai sheet "users" dan "absensi" Anda
+const CSV = {
+  users:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZbBjOyhPKBaeHt15ZiuGiSG3m6fk-n_s9QaR_Gx-WkPR2PPcYx8ESgD5iG_bBDNN9n2lazsDFXlpe/pub?gid=518898558&single=true&output=csv',
+  // ⚠️ Ganti gid= di bawah dengan ID sheet "absensi" yang baru Anda buat
+  absensi: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZbBjOyhPKBaeHt15ZiuGiSG3m6fk-n_s9QaR_Gx-WkPR2PPcYx8ESgD5iG_bBDNN9n2lazsDFXlpe/pub?gid=1155057465&single=true&output=csv',
+};
+
+const FOLDER_ID = '10j8P6hWY3RZRKyKLqEm01Gestq6FN8EL'; // folder Drive utama
+
+// ── HELPER NAMA USER ──────────────────────────────────────────────────────────
+// [FIX] Handle kolom 'name' (alias 'nama') dari sheet users
+function getNama(u) {
+  if (!u) return '';
+  return u.nama || u.name || u.username || '';
+}
+
+// ── STATE ──────────────────────────────────────────────────────────────────────
+let currentUser  = null;
+let absensiData  = [];
+let usersData    = [];
+let gpsCoords    = null;
+let checkInMode  = true; // true = check-in, false = check-out
+let rekapPage    = 1;
+const rekapPerPage = 25;
+let semuaPage    = 1;
+const semuaPerPage = 25;
+let editingAbsensiId = null;
+let expandedKaryawan = new Set();
+
+// ── STATE SHIFT (Bagian 3) ────────────────────────────────────────────────────
+let shiftData       = [];   // shift aktif (dari action=getShift)
+let shiftDataAll     = [];   // semua shift termasuk nonaktif (untuk halaman Kelola Shift)
+let jadwalHariIni    = null; // jadwal user untuk hari ini (null = belum dijadwalkan admin)
+let shiftTerpilihId  = '';   // shift_id yang dipilih user di modal check-in (kalau tidak terkunci)
+let jadwalHarianCache = {};  // cache jadwal_shift per tanggal: { 'YYYY-MM-DD': [{username, shift_id}, ...] }
+
+// ── STATE ISTIRAHAT (Bagian 2) ────────────────────────────────────────────────
+let istirahatSesiLog = [];   // array sesi istirahat hari ini [{mulai,selesai,durasi_menit,auto}]
+let istirahatSedangBerjalan = false; // apakah ada sesi terbuka saat ini
+
+// ── RINGKASAN PER KARYAWAN (gabung semua tanggal jadi 1 baris) ───────────────
+// ✅ BARU: sama seperti pola "Ringkasan Stok" — semua baris dengan nama yang
+// sama (di sini: karyawan yang sama) digabung jadi 1 baris ringkasan. Detail
+// per tanggal baru muncul saat baris diklik (expand).
+function buildRingkasanKaryawan(rows){
+  const map = {};
+  rows.forEach(r=>{
+    const uname = (r.username||'').toLowerCase();
+    if(!uname) return;
+    if(!map[uname]){
+      const uData = usersData.find(u=>(u.username||'').toLowerCase()===uname);
+      map[uname] = {
+        username: r.username, nama: getNama(uData) || r.username,
+        hadir:0, izin:0, sakit:0, cuti:0, absen:0, totalMenit:0, records:[]
+      };
+    }
+    const g = map[uname];
+    if(r.status==='Hadir') g.hadir++;
+    else if(r.status==='Izin') g.izin++;
+    else if(r.status==='Sakit') g.sakit++;
+    else if(r.status==='Cuti') g.cuti++;
+    else if(r.status==='Absen') g.absen++;
+
+    const m = String(durasiOf(r)).match(/(\d+)j\s*(\d+)m/);
+    if(m) g.totalMenit += Number(m[1])*60 + Number(m[2]);
+
+    g.records.push(r);
+  });
+  const list = Object.values(map);
+  list.forEach(g=>g.records.sort((a,b)=>(b.tanggal||'').localeCompare(a.tanggal||'')));
+  list.sort((a,b)=>(a.nama||'').localeCompare(b.nama||''));
+  return list;
+}
+function formatMenitTotal(total){
+  if(!total) return '-';
+  const j = Math.floor(total/60), m = total%60;
+  return `${j}j ${m}m`;
+}
+function toggleKaryawanExpand(username){
+  if(expandedKaryawan.has(username)) expandedKaryawan.delete(username);
+  else expandedKaryawan.add(username);
+  renderSemua();
+}
+
+// ── CSV PARSER ─────────────────────────────────────────────────────────────────
+function parseCSV(text){
+  const lines = text.trim().split('\n').map(l=>l.trim()).filter(Boolean);
+  if(lines.length < 2) return [];
+  const sep = lines[0].includes('\t') ? '\t' : ',';
+  function splitLine(line){
+    if(sep==='\t') return line.split('\t').map(v=>v.trim().replace(/^"|"$/g,''));
+    const vals=[];let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(c==='"'){inQ=!inQ;continue;}
+      if(c===','&&!inQ){vals.push(cur.trim());cur='';continue;}
+      cur+=c;
+    }
+    vals.push(cur.trim());
+    return vals;
+  }
+  const headers = splitLine(lines[0]).map(h=>h.replace(/^"|"$/g,''));
+  return lines.slice(1).map(line=>{
+    const vals = splitLine(line);
+    const obj={};
+    headers.forEach((h,i)=>{ obj[h]=vals[i]||''; });
+    return obj;
+  }).filter(row=>Object.values(row).some(v=>v!==''&&v!=='0'&&v!==0));
+}
+
+async function fetchCSV(url){
+  const res = await fetch(url);
+  const text = await res.text();
+  return parseCSV(text);
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+function updateClock(){
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  const ss = String(now.getSeconds()).padStart(2,'0');
+  const el1 = document.getElementById('clock-hhmm');
+  const el2 = document.getElementById('clock-ss');
+  const el3 = document.getElementById('clock-date');
+  if(el1) el1.textContent = `${hh}:${mm}`;
+  if(el2) el2.textContent = ss;
+  if(el3) el3.textContent = `${HARI[now.getDay()]}, ${now.getDate()} ${BULAN[now.getMonth()]} ${now.getFullYear()}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+// ── THEME OTOMATIS BERDASARKAN WAKTU ─────────────────────────────────────────
+// Terang 06:00–18:00, Gelap 18:00–06:00
+// Manual override aktif 10 menit, lalu kembali ke saran waktu
+
+const THEME_MANUAL_DURATION = 10 * 60 * 1000; // 10 menit dalam ms
+let themeAutoTimer = null;
+
+function getAutoTheme(){
+  const h = new Date().getHours();
+  return (h >= 6 && h < 18) ? 'light' : 'dark';
+}
+
+function applyTheme(t, isAuto){
+  document.documentElement.setAttribute('data-theme', t);
+  if(!isAuto){
+    // Simpan pilihan manual + waktu kadaluarsa
+    localStorage.setItem('theme', t);
+    localStorage.setItem('theme_manual_until', String(Date.now() + THEME_MANUAL_DURATION));
+    // Jadwalkan kembali ke auto setelah 10 menit
+    clearTimeout(themeAutoTimer);
+    themeAutoTimer = setTimeout(()=>{
+      const auto = getAutoTheme();
+      applyTheme(auto, true);
+      localStorage.removeItem('theme_manual_until');
+    }, THEME_MANUAL_DURATION);
+    // Tampilkan info toast singkat (hanya kalau showToast sudah tersedia)
+    if(typeof showToast === 'function') showToast('Tema diubah manual - kembali otomatis dalam 10 menit', 'info');
+  } else {
+    localStorage.removeItem('theme_manual_until');
+  }
+  updateThemeIcon();
+}
+
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  applyTheme(next, false);
+}
+
+function updateThemeIcon(){
+  const t = document.documentElement.getAttribute('data-theme') || 'dark';
+  const el = document.getElementById('theme-icon');
+  if(el) el.textContent = t === 'dark' ? '🌙' : '☀️';
+}
+
+// Jalankan auto-theme saat init dan cek setiap menit
+function initAutoTheme(){
+  const manualUntil = parseInt(localStorage.getItem('theme_manual_until') || '0');
+  if(Date.now() < manualUntil){
+    // Masih dalam periode manual — jadwalkan kembali ke auto saat expired
+    const sisaMs = manualUntil - Date.now();
+    clearTimeout(themeAutoTimer);
+    themeAutoTimer = setTimeout(()=>{
+      const auto = getAutoTheme();
+      applyTheme(auto, true);
+    }, sisaMs);
+  } else {
+    // Tidak ada override manual, terapkan auto
+    applyTheme(getAutoTheme(), true);
+  }
+  updateThemeIcon();
+  // Cek pergantian jam setiap 60 detik (saat jam 06:00 atau 18:00 tema berubah otomatis)
+  setInterval(()=>{
+    const manualUntil2 = parseInt(localStorage.getItem('theme_manual_until') || '0');
+    if(Date.now() >= manualUntil2){
+      applyTheme(getAutoTheme(), true);
+    }
+  }, 60 * 1000);
+}
+initAutoTheme();
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+function isMobile(){ return window.innerWidth <= 768; }
+function toggleSidebar(){
+  if(isMobile()){
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('sidebar-overlay');
+    sb.classList.toggle('mobile-open');
+    ov.classList.toggle('show');
+  } else {
+    const layout = document.getElementById('layout');
+    const sb = document.getElementById('sidebar');
+    const tog = document.getElementById('sidebar-toggle');
+    const collapsed = sb.classList.toggle('collapsed');
+    layout.classList.toggle('sidebar-collapsed', collapsed);
+    tog.style.marginLeft = collapsed ? '0' : '240px';
+  }
+}
+function closeSidebarMobile(){
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+// ── OFFLINE ───────────────────────────────────────────────────────────────────
+window.addEventListener('online',  ()=>document.getElementById('offline-bar').classList.remove('show'));
+window.addEventListener('offline', ()=>document.getElementById('offline-bar').classList.add('show'));
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type='info', dur=3500){
+  const icons = {
+    success:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>',
+    error:  '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    info:   '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    warning:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  };
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = (icons[type]||'') + `<span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),400); }, dur);
+}
+
+// ── CONFIRM ───────────────────────────────────────────────────────────────────
+let _confirmCb = null;
+function showConfirm(title, sub, onOk, label='Ya, Lanjutkan'){
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-sub').textContent = sub;
+  document.getElementById('confirm-ok').textContent = label;
+  _confirmCb = onOk;
+  document.getElementById('confirm-modal').classList.add('open');
+  document.getElementById('confirm-ok').onclick = ()=>{ closeConfirm(); if(_confirmCb) _confirmCb(); };
+}
+function closeConfirm(){ document.getElementById('confirm-modal').classList.remove('open'); }
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ── FOTO PREVIEW ──────────────────────────────────────────────────────────────
+function previewFoto(input, previewId){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById(previewId);
+    prev.innerHTML = `<img src="${e.target.result}" alt="preview"/>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── PILIH SUMBER FOTO: AMBIL LANGSUNG (KAMERA) ATAU UPLOAD GALERI ────────────
+// ✅ BARU: sebelumnya input file selalu pakai capture="environment" (langsung
+// buka kamera, tidak ada pilihan ke galeri). Sekarang capture diset/dilepas
+// secara dinamis sesuai tombol yang ditekan, jadi user benar-benar bisa pilih.
+function pilihFoto(inputId, useCamera){
+  const inp = document.getElementById(inputId);
+  if(useCamera) inp.setAttribute('capture','environment');
+  else inp.removeAttribute('capture');
+  inp.click();
+}
+
+// ── GPS ───────────────────────────────────────────────────────────────────────
+function getGPS(){
+  return new Promise((resolve)=>{
+    if(!navigator.geolocation){ resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy) }),
+      ()  => resolve(null),
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  });
+}
+
+function updateGPSStatus(coords){
+  const el = document.getElementById('gps-status');
+  const mi = document.getElementById('modal-gps-info');
+  if(coords){
+    gpsCoords = coords;
+    if(el){
+      el.className='gps-badge gps-ok';
+      el.innerHTML=`<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg> GPS Aktif (±${coords.acc}m)`;
+    }
+    if(mi) mi.innerHTML=`<span style="color:#34d399;font-weight:600">✓ Lokasi terdeteksi</span> - Lat: ${coords.lat.toFixed(5)}, Lng: ${coords.lng.toFixed(5)} (±${coords.acc}m)
+      <br><a href="https://maps.google.com/?q=${coords.lat},${coords.lng}" target="_blank" style="color:#7dd3fc;font-size:11px;text-decoration:none">Buka di Maps ↗</a>`;
+  } else {
+    gpsCoords = null;
+    if(el){
+      el.className='gps-badge gps-err';
+      el.innerHTML=`<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55"/></svg> Lokasi tidak tersedia`;
+    }
+    if(mi) mi.innerHTML='<span style="color:#f87171">Lokasi tidak dapat dideteksi</span> - Pastikan izin GPS diaktifkan';
+  }
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+// [1.6] Login via endpoint action=login di server (bukan baca CSV users langsung)
+async function doLogin(){
+  const username = document.getElementById('inp-user').value.trim().toLowerCase();
+  const password = document.getElementById('inp-pass').value;
+  const btn = document.getElementById('btn-login');
+  const err = document.getElementById('login-error');
+  err.style.display='none';
+  btn.disabled=true; btn.textContent='Memverifikasi...';
+  try{
+    if(!navigator.onLine){
+      err.textContent='Tidak ada koneksi internet.';
+      err.style.display='block';
+      btn.disabled=false; btn.textContent='Masuk';
+      return;
+    }
+    const params = new URLSearchParams();
+    params.append('action',   'login');
+    params.append('username', username);
+    params.append('password', password);
+    const res  = await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params.toString() });
+    const data = await res.json();
+    if(data.success && data.user){
+      const u = data.user;
+      currentUser = { username: u.username, nama: getNama(u) || u.username, role: (u.role||'karyawan').toLowerCase(), status: u.status||'Aktif' };
+      localStorage.setItem('abs_session', JSON.stringify(currentUser));
+      document.getElementById('login-page').style.display='none';
+      document.getElementById('app').style.display='block';
+      logAkses('login');
+      await initApp();
+      hideAppLoading();
+    } else {
+      err.textContent = data.message || 'Username atau password salah.';
+      err.style.display='block';
+    }
+  } catch(e){
+    err.textContent='Gagal terhubung ke server. Coba lagi.';
+    err.style.display='block';
+    console.error(e);
+  }
+  btn.disabled=false; btn.textContent='Masuk';
+}
+
+function doLogout(){
+  showConfirm('Keluar dari Aplikasi','Anda akan keluar dari sesi ini.',()=>{
+    logAkses('logout');
+    currentUser = null;
+    localStorage.removeItem('abs_session');
+    document.getElementById('app').style.display='none';
+    document.getElementById('login-page').style.display='flex';
+    document.getElementById('register-page').style.display='none';
+    document.getElementById('inp-user').value='';
+    document.getElementById('inp-pass').value='';
+  });
+}
+
+// ── REGISTER PAGE TOGGLE ──────────────────────────────────────────────────────
+function showRegisterPage(){
+  document.getElementById('login-page').style.display='none';
+  const rp = document.getElementById('register-page');
+  rp.style.display='flex';
+  rp.style.alignItems='center';
+  rp.style.justifyContent='center';
+  document.getElementById('reg-nama').value='';
+  document.getElementById('reg-user').value='';
+  document.getElementById('reg-pass').value='';
+  document.getElementById('reg-pass2').value='';
+  document.getElementById('reg-error').style.display='none';
+}
+
+function showLoginPage(){
+  document.getElementById('register-page').style.display='none';
+  document.getElementById('login-page').style.display='flex';
+}
+
+// ── REGISTRASI ────────────────────────────────────────────────────────────────
+// [1.6] Registrasi: validasi duplikat username diserahkan ke server (bukan baca CSV)
+async function doRegister(){
+  const nama  = document.getElementById('reg-nama').value.trim();
+  const user  = document.getElementById('reg-user').value.trim().toLowerCase();
+  const pass  = document.getElementById('reg-pass').value;
+  const pass2 = document.getElementById('reg-pass2').value;
+  const btn   = document.getElementById('btn-register');
+  const err   = document.getElementById('reg-error');
+
+  err.style.display='none';
+
+  if(!nama){ err.textContent='Nama lengkap wajib diisi.'; err.style.display='block'; return; }
+  if(!user){ err.textContent='Username wajib diisi.'; err.style.display='block'; return; }
+  if(!/^[a-z0-9_]+$/.test(user)){ err.textContent='Username hanya boleh huruf kecil, angka, dan underscore.'; err.style.display='block'; return; }
+  if(pass.length < 6){ err.textContent='Password minimal 6 karakter.'; err.style.display='block'; return; }
+  if(pass !== pass2){ err.textContent='Konfirmasi password tidak cocok.'; err.style.display='block'; return; }
+
+  btn.disabled=true; btn.textContent='Mendaftarkan...';
+
+  try{
+    if(!navigator.onLine){ err.textContent='Tidak ada koneksi internet.'; err.style.display='block'; btn.disabled=false; btn.textContent='Daftar'; return; }
+
+    const params = new URLSearchParams();
+    params.append('action',   'registrasi');
+    params.append('nama',     nama);
+    params.append('username', user);
+    params.append('password', pass);
+    params.append('role',     'karyawan');
+    params.append('status',   'Aktif');
+
+    const res  = await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params.toString() });
+    const data = await res.json();
+
+    if(data.success){
+      showLoginPage();
+      document.getElementById('inp-user').value = user;
+      showToast('Akun berhasil dibuat! Silakan masuk.','success', 4000);
+    } else {
+      err.textContent = 'Gagal mendaftar: ' + (data.message||'Coba lagi.');
+      err.style.display='block';
+    }
+  } catch(e){
+    err.textContent='Terjadi kesalahan. Periksa koneksi.';
+    err.style.display='block';
+    console.error(e);
+  }
+
+  btn.disabled=false; btn.textContent='Daftar';
+}
+
+// ── INIT APP ──────────────────────────────────────────────────────────────────
+async function initApp(){
+  const role = currentUser.role;
+  const rb = document.getElementById('role-badge');
+  rb.className = 'role-badge ' + (role==='admin'?'admin':role==='owner'?'owner':'karyawan');
+  document.getElementById('role-label').textContent = role==='admin'?'Administrator':role==='owner'?'Owner':'Karyawan';
+  const namaDisplay = currentUser.nama && currentUser.nama !== currentUser.username ? currentUser.nama : currentUser.username;
+  const showSub = currentUser.nama && currentUser.nama !== currentUser.username;
+  document.getElementById('user-name').textContent = namaDisplay;
+  document.getElementById('user-role-sub').textContent = showSub ? '@' + currentUser.username : (role.charAt(0).toUpperCase()+role.slice(1));
+  // Debug: tampilkan kolom yang tersedia di console
+  console.log('[DEBUG] currentUser:', JSON.stringify(currentUser));
+
+  const isPriv = role==='admin'||role==='owner';
+  const navItems = [
+    { key:'absensi', label:'Absensi Saya', icon:'clock' },
+    { key:'rekap',   label:'Rekap Saya',   icon:'list'  },
+    ...(isPriv ? [
+      { key:'semua',         label:'Semua Karyawan',  icon:'users' },
+      { key:'kelola',        label:'Kelola Karyawan', icon:'settings' },
+      { key:'kelola-shift',  label:'Kelola Shift',    icon:'shift' },
+      { key:'jadwal-harian', label:'Jadwal Harian',   icon:'calendar' },
+    ] : []),
+  ];
+
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = navItems.map(n=>`
+    <button class="nav-item${n.key==='absensi'?' active':''}" onclick="navTo('${n.key}',this)">
+      ${navIcon(n.icon)}<span>${n.label}</span>
+    </button>
+  `).join('');
+
+  // Isi dropdown bulan (2 tahun ke belakang hingga tahun ini)
+  const now = new Date();
+  const mnth = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  let monthOpts = '';
+  for(let y = now.getFullYear(); y >= now.getFullYear()-1; y--){
+    for(let m = 11; m >= 0; m--){
+      if(y === now.getFullYear() && m > now.getMonth()) continue;
+      const val = `${y}-${String(m+1).padStart(2,'0')}`;
+      const sel = (y===now.getFullYear()&&m===now.getMonth())?' selected':'';
+      monthOpts += `<option value="${val}"${sel}>${mnth[m]} ${y}</option>`;
+    }
+  }
+  ['fil-bulan','fil-bulan-semua'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML='<option value="">Semua Bulan</option>'+monthOpts;
+  });
+
+  // Set tanggal default form laporan
+  const tglEl = document.getElementById('inp-tgl-lapor');
+  if(tglEl) tglEl.value = now.toISOString().slice(0,10);
+
+  // Tampilkan info absensi hari ini
+  updateGreeting();
+
+  // Deteksi GPS
+  getGPS().then(updateGPSStatus);
+
+  // Muat data
+  await loadAbsensiData();
+  await loadShiftData();         // [3.3] muat daftar shift aktif
+  await loadJadwalHariIniUser();  // [3.4] muat jadwal hari ini (kalau ada)
+  renderJadwalSayaMini();          // [3.11] tampilkan jadwal 7 hari ke depan
+  navTo('absensi', nav.querySelector('.nav-item'));
+}
+
+function navIcon(name){
+  const icons = {
+    clock:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>`,
+    list: `<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+    users:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>`,
+    settings:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
+    shift:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/><path d="M12 2a10 10 0 010 20"/></svg>`,
+    calendar:`<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  };
+  return icons[name]||'';
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+let activePage = 'absensi';
+function navTo(key, el){
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg = document.getElementById('page-'+key);
+  if(pg) pg.classList.add('active');
+  activePage = key;
+  if(isMobile()) closeSidebarMobile();
+  if(key==='absensi') renderAbsensiPage();
+  if(key==='rekap')   renderRekap();
+  if(key==='semua')   renderSemua();
+  if(key==='kelola')  renderKelolaKaryawan();
+  if(key==='kelola-shift')  renderKelolaShift();
+  if(key==='jadwal-harian') { populateJadwalHarianFilters(); loadJadwalHarianTanggal(); }
+}
+
+// ── LOAD DATA ABSENSI ─────────────────────────────────────────────────────────
+// [1.7] usersData sekarang dari endpoint action=getUsers (bukan CSV users langsung)
+async function loadAbsensiData(silent=false){
+  try{
+    const [abs, usrRes] = await Promise.all([
+      fetchCSV(CSV.absensi + '&t=' + Date.now()),
+      (async()=>{
+        const p = new URLSearchParams();
+        p.append('action','getUsers');
+        const r = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+        const d = await r.json();
+        return d.success ? d.users : [];
+      })()
+    ]);
+    absensiData = abs;
+    usersData   = usrRes;
+    // Populasi dropdown karyawan (admin/owner)
+    const karEl = document.getElementById('fil-karyawan');
+    if(karEl){
+      const names = [...new Set(absensiData.map(a=>a.username||'').filter(Boolean))].sort();
+      karEl.innerHTML = '<option value="">Semua Karyawan</option>' + names.map(n=>`<option value="${n}">${n}</option>`).join('');
+    }
+    if(!silent) renderCurrentPage();
+  } catch(e){
+    console.error(e);
+    if(!silent) showToast('Gagal memuat data absensi','error');
+  }
+}
+
+function renderCurrentPage(){
+  if(activePage==='absensi') renderAbsensiPage();
+  if(activePage==='rekap')   renderRekap();
+  if(activePage==='semua')   renderSemua();
+  if(activePage==='kelola')  renderKelolaKaryawan();
+  if(activePage==='kelola-shift')  renderKelolaShift();
+}
+
+// ── UPDATE DATA LOKAL SECARA INSTAN ───────────────────────────────────────────
+// FIX: sebelumnya setelah checkin/checkout/lapor, tampilan diperbarui dengan
+// fetch ulang CSV dari Google Sheets (publish-to-web). CSV publish-to-web punya
+// delay cache di sisi Google (data baru kadang baru muncul beberapa saat
+// kemudian), jadi tombol Check Out tetap kelihatan disabled sampai halaman
+// di-refresh manual. Sekarang kita update array absensiData di memori secara
+// langsung begitu server konfirmasi sukses, baru render — tidak perlu menunggu
+// CSV ter-update.
+function applyAbsensiLocalUpdate(info){
+  const uname = (info.username||'').toLowerCase();
+  let row = absensiData.find(a =>
+    (a.username||'').toLowerCase()===uname && (a.tanggal||'').slice(0,10)===info.tanggal
+  );
+
+  if(info.tipe === 'checkin'){
+    if(!row){
+      row = {
+        id: info.id||'', username: info.username, tanggal: info.tanggal,
+        status: info.status||'Hadir', jam_masuk: info.jam, jam_keluar:'', durasi:'',
+        gps_masuk: info.gps||'', gps_link_masuk: info.gpsLink||'',
+        gps_keluar:'', gps_link_keluar:'',
+        foto_masuk: info.foto||'', foto_keluar:'', keterangan: info.keterangan||''
+      };
+      absensiData.push(row);
+    } else {
+      row.jam_masuk = info.jam;
+      row.status    = info.status || row.status;
+      if(info.gps)        row.gps_masuk      = info.gps;
+      if(info.gpsLink)     row.gps_link_masuk = info.gpsLink;
+      if(info.foto)        row.foto_masuk     = info.foto;
+      if(info.keterangan)  row.keterangan     = info.keterangan;
+    }
+  } else if(info.tipe === 'checkout'){
+    if(row){
+      row.jam_keluar = info.jam;
+      row.durasi     = info.durasi || computeDurasiClient(row.jam_masuk, info.jam);
+      if(info.gps)     row.gps_keluar      = info.gps;
+      if(info.gpsLink) row.gps_link_keluar = info.gpsLink;
+      if(info.foto)     row.foto_keluar     = info.foto;
+    }
+  } else if(info.tipe === 'lapor'){
+    if(!row){
+      row = {
+        id: info.id||'', username: info.username, tanggal: info.tanggal,
+        status: info.status, jam_masuk:'', jam_keluar:'', durasi:'',
+        gps_masuk:'', gps_link_masuk:'', gps_keluar:'', gps_link_keluar:'',
+        foto_masuk: info.foto||'', foto_keluar:'', keterangan: info.keterangan||''
+      };
+      absensiData.push(row);
+    } else {
+      row.status = info.status;
+      if(info.keterangan) row.keterangan = info.keterangan;
+      if(info.foto)        row.foto_masuk = info.foto;
+    }
+  }
+
+  // Sinkronkan dropdown filter karyawan (halaman admin/owner) kalau ada user baru
+  const karEl = document.getElementById('fil-karyawan');
+  if(karEl){
+    const cur = karEl.value;
+    const names = [...new Set(absensiData.map(a=>a.username||'').filter(Boolean))].sort();
+    karEl.innerHTML = '<option value="">Semua Karyawan</option>' + names.map(n=>`<option value="${n}">${n}</option>`).join('');
+    karEl.value = cur;
+  }
+}
+
+// ── ABSENSI HARI INI ──────────────────────────────────────────────────────────
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getAbsensiHariIni(){
+  const today = todayStr();
+  const uname = (currentUser.username||'').toLowerCase();
+  return absensiData.find(a => (a.username||'').toLowerCase()===uname && (a.tanggal||'').startsWith(today));
+}
+
+function updateGreeting(){
+  const greet = document.getElementById('absen-greeting');
+  const dateInfo = document.getElementById('absen-date-info');
+  if(greet) greet.textContent = `Halo, ${currentUser.nama || currentUser.username}!`;
+  const now = new Date();
+  if(dateInfo) dateInfo.textContent = `${HARI[now.getDay()]}, ${now.getDate()} ${BULAN[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+function renderAbsensiPage(){
+  const data = getAbsensiHariIni();
+  const btnIn  = document.getElementById('btn-checkin');
+  const btnOut = document.getElementById('btn-checkout');
+  const elMasuk  = document.getElementById('info-jam-masuk');
+  const elKeluar = document.getElementById('info-jam-keluar');
+  const elStatus = document.getElementById('info-status-hari');
+  const elDurasi = document.getElementById('info-durasi');
+  const sub = document.getElementById('absensi-sub');
+
+  if(data){
+    const status = data.status || 'Hadir';
+    const jamMasuk  = data.jam_masuk  || '-';
+    const jamKeluar = data.jam_keluar || '-';
+    const durasi    = durasiOf(data);
+
+    if(elMasuk)  elMasuk.textContent  = jamMasuk;
+    if(elKeluar) elKeluar.textContent = jamKeluar;
+    if(elStatus) elStatus.innerHTML   = badgeStatus(status);
+    if(elDurasi) elDurasi.textContent = durasi;
+    if(sub) sub.textContent = `Data absensi hari ini sudah tercatat`;
+
+    // Tombol check-in: disabled hanya kalau jam_masuk sudah terisi
+    if(btnIn)  btnIn.disabled  = !!data.jam_masuk;
+    // Tombol check-out: enabled hanya kalau sudah check-in tapi belum check-out
+    if(btnOut) btnOut.disabled = !(data.jam_masuk && !data.jam_keluar);
+
+  } else {
+    if(elMasuk)  elMasuk.textContent  = '-';
+    if(elKeluar) elKeluar.textContent = '-';
+    if(elStatus) elStatus.textContent = '-';
+    if(elDurasi) elDurasi.textContent = '-';
+    if(sub) sub.textContent = 'Belum ada absensi hari ini';
+    if(btnIn)  btnIn.disabled  = false;
+    if(btnOut) btnOut.disabled = true;
+  }
+
+  // [3.8] Tampilkan info shift hari ini (terkunci jadwal admin / belum dipilih)
+  updateShiftHeroDisplay();
+  // [2.8/2.10] Update badge telat/lembur dan panel istirahat
+  updateAbsensiBadges();
+  renderIstirahatPanel();
+}
+
+// ── CHECK IN ──────────────────────────────────────────────────────────────────
+function doCheckIn(){
+  const existing = getAbsensiHariIni();
+  if(existing && existing.jam_masuk){
+    showToast('Anda sudah melakukan check-in hari ini','warning'); return;
+  }
+  checkInMode = true;
+  document.getElementById('checkin-modal-title').textContent = 'Konfirmasi Check In';
+  document.getElementById('btn-konfirmasi-ci').innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg> Check In`;
+  document.getElementById('foto-ci-preview').innerHTML = `<div class="foto-placeholder"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><span>Belum ada foto</span></div>`;
+  document.getElementById('foto-ci-input').value='';
+  document.getElementById('inp-ket-ci').value='';
+  // [3.8] Tampilkan pilihan/lockstatus shift sebelum check-in
+  renderModalShiftPicker();
+  // Update GPS info di modal
+  updateGPSStatus(gpsCoords);
+  // Refresh GPS
+  getGPS().then(updateGPSStatus);
+  openModal('modal-checkin');
+}
+
+function doCheckOut(){
+  const existing = getAbsensiHariIni();
+  if(!existing||!existing.jam_masuk){
+    showToast('Anda belum check-in hari ini','warning'); return;
+  }
+  if(existing.jam_keluar){
+    showToast('Anda sudah melakukan check-out hari ini','warning'); return;
+  }
+  checkInMode = false;
+  document.getElementById('checkin-modal-title').textContent = 'Konfirmasi Check Out';
+  document.getElementById('btn-konfirmasi-ci').innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg> Check Out`;
+  document.getElementById('foto-ci-preview').innerHTML = `<div class="foto-placeholder"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><span>Belum ada foto</span></div>`;
+  document.getElementById('foto-ci-input').value='';
+  document.getElementById('inp-ket-ci').value='';
+  // [3.8] Saat checkout, sembunyikan pilihan shift (sudah ditetapkan saat checkin)
+  renderModalShiftPicker();
+  updateGPSStatus(gpsCoords);
+  getGPS().then(updateGPSStatus);
+  openModal('modal-checkin');
+}
+
+async function konfirmasiCheckIn(){
+  // ✅ FIX: foto bukti sekarang wajib untuk check-in & check-out
+  const fotoFileCek = document.getElementById('foto-ci-input').files[0];
+  if(!fotoFileCek){
+    showToast('Foto bukti wajib diisi. Ambil foto atau upload dari galeri terlebih dahulu.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-konfirmasi-ci');
+  btn.disabled=true;
+  const origText = btn.innerHTML;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:1.5px"></div> Menyimpan...';
+
+  const now = new Date();
+  const jamStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const tanggal = todayStr();
+  const keterangan = document.getElementById('inp-ket-ci').value.trim();
+  const fotoFile = fotoFileCek;
+  const gps = gpsCoords ? `${gpsCoords.lat},${gpsCoords.lng}` : '';
+  const gpsLink = gpsCoords ? `https://maps.google.com/?q=${gpsCoords.lat},${gpsCoords.lng}` : '';
+
+  try{
+    let fotoUrl = '';
+    // Upload foto jika ada
+    if(fotoFile){
+      fotoUrl = await uploadFoto(fotoFile, checkInMode ? 'checkin' : 'checkout');
+    }
+
+    // Kirim ke GAS
+    const params = new URLSearchParams();
+    params.append('action',      'absensi');
+    params.append('tipe',        checkInMode ? 'checkin' : 'checkout');
+    params.append('username',    currentUser.username);
+    params.append('tanggal',     tanggal);
+    params.append('jam',         jamStr);
+    params.append('status',      'Hadir');
+    params.append('gps',         gps);
+    params.append('gpsLink',     gpsLink);
+    params.append('foto',        fotoUrl);
+    params.append('keterangan',  keterangan);
+    if(checkInMode && shiftTerpilihId) params.append('shiftId', shiftTerpilihId); // [3.7]
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: params.toString()
+    });
+    const data = await res.json();
+    if(data.success){
+      showToast(checkInMode ? 'Check In berhasil dicatat! ✓' : 'Check Out berhasil dicatat! ✓', 'success');
+      closeModal('modal-checkin');
+
+      // ✅ FIX: update data lokal langsung — tidak perlu menunggu refresh CSV
+      applyAbsensiLocalUpdate({
+        id: data.id, username: currentUser.username, tanggal,
+        tipe: checkInMode ? 'checkin' : 'checkout',
+        jam: jamStr, status: 'Hadir', gps, gpsLink, foto: fotoUrl, keterangan,
+        durasi: data.durasi
+      });
+      if(checkInMode && shiftTerpilihId){
+        // simpan shift_id di data lokal & cek toleransi keterlambatan (3.12, non-blokir)
+        const row = absensiData.find(a=>(a.username||'').toLowerCase()===currentUser.username.toLowerCase() && (a.tanggal||'').slice(0,10)===tanggal);
+        if(row) row.shift_id = shiftTerpilihId;
+        cekToleransiJamShift(shiftTerpilihId, jamStr);
+      }
+      renderCurrentPage();
+      updateShiftHeroDisplay();
+
+      // Sinkron ke server di belakang (silent), tidak menimpa tampilan kalau CSV belum update
+      loadAbsensiData(true);
+    } else {
+      showToast('Gagal: ' + (data.message||'Coba lagi'), 'error');
+    }
+  } catch(e){
+    console.error(e);
+    showToast('Terjadi kesalahan. Periksa koneksi.','error');
+  }
+
+  btn.disabled=false;
+  btn.innerHTML=origText;
+}
+
+// ── UPLOAD FOTO ───────────────────────────────────────────────────────────────
+async function uploadFoto(file, tipe){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try{
+        const base64 = e.target.result.split(',')[1];
+        const ext = file.name.split('.').pop();
+        const tgl = todayStr();
+        const fileName = `${currentUser.username}_${tipe}_${tgl}.${ext}`;
+
+        const params = new URLSearchParams();
+        params.append('action',      'uploadAbsensiFoto');
+        params.append('fileData',    base64);
+        params.append('fileName',    fileName);
+        params.append('mimeType',    file.type||'image/jpeg');
+        params.append('username',    currentUser.username);
+        params.append('tipe',        tipe);
+        params.append('tanggal',     tgl);
+
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method:'POST',
+          headers:{'Content-Type':'application/x-www-form-urlencoded'},
+          body: params.toString()
+        });
+        const data = await res.json();
+        resolve(data.fileUrl || '');
+      } catch(err){ resolve(''); }
+    };
+    reader.onerror = ()=>resolve('');
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── LAPORAN IZIN/SAKIT/CUTI ───────────────────────────────────────────────────
+async function submitLaporan(){
+  const status = document.getElementById('sel-status').value;
+  const tgl    = document.getElementById('inp-tgl-lapor').value;
+  const ket    = document.getElementById('inp-ket-lapor').value.trim();
+  const fotoFile = document.getElementById('foto-lapor-input').files[0];
+
+  if(!status){ showToast('Pilih status terlebih dahulu','warning'); return; }
+  if(!tgl)   { showToast('Pilih tanggal terlebih dahulu','warning'); return; }
+
+  const btn = document.getElementById('btn-lapor');
+  btn.disabled=true;
+  const origHtml = btn.innerHTML;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:1.5px"></div> Menyimpan...';
+
+  try{
+    let fotoUrl = '';
+    if(fotoFile) fotoUrl = await uploadFoto(fotoFile, status.toLowerCase());
+
+    const params = new URLSearchParams();
+    params.append('action',     'absensi');
+    params.append('tipe',       'lapor');
+    params.append('username',   currentUser.username);
+    params.append('tanggal',    tgl);
+    params.append('jam',        '');
+    params.append('status',     status);
+    params.append('gps',        '');
+    params.append('gpsLink',    '');
+    params.append('foto',       fotoUrl);
+    params.append('keterangan', ket);
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: params.toString()
+    });
+    const data = await res.json();
+    if(data.success){
+      showToast(`Laporan ${status} berhasil disimpan ✓`, 'success');
+      document.getElementById('sel-status').value = '';
+      document.getElementById('inp-ket-lapor').value = '';
+      document.getElementById('foto-lapor-input').value = '';
+      document.getElementById('foto-lapor-preview').innerHTML = `<div class="foto-placeholder"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><span>Belum ada foto</span></div>`;
+
+      // ✅ FIX: update data lokal langsung — tidak perlu menunggu refresh CSV
+      applyAbsensiLocalUpdate({
+        id: data.id, username: currentUser.username, tanggal: tgl,
+        tipe: 'lapor', status, foto: fotoUrl, keterangan: ket
+      });
+      renderCurrentPage();
+      loadAbsensiData(true);
+    } else {
+      showToast('Gagal: ' + (data.message||'Coba lagi'), 'error');
+    }
+  } catch(e){
+    console.error(e);
+    showToast('Terjadi kesalahan','error');
+  }
+
+  btn.disabled=false;
+  btn.innerHTML=origHtml;
+}
+
+// ── BADGE STATUS ──────────────────────────────────────────────────────────────
+function badgeStatus(s){
+  const map = {
+    'Hadir':'hadir','Izin':'izin','Sakit':'sakit','Cuti':'cuti','Absen':'absen'
+  };
+  const cls = map[s]||'absen';
+  return `<span class="badge badge-${cls}">${s||'-'}</span>`;
+}
+
+// ── DURASI (fallback hitung di client kalau kolom durasi kosong) ──────────────
+// FIX: kalau backend belum berhasil hitung durasi (data lama / bug format jam),
+// kita hitung ulang di sisi client dari jam_masuk & jam_keluar yang tersedia.
+function computeDurasiClient(jamMasuk, jamKeluar){
+  if(!jamMasuk || !jamKeluar) return '';
+  try{
+    const mm = String(jamMasuk).match(/(\d{1,2}):(\d{2})/);
+    const mk = String(jamKeluar).match(/(\d{1,2}):(\d{2})/);
+    if(!mm || !mk) return '';
+    const totalMenit = (Number(mk[1])*60+Number(mk[2])) - (Number(mm[1])*60+Number(mm[2]));
+    if(totalMenit < 0) return '';
+    const jam = Math.floor(totalMenit/60), mnt = totalMenit%60;
+    return `${jam}j ${mnt}m`;
+  }catch(e){ return ''; }
+}
+function durasiOf(r){
+  return r.durasi || computeDurasiClient(r.jam_masuk, r.jam_keluar) || '-';
+}
+
+// ── BADGE TELAT & LEMBUR (Bagian 2) ──────────────────────────────────────────
+
+// Helper: ubah "HH:MM" ke menit total
+function jamKeM(str){
+  if(!str) return null;
+  const m = String(str).match(/(\d{1,2}):(\d{2})/);
+  if(!m) return null;
+  return Number(m[1])*60 + Number(m[2]);
+}
+
+// [2.2] Hitung keterlambatan: return menit telat (0 = tepat waktu / lebih awal)
+function hitungTelat(jamMasukAktual, shiftObj){
+  if(!jamMasukAktual || !shiftObj) return 0;
+  const aktual   = jamKeM(jamMasukAktual);
+  const standar  = jamKeM(shiftObj.jam_masuk);
+  const toleransi = Number(shiftObj.toleransi_telat) || 0;
+  if(aktual === null || standar === null) return 0;
+  const selisih = aktual - standar;
+  return selisih > toleransi ? selisih : 0;
+}
+
+// [2.3] Hitung lembur: return menit lembur (0 = tidak lembur)
+function hitungLembur(jamMasukAktual, jamKeluarAktual, shiftObj){
+  if(!jamMasukAktual || !jamKeluarAktual || !shiftObj) return 0;
+  const masuk   = jamKeM(jamMasukAktual);
+  const keluar  = jamKeM(jamKeluarAktual);
+  const durasiShift = Number(shiftObj.durasi_kerja) * 60;
+  if(masuk === null || keluar === null) return 0;
+  const totalDiKantor = keluar - masuk;
+  const selisih = totalDiKantor - durasiShift;
+  return selisih > 0 ? selisih : 0;
+}
+
+// Format menit ke "Xj Ym"
+function fmtMenit(mnt){
+  if(!mnt) return '';
+  const j = Math.floor(mnt/60), m = mnt%60;
+  if(j===0) return `${m}m`;
+  if(m===0) return `${j}j`;
+  return `${j}j ${m}m`;
+}
+
+// [2.10] Render badge telat + lembur untuk 1 record absensi
+function badgeTelat(r){
+  const shift = shiftData.find(s=>s.id===(r.shift_id||''));
+  if(!shift || !r.jam_masuk) return '';
+  const telat = hitungTelat(r.jam_masuk, shift);
+  if(!telat) return '';
+  return `<span class="badge-telat">🔴 Terlambat ${fmtMenit(telat)}</span>`;
+}
+function badgeLembur(r){
+  const shift = shiftData.find(s=>s.id===(r.shift_id||''));
+  if(!shift || !r.jam_masuk || !r.jam_keluar) return '';
+  const lembur = hitungLembur(r.jam_masuk, r.jam_keluar, shift);
+  if(!lembur) return '';
+  return `<span class="badge-lembur">🟣 Lembur ${fmtMenit(lembur)}</span>`;
+}
+
+// [2.9] Badge istirahat lupa diakhiri (ada sesi auto)
+function badgeIstirahatAuto(logStr){
+  try{
+    const log = JSON.parse(logStr||'[]');
+    if(log.some(s=>s.auto)) return `<span class="badge-auto-warn">⚠️ Lupa diakhiri</span>`;
+  }catch(e){}
+  return '';
+}
+
+// Hitung total menit istirahat dari log JSON
+function totalIstirahatMenit(logStr){
+  try{
+    const log = JSON.parse(logStr||'[]');
+    return log.filter(s=>s.selesai).reduce((sum,s)=>sum+(s.durasi_menit||0),0);
+  }catch(e){ return 0; }
+}
+
+// [2.10] Perbarui badge di halaman Absensi Hari Ini
+function updateAbsensiBadges(){
+  const container = document.getElementById('absensi-badges-row');
+  if(!container) return;
+  const data = getAbsensiHariIni();
+  if(!data || !data.jam_masuk){ container.style.display='none'; return; }
+
+  const badges = [badgeTelat(data), badgeLembur(data)].filter(Boolean);
+  const istMenit = totalIstirahatMenit(data.istirahat_log||'[]');
+  if(istMenit > 0){
+    badges.push(`<span class="badge-istirahat">☕ Istirahat ${fmtMenit(istMenit)}</span>`);
+  }
+  if(badges.length){
+    container.style.display='flex';
+    container.innerHTML = badges.join('');
+  } else {
+    container.style.display='none';
+  }
+}
+
+// ── ISTIRAHAT UI (Bagian 2) ───────────────────────────────────────────────────
+
+// [2.8] Sinkronkan state istirahat dari data absensi lokal
+function syncIstirahatState(){
+  const data = getAbsensiHariIni();
+  if(!data || !data.jam_masuk){ istirahatSesiLog=[]; istirahatSedangBerjalan=false; return; }
+  try{
+    istirahatSesiLog = JSON.parse(data.istirahat_log||'[]');
+  }catch(e){ istirahatSesiLog=[]; }
+  istirahatSedangBerjalan = istirahatSesiLog.some(s=>s.mulai&&!s.selesai);
+}
+
+// Render panel istirahat
+function renderIstirahatPanel(){
+  syncIstirahatState();
+  const data = getAbsensiHariIni();
+  const panel = document.getElementById('istirahat-panel');
+  const statusEl = document.getElementById('istirahat-status-text');
+  const btnMulai = document.getElementById('btn-ist-mulai');
+  const btnSelesai = document.getElementById('btn-ist-selesai');
+
+  if(!data || !data.jam_masuk){
+    if(panel) panel.style.display='none';
+    return;
+  }
+
+  if(panel) panel.style.display='block';
+
+  const sudahCheckout = !!data.jam_keluar;
+  const totalMnt = totalIstirahatMenit(data.istirahat_log||'[]');
+  const nSesi = istirahatSesiLog.length;
+  const adaAuto = istirahatSesiLog.some(s=>s.auto);
+
+  let statusTeks = '';
+  if(istirahatSedangBerjalan){
+    const sesiAktif = istirahatSesiLog.find(s=>s.mulai&&!s.selesai);
+    statusTeks = `<span style="color:#fcd34d">● Sedang istirahat sejak ${sesiAktif?sesiAktif.mulai:'-'}</span>`;
+    if(totalMnt > 0) statusTeks += ` &nbsp;•&nbsp; Total sejauh ini: <strong>${fmtMenit(totalMnt)}</strong> (${nSesi} sesi)`;
+  } else if(nSesi > 0){
+    statusTeks = `Total: <strong>${fmtMenit(totalMnt)}</strong> dari <strong>${nSesi}</strong> sesi`;
+    if(adaAuto) statusTeks += ` &nbsp;<span class="badge-auto-warn">⚠️ Ada sesi lupa diakhiri</span>`;
+  } else {
+    statusTeks = '<span style="color:var(--muted)">Belum ada sesi istirahat hari ini</span>';
+  }
+  if(statusEl) statusEl.innerHTML = statusTeks;
+
+  if(btnMulai)  btnMulai.disabled  = istirahatSedangBerjalan || sudahCheckout;
+  if(btnSelesai) btnSelesai.disabled = !istirahatSedangBerjalan || sudahCheckout;
+}
+
+async function doIstirahatMulai(){
+  const data = getAbsensiHariIni();
+  if(!data||!data.jam_masuk){ showToast('Check-in dulu sebelum memulai istirahat','warning'); return; }
+  if(data.jam_keluar){ showToast('Sudah check-out, tidak bisa mulai istirahat','warning'); return; }
+
+  const btn = document.getElementById('btn-ist-mulai');
+  const origHtml = btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block"></div> Memulai...';
+
+  const now = new Date();
+  const jam = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const tanggal = todayStr();
+
+  try{
+    const p = new URLSearchParams();
+    p.append('action','istirahat_mulai');
+    p.append('username', currentUser.username);
+    p.append('tanggal', tanggal);
+    p.append('jam', jam);
+    const res = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+    const d = await res.json();
+    if(d.success){
+      // Update lokal
+      const row = absensiData.find(a=>(a.username||'').toLowerCase()===currentUser.username.toLowerCase()&&(a.tanggal||'').slice(0,10)===tanggal);
+      if(row){
+        let log = [];
+        try{ log = JSON.parse(row.istirahat_log||'[]'); }catch(e){ log=[]; }
+        log.push({mulai:jam, selesai:null, durasi_menit:null, auto:false});
+        row.istirahat_log = JSON.stringify(log);
+      }
+      showToast(`Istirahat dimulai pukul ${jam} ☕`,'info');
+      renderIstirahatPanel();
+      updateAbsensiBadges();
+    } else {
+      showToast('Gagal: '+(d.message||'Coba lagi'),'error');
+    }
+  }catch(e){ showToast('Terjadi kesalahan. Periksa koneksi.','error'); }
+  btn.disabled=false; btn.innerHTML=origHtml;
+}
+
+async function doIstirahatSelesai(){
+  const data = getAbsensiHariIni();
+  if(!data||!data.jam_masuk||!istirahatSedangBerjalan){ showToast('Tidak ada sesi istirahat yang berjalan','warning'); return; }
+
+  const btn = document.getElementById('btn-ist-selesai');
+  const origHtml = btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block"></div> Menyimpan...';
+
+  const now = new Date();
+  const jam = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const tanggal = todayStr();
+
+  try{
+    const p = new URLSearchParams();
+    p.append('action','istirahat_selesai');
+    p.append('username', currentUser.username);
+    p.append('tanggal', tanggal);
+    p.append('jam', jam);
+    const res = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+    const d = await res.json();
+    if(d.success){
+      // Update lokal
+      const row = absensiData.find(a=>(a.username||'').toLowerCase()===currentUser.username.toLowerCase()&&(a.tanggal||'').slice(0,10)===tanggal);
+      if(row){
+        let log = [];
+        try{ log = JSON.parse(row.istirahat_log||'[]'); }catch(e){ log=[]; }
+        const idx = log.findIndex(s=>s.mulai&&!s.selesai);
+        if(idx>=0){
+          const [hh,mm] = log[idx].mulai.split(':').map(Number);
+          const [hs,ms] = jam.split(':').map(Number);
+          const durMnt = Math.max(0,(hs*60+ms)-(hh*60+mm));
+          log[idx] = {...log[idx], selesai:jam, durasi_menit:durMnt, auto:false};
+        }
+        row.istirahat_log = JSON.stringify(log);
+      }
+      showToast(`Istirahat selesai. Total: ${d.total_istirahat||''}`, 'success');
+      renderIstirahatPanel();
+      updateAbsensiBadges();
+    } else {
+      showToast('Gagal: '+(d.message||'Coba lagi'),'error');
+    }
+  }catch(e){ showToast('Terjadi kesalahan. Periksa koneksi.','error'); }
+  btn.disabled=false; btn.innerHTML=origHtml;
+}
+
+// ── LOKASI MASUK & KELUAR ─────────────────────────────────────────────────────
+// FIX: sebelumnya hanya 1 link lokasi (lokasi check-in saja). Sekarang dipisah
+// lokasi masuk & lokasi keluar. Tetap kompatibel dengan data lama (kolom gps_link).
+function lokasiCell(r){
+  const masuk  = r.gps_link_masuk || r.gps_link || '';
+  const keluar = r.gps_link_keluar || '';
+  if(!masuk && !keluar) return '-';
+  return [
+    masuk  ? `<a href="${masuk}" target="_blank" style="color:#7dd3fc;font-size:11px;text-decoration:none;display:inline-block;margin-right:6px">📍 Masuk</a>` : '',
+    keluar ? `<a href="${keluar}" target="_blank" style="color:#f87171;font-size:11px;text-decoration:none;display:inline-block">📍 Keluar</a>` : ''
+  ].join('');
+}
+
+function toTimeInputVal(v){
+  if(!v) return '';
+  const m = String(v).match(/(\d{1,2}):(\d{2})/);
+  return m ? `${m[1].padStart(2,'0')}:${m[2]}` : '';
+}
+
+const fmtTgl = d => {
+  if(!d) return '-';
+  try{
+    const dt = new Date(d);
+    return `${dt.getDate()} ${BULAN[dt.getMonth()]} ${dt.getFullYear()}`;
+  }catch(e){ return d; }
+};
+
+// ── RENDER REKAP SAYA ─────────────────────────────────────────────────────────
+function renderRekap(){
+  const filBulan  = (document.getElementById('fil-bulan')||{}).value  || '';
+  const filStatus = (document.getElementById('fil-status-rekap')||{}).value || '';
+
+  const uname = (currentUser.username||'').toLowerCase();
+  let rows = absensiData.filter(a=>(a.username||'').toLowerCase()===uname);
+  if(filBulan)  rows = rows.filter(a=>(a.tanggal||'').slice(0,7)===filBulan);
+  if(filStatus) rows = rows.filter(a=>(a.status||'')=== filStatus);
+  rows = rows.slice().sort((a,b)=>(b.tanggal||'').localeCompare(a.tanggal||''));
+
+  // Stats
+  const allMy = absensiData.filter(a=>(a.username||'').toLowerCase()===uname);
+  const hadir  = allMy.filter(a=>a.status==='Hadir').length;
+  const izin   = allMy.filter(a=>a.status==='Izin').length;
+  const sakit  = allMy.filter(a=>a.status==='Sakit').length;
+  const cuti   = allMy.filter(a=>a.status==='Cuti').length;
+
+  document.getElementById('rekap-stats').innerHTML = `
+    ${statCard('Total Hadir', hadir, 'hari','#10b981','<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>')}
+    ${statCard('Izin', izin, 'hari','#f59e0b','<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>')}
+    ${statCard('Sakit', sakit, 'hari','#0ea5e9','<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>')}
+    ${statCard('Cuti', cuti, 'hari','#8b5cf6','<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>')}
+  `;
+
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total/rekapPerPage));
+  if(rekapPage > totalPages) rekapPage = totalPages;
+  const start = (rekapPage-1)*rekapPerPage;
+  const pageRows = rows.slice(start, start+rekapPerPage);
+
+  const sub = document.getElementById('rekap-tbl-sub');
+  if(sub) sub.textContent = `${total} data`;
+
+  const sub2 = document.getElementById('rekap-sub');
+  if(sub2) sub2.textContent = `Menampilkan ${total} rekap absensi Anda`;
+
+  if(!rows.length){
+    document.getElementById('rekap-body').innerHTML='<div class="empty">Belum ada data absensi</div>';
+    return;
+  }
+
+  document.getElementById('rekap-body').innerHTML = `
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>Tanggal</th><th>Status</th><th>Jam Masuk</th><th>Jam Keluar</th><th>Durasi</th><th>Info</th><th>Lokasi</th><th>Foto</th><th>Keterangan</th>
+      </tr></thead>
+      <tbody>
+        ${pageRows.map(r=>`<tr>
+          <td style="white-space:nowrap">${fmtTgl(r.tanggal)}</td>
+          <td>${badgeStatus(r.status)}</td>
+          <td style="font-weight:600;color:#34d399">${r.jam_masuk||'-'}</td>
+          <td style="font-weight:600;color:#f87171">${r.jam_keluar||'-'}</td>
+          <td style="color:var(--muted)">${durasiOf(r)}</td>
+          <td>${[badgeTelat(r),badgeLembur(r),badgeIstirahatAuto(r.istirahat_log||'')].filter(Boolean).join(' ')||'-'}</td>
+          <td>${lokasiCell(r)}</td>
+          <td>${
+            (r.foto_masuk||r.foto_keluar)
+            ? [r.foto_masuk?`<a href="${r.foto_masuk}" target="_blank" style="color:#a5b4fc;font-size:11px;text-decoration:none;display:inline-block;margin-right:6px">🖼 Masuk</a>`:'',
+               r.foto_keluar?`<a href="${r.foto_keluar}" target="_blank" style="color:#f87171;font-size:11px;text-decoration:none;display:inline-block">🖼 Keluar</a>`:''].join('')
+            : '-'
+          }</td>
+          <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.keterangan||'-'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>
+    ${buildPagination(rekapPage, totalPages, total, start, pageRows.length, 'rekap')}`;
+}
+
+// ── RENDER SEMUA KARYAWAN (admin/owner) ───────────────────────────────────────
+function renderSemua(){
+  const role = currentUser.role;
+  if(role!=='admin'&&role!=='owner') return;
+
+  const filBulan  = (document.getElementById('fil-bulan-semua')||{}).value  || '';
+  const filKar    = (document.getElementById('fil-karyawan')||{}).value     || '';
+  const filStatus = (document.getElementById('fil-status-semua')||{}).value || '';
+  const q         = ((document.getElementById('semua-search')||{}).value||'').toLowerCase();
+
+  let rows = [...absensiData];
+  if(filBulan)  rows = rows.filter(a=>(a.tanggal||'').slice(0,7)===filBulan);
+  if(filKar)    rows = rows.filter(a=>(a.username||'')===filKar);
+  if(filStatus) rows = rows.filter(a=>(a.status||'')===filStatus);
+  if(q)         rows = rows.filter(a=>(a.username||'').toLowerCase().includes(q)||(a.keterangan||'').toLowerCase().includes(q));
+  rows = rows.slice().sort((a,b)=>(b.tanggal||'').localeCompare(a.tanggal||'')||(b.jam_masuk||'').localeCompare(a.jam_masuk||''));
+
+  // Stats hari ini
+  const today = todayStr();
+  const todayRows = absensiData.filter(a=>(a.tanggal||'').startsWith(today));
+  const hadirHariIni = todayRows.filter(a=>a.status==='Hadir').length;
+  const izinHariIni  = todayRows.filter(a=>a.status==='Izin'||a.status==='Sakit'||a.status==='Cuti').length;
+  const totalKar     = usersData.filter(u=>(u.role||'').toLowerCase()==='karyawan'&&(u.status||'').toLowerCase()!=='nonaktif').length;
+
+  document.getElementById('semua-stats').innerHTML = `
+    ${statCard('Hadir Hari Ini', hadirHariIni, 'orang','#10b981','<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>')}
+    ${statCard('Izin/Sakit/Cuti', izinHariIni, 'orang','#f59e0b','<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>')}
+    ${statCard('Total Karyawan', totalKar, 'aktif','#6366f1','<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>')}
+    ${statCard('Total Rekap', rows.length, 'baris','#0ea5e9','<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>')}
+  `;
+
+  const sub2 = document.getElementById('rekap-sub');
+
+  // ✅ FIX: gabungkan semua tanggal jadi 1 baris per karyawan, detail muncul saat di-expand
+  const ringkasan = buildRingkasanKaryawan(rows);
+
+  const total = ringkasan.length;
+  const totalPages = Math.max(1, Math.ceil(total/semuaPerPage));
+  if(semuaPage > totalPages) semuaPage = totalPages;
+  const start = (semuaPage-1)*semuaPerPage;
+  const pageRows = ringkasan.slice(start, start+semuaPerPage);
+
+  const sub = document.getElementById('semua-tbl-sub');
+  if(sub) sub.textContent = `${total} karyawan • ${rows.length} data`;
+
+  if(!ringkasan.length){
+    document.getElementById('semua-body').innerHTML='<div class="empty">Belum ada data absensi</div>';
+    return;
+  }
+
+  document.getElementById('semua-body').innerHTML = `
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th></th><th>Karyawan</th><th>Hadir</th><th>Izin</th><th>Sakit</th><th>Cuti</th><th>Absen</th><th>Total Durasi</th>
+      </tr></thead>
+      <tbody>
+        ${pageRows.map(g=>{
+          const isOpen = expandedKaryawan.has(g.username);
+          const unameEsc = String(g.username).replace(/'/g,"\\'");
+          const summaryRow = `<tr onclick="toggleKaryawanExpand('${unameEsc}')" style="cursor:pointer" title="Klik untuk lihat detail per tanggal">
+            <td style="width:20px;color:var(--muted);font-size:13px">${isOpen?'⌄':'›'}</td>
+            <td>
+              <div style="font-weight:600;color:var(--text-strong)">${g.nama}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">@${g.username}</div>
+            </td>
+            <td><span class="badge badge-hadir">${g.hadir}</span></td>
+            <td><span class="badge badge-izin">${g.izin}</span></td>
+            <td><span class="badge badge-sakit">${g.sakit}</span></td>
+            <td><span class="badge badge-cuti">${g.cuti}</span></td>
+            <td><span class="badge badge-absen">${g.absen}</span></td>
+            <td style="color:var(--muted)">${formatMenitTotal(g.totalMenit)}</td>
+          </tr>`;
+
+          const detailRow = !isOpen ? '' : `<tr>
+            <td colspan="8" style="padding:0;background:var(--tint-05)">
+              <div class="table-wrap"><table>
+                <thead><tr>
+                  <th></th><th>Tanggal</th><th>Status</th><th>Jam Masuk</th><th>Jam Keluar</th><th>Durasi</th><th>Info</th><th>Lokasi</th><th>Foto</th><th>Keterangan</th>
+                </tr></thead>
+                <tbody>
+                  ${g.records.map(r=>`<tr onclick="openDetailAbsensi('${String(r.id||'').replace(/'/g,"\\'")}')" style="cursor:pointer" title="Klik untuk edit">
+                    <td style="color:var(--muted);padding-left:20px">↳</td>
+                    <td style="white-space:nowrap">${fmtTgl(r.tanggal)}</td>
+                    <td>${badgeStatus(r.status)}</td>
+                    <td style="font-weight:600;color:#34d399">${r.jam_masuk||'-'}</td>
+                    <td style="font-weight:600;color:#f87171">${r.jam_keluar||'-'}</td>
+                    <td style="color:var(--muted)">${durasiOf(r)}</td>
+                    <td>${[badgeTelat(r),badgeLembur(r),badgeIstirahatAuto(r.istirahat_log||'')].filter(Boolean).join(' ')||'-'}</td>
+                    <td>${lokasiCell(r)}</td>
+                    <td>${
+                      (r.foto_masuk||r.foto_keluar)
+                      ? [r.foto_masuk?`<a href="${r.foto_masuk}" target="_blank" style="color:#a5b4fc;font-size:11px;text-decoration:none;display:inline-block;margin-right:6px">🖼 Masuk</a>`:'',
+                         r.foto_keluar?`<a href="${r.foto_keluar}" target="_blank" style="color:#f87171;font-size:11px;text-decoration:none;display:inline-block">🖼 Keluar</a>`:''].join('')
+                      : '-'
+                    }</td>
+                    <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.keterangan||'-'}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table></div>
+            </td>
+          </tr>`;
+
+          return summaryRow + detailRow;
+        }).join('')}
+      </tbody>
+    </table></div>
+    ${buildPagination(semuaPage, totalPages, total, start, pageRows.length, 'semua')}`;
+}
+
+// ── EDIT ABSENSI OLEH ADMIN/OWNER ─────────────────────────────────────────────
+// FIX: admin/owner bisa klik baris di tabel "Semua Karyawan" untuk ubah
+// status, jam masuk, jam keluar, dan keterangan langsung dari sini.
+function openDetailAbsensi(id){
+  const role = currentUser.role;
+  if(role!=='admin' && role!=='owner') return;
+  const r = absensiData.find(a=>String(a.id||'')===String(id));
+  if(!r){ showToast('Data absensi tidak ditemukan','error'); return; }
+
+  editingAbsensiId = id;
+  const uData = usersData.find(u=>(u.username||'').toLowerCase()===(r.username||'').toLowerCase());
+  const namaDisplay = getNama(uData) || r.username||'-';
+  const statusOpts = ['Hadir','Izin','Sakit','Cuti','Absen'];
+  const lokasiMasuk  = r.gps_link_masuk || r.gps_link || '';
+  const lokasiKeluar = r.gps_link_keluar || '';
+
+  document.getElementById('detail-modal-title').textContent = 'Edit Absensi';
+  document.getElementById('detail-modal-body').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-weight:600;color:var(--text-strong);font-size:15px">${namaDisplay}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">@${r.username||''} • ${fmtTgl(r.tanggal)}</div>
+    </div>
+    <label class="form-label">Status</label>
+    <select class="form-select" id="edit-abs-status">
+      ${statusOpts.map(s=>`<option value="${s}"${r.status===s?' selected':''}>${s}</option>`).join('')}
+    </select>
+    <div style="display:flex;gap:10px">
+      <div style="flex:1">
+        <label class="form-label">Jam Masuk</label>
+        <input class="form-input" type="time" id="edit-abs-jammasuk" value="${toTimeInputVal(r.jam_masuk)}"/>
+      </div>
+      <div style="flex:1">
+        <label class="form-label">Jam Keluar</label>
+        <input class="form-input" type="time" id="edit-abs-jamkeluar" value="${toTimeInputVal(r.jam_keluar)}"/>
+      </div>
+    </div>
+    <label class="form-label">Keterangan</label>
+    <textarea class="form-input" id="edit-abs-ket" rows="3" style="resize:vertical">${r.keterangan||''}</textarea>
+    ${(lokasiMasuk||lokasiKeluar) ? `
+    <div style="display:flex;gap:14px;margin-bottom:16px;margin-top:-6px">
+      ${lokasiMasuk  ? `<a href="${lokasiMasuk}" target="_blank" style="color:#7dd3fc;font-size:12px;text-decoration:none">📍 Lihat Lokasi Masuk</a>` : ''}
+      ${lokasiKeluar ? `<a href="${lokasiKeluar}" target="_blank" style="color:#f87171;font-size:12px;text-decoration:none">📍 Lihat Lokasi Keluar</a>` : ''}
+    </div>` : ''}
+    <button class="btn-primary" id="btn-simpan-edit-abs" onclick="simpanEditAbsensi()">Simpan Perubahan</button>
+  `;
+  openModal('modal-detail');
+}
+
+async function simpanEditAbsensi(){
+  const id = editingAbsensiId;
+  if(!id) return;
+  const btn = document.getElementById('btn-simpan-edit-abs');
+  const origHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:1.5px;display:inline-block"></div> Menyimpan...';
+
+  const status     = document.getElementById('edit-abs-status').value;
+  const jamMasuk    = document.getElementById('edit-abs-jammasuk').value;
+  const jamKeluar   = document.getElementById('edit-abs-jamkeluar').value;
+  const keterangan  = document.getElementById('edit-abs-ket').value.trim();
+
+  const params = new URLSearchParams();
+  params.append('action',     'updateAbsensiAdmin');
+  params.append('id',         id);
+  params.append('status',     status);
+  params.append('jamMasuk',   jamMasuk);
+  params.append('jamKeluar',  jamKeluar);
+  params.append('keterangan', keterangan);
+
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: params.toString()
+    });
+    const data = await res.json();
+    if(data.success){
+      showToast('Data absensi berhasil diperbarui ✓','success');
+      closeModal('modal-detail');
+
+      // ✅ FIX: update data lokal langsung — tidak perlu menunggu refresh CSV
+      const row = absensiData.find(a=>String(a.id||'')===String(id));
+      if(row){
+        row.status     = status;
+        row.jam_masuk  = jamMasuk;
+        row.jam_keluar = jamKeluar;
+        row.keterangan = keterangan;
+        row.durasi     = data.durasi || computeDurasiClient(jamMasuk, jamKeluar);
+      }
+      renderCurrentPage();
+      loadAbsensiData(true);
+    } else {
+      showToast('Gagal: ' + (data.message||'Coba lagi'), 'error');
+    }
+  } catch(e){
+    console.error(e);
+    showToast('Terjadi kesalahan. Periksa koneksi.','error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = origHtml;
+}
+
+// ── GANTI SANDI (karyawan sendiri) [1.11] ────────────────────────────────────
+async function submitGantiSandi(){
+  const lama  = document.getElementById('gs-lama').value;
+  const baru  = document.getElementById('gs-baru').value;
+  const baru2 = document.getElementById('gs-baru2').value;
+  const errEl = document.getElementById('ganti-sandi-err');
+  const btn   = document.getElementById('btn-simpan-ganti-sandi');
+  errEl.style.display='none';
+
+  if(!lama){ errEl.textContent='Password lama wajib diisi.'; errEl.style.display='block'; return; }
+  if(baru.length < 6){ errEl.textContent='Password baru minimal 6 karakter.'; errEl.style.display='block'; return; }
+  if(baru !== baru2){ errEl.textContent='Konfirmasi password tidak cocok.'; errEl.style.display='block'; return; }
+
+  const origHtml = btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:14px;height:14px;border-width:1.5px;display:inline-block"></div> Menyimpan...';
+
+  try{
+    const params = new URLSearchParams();
+    params.append('action',   'gantiPassword');
+    params.append('username', currentUser.username);
+    params.append('passLama', lama);
+    params.append('passBaru', baru);
+    const res  = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params.toString()});
+    const data = await res.json();
+    if(data.success){
+      closeModal('modal-ganti-sandi');
+      document.getElementById('gs-lama').value='';
+      document.getElementById('gs-baru').value='';
+      document.getElementById('gs-baru2').value='';
+      showToast('Password berhasil diubah ✓','success');
+    } else {
+      errEl.textContent = data.message || 'Gagal mengubah password.';
+      errEl.style.display='block';
+    }
+  } catch(e){
+    errEl.textContent='Terjadi kesalahan. Periksa koneksi.';
+    errEl.style.display='block';
+  }
+  btn.disabled=false; btn.innerHTML=origHtml;
+}
+
+// ── KELOLA KARYAWAN (admin/owner) [1.12] ─────────────────────────────────────
+function renderKelolaKaryawan(){
+  const role = currentUser.role;
+  if(role!=='admin'&&role!=='owner') return;
+
+  const q = ((document.getElementById('kelola-search')||{}).value||'').toLowerCase();
+  let rows = [...usersData];
+  if(q) rows = rows.filter(u=>(getNama(u)||'').toLowerCase().includes(q)||(u.username||'').toLowerCase().includes(q)||(u.role||'').toLowerCase().includes(q));
+  rows = rows.slice().sort((a,b)=>(a.nama||'').localeCompare(b.nama||''));
+
+  const sub = document.getElementById('kelola-sub');
+  if(sub) sub.textContent = `${rows.length} karyawan`;
+
+  const statusBadge = s => s==='Aktif'
+    ? '<span class="badge badge-hadir">Aktif</span>'
+    : '<span class="badge badge-absen">Nonaktif</span>';
+  const roleBadge = r => {
+    if(r==='admin')   return '<span class="badge badge-admin">Admin</span>';
+    if(r==='owner')   return '<span class="badge badge-owner">Owner</span>';
+    return '<span class="badge badge-karyawan">Karyawan</span>';
+  };
+
+  if(!rows.length){
+    document.getElementById('kelola-body').innerHTML='<div class="empty">Tidak ada karyawan ditemukan</div>';
+    return;
+  }
+
+  document.getElementById('kelola-body').innerHTML = `
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>Nama</th><th>Username</th><th>Role</th><th>Status</th><th>Aksi</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(u=>`<tr>
+          <td style="font-weight:600;color:var(--text-strong)">${getNama(u)||'-'}</td>
+          <td class="mono">@${u.username||'-'}</td>
+          <td>${roleBadge((u.role||'karyawan').toLowerCase())}</td>
+          <td>${statusBadge(u.status||'Aktif')}</td>
+          <td>
+            <button onclick="openEditKaryawan('${String(u.username||'').replace(/'/g,"\\'")}','${String(getNama(u)||'').replace(/'/g,"\\'")}','${u.role||'karyawan'}','${u.status||'Aktif'}')"
+              style="padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid rgba(99,102,241,.3);background:rgba(99,102,241,.12);color:#a5b4fc;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s"
+              onmouseover="this.style.background='rgba(99,102,241,.25)'" onmouseout="this.style.background='rgba(99,102,241,.12)'">
+              Edit
+            </button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+}
+
+// ── OPEN EDIT KARYAWAN [1.13] ─────────────────────────────────────────────────
+function openEditKaryawan(username, nama, role, status){
+  document.getElementById('edit-kar-original-username').value = username;
+  document.getElementById('edit-kar-nama').value     = nama;
+  document.getElementById('edit-kar-username').value = username;
+  document.getElementById('edit-kar-role').value     = role;
+  document.getElementById('edit-kar-status').value   = status;
+  document.getElementById('edit-kar-pass').value     = '';
+  document.getElementById('edit-kar-err').style.display='none';
+  openModal('modal-edit-karyawan');
+}
+
+async function submitEditKaryawan(){
+  const errEl  = document.getElementById('edit-kar-err');
+  const btn    = document.getElementById('btn-simpan-edit-karyawan');
+  errEl.style.display='none';
+
+  const originalUsername = document.getElementById('edit-kar-original-username').value;
+  const namaBaru    = document.getElementById('edit-kar-nama').value.trim();
+  const usernameBaru= document.getElementById('edit-kar-username').value.trim().toLowerCase();
+  const role        = document.getElementById('edit-kar-role').value;
+  const status      = document.getElementById('edit-kar-status').value;
+  const passBaru    = document.getElementById('edit-kar-pass').value;
+
+  if(!namaBaru)  { errEl.textContent='Nama wajib diisi.'; errEl.style.display='block'; return; }
+  if(!usernameBaru){ errEl.textContent='Username wajib diisi.'; errEl.style.display='block'; return; }
+  if(!/^[a-z0-9_]+$/.test(usernameBaru)){ errEl.textContent='Username hanya boleh huruf kecil, angka, underscore.'; errEl.style.display='block'; return; }
+  if(passBaru && passBaru.length < 6){ errEl.textContent='Password baru minimal 6 karakter.'; errEl.style.display='block'; return; }
+
+  const origHtml = btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:14px;height:14px;border-width:1.5px;display:inline-block"></div> Menyimpan...';
+
+  try{
+    const params = new URLSearchParams();
+    params.append('action',           'editUser');
+    params.append('requesterRole',    currentUser.role);
+    params.append('targetUsername',   originalUsername);
+    params.append('nama',             namaBaru);
+    params.append('username',         usernameBaru);
+    params.append('role',             role);
+    params.append('status',           status);
+    if(passBaru) params.append('passBaru', passBaru);
+
+    const res  = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params.toString()});
+    const data = await res.json();
+    if(data.success){
+      closeModal('modal-edit-karyawan');
+      showToast('Data karyawan berhasil diperbarui ✓','success');
+      // Update data lokal
+      const idx = usersData.findIndex(u=>(u.username||'').toLowerCase()===originalUsername.toLowerCase());
+      if(idx>=0){
+        usersData[idx] = { username: usernameBaru, nama: namaBaru, role, status };
+      }
+      renderKelolaKaryawan();
+    } else {
+      errEl.textContent = data.message || 'Gagal menyimpan.';
+      errEl.style.display='block';
+    }
+  } catch(e){
+    errEl.textContent='Terjadi kesalahan. Periksa koneksi.';
+    errEl.style.display='block';
+  }
+  btn.disabled=false; btn.innerHTML=origHtml;
+}
+
+// ── PAGINATION ────────────────────────────────────────────────────────────────
+function buildPagination(page, totalPages, total, start, pageLen, ns){
+  if(totalPages <= 1) return '';
+  const btns = [];
+  for(let i=1;i<=totalPages;i++){
+    if(i===1||i===totalPages||Math.abs(i-page)<=1) btns.push(`<button class="pg-btn${page===i?' active':''}" onclick="${ns}Page=${i};render${ns.charAt(0).toUpperCase()+ns.slice(1)}()">${i}</button>`);
+    else if(Math.abs(i-page)===2) btns.push('<span style="color:var(--muted);padding:0 4px;font-size:12px">…</span>');
+  }
+  return `<div class="pagination">
+    <span class="pagination-info">Menampilkan ${start+1}-${start+pageLen} dari ${total}</span>
+    <div class="pagination-btns">
+      <button class="pg-btn" onclick="${ns}Page--;render${ns.charAt(0).toUpperCase()+ns.slice(1)}()" ${page<=1?'disabled':''}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+      ${btns.join('')}
+      <button class="pg-btn" onclick="${ns}Page++;render${ns.charAt(0).toUpperCase()+ns.slice(1)}()" ${page>=totalPages?'disabled':''}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>`;
+}
+
+// ── STAT CARD ─────────────────────────────────────────────────────────────────
+function statCard(label, value, unit, color, iconSvg){
+  return `<div class="stat-card">
+    <div class="stat-card-top">
+      <span class="stat-label">${label}</span>
+      <div class="stat-icon" style="background:${color}20;color:${color}">${iconSvg}</div>
+    </div>
+    <div class="stat-value">${value}</div>
+    <div class="stat-sub">${unit}</div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ── SISTEM SHIFT (Bagian 3) ───────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+
+// Helper: tanggal hari ini + offset hari, format YYYY-MM-DD
+function dateStrOffset(offsetDays){
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function cariShiftById(id){
+  return shiftData.find(s=>s.id===id) || shiftDataAll.find(s=>s.id===id) || null;
+}
+
+// [3.3] Muat daftar shift aktif dari server
+async function loadShiftData(silent=false){
+  try{
+    const p = new URLSearchParams();
+    p.append('action','getShift');
+    const r = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+    const d = await r.json();
+    if(d.success){
+      const allShifts = d.shifts || [];
+      // Sembunyikan shift "Full" dari pilihan karyawan — hanya owner/admin yg boleh pakai
+      const isKaryawan = currentUser && currentUser.role === 'karyawan';
+      shiftData = isKaryawan
+        ? allShifts.filter(s => (s.nama || '').toLowerCase() !== 'full')
+        : allShifts;
+    }
+
+    // Untuk admin/owner: juga muat semua shift termasuk nonaktif (halaman Kelola Shift)
+    if(currentUser && (currentUser.role==='admin'||currentUser.role==='owner')){
+      const p2 = new URLSearchParams();
+      p2.append('action','getShift');
+      p2.append('semua','1');
+      const r2 = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p2.toString()});
+      const d2 = await r2.json();
+      if(d2.success) shiftDataAll = d2.shifts || [];
+    }
+
+    if(!silent && activePage==='kelola-shift') renderKelolaShift();
+  } catch(e){
+    console.error(e);
+    if(!silent) showToast('Gagal memuat data shift','error');
+  }
+}
+
+// [3.4] Muat jadwal hari ini untuk user yang sedang login
+async function loadJadwalHariIniUser(){
+  try{
+    const p = new URLSearchParams();
+    p.append('action','getJadwal');
+    p.append('username', currentUser.username);
+    p.append('tanggal', todayStr());
+    const r = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+    const d = await r.json();
+    jadwalHariIni = (d.success && d.jadwal) ? d.jadwal : null;
+  } catch(e){
+    console.error(e);
+    jadwalHariIni = null;
+  }
+}
+
+// [3.8] Tampilkan info shift hari ini di hero absensi (terkunci atau perlu pilih)
+function updateShiftHeroDisplay(){
+  const box   = document.getElementById('shift-lock-box');
+  const label = document.getElementById('shift-lock-label');
+  const val   = document.getElementById('shift-lock-val');
+  const badge = document.getElementById('shift-lock-badge');
+  if(!box) return;
+
+  const sudahCheckin = !!getAbsensiHariIni();
+
+  if(jadwalHariIni && jadwalHariIni.shift_id){
+    const shf = cariShiftById(jadwalHariIni.shift_id);
+    box.style.display='flex';
+    label.textContent = 'Shift Hari Ini (ditetapkan admin)';
+    val.textContent = shf ? `${shf.jam_masuk} - ${shf.jam_keluar}` : '-';
+    badge.textContent = shf ? shf.nama : jadwalHariIni.shift_id;
+  } else if(shiftData.length){
+    box.style.display='flex';
+    label.textContent = sudahCheckin ? 'Shift Hari Ini' : 'Shift belum dipilih - pilih saat Check In';
+    if(sudahCheckin){
+      const rec = getAbsensiHariIni();
+      const shf = rec && rec.shift_id ? cariShiftById(rec.shift_id) : null;
+      val.textContent = shf ? `${shf.jam_masuk} - ${shf.jam_keluar}` : '-';
+      badge.textContent = shf ? shf.nama : '-';
+    } else {
+      val.textContent = 'Belum dipilih';
+      badge.textContent = 'Pilih saat Check In';
+    }
+  } else {
+    box.style.display='none';
+  }
+}
+
+// [3.8] Render pilihan pill shift di modal check-in
+function renderModalShiftPicker(){
+  const pilihWrap  = document.getElementById('modal-shift-pilih-wrap');
+  const lockedWrap = document.getElementById('modal-shift-locked-wrap');
+  const lockedVal  = document.getElementById('modal-shift-locked-val');
+  const pillList   = document.getElementById('modal-shift-pill-list');
+  if(!pilihWrap || !lockedWrap) return;
+
+  // Saat checkout, tidak perlu pilih shift lagi (shift sudah ditetapkan saat checkin)
+  if(!checkInMode){
+    pilihWrap.style.display='none';
+    lockedWrap.style.display='none';
+    return;
+  }
+
+  if(jadwalHariIni && jadwalHariIni.shift_id){
+    // Shift terkunci oleh jadwal admin
+    const shf = cariShiftById(jadwalHariIni.shift_id);
+    shiftTerpilihId = jadwalHariIni.shift_id;
+    pilihWrap.style.display='none';
+    lockedWrap.style.display='block';
+    lockedVal.textContent = shf ? `${shf.nama} (${shf.jam_masuk} - ${shf.jam_keluar})` : jadwalHariIni.shift_id;
+  } else if(shiftData.length){
+    // Karyawan bebas pilih shift aktif
+    lockedWrap.style.display='none';
+    pilihWrap.style.display='block';
+    if(!shiftTerpilihId || !shiftData.find(s=>s.id===shiftTerpilihId)){
+      shiftTerpilihId = shiftData[0].id;
+    }
+    pillList.innerHTML = shiftData.map(s=>`
+      <button type="button" class="shift-pill${s.id===shiftTerpilihId?' active':''}" onclick="pilihShiftModal('${s.id}')">
+        ${s.nama} <span style="opacity:.7">(${s.jam_masuk}-${s.jam_keluar})</span>
+      </button>
+    `).join('');
+  } else {
+    pilihWrap.style.display='none';
+    lockedWrap.style.display='none';
+    shiftTerpilihId = '';
+  }
+}
+
+function pilihShiftModal(id){
+  shiftTerpilihId = id;
+  document.querySelectorAll('#modal-shift-pill-list .shift-pill').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('onclick')===`pilihShiftModal('${id}')`);
+  });
+}
+
+// [3.12] Validasi non-blokir: warning kalau jam check-in di luar jam shift ±2 jam
+function cekToleransiJamShift(shiftId, jamAktualStr){
+  const shf = cariShiftById(shiftId);
+  if(!shf || !shf.jam_masuk) return;
+  const [hA,mA] = jamAktualStr.split(':').map(Number);
+  const [hS,mS] = shf.jam_masuk.split(':').map(Number);
+  let diffMin = Math.abs((hA*60+mA) - (hS*60+mS));
+  // Tangani shift malam yang melewati tengah malam (selisih lebih masuk akal jika dibalik)
+  if(diffMin > 12*60) diffMin = 24*60 - diffMin;
+  if(diffMin > 120){
+    showToast(`⚠️ Jam check-in di luar jam shift "${shf.nama}" (${shf.jam_masuk}) lebih dari 2 jam`, 'warning', 5000);
+  }
+}
+
+// [3.11] Render kartu mini jadwal shift saya — 7 hari ke depan
+async function renderJadwalSayaMini(){
+  const body = document.getElementById('jadwal-saya-body');
+  if(!body) return;
+  body.innerHTML = '<div class="loading"><div class="spinner"></div> Memuat...</div>';
+
+  try{
+    const reqs = [];
+    for(let i=0;i<7;i++){
+      const tgl = dateStrOffset(i);
+      const p = new URLSearchParams();
+      p.append('action','getJadwal');
+      p.append('username', currentUser.username);
+      p.append('tanggal', tgl);
+      reqs.push(
+        fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()})
+          .then(r=>r.json()).then(d=>({tgl, jadwal: (d.success && d.jadwal) ? d.jadwal : null}))
+      );
+    }
+    const hasil = await Promise.all(reqs);
+
+    body.innerHTML = hasil.map(h=>{
+      const d = new Date(h.tgl+'T00:00:00');
+      const labelHari = `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]}`;
+      let val = '<span style="color:var(--muted)">Belum dijadwalkan - bebas pilih saat Check In</span>';
+      if(h.jadwal && h.jadwal.shift_id){
+        const shf = cariShiftById(h.jadwal.shift_id);
+        val = shf
+          ? `<span class="badge-shift">${shf.nama} (${shf.jam_masuk}-${shf.jam_keluar})</span>`
+          : `<span class="badge-shift">${h.jadwal.shift_id}</span>`;
+      }
+      return `<div class="jadwal-mini-row"><span class="jadwal-mini-day">${labelHari}</span><span class="jadwal-mini-val">${val}</span></div>`;
+    }).join('');
+  } catch(e){
+    console.error(e);
+    body.innerHTML = '<div class="empty">Gagal memuat jadwal</div>';
+  }
+}
+
+// ── [3.9] KELOLA SHIFT (admin/owner) ──────────────────────────────────────────
+function renderKelolaShift(){
+  const role = currentUser.role;
+  if(role!=='admin'&&role!=='owner') return;
+
+  const sub = document.getElementById('kelola-shift-sub');
+  if(sub) sub.textContent = `${shiftDataAll.length} shift terdaftar`;
+
+  const body = document.getElementById('kelola-shift-body');
+  if(!shiftDataAll.length){
+    body.innerHTML = '<div class="empty">Belum ada shift. Tambahkan shift baru di atas.</div>';
+    return;
+  }
+
+  const rows = [...shiftDataAll].sort((a,b)=>a.jam_masuk.localeCompare(b.jam_masuk));
+
+  body.innerHTML = `
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>Nama</th><th>Jam Masuk</th><th>Jam Keluar</th><th>Durasi Kerja</th><th>Toleransi Telat</th><th>Status</th><th>Aksi</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(s=>`<tr>
+          <td style="font-weight:600;color:var(--text-strong)">${s.nama}</td>
+          <td class="mono">${s.jam_masuk}</td>
+          <td class="mono">${s.jam_keluar}</td>
+          <td>${s.durasi_kerja} jam</td>
+          <td>${s.toleransi_telat} menit</td>
+          <td>${s.aktif ? '<span class="badge badge-hadir">Aktif</span>' : '<span class="badge badge-absen">Nonaktif</span>'}</td>
+          <td style="display:flex;gap:6px">
+            <button onclick="openEditShift('${s.id}')"
+              style="padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid rgba(99,102,241,.3);background:rgba(99,102,241,.12);color:#a5b4fc;cursor:pointer;font-family:'DM Sans',sans-serif">
+              Edit
+            </button>
+            <button onclick="toggleAktifShift('${s.id}', ${s.aktif})"
+              style="padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid ${s.aktif?'rgba(239,68,68,.3)':'rgba(16,185,129,.3)'};background:${s.aktif?'rgba(239,68,68,.12)':'rgba(16,185,129,.12)'};color:${s.aktif?'#fca5a5':'#6ee7b7'};cursor:pointer;font-family:'DM Sans',sans-serif">
+              ${s.aktif?'Nonaktifkan':'Aktifkan'}
+            </button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+}
+
+async function submitTambahShift(){
+  const errEl = document.getElementById('shift-form-err');
+  const btn   = document.getElementById('btn-tambah-shift');
+  errEl.style.display='none';
+
+  const nama       = document.getElementById('shf-nama').value.trim();
+  const jamMasuk    = document.getElementById('shf-jam-masuk').value;
+  const jamKeluar   = document.getElementById('shf-jam-keluar').value;
+  const durasi      = document.getElementById('shf-durasi').value || 8;
+  const toleransi   = document.getElementById('shf-toleransi').value || 15;
+
+  if(!nama){ errEl.textContent='Nama shift wajib diisi.'; errEl.style.display='block'; return; }
+  if(!jamMasuk || !jamKeluar){ errEl.textContent='Jam masuk dan jam keluar wajib diisi.'; errEl.style.display='block'; return; }
+
+  const orig = btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:14px;height:14px;border-width:1.5px;display:inline-block"></div> Menyimpan...';
+
+  try{
+    const p = new URLSearchParams();
+    p.append('action','kelolaShift');
+    p.append('mode','tambah');
+    p.append('requesterRole', currentUser.role);
+    p.append('nama', nama);
+    p.append('jamMasuk', jamMasuk);
+    p.append('jamKeluar', jamKeluar);
+    p.append('durasiKerja', durasi);
+    p.append('toleransiTelat', toleransi);
+
+    const r = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+    const d = await r.json();
+    if(d.success){
+      showToast('Shift berhasil ditambahkan ✓','success');
+      document.getElementById('shf-nama').value='';
+      document.getElementById('shf-jam-masuk').value='';
+      document.getElementById('shf-jam-keluar').value='';
+      document.getElementById('shf-durasi').value='8';
+      document.getElementById('shf-toleransi').value='15';
+      await loadShiftData();
+      renderKelolaShift();
+    } else {
+      errEl.textContent = d.message || 'Gagal menambahkan shift.';
+      errEl.style.display='block';
+    }
+  } catch(e){
+    console.error(e);
+    errEl.textContent='Terjadi kesalahan. Periksa koneksi.';
+    errEl.style.display='block';
+  }
+  btn.disabled=false; btn.innerHTML=orig;
+}
+
+function openEditShift(id){
+  const shf = shiftDataAll.find(s=>s.id===id);
+  if(!shf) return;
+  document.getElementById('edit-shift-id').value = shf.id;
+  document.getElementById('edit-shift-nama').value = shf.nama;
+  document.getElementById('edit-shift-jam-masuk').value = shf.jam_masuk;
+  document.getElementById('edit-shift-jam-keluar').value = shf.jam_keluar;
+  document.getElementById('edit-shift-durasi').value = shf.durasi_kerja;
+  document.getElementById('edit-shift-toleransi').value = shf.toleransi_telat;
+  document.getElementById('edit-shift-err').style.display='none';
+  openModal('modal-edit-shift');
+}
+
+async function submitEditShift(){
+  const errEl = document.getElementById('edit-shift-err');
+  const btn   = document.getElementById('btn-simpan-edit-shift');
+  errEl.style.display='none';
+
+  const id        = document.getElementById('edit-shift-id').value;
+  const nama      = document.getElementById('edit-shift-nama').value.trim();
+  const jamMasuk   = document.getElementById('edit-shift-jam-masuk').value;
+  const jamKeluar  = document.getElementById('edit-shift-jam-keluar').value;
+  const durasi     = document.getElementById('edit-shift-durasi').value;
+  const toleransi  = document.getElementById('edit-shift-toleransi').value;
+
+  if(!nama){ errEl.textContent='Nama shift wajib diisi.'; errEl.style.display='block'; return; }
+
+  const orig = btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:14px;height:14px;border-width:1.5px;display:inline-block"></div> Menyimpan...';
+
+  try{
+    const p = new URLSearchParams();
+    p.append('action','kelolaShift');
+    p.append('mode','edit');
+    p.append('requesterRole', currentUser.role);
+    p.append('targetId', id);
+    p.append('nama', nama);
+    p.append('jamMasuk', jamMasuk);
+    p.append('jamKeluar', jamKeluar);
+    p.append('durasiKerja', durasi);
+    p.append('toleransiTelat', toleransi);
+
+    const r = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+    const d = await r.json();
+    if(d.success){
+      closeModal('modal-edit-shift');
+      showToast('Shift berhasil diperbarui ✓','success');
+      await loadShiftData();
+      renderKelolaShift();
+    } else {
+      errEl.textContent = d.message || 'Gagal menyimpan.';
+      errEl.style.display='block';
+    }
+  } catch(e){
+    console.error(e);
+    errEl.textContent='Terjadi kesalahan. Periksa koneksi.';
+    errEl.style.display='block';
+  }
+  btn.disabled=false; btn.innerHTML=orig;
+}
+
+function toggleAktifShift(id, sedangAktif){
+  const aksi = sedangAktif ? 'Nonaktifkan' : 'Aktifkan';
+  showConfirm(
+    `${aksi} Shift`,
+    `Shift ini akan ${sedangAktif?'dinonaktifkan dan tidak bisa dipilih karyawan':'diaktifkan kembali'}.`,
+    async ()=>{
+      try{
+        const p = new URLSearchParams();
+        p.append('action','kelolaShift');
+        p.append('mode', sedangAktif ? 'nonaktifkan' : 'aktifkan');
+        p.append('requesterRole', currentUser.role);
+        p.append('targetId', id);
+        const r = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+        const d = await r.json();
+        if(d.success){
+          showToast(`Shift berhasil ${sedangAktif?'dinonaktifkan':'diaktifkan'} ✓`,'success');
+          await loadShiftData();
+          renderKelolaShift();
+        } else {
+          showToast('Gagal: ' + (d.message||'Coba lagi'), 'error');
+        }
+      } catch(e){
+        console.error(e);
+        showToast('Terjadi kesalahan. Periksa koneksi.','error');
+      }
+    },
+    aksi
+  );
+}
+
+// ── [3.10] JADWAL HARIAN (admin/owner) ────────────────────────────────────────
+function populateJadwalHarianFilters(){
+  const shiftSel = document.getElementById('jh-bulk-shift');
+  if(shiftSel){
+    shiftSel.innerHTML = '<option value="">-- Pilih Shift --</option>' +
+      shiftData.map(s=>`<option value="${s.id}">${s.nama} (${s.jam_masuk}-${s.jam_keluar})</option>`).join('');
+  }
+  const karSel = document.getElementById('jh-bulk-karyawan');
+  if(karSel){
+    const aktif = usersData.filter(u=>(u.status||'Aktif')==='Aktif').sort((a,b)=>(a.nama||'').localeCompare(b.nama||''));
+    karSel.innerHTML = aktif.map(u=>`<option value="${u.username}">${getNama(u)||u.username}</option>`).join('');
+  }
+  const bulkTgl = document.getElementById('jh-bulk-tanggal');
+  const filterTgl = document.getElementById('jh-filter-tanggal');
+  if(bulkTgl && !bulkTgl.value) bulkTgl.value = dateStrOffset(1); // default besok
+  if(filterTgl && !filterTgl.value) filterTgl.value = todayStr();
+}
+
+async function submitBulkAssign(){
+  const btn = document.getElementById('btn-bulk-assign');
+  const tanggal = document.getElementById('jh-bulk-tanggal').value;
+  const shiftId = document.getElementById('jh-bulk-shift').value;
+  const karSel  = document.getElementById('jh-bulk-karyawan');
+  let usernames = Array.from(karSel.selectedOptions).map(o=>o.value);
+
+  if(!tanggal){ showToast('Pilih tanggal terlebih dahulu','warning'); return; }
+  if(!shiftId){ showToast('Pilih shift terlebih dahulu','warning'); return; }
+
+  // Kosongkan pilihan karyawan = semua karyawan aktif
+  if(!usernames.length){
+    usernames = usersData.filter(u=>(u.status||'Aktif')==='Aktif').map(u=>u.username);
+  }
+  if(!usernames.length){ showToast('Tidak ada karyawan aktif untuk dijadwalkan','warning'); return; }
+
+  const orig = btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:14px;height:14px;border-width:1.5px;display:inline-block"></div> Menyimpan...';
+
+  try{
+    const p = new URLSearchParams();
+    p.append('action','setJadwal');
+    p.append('requesterRole', currentUser.role);
+    p.append('requesterUsername', currentUser.username);
+    p.append('tanggal', tanggal);
+    p.append('shiftId', shiftId);
+    p.append('usernames', usernames.join(','));
+
+    const r = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+    const d = await r.json();
+    if(d.success){
+      showToast(`Jadwal berhasil disimpan untuk ${usernames.length} karyawan ✓`,'success');
+      karSel.selectedIndex = -1;
+      const filterTgl = document.getElementById('jh-filter-tanggal');
+      if(filterTgl) filterTgl.value = tanggal;
+      await loadJadwalHarianTanggal();
+    } else {
+      showToast('Gagal: ' + (d.message||'Coba lagi'), 'error');
+    }
+  } catch(e){
+    console.error(e);
+    showToast('Terjadi kesalahan. Periksa koneksi.','error');
+  }
+  btn.disabled=false; btn.innerHTML=orig;
+}
+
+// Muat jadwal untuk tanggal yang difilter (per-karyawan, paralel)
+async function loadJadwalHarianTanggal(){
+  const tgl = document.getElementById('jh-filter-tanggal').value || todayStr();
+  const body = document.getElementById('jadwal-harian-body');
+  body.innerHTML = '<div class="loading"><div class="spinner"></div> Memuat...</div>';
+
+  try{
+    const aktif = usersData.filter(u=>(u.status||'Aktif')==='Aktif').sort((a,b)=>(a.nama||'').localeCompare(b.nama||''));
+    const reqs = aktif.map(u=>{
+      const p = new URLSearchParams();
+      p.append('action','getJadwal');
+      p.append('username', u.username);
+      p.append('tanggal', tgl);
+      return fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()})
+        .then(r=>r.json()).then(d=>({ username:u.username, nama:getNama(u)||u.username, jadwal: (d.success && d.jadwal) ? d.jadwal : null }));
+    });
+    const hasil = await Promise.all(reqs);
+    jadwalHarianCache[tgl] = hasil;
+    renderJadwalHarian();
+  } catch(e){
+    console.error(e);
+    body.innerHTML = '<div class="empty">Gagal memuat jadwal</div>';
+  }
+}
+
+function renderJadwalHarian(){
+  const tgl = document.getElementById('jh-filter-tanggal').value || todayStr();
+  const rows = jadwalHarianCache[tgl];
+  const sub = document.getElementById('jadwal-harian-sub');
+  const body = document.getElementById('jadwal-harian-body');
+
+  if(!rows){ loadJadwalHarianTanggal(); return; }
+
+  if(sub) sub.textContent = `${rows.length} karyawan aktif - ${tgl}`;
+
+  if(!rows.length){
+    body.innerHTML = '<div class="empty">Tidak ada karyawan aktif</div>';
+    return;
+  }
+
+  const shiftOpts = '<option value="">- Belum dijadwalkan -</option>' +
+    shiftData.map(s=>`<option value="${s.id}">${s.nama} (${s.jam_masuk}-${s.jam_keluar})</option>`).join('');
+
+  body.innerHTML = `
+    <div class="table-wrap"><table>
+      <thead><tr><th>Karyawan</th><th>Shift Ditetapkan</th><th>Aksi</th></tr></thead>
+      <tbody>
+        ${rows.map(r=>{
+          const curShiftId = r.jadwal ? r.jadwal.shift_id : '';
+          return `<tr>
+            <td style="font-weight:600;color:var(--text-strong)">${r.nama}</td>
+            <td>
+              <select class="select-inp" id="jh-sel-${r.username}" style="margin:0;min-width:200px">
+                ${shiftOpts.replace(`value="${curShiftId}"`, `value="${curShiftId}" selected`)}
+              </select>
+            </td>
+            <td>
+              <button onclick="simpanJadwalSatuan('${r.username}','${tgl}')"
+                style="padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid rgba(99,102,241,.3);background:rgba(99,102,241,.12);color:#a5b4fc;cursor:pointer;font-family:'DM Sans',sans-serif">
+                Simpan
+              </button>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table></div>`;
+}
+
+async function simpanJadwalSatuan(username, tanggal){
+  const sel = document.getElementById(`jh-sel-${username}`);
+  const shiftId = sel ? sel.value : '';
+
+  if(!shiftId){ showToast('Pilih shift terlebih dahulu','warning'); return; }
+
+  try{
+    const p = new URLSearchParams();
+    p.append('action','setJadwal');
+    p.append('requesterRole', currentUser.role);
+    p.append('requesterUsername', currentUser.username);
+    p.append('tanggal', tanggal);
+    p.append('shiftId', shiftId);
+    p.append('username', username);
+
+    const r = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:p.toString()});
+    const d = await r.json();
+    if(d.success){
+      showToast('Jadwal berhasil disimpan ✓','success');
+      await loadJadwalHarianTanggal();
+    } else {
+      showToast('Gagal: ' + (d.message||'Coba lagi'), 'error');
+    }
+  } catch(e){
+    console.error(e);
+    showToast('Terjadi kesalahan. Periksa koneksi.','error');
+  }
+}
+
+// ── LOG AKSES ─────────────────────────────────────────────────────────────────
+async function logAkses(tipe, halaman='Absensi'){
+  if(!currentUser && tipe!=='login') return;
+  const user = currentUser||{};
+  let ipInfo = {ip:'',kota:'',negara:''};
+  try{
+    const r = await fetch('https://ipapi.co/json/');
+    if(r.ok){const d=await r.json();ipInfo={ip:d.ip||'',kota:d.city||'',negara:d.country_name||''};}
+  }catch(e){}
+  const ua = navigator.userAgent;
+  let browser = 'Unknown';
+  if(ua.includes('Edg')) browser='Edge';
+  else if(ua.includes('OPR')||ua.includes('Opera')) browser='Opera';
+  else if(ua.includes('Chrome')) browser='Chrome';
+  else if(ua.includes('Firefox')) browser='Firefox';
+  else if(ua.includes('Safari')) browser='Safari';
+  const device = /Mobi|Android/i.test(ua) ? 'Mobile' : 'Desktop';
+  const params = new URLSearchParams();
+  params.append('action',   'logAkses');
+  params.append('username', user.username||'');
+  params.append('nama',     getNama(user)||user.username||'');
+  params.append('role',     user.role||'');
+  params.append('tipe',     tipe);
+  params.append('halaman',  halaman);
+  params.append('waktu',    new Date().toLocaleString('id-ID'));
+  params.append('ip',       ipInfo.ip);
+  params.append('kota',     ipInfo.kota);
+  params.append('negara',   ipInfo.negara);
+  params.append('browser',  browser);
+  params.append('device',   device);
+  try{
+    fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:params.toString()});
+  }catch(e){}
+}
+
+// ── APP LOADING ───────────────────────────────────────────────────────────────
+function hideAppLoading(){
+  const el = document.getElementById('app-loading');
+  if(el&&!el.classList.contains('hide')){
+    el.classList.add('hide');
+    setTimeout(()=>{el.style.display='none';},500);
+  }
+}
+setTimeout(hideAppLoading, 8000);
+
+// ── RESTORE SESSION ───────────────────────────────────────────────────────────
+(async function(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('abs_session')||'null');
+    if(saved && saved.username){
+      currentUser = saved;
+      // [FIX] Re-fetch nama terbaru dari server supaya nama selalu sinkron
+      // (terutama penting kalau kolom di sheet adalah 'name' bukan 'nama')
+      try {
+        const p = new URLSearchParams();
+        p.append('action', 'getUsers');
+        const res = await fetch(APPS_SCRIPT_URL, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: p.toString()});
+        const d = await res.json();
+        if(d.success && d.users){
+          const u = d.users.find(x=>(x.username||'').toLowerCase() === (saved.username||'').toLowerCase());
+          if(u){
+            const namaBaru = getNama(u) || saved.username;
+            currentUser.nama = namaBaru;
+            // Update localStorage supaya sesi berikutnya sudah benar
+            localStorage.setItem('abs_session', JSON.stringify(currentUser));
+          }
+        }
+      } catch(e){ /* gagal fetch — pakai nama dari sesi tersimpan */ }
+
+      document.getElementById('login-page').style.display='none';
+      document.getElementById('app').style.display='block';
+      await initApp();
+      hideAppLoading();
+    } else {
+      hideAppLoading();
+    }
+  }catch(e){ hideAppLoading(); }
+})();
+</script>
+
+
+
+</body>
+</html>
