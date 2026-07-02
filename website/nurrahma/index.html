@@ -783,7 +783,7 @@ select option{background:var(--elevated);color:var(--text-strong)}
               <div class="period-filter" id="period-filter">
                 <button class="period-btn active" onclick="setPeriod('total',this)">Total</button>
                 <button class="period-btn" onclick="setPeriod('hari',this)">Hari</button>
-                <button class="period-btn" onclick="setPeriod('minggu',this)">Minggu</button>
+                <button class="period-btn" onclick="setPeriod('minggu',this)">Pekan</button>
                 <button class="period-btn" onclick="setPeriod('bulan',this)">Bulan</button>
                 <button class="period-btn" onclick="setPeriod('tahun',this)">Tahun</button>
               </div>
@@ -1032,7 +1032,7 @@ select option{background:var(--elevated);color:var(--text-strong)}
                 <div class="card-sub">Volume pergerakan barang per periode</div>
               </div>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="filter-btn active" id="kd-tf-minggu" onclick="kdSetTrenFilter('minggu',this)">Minggu</button>
+                <button class="filter-btn active" id="kd-tf-minggu" onclick="kdSetTrenFilter('minggu',this)">Pekan</button>
                 <button class="filter-btn" id="kd-tf-bulan" onclick="kdSetTrenFilter('bulan',this)">Bulan</button>
                 <select id="kd-tf-barang" onchange="kdRenderTren()" style="padding:6px 9px;border-radius:8px;background:var(--input-bg);border:1px solid var(--border);color:var(--text-strong);font-size:11px;outline:none">
                   <option value="">Semua Barang</option>
@@ -1483,7 +1483,7 @@ select option{background:var(--elevated);color:var(--text-strong)}
           </div>
           <div style="margin-bottom:14px">
             <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Keterangan (opsional)</label>
-            <input id="upload-ket" type="text" placeholder="Contoh: Pembayaran lunas minggu ini" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text-strong);font-size:13px;outline:none;box-sizing:border-box"/>
+            <input id="upload-ket" type="text" placeholder="Contoh: Pembayaran lunas pekan ini" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text-strong);font-size:13px;outline:none;box-sizing:border-box"/>
           </div>
           <div style="margin-bottom:20px">
             <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">File Dokumen</label>
@@ -1732,7 +1732,7 @@ function periodLabel(){
     const parts=[_pHari.tgl,_pHari.bln&&['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][parseInt(_pHari.bln)-1],_pHari.thn].filter(Boolean);
     return parts.length ? parts.join(' ') : 'Hari ini';
   }
-  if(dashPeriod==='minggu') return `Minggu (${_pMinggu.thn||new Date().getFullYear()})`;
+  if(dashPeriod==='minggu') return `Pekan (${_pMinggu.thn||new Date().getFullYear()})`;
   if(dashPeriod==='bulan'){
     const mn=_pBulan.bln?['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][parseInt(_pBulan.bln)-1]:'';
     return [mn,_pBulan.thn].filter(Boolean).join(' ') || 'Bulan ini';
@@ -1763,7 +1763,7 @@ function autoThemeByTime(){
 })();
 
 // ── JAM DIGITAL ──────────────────────────────────────────────────────────────
-const HARI_ID = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const HARI_ID = ['Ahad','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 let _lastAutoHour = -1;
 function updateClock(){
@@ -3277,7 +3277,7 @@ const COMPANY = {
 function fmtTglPanjang(tgl){
   if(!tgl) return '-';
   const d = new Date(tgl);
-  const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()];
+  const hari = ['Ahad','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()];
   const bln = ['JANUARI','FEBRUARI','MARET','APRIL','MEI','JUNI','JULI','AGUSTUS','SEPTEMBER','OKTOBER','NOVEMBER','DESEMBER'][d.getMonth()];
   return `${hari}, ${d.getDate()} ${bln} ${d.getFullYear()}`;
 }
