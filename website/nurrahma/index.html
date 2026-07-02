@@ -157,8 +157,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nav-group-toggle .nav-group-left{display:flex;align-items:center;gap:10px}
 .nav-group-chevron{transition:transform .32s cubic-bezier(.4,0,.2,1);flex-shrink:0;opacity:.5}
 .nav-group-toggle.open .nav-group-chevron{transform:rotate(90deg)}
-.nav-subitems{display:none;padding-left:16px;margin-top:2px}
-.nav-subitems.open{display:block}
+.nav-subitems{display:grid;grid-template-rows:0fr;opacity:0;padding-left:16px;margin-top:0;transition:grid-template-rows .38s cubic-bezier(.4,0,.2,1),opacity .3s ease,margin-top .38s cubic-bezier(.4,0,.2,1)}
+.nav-subitems-inner{overflow:hidden;min-height:0;display:flex;flex-direction:column}
+.nav-subitems.open{grid-template-rows:1fr;opacity:1;margin-top:2px}
+.nav-subitems:not(.open) .nav-subitem{transition:none}
+.nav-subitems.open .nav-subitem{animation:subitemIn .32s cubic-bezier(.16,1,.3,1) both}
+.nav-subitems.open .nav-subitem:nth-child(1){animation-delay:.03s}
+.nav-subitems.open .nav-subitem:nth-child(2){animation-delay:.07s}
+.nav-subitems.open .nav-subitem:nth-child(3){animation-delay:.11s}
+.nav-subitems.open .nav-subitem:nth-child(4){animation-delay:.15s}
+.nav-subitems.open .nav-subitem:nth-child(n+5){animation-delay:.19s}
+@keyframes subitemIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
 .nav-subitem{display:flex;align-items:center;gap:8px;padding:7px 11px;border-radius:9px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .2s;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;margin-bottom:1px;border-left:2px solid var(--border)}
 .nav-subitem:hover{color:var(--text-secondary);background:var(--tint-05);border-left-color:rgba(99,102,241,.4)}
 .nav-subitem.active{background:rgba(99,102,241,.15);color:#a5b4fc;border-left-color:#6366f1}
@@ -185,7 +194,34 @@ html[data-theme="light"] .btn-absensi-link:hover{color:#4338ca}
 /* ── MAIN ── */
 .main{flex:1;overflow-y:auto;padding:32px;padding-top:68px}
 .page{display:none}
-.page.active{display:block}
+.page.active{display:block;animation:secIn .5s cubic-bezier(.16,1,.3,1) both}
+.page.active>*{animation:secItemIn .5s cubic-bezier(.16,1,.3,1) both}
+.page.active>*:nth-child(1){animation-delay:.02s}
+.page.active>*:nth-child(2){animation-delay:.06s}
+.page.active>*:nth-child(3){animation-delay:.10s}
+.page.active>*:nth-child(4){animation-delay:.14s}
+.page.active>*:nth-child(5){animation-delay:.18s}
+.page.active>*:nth-child(n+6){animation-delay:.22s}
+@keyframes secIn{from{opacity:0}to{opacity:1}}
+@keyframes secItemIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes itemPop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes modalPop{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.stat-card,.doc-card,.stok-summary-card,.trx-pick-item,.stat-status-row,.card{animation:itemPop .4s cubic-bezier(.34,1.2,.64,1) both}
+.stat-card:nth-child(1),.doc-card:nth-child(1),.stok-summary-card:nth-child(1){animation-delay:.02s}
+.stat-card:nth-child(2),.doc-card:nth-child(2),.stok-summary-card:nth-child(2){animation-delay:.06s}
+.stat-card:nth-child(3),.doc-card:nth-child(3),.stok-summary-card:nth-child(3){animation-delay:.10s}
+.stat-card:nth-child(4),.doc-card:nth-child(4),.stok-summary-card:nth-child(4){animation-delay:.14s}
+.stat-card:nth-child(5),.doc-card:nth-child(5),.stok-summary-card:nth-child(5){animation-delay:.18s}
+.stat-card:nth-child(6),.doc-card:nth-child(6),.stok-summary-card:nth-child(6){animation-delay:.22s}
+.stat-card:nth-child(n+7),.doc-card:nth-child(n+7),.stok-summary-card:nth-child(n+7){animation-delay:.26s}
+table tbody tr{animation:itemPop .32s ease both}
+table tbody tr:nth-child(1){animation-delay:.02s}
+table tbody tr:nth-child(2){animation-delay:.045s}
+table tbody tr:nth-child(3){animation-delay:.07s}
+table tbody tr:nth-child(4){animation-delay:.095s}
+table tbody tr:nth-child(5){animation-delay:.12s}
+table tbody tr:nth-child(n+6){animation-delay:.145s}
+.modal-box{animation:modalPop .4s cubic-bezier(.34,1.2,.64,1) both}
 .page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text-strong);margin-bottom:4px}
 .page-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
 
@@ -1325,6 +1361,13 @@ select option{background:var(--elevated);color:var(--text-strong)}
         <div class="loading"><div class="spinner"></div> Memuat...</div>
       </div>
 
+      <!-- DATALIST SUGESTI OTOMATIS (diisi dari data yang sudah ada) -->
+      <datalist id="dl-nt-penanggung"></datalist>
+      <datalist id="dl-nt-detail"></datalist>
+      <datalist id="dl-nt-subdetail"></datalist>
+      <datalist id="dl-nt-satuan"></datalist>
+      <datalist id="dl-nt-supir"></datalist>
+
       <!-- MODAL TAMBAH TRANSAKSI -->
       <div class="modal-overlay" id="modal-tambah-trx" onclick="if(event.target.id==='modal-tambah-trx') closeTambahTrxModal()" style="z-index:1001">
         <div class="modal-box" style="max-width:760px;width:95%;max-height:90vh;overflow-y:auto">
@@ -2225,7 +2268,9 @@ function initApp(){
           <svg class="nav-group-chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
         <div class="nav-subitems" id="subitems-${n.key}">
-          ${n.subs.map(s=>`<button class="nav-subitem" onclick="navSubTo('${n.key}','${s.key}',this)">${s.label}</button>`).join('')}
+          <div class="nav-subitems-inner">
+            ${n.subs.map(s=>`<button class="nav-subitem" onclick="navSubTo('${n.key}','${s.key}',this)">${s.label}</button>`).join('')}
+          </div>
         </div>
       </div>`;
     }
@@ -2810,6 +2855,10 @@ function openTrxModal(t){
         <div style="background:var(--surface);border-radius:10px;padding:14px">
           <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Status</div>
           <div>${badge(t.status)}</div>
+        </div>
+        <div style="background:var(--surface);border-radius:10px;padding:14px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Penanggung Jawab</div>
+          <div style="font-size:13px;color:var(--text-strong);font-weight:600">${t.penanggung_jawab || t.penanggungJawab || '-'}</div>
         </div>
       </div>
       <!-- Deskripsi -->
@@ -4556,6 +4605,21 @@ updateOnlineStatus();
 let _ntBlokSeq  = 0;   // penomor unik tiap blok transaksi
 let _ntBarisSeq = 0;   // penomor unik tiap baris detail (global, lintas blok)
 
+function isiOption(dlId, values){
+  const dl = document.getElementById(dlId);
+  if(!dl) return;
+  const uniq = [...new Set(values.map(v=>String(v||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'id'));
+  dl.innerHTML = uniq.map(v=>`<option value="${v.replace(/"/g,'&quot;')}"></option>`).join('');
+}
+
+function bangunSugestiTrx(){
+  isiOption('dl-nt-penanggung', (DATA.transaksi||[]).map(t=>t.penanggung_jawab || t.penanggungJawab));
+  isiOption('dl-nt-detail',     (DATA.transaksi_detail||[]).map(d=>d.detail));
+  isiOption('dl-nt-subdetail',  (DATA.transaksi_detail||[]).map(d=>d.subdetail));
+  isiOption('dl-nt-satuan',     (DATA.transaksi_detail||[]).map(d=>d.satuan));
+  isiOption('dl-nt-supir',      (DATA.transaksi_detail||[]).map(d=>d.supir));
+}
+
 function mitraOptionsHtml(){
   let html = '<option value="">Pilih Mitra</option>';
   DATA.mitra.forEach(m=>{
@@ -4612,7 +4676,7 @@ function blokTransaksiHtml(b, nomor){
       </div>
       <div>
         <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px">Penanggung Jawab</label>
-        <input id="nt-penanggung-jawab-${b}" type="text" placeholder="Nama" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text-strong);font-size:12px;outline:none;box-sizing:border-box">
+        <input id="nt-penanggung-jawab-${b}" type="text" placeholder="Nama" list="dl-nt-penanggung" autocomplete="off" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text-strong);font-size:12px;outline:none;box-sizing:border-box">
       </div>
     </div>
 
@@ -4623,9 +4687,9 @@ function blokTransaksiHtml(b, nomor){
         <img id="nt-foto-img-${b}" src="" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"/>
         <button onclick="hapusFotoNt(${b})" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#ef4444;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1">✕</button>
       </div>
-      <div id="nt-foto-zona-${b}" style="border:2px dashed var(--border);border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="document.getElementById('nt-foto-file-${b}').click()">
+      <div id="nt-foto-zona-${b}" tabindex="0" onpaste="onNtFotoPaste(event, ${b})" style="border:2px dashed var(--border);border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;outline:none" onclick="document.getElementById('nt-foto-file-${b}').click()">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--muted);flex-shrink:0"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span style="font-size:12px;color:var(--muted)">Upload Gambar</span>
+        <span style="font-size:12px;color:var(--muted)">Upload Gambar <span style="opacity:.7">atau klik lalu tekan Ctrl+V</span></span>
         <button onclick="event.stopPropagation();document.getElementById('nt-foto-cam-${b}').click()" style="margin-left:auto;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer">Kamera</button>
       </div>
       <input id="nt-foto-file-${b}" type="file" accept="image/*" style="display:none" onchange="onNtFotoSelected(this, ${b})"/>
@@ -4704,6 +4768,7 @@ function hapusBlokTransaksi(b){
 }
 
 function openTambahTrxModal(){
+  bangunSugestiTrx();
   document.getElementById('nt-blocks').innerHTML = '';
   document.getElementById('nt-grand-total').textContent = 'Rp 0';
   document.getElementById('nt-error').style.display = 'none';
@@ -4748,23 +4813,69 @@ function hitungNtStatus(b){
   lbl.style.color = status === 'Lunas' ? '#10b981' : status === 'Diproses' ? '#6366f1' : '#f59e0b';
 }
 
-function onNtFotoSelected(input, b){
-  const file = input.files[0];
-  if(!file) return;
+function pasangFotoNt(file, b){
+  if(!file || !file.type || file.type.indexOf('image/') !== 0) return false;
   const reader = new FileReader();
   reader.onload = function(e){
     const b64full = e.target.result;
     const mime    = file.type || 'image/jpeg';
     const b64     = b64full.split(',')[1];
     const img     = document.getElementById('nt-foto-img-' + b);
+    if(!img) return;
     img.src             = b64full;
     img.dataset.base64  = b64;
     img.dataset.mime    = mime;
-    img.dataset.name    = file.name;
+    img.dataset.name    = file.name || ('tempel-' + Date.now() + '.png');
     document.getElementById('nt-foto-preview-' + b).style.display = 'block';
+    showToast && typeof showToast === 'function' && showToast('Gambar berhasil ditempel', 'success');
   };
   reader.readAsDataURL(file);
+  return true;
 }
+
+function onNtFotoSelected(input, b){
+  const file = input.files[0];
+  if(!file) return;
+  pasangFotoNt(file, b);
+}
+
+function ambilGambarDariClipboard(dataTransfer, b){
+  if(!dataTransfer || !dataTransfer.items) return false;
+  for(const item of dataTransfer.items){
+    if(item.kind === 'file' && item.type.indexOf('image/') === 0){
+      const file = item.getAsFile();
+      if(file) return pasangFotoNt(file, b);
+    }
+  }
+  return false;
+}
+
+function onNtFotoPaste(event, b){
+  const handled = ambilGambarDariClipboard(event.clipboardData, b);
+  if(handled) event.preventDefault();
+}
+
+// Fallback: tangkap paste di mana saja selama modal tambah transaksi terbuka,
+// lalu tempelkan ke zona foto blok yang sedang aktif (fokus terakhir), atau blok terakhir kalau tidak ada.
+document.addEventListener('paste', function(event){
+  const modal = document.getElementById('modal-tambah-trx');
+  if(!modal || !modal.classList.contains('open')) return;
+  // Kalau event sudah ditangani oleh handler onpaste di zona foto, jangan tangani dua kali
+  if(event.defaultPrevented) return;
+  // Kalau fokus sedang di input teks biasa (bukan zona foto), biarkan browser tempel teks seperti biasa,
+  // kecuali clipboard memang berisi gambar.
+  const active   = document.activeElement;
+  const blokAktif = active && active.closest ? active.closest('.nt-blok') : null;
+  let b;
+  if(blokAktif) b = Number(blokAktif.dataset.blok);
+  else {
+    const blocks = document.querySelectorAll('#nt-blocks .nt-blok');
+    if(!blocks.length) return;
+    b = Number(blocks[blocks.length - 1].dataset.blok);
+  }
+  const handled = ambilGambarDariClipboard(event.clipboardData, b);
+  if(handled) event.preventDefault();
+});
 
 function hapusFotoNt(b){
   document.getElementById('nt-foto-img-' + b).src = '';
@@ -4781,7 +4892,8 @@ function tambahBarisDetail(b){
   row.id = 'nt-row-' + id;
   row.dataset.blok = b;
   row.style.cssText = 'display:grid;grid-template-columns:2fr 2fr 1fr 1.2fr 1.5fr 1.5fr 1.5fr 1.5fr auto;gap:6px;margin-bottom:6px';
-  const inp = (name, ph, type='text') => `<input data-field="${name}" type="${type}" placeholder="${ph}" oninput="hitungNtTotal(${b})" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 8px;color:var(--text-strong);font-size:11px;outline:none;box-sizing:border-box">`;
+  const dlMap = { detail:'dl-nt-detail', subdetail:'dl-nt-subdetail', satuan:'dl-nt-satuan', supir:'dl-nt-supir' };
+  const inp = (name, ph, type='text') => `<input data-field="${name}" type="${type}" placeholder="${ph}" ${dlMap[name] ? `list="${dlMap[name]}" autocomplete="off"` : ''} oninput="hitungNtTotal(${b})" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 8px;color:var(--text-strong);font-size:11px;outline:none;box-sizing:border-box">`;
   row.innerHTML = `
     ${inp('detail','Item')}
     ${inp('subdetail','Tipe')}
@@ -4959,15 +5071,29 @@ async function prosesSimpanTrxPayloads(payloads){
     try {
       let fotoUrl = '';
       if(p.fotoB64){
+        // Bersihkan deskripsi & mitra dari karakter yang tidak aman untuk nama file
+        const safeDeskripsi = (p.deskripsi || 'Struk').replace(/[^a-zA-Z0-9 _\-]/g,'').trim();
+        const safeMitraNama = (p.mitraNama || '').replace(/[^a-zA-Z0-9 _\-]/g,'').trim();
+        const safeTanggal   = (p.tanggal || '').trim();
+        // Ekstensi diambil dari nama file asli, fallback ke mime type
+        const extFromName = (p.fotoName && p.fotoName.includes('.')) ? p.fotoName.split('.').pop() : '';
+        const extFromMime = (p.fotoMime && p.fotoMime.includes('/')) ? p.fotoMime.split('/').pop() : '';
+        const ext = (extFromName || extFromMime || 'jpg').toLowerCase();
+
+        // Nama file fisik: deskripsi_tanggal.ext
+        const namaFile = safeDeskripsi + '_' + safeTanggal + '.' + ext;
+        // Nama dokumen (kolom "nama" di sheet dokumen): sertakan mitraNama juga
+        const namaDokumen = (safeMitraNama ? safeMitraNama + '_' : '') + safeDeskripsi + '_' + safeTanggal;
+
         const fotoParams = new URLSearchParams();
         fotoParams.append('action',      'uploadDok');
         fotoParams.append('fileData',    p.fotoB64);
-        fotoParams.append('fileName',    p.fotoName);
+        fotoParams.append('fileName',    namaFile);
         fotoParams.append('mimeType',    p.fotoMime);
         fotoParams.append('mitraId',     p.mitraId);
         fotoParams.append('mitraNama',   p.mitraNama);
         fotoParams.append('jenis',       'Nota');
-        fotoParams.append('docNamaBaru', p.fotoName);
+        fotoParams.append('docNamaBaru', namaDokumen);
         fotoParams.append('keterangan',  p.deskripsi);
         fotoParams.append('docTanggal',  p.tanggal);
         const fotoResp = await fetch(APPS_SCRIPT_URL, {
@@ -5306,8 +5432,15 @@ function hitungFaktorKonversi(rowsMasuk, rowsKeluar){
   const cara2 = avgHargaKeluar > 0 ? avgHargaMasuk / avgHargaKeluar : null;
 
   // Cara 3: median harga berbobot qty (transaksi besar dapat bobot lebih)
-  const hargaMasukArr  = rowsMasuk.flatMap(r=>r.harga>0?Array(Math.max(1,Math.round(r.qty))).fill(r.harga):[]).slice(0,500);
-  const hargaKeluarArr = rowsKeluar.flatMap(r=>r.harga>0?Array(Math.max(1,Math.round(r.qty))).fill(r.harga):[]).slice(0,500);
+  // Fallback: kalau kolom Harga per-unit kosong/0, pakai (subtotal ÷ qty) sebagai harga efektif,
+  // supaya transaksi yang hanya diisi subtotal (tanpa harga satuan) tetap ikut dihitung.
+  function hargaEfektif(r){
+    if(r.harga > 0) return r.harga;
+    if(r.qty > 0 && r.subtotal > 0) return r.subtotal / r.qty;
+    return 0;
+  }
+  const hargaMasukArr  = rowsMasuk.flatMap(r=>{ const h=hargaEfektif(r); return h>0?Array(Math.max(1,Math.round(r.qty))).fill(h):[]; }).slice(0,500);
+  const hargaKeluarArr = rowsKeluar.flatMap(r=>{ const h=hargaEfektif(r); return h>0?Array(Math.max(1,Math.round(r.qty))).fill(h):[]; }).slice(0,500);
   const cara3 = (hargaMasukArr.length && hargaKeluarArr.length)
     ? median(hargaMasukArr) / median(hargaKeluarArr)
     : null;
@@ -5316,7 +5449,7 @@ function hitungFaktorKonversi(rowsMasuk, rowsKeluar){
   // Cara 1 & 2 tidak reliable karena butuh stok balance (semua terjual habis)
   // Cara 3 (median harga berbobot) adalah satu-satunya yang valid
   // Cara 1 & 2 hanya dipakai jika satuan sama (sebagai validasi silang)
-  const satuanSama = rowsMasuk[0] && rowsKeluar[0] && rowsMasuk[0].satuan === rowsKeluar[0].satuan;
+  const satuanSama = rowsMasuk[0] && rowsKeluar[0] && (rowsMasuk[0].satuan||'').trim().toLowerCase() === (rowsKeluar[0].satuan||'').trim().toLowerCase();
   const candidates = satuanSama ? [cara1, cara2, cara3] : [cara3];
   const valid = candidates.filter(v=>v!==null && isFinite(v) && v>0);
   if(!valid.length) return null;
@@ -5349,13 +5482,15 @@ function buildRingkasanStok(rows){
 
   const result = [];
   Object.values(byDetail).forEach(b => {
-    // Deteksi apakah satuan masuk dan keluar berbeda
-    const satuanMasukSet  = new Set(b.masukRows.map(r=>r.satuan));
-    const satuanKeluarSet = new Set(b.keluarRows.map(r=>r.satuan));
+    // Deteksi apakah satuan masuk dan keluar berbeda (dibandingkan tanpa peduli besar/kecil huruf & spasi)
+    const normSat = s => (s||'').trim().toLowerCase();
+    const satuanMasukSet  = new Set(b.masukRows.map(r=>normSat(r.satuan)));
+    const satuanKeluarSet = new Set(b.keluarRows.map(r=>normSat(r.satuan)));
     const satuanBerbeda   = b.masukRows.length > 0 && b.keluarRows.length > 0 &&
       ![...satuanMasukSet].some(s => satuanKeluarSet.has(s));
 
     let konversi = null;
+    let konversiGagal = false;
     let masukKonversi = 0;
     let masukAsli = 0;
     let keluar = 0;
@@ -5364,6 +5499,7 @@ function buildRingkasanStok(rows){
     if(satuanBerbeda){
       // Hitung faktor konversi dinamis dari data
       konversi = hitungFaktorKonversi(b.masukRows, b.keluarRows);
+      konversiGagal = !konversi; // satuan beda tapi faktor tidak bisa dihitung (data harga kurang)
       const faktor = konversi ? konversi.faktor : 1;
       masukAsli     = b.masukRows.reduce((s,r)=>s+r.qty,0);
       masukKonversi = Math.round(masukAsli * faktor * 10) / 10;
@@ -5391,7 +5527,9 @@ function buildRingkasanStok(rows){
       masuk:  masukKonversi,
       masukAsli,
       keluar,
-      konversi,  // null jika tidak ada konversi
+      konversi,      // null jika tidak ada konversi
+      konversiGagal, // true jika satuan beda tapi faktor gagal dihitung (kurang data harga)
+      satuanAsliMasuk: satuanBerbeda ? (b.masukRows[0] && b.masukRows[0].satuan) : null,
       subs: Object.values(subsMap)
     });
   });
@@ -5797,13 +5935,20 @@ function renderRingkasanStok(ringkasan){
             <div style="font-size:10px;color:#fbbf24;margin-top:3px;display:flex;align-items:center;gap:4px" title="C1(vol):${k.cara1||'-'} | C2(avg harga):${k.cara2||'-'} | C3(median):${k.cara3||'-'}">
               <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               ~estimasi · 1 ${k.satuanMasuk} ≈ ${k.faktor} ${k.satuanKeluar} (dari data · hover untuk detail)
-            </div>` : '';
+            </div>` : (r.konversiGagal ? `
+            <div style="font-size:10px;color:#f87171;margin-top:3px;display:flex;align-items:center;gap:4px" title="Satuan masuk (${r.satuanAsliMasuk||'-'}) berbeda dari satuan keluar (${r.satuan}), tapi faktor konversi tidak bisa dihitung karena data Harga/Subtotal transaksi belum cukup. Angka MASUK di bawah masih dalam satuan asli, BUKAN sudah dikonversi.">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              satuan beda (${r.satuanAsliMasuk||'-'}), konversi gagal — isi Harga/Subtotal supaya bisa dihitung
+            </div>` : '');
 
           // Info masuk asli jika ada konversi
           const masukDisplay = k
             ? `<span style="font-weight:600;color:#34d399">${r.masuk.toLocaleString('id-ID')}</span>
                <div style="font-size:10px;color:var(--muted)">(${r.masukAsli.toLocaleString('id-ID')} ${k.satuanMasuk})</div>`
-            : `<span style="font-weight:600;color:#34d399">${r.masuk.toLocaleString('id-ID')}</span>`;
+            : (r.konversiGagal
+              ? `<span style="font-weight:600;color:#34d399">${r.masuk.toLocaleString('id-ID')}</span>
+                 <div style="font-size:10px;color:#f87171">(${r.satuanAsliMasuk||'-'}, belum dikonversi)</div>`
+              : `<span style="font-weight:600;color:#34d399">${r.masuk.toLocaleString('id-ID')}</span>`);
 
           const subRows = hasSubs ? r.subs.map(s=>{
             const ss = s.masuk - s.keluar;
