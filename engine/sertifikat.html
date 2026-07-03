@@ -19,36 +19,82 @@
     body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   }
 
-  .toolbar {
-    width: 210mm; max-width: 100%;
-    margin: 14px 0; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  /* ===== Navbar (tidak ikut tercetak, tidak mengubah struktur dokumen sertifikat) ===== */
+  .navbar {
+    width: 100%; background: linear-gradient(135deg, #12294f, #1a3c6e);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18); margin-bottom: 18px;
+    position: sticky; top: 0; z-index: 20;
   }
-  .toolbar button {
-    font-family: Arial, sans-serif; font-size: 14px; padding: 10px 18px;
-    border-radius: 6px; border: none; cursor: pointer; background: #1a3c6e; color: #fff;
+  .navbar-inner {
+    width: 210mm; max-width: 100%; margin: 0 auto; box-sizing: border-box;
+    padding: 12px 18px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    font-family: Arial, sans-serif;
   }
-  .toolbar button.secondary { background: #6b7280; }
-  .toolbar-note {
-    width: 210mm; max-width: 100%; text-align: center;
-    font-family: Arial, sans-serif; font-size: 12.5px; color: #444; margin-bottom: 14px;
+  .navbar-brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+  .navbar-logo {
+    width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.14);
+    display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0;
+  }
+  .navbar-title { font-size: 14.5px; font-weight: bold; color: #fff; line-height: 1.25; }
+  .navbar-subtitle { font-size: 11px; color: #c3d0e6; line-height: 1.2; }
+  .navbar-tabs { display: flex; gap: 6px; }
+  .navbar-tabs button {
+    font-size: 13px; padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer;
+    background: rgba(255,255,255,0.1); color: #dbe4f2; font-weight: bold; transition: background .15s;
+  }
+  .navbar-tabs button:hover { background: rgba(255,255,255,0.2); }
+  .navbar-tabs button.active { background: #fff; color: #1a3c6e; }
+  .navbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .navbar-actions button {
+    font-family: Arial, sans-serif; font-size: 13px; padding: 9px 14px;
+    border-radius: 6px; border: none; cursor: pointer; white-space: nowrap;
+  }
+  .navbar-actions button.primary { background: #ffb020; color: #1a1a1a; font-weight: bold; }
+  .navbar-actions button.primary:hover { background: #ffc04d; }
+  .navbar-actions button.secondary { background: rgba(255,255,255,0.14); color: #fff; }
+  .navbar-actions button.secondary:hover { background: rgba(255,255,255,0.26); }
+  .navbar-actions button.ghost { background: transparent; color: #dbe4f2; border: 1px solid rgba(255,255,255,0.35); }
+  .navbar-actions button.ghost:hover { background: rgba(255,255,255,0.1); }
+  .navbar-dropdown { position: relative; }
+  .navbar-dropdown-menu {
+    display: none; position: absolute; right: 0; top: calc(100% + 6px);
+    background: #fff; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    min-width: 220px; overflow: hidden; z-index: 30;
+  }
+  .navbar-dropdown-menu.open { display: block; }
+  .navbar-dropdown-menu button {
+    width: 100%; text-align: left; background: #fff !important; color: #1a3c6e !important;
+    border-radius: 0 !important; padding: 11px 14px !important; font-weight: normal !important;
+    border-bottom: 1px solid #eef1f6;
+  }
+  .navbar-dropdown-menu button:last-child { border-bottom: none; }
+  .navbar-dropdown-menu button:hover { background: #eef1f6 !important; }
+  .navbar-note {
+    width: 210mm; max-width: 100%; margin: 0 auto; box-sizing: border-box;
+    padding: 6px 18px 10px; text-align: center;
+    font-family: Arial, sans-serif; font-size: 11.5px; color: #cdd9ec;
+  }
+  @media screen and (max-width: 850px) {
+    .navbar-inner { justify-content: center; }
+    .navbar-brand { margin-right: 0; }
   }
   @media print {
-    .toolbar, .toolbar-note, .form-panel, .doclist-toolbar, .tabs { display: none !important; }
-    body { background: #fff; }
+    .navbar, .form-panel, .doclist-toolbar, .batch-modal { display: none !important; }
+    body { background: #fff; display: block !important; }
     body[data-print-target="cert"] .doclist-section { display: none !important; }
     body[data-print-target="list"] .page-frame { display: none !important; }
+    body[data-print-target="batchAll"] .doclist-section,
+    body[data-print-target="batchAll"] #certSection { display: none !important; }
+    #batchAll { display: none; }
+    body[data-print-target="batchAll"] #batchAll { display: block !important; }
+    #batchAll .page-frame {
+      display: block; page-break-after: always; break-after: page;
+      page-break-inside: avoid; break-inside: avoid; margin: 0 auto;
+    }
+    #batchAll .page-frame:last-child { page-break-after: auto; break-after: auto; }
   }
 
   /* ===== Panel generator (form) - tidak ikut tercetak ===== */
-  .tabs {
-    width: 210mm; max-width: 100%; display: flex; gap: 8px; justify-content: center;
-    font-family: Arial, sans-serif; margin-bottom: 10px;
-  }
-  .tabs button {
-    font-size: 13.5px; padding: 8px 16px; border-radius: 6px 6px 0 0; border: none;
-    cursor: pointer; background: #d7deea; color: #1a3c6e; font-weight: bold;
-  }
-  .tabs button.active { background: #1a3c6e; color: #fff; }
 
   .form-panel {
     width: 210mm; max-width: 100%; background: #fff; border-radius: 8px;
@@ -109,6 +155,28 @@
     .doclist-section { box-shadow: none; }
     table.doclist-table { font-size: 11.5px; }
   }
+
+  .form-field .urut-formula { font-size: 12px; color: #1a3c6e; margin-top: 3px; font-weight: bold; }
+
+  /* ===== Modal cetak semua (mode file terpisah) ===== */
+  .batch-modal {
+    position: fixed; inset: 0; background: rgba(15,25,45,0.55);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+    font-family: Arial, sans-serif;
+  }
+  .batch-modal.open { display: flex; }
+  .batch-modal-box {
+    background: #fff; border-radius: 10px; padding: 22px 24px; width: 340px; max-width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center;
+  }
+  .batch-modal-box h4 { margin: 0 0 8px; color: #1a3c6e; font-size: 15px; }
+  .batch-modal-box p { margin: 0 0 16px; font-size: 13px; color: #444; line-height: 1.4; }
+  .batch-modal-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .batch-modal-actions button {
+    font-size: 13px; padding: 9px 16px; border-radius: 6px; border: none; cursor: pointer;
+  }
+  .batch-modal-actions button.next { background: #1a3c6e; color: #fff; }
+  .batch-modal-actions button.stop { background: #b3413a; color: #fff; }
 
   /* Bingkai/tepi luar baru — dibungkus di luar .page yang sudah ada.
      .page di dalamnya TIDAK diubah ukuran/bentuknya sama sekali, sehingga
@@ -178,10 +246,10 @@
   .awarded { text-align: center; font-size: 20px; margin-top: 22px; }
   .awarded .sub {font-size: 18px; }
 
-  .fields { margin: 26px auto 0; width: 80%; font-size: 22px; }
+  .fields { margin: 26px auto 0; width: 80%; font-size: 21px; }
   .field-row { display: flex; margin-bottom: 3px; }
   .field-label { width: 220px; flex-shrink: 0; }
-  .field-label .en { display:block; font-size: 22px; color:#333; }
+  .field-label .en { display:block; font-size: 21px; color:#333; }
   .field-colon { width: 10px; flex-shrink: 0; }
   .field-value {
     font-weight: bold; outline: none; flex: 1;
@@ -224,17 +292,34 @@
 </head>
 <body>
 
-  <div class="toolbar">
-    <button onclick="window.print()">🖨️ Cetak / Simpan sebagai PDF</button>
-    <button class="secondary" onclick="resetFields()">↺ Reset ke contoh</button>
-  </div>
-  <div class="toolbar-note">
-    Klik langsung pada teks <b>Nama</b>, <b>Tempat/Tgl Lahir</b>, <b>Nomor Reg</b>, dan <b>Jenis Dokumen</b> di sertifikat untuk mengubahnya, lalu tekan tombol cetak. Bagian ini tidak akan ikut tercetak.
-  </div>
-
-  <div class="tabs">
-    <button type="button" id="tabBtnCert" class="active" onclick="showTab('cert')">📄 Sertifikat</button>
-    <button type="button" id="tabBtnList" onclick="showTab('list')">📋 Daftar Dokumen</button>
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-brand">
+        <div class="navbar-logo">📄</div>
+        <div>
+          <div class="navbar-title">Generator Sertifikat</div>
+          <div class="navbar-subtitle">PT. Indotama Jasa Sertifikasi</div>
+        </div>
+      </div>
+      <div class="navbar-tabs">
+        <button type="button" id="tabBtnCert" class="active" onclick="showTab('cert')">Sertifikat</button>
+        <button type="button" id="tabBtnList" onclick="showTab('list')">Daftar Dokumen</button>
+      </div>
+      <div class="navbar-actions">
+        <button type="button" class="primary" onclick="printCurrent()">🖨️ Cetak</button>
+        <div class="navbar-dropdown">
+          <button type="button" class="secondary" onclick="toggleBatchMenu()">🗂️ Cetak Semua (16) ▾</button>
+          <div class="navbar-dropdown-menu" id="batchMenu">
+            <button type="button" onclick="closeBatchMenu(); printAllCombined();">Gabung jadi 1 File</button>
+            <button type="button" onclick="closeBatchMenu(); printAllSeparate();">File Terpisah (berurutan)</button>
+          </div>
+        </div>
+        <button type="button" class="ghost" onclick="resetFields()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="navbar-note">
+      Klik langsung pada teks <b>Nama</b>, <b>Tempat/Tgl Lahir</b>, <b>Nomor Reg</b>, dan <b>Jenis Dokumen</b> di sertifikat untuk mengubahnya. Navbar ini tidak ikut tercetak.
+    </div>
   </div>
 
   <div class="form-panel">
@@ -253,8 +338,13 @@
         <input type="text" id="fTtl" placeholder="Contoh: Makassar, 17 Agustus 1990">
       </div>
       <div class="form-field">
-        <label>Reg.No. (nomor saja)</label>
-        <input type="text" id="fRegMid" placeholder="Contoh: 1822">
+        <label>Urutan Dokumen ke-</label>
+        <input type="number" id="fUrutKe" min="1" step="1" placeholder="1" onchange="updateRegPreview()" oninput="updateRegPreview()">
+        <div class="urut-formula" id="urutFormula"></div>
+      </div>
+      <div class="form-field">
+        <label>Reg.No. (override manual, opsional)</label>
+        <input type="text" id="fRegMid" placeholder="Kosongkan agar pakai rumus otomatis" oninput="updateRegPreview()">
         <div class="regno-preview" id="regPreview">Preview: 153/____/QHSE.____/PJK3.IJS/III/2025</div>
       </div>
       <div class="form-field">
@@ -319,12 +409,12 @@
         <div class="field-row">
           <div class="field-label">Nama<span class="en">Name</span></div>
           <div class="field-colon">:</div>
-          <div class="field-value" contenteditable="true" id="nama">Jontra Polta</div>
+          <div class="field-value" contenteditable="true" id="nama">Nama Peserta</div>
         </div>
         <div class="field-row">
           <div class="field-label">Tempat Tgl Lahir<span class="en">Place and date of birth</span></div>
           <div class="field-colon">:</div>
-          <div class="field-value" contenteditable="true" id="ttl">Bengo, 09 July 1986</div>
+          <div class="field-value" contenteditable="true" id="ttl">Tempat, TT MMMM YYYY</div>
         </div>
       </div>
 
@@ -359,6 +449,8 @@
   </div>
   </div>
 
+  <div id="batchAll"></div>
+
   <div class="doclist-section" id="doclistSection">
     <h2>📋 Daftar Dokumen yang Sudah Dibuat</h2>
     <div class="doclist-sub">PT. Indotama Jasa Sertifikasi — Rekap dokumen yang telah digenerate pada perangkat ini</div>
@@ -382,6 +474,17 @@
     <div class="doclist-empty" id="doclistEmpty" style="display:none;">Belum ada dokumen yang disimpan. Isi form generator lalu klik "Simpan ke Daftar Dokumen".</div>
   </div>
 
+  <div class="batch-modal" id="batchModal">
+    <div class="batch-modal-box">
+      <h4>Cetak Semua Dokumen (File Terpisah)</h4>
+      <p id="batchModalText"></p>
+      <div class="batch-modal-actions">
+        <button type="button" class="next" onclick="continueBatchSeparate()">Lanjut Dokumen Berikutnya</button>
+        <button type="button" class="stop" onclick="stopBatchSeparate()">Berhenti</button>
+      </div>
+    </div>
+  </div>
+
 <script>
   // ===== Master data 16 jenis dokumen (sesuai daftar registrasi) =====
   const DOCS = [
@@ -403,28 +506,40 @@
     { no: 16, jenis: "Safety Officer",                                code: "P3K",       mid: "1924", sub: "(Ahli Keselamatan Kerja)" }
   ];
 
+  // Menghitung nomor register (mid) final: pakai override manual fRegMid jika diisi,
+  // jika tidak: default (mid tetap per jenis) + angka yang diketik di "Urutan Dokumen ke-".
+  // CATATAN: murni stateless — tidak disimpan/diingat dari sesi atau peserta sebelumnya.
+  // Berapa pun angka yang diketik user, itulah yang langsung ditambahkan ke mid default.
+  function computedMid(d) {
+    const override = document.getElementById("fRegMid").value.trim();
+    if (override) return override;
+    const urutRaw = parseInt(document.getElementById("fUrutKe").value, 10);
+    const urut = (!isNaN(urutRaw) && urutRaw > 0) ? urutRaw : 1;
+    return String(parseInt(d.mid, 10) + urut);
+  }
+
   const defaults = {
     "nama": "Nama Peserta",
     "ttl": "Tempat, Tanggal",
-    "regno-mid": "1366",
-    "regno-code": "MSDS",
-    "regno-full": "153/1366/QHSE.MSDS/PJK3.IJS/III/2025",
-    "course": "Material Safety Data Sheet",
-    "coursesub": "(Lembar Data Keselamatan Bahan)"
+    "regno-mid": "1822",
+    "regno-code": "ISO:31000",
+    "regno-full": "153/1822/QHSE.ISO:31000/PJK3.IJS/III/2025",
+    "course": "ISO 31000:2018",
+    "coursesub": "Manajemen Risiko (Risk Management)"
   };
 
   function resetFields() {
     for (const id in defaults) {
       document.getElementById(id).innerText = defaults[id];
     }
-    document.getElementById("fJenis").selectedIndex = 4; // MSDS
+    document.getElementById("fJenis").selectedIndex = 0; // default ISO 31000:2018
     document.getElementById("fNama").value = "";
     document.getElementById("fTtl").value = "";
     document.getElementById("fRegMid").value = "";
     document.getElementById("fManualMode").checked = false;
     document.getElementById("fRegFull").value = "";
     onManualModeToggle();
-    onJenisChange();
+    onJenisChange(); // akan mengisi ulang fUrutKe sesuai jenis MSDS
     document.getElementById("regnoAuto").style.display = "";
     document.getElementById("regnoManual").style.display = "none";
   }
@@ -447,16 +562,26 @@
 
   function updateRegPreview() {
     const d = currentDoc();
-    const mid = document.getElementById("fRegMid").value.trim() || d.mid;
+    const mid = computedMid(d);
     document.getElementById("regPreview").textContent =
       "Preview: 153/" + mid + "/QHSE." + d.code + "/PJK3.IJS/III/2025";
+    const urutRaw = parseInt(document.getElementById("fUrutKe").value, 10);
+    const urut = (!isNaN(urutRaw) && urutRaw > 0) ? urutRaw : 1;
+    document.getElementById("urutFormula").textContent =
+      "Rumus: default (" + d.mid + ") + urutan ke-" + urut + " = " + mid;
   }
 
   function onJenisChange() {
     const d = currentDoc();
-    document.getElementById("fRegMid").placeholder = d.mid;
+    document.getElementById("fRegMid").placeholder = "Kosongkan agar pakai rumus otomatis";
+    // Urutan Dokumen ke- TIDAK diisi ulang otomatis dari penyimpanan apa pun saat ganti jenis.
+    // Nilai yang sedang diketik user dibiarkan apa adanya (default awal "1" hanya diisi
+    // sekali saat halaman pertama dibuka / tombol Reset ditekan).
+    if (!document.getElementById("fUrutKe").value) {
+      document.getElementById("fUrutKe").value = 1;
+    }
     if (!document.getElementById("fManualMode").checked) {
-      document.getElementById("fRegFull").value = "153/" + d.mid + "/QHSE." + d.code + "/PJK3.IJS/III/2025";
+      document.getElementById("fRegFull").value = "153/" + computedMid(d) + "/QHSE." + d.code + "/PJK3.IJS/III/2025";
     }
     updateRegPreview();
   }
@@ -466,7 +591,7 @@
     document.getElementById("fRegFullWrap").style.display = manual ? "" : "none";
     if (manual) {
       const d = currentDoc();
-      const mid = document.getElementById("fRegMid").value.trim() || d.mid;
+      const mid = computedMid(d);
       if (!document.getElementById("fRegFull").value) {
         document.getElementById("fRegFull").value = "153/" + mid + "/QHSE." + d.code + "/PJK3.IJS/III/2025";
       }
@@ -477,7 +602,7 @@
     const d = currentDoc();
     const nama = document.getElementById("fNama").value.trim();
     const ttl = document.getElementById("fTtl").value.trim();
-    const mid = document.getElementById("fRegMid").value.trim() || d.mid;
+    const mid = computedMid(d);
     const manual = document.getElementById("fManualMode").checked;
 
     if (nama) document.getElementById("nama").innerText = nama;
@@ -549,10 +674,14 @@
 
   function saveToDocList() {
     applyToCertificate();
+    const d = currentDoc();
     const manual = document.getElementById("fManualMode").checked;
     const regno = manual ?
       document.getElementById("regno-full").innerText :
       ("153/" + document.getElementById("regno-mid").innerText + "/QHSE." + document.getElementById("regno-code").innerText + "/PJK3.IJS/III/2025");
+
+    const urutRaw = parseInt(document.getElementById("fUrutKe").value, 10);
+    const urut = (!isNaN(urutRaw) && urutRaw > 0) ? urutRaw : 1;
 
     const entry = {
       jenis: document.getElementById("course").innerText,
@@ -561,6 +690,7 @@
       ttl: document.getElementById("ttl").innerText,
       coursesub: document.getElementById("coursesub").innerText,
       manual: manual,
+      urutke: urut,
       tanggal: new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })
     };
     const list = loadDocList();
@@ -594,6 +724,7 @@
     }
     document.getElementById("fNama").value = item.nama;
     document.getElementById("fTtl").value = item.ttl;
+    if (item.urutke) document.getElementById("fUrutKe").value = item.urutke;
     onManualModeToggle();
     showTab("cert");
   }
@@ -628,10 +759,134 @@
     window.print();
   }
 
+  // ===== Navbar dropdown (Cetak Semua) =====
+  function toggleBatchMenu() {
+    document.getElementById("batchMenu").classList.toggle("open");
+  }
+  function closeBatchMenu() {
+    document.getElementById("batchMenu").classList.remove("open");
+  }
+  document.addEventListener("click", function (e) {
+    const dd = document.querySelector(".navbar-dropdown");
+    if (dd && !dd.contains(e.target)) closeBatchMenu();
+  });
+
+  // ===== Cetak 1 dokumen (mode single, tetap seperti semula) =====
+  function printCurrent() {
+    document.body.setAttribute("data-print-target", "cert");
+    window.print();
+  }
+
+  // ===== Cetak Semua (16 dokumen), mode Gabung jadi 1 file =====
+  // Struktur .page-frame/.page/.content sertifikat di-clone persis (tidak diubah),
+  // hanya field nama/ttl/jenis/regno yang diisi ulang per dokumen.
+  function buildDocPage(d, nama, ttl, urut) {
+    const clone = document.getElementById("certSection").cloneNode(true);
+    const mid = parseInt(d.mid, 10) + urut;
+    clone.querySelector("#nama").innerText = nama || "Nama Peserta";
+    clone.querySelector("#ttl").innerText = ttl || "";
+    clone.querySelector("#course").innerText = d.jenis;
+    clone.querySelector("#coursesub").innerText = d.sub;
+    const midEl = clone.querySelector("#regno-mid");
+    const codeEl = clone.querySelector("#regno-code");
+    midEl.innerText = mid;
+    codeEl.innerText = d.code;
+    // #regno-mid/#regno-code punya CSS font-weight:normal berbasis ID; karena ID akan
+    // dihapus di bawah (hindari duplikat ID di halaman), style-nya diberikan inline dulu.
+    midEl.style.fontWeight = "normal";
+    codeEl.style.fontWeight = "normal";
+    clone.querySelector("#regnoAuto").style.display = "";
+    clone.querySelector("#regnoManual").style.display = "none";
+    clone.querySelectorAll("[id]").forEach(function (el) { el.removeAttribute("id"); });
+    clone.removeAttribute("id");
+    return clone;
+  }
+
+  // ===== Cetak Semua (16 dokumen), mode Gabung jadi 1 File =====
+  // Stateless: angka yang diketik di "Urutan Dokumen ke-" langsung dipakai sebagai penambah
+  // mid default SETIAP jenis dokumen, sama untuk ke-16 dokumen, tidak disimpan, tidak nyambung
+  // dari sesi/peserta sebelumnya.
+  function printAllCombined() {
+    const nama = document.getElementById("nama").innerText.trim();
+    const ttl = document.getElementById("ttl").innerText.trim();
+    const container = document.getElementById("batchAll");
+    container.innerHTML = "";
+    const urutRaw = parseInt(document.getElementById("fUrutKe").value, 10);
+    const urut = (!isNaN(urutRaw) && urutRaw > 0) ? urutRaw : 1;
+    DOCS.forEach(function (d) {
+      container.appendChild(buildDocPage(d, nama, ttl, urut));
+    });
+    document.body.setAttribute("data-print-target", "batchAll");
+    window.print();
+  }
+
+  // ===== Cetak Semua (16 dokumen), mode File Terpisah (berurutan, dengan konfirmasi "Lanjut") =====
+  let batchQueue = [];
+  let batchIndex = 0;
+  let batchNama = "";
+  let batchTtl = "";
+  let batchUrut = 1;
+
+  function printAllSeparate() {
+    batchQueue = DOCS.slice();
+    batchIndex = 0;
+    batchNama = document.getElementById("nama").innerText.trim();
+    batchTtl = document.getElementById("ttl").innerText.trim();
+    const urutRaw = parseInt(document.getElementById("fUrutKe").value, 10);
+    batchUrut = (!isNaN(urutRaw) && urutRaw > 0) ? urutRaw : 1;
+    runBatchStep();
+  }
+
+  function runBatchStep() {
+    if (batchIndex >= batchQueue.length) {
+      batchQueue = []; batchIndex = 0;
+      return;
+    }
+    const d = batchQueue[batchIndex];
+    document.getElementById("nama").innerText = batchNama || "Nama Peserta";
+    document.getElementById("ttl").innerText = batchTtl || "";
+    document.getElementById("course").innerText = d.jenis;
+    document.getElementById("coursesub").innerText = d.sub;
+    document.getElementById("regno-mid").innerText = parseInt(d.mid, 10) + batchUrut;
+    document.getElementById("regno-code").innerText = d.code;
+    document.getElementById("regnoAuto").style.display = "";
+    document.getElementById("regnoManual").style.display = "none";
+    document.body.setAttribute("data-print-target", "cert");
+    window.print();
+  }
+
+  window.addEventListener("afterprint", function () {
+    // Setelah cetak batch gabung: kembalikan target cetak normal & bersihkan container
+    if (document.body.getAttribute("data-print-target") === "batchAll") {
+      document.body.setAttribute("data-print-target", "cert");
+      document.getElementById("batchAll").innerHTML = "";
+      return;
+    }
+    // Setelah cetak batch terpisah: tampilkan modal konfirmasi "Lanjut"
+    if (batchQueue.length && batchIndex < batchQueue.length) {
+      const d = batchQueue[batchIndex];
+      document.getElementById("batchModalText").textContent =
+        "Dokumen " + (batchIndex + 1) + " dari " + batchQueue.length + " (" + d.jenis + ") sudah diproses cetak/simpan PDF. Lanjut ke dokumen berikutnya?";
+      document.getElementById("batchModal").classList.add("open");
+    }
+  });
+
+  function continueBatchSeparate() {
+    document.getElementById("batchModal").classList.remove("open");
+    batchIndex++;
+    runBatchStep();
+  }
+
+  function stopBatchSeparate() {
+    document.getElementById("batchModal").classList.remove("open");
+    batchQueue = [];
+    batchIndex = 0;
+  }
+
   // ===== Init =====
   document.body.setAttribute("data-print-target", "cert");
   populateJenisSelect();
-  document.getElementById("fJenis").selectedIndex = 4; // default MSDS
+  document.getElementById("fJenis").selectedIndex = 0; // default ISO 31000:2018
   onJenisChange();
   onManualModeToggle();
   renderDocList();
@@ -639,7 +894,7 @@
     updateRegPreview();
     if (document.getElementById("fManualMode").checked) {
       const d = currentDoc();
-      const mid = this.value.trim() || d.mid;
+      const mid = computedMid(d);
       document.getElementById("fRegFull").value = "153/" + mid + "/QHSE." + d.code + "/PJK3.IJS/III/2025";
     }
   });
