@@ -53,30 +53,36 @@ html, body, #app-inner, #scale-wrapper {
 @import url("https://fonts.googleapis.com/css?family=Amatic+SC");
 
 /* section wrapper untuk our moments */
+#secOurMoments {
+  position: relative;
+  overflow: visible;
+}
+
 #secOurMoments .om-section-wrapper {
-  position: absolute;
-  top: 0; left: 0;
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s ease;
   pointer-events: none;
+  z-index: 2;
+  touch-action: pan-y;
 }
 
 #secOurMoments .om-section-wrapper.visible {
   opacity: 1;
+  visibility: visible;
   transform: translateY(0);
-  pointer-events: auto;
 }
 
-#secOurMoments .om-section-wrapper.exit-up {
-  opacity: 0;
-  transform: translateY(-40px);
-  pointer-events: none;
+#secOurMoments .om-section-wrapper.visible > * {
+  pointer-events: auto;
 }
 
 .our-moments-title {
@@ -408,6 +414,82 @@ html, body {
     z-index: 5; /* tampil di depan panorama (z=2) tetapi di belakang pohon (z=8) */
 }
 
+/* ================= SCROLL HINT (panah ke atas di secStart) ================= */
+.scroll-hint {
+    position: fixed;
+    left: 50%;
+    bottom: 160px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    z-index: 20;
+    color: #fff;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.7s ease;
+}
+
+.scroll-hint.show {
+    opacity: 1;
+    animation: scrollHintFloat 2s ease-in-out infinite;
+}
+
+.scroll-hint-chevrons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 0.55;
+}
+
+.scroll-hint-chevrons .chevron {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid #c0392b;
+    border-left: 2px solid #c0392b;
+    transform: rotate(45deg);
+    margin: -6px;
+    animation: animateArrow 2s infinite;
+    opacity: 0;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45));
+}
+
+.chevron.c1 { animation-delay: 0s; opacity: 1; }
+.chevron.c2 { animation-delay: -0.2s; opacity: 0.75; }
+.chevron.c3 { animation-delay: -0.4s; opacity: 0.4; }
+
+.scroll-hint-text {
+    margin-top: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #c0392b;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+
+@keyframes scrollHintFloat {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-8px); }
+}
+
+@keyframes animateArrow {
+    0% {
+        opacity: 0;
+        transform: rotate(45deg) translate(12px, 12px);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(45deg) translate(-12px, -12px);
+    }
+}
+
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:300);
 
 .app-body {
@@ -606,6 +688,7 @@ html, body {
 
 /* --- SECTIONS --- */
 .app-section { height: 815px; scroll-snap-align: start; position: relative; }
+#secDetailAcara { height: auto; min-height: 815px; }
 
 /* ================= COVER ================= */
 #cover {
@@ -699,7 +782,6 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
     margin: 0 auto;
     padding: 8px 18px;
     font-size: 1rem;
@@ -739,28 +821,59 @@ html, body {
 }
 
 .btn-arrow {
-    width: 32px;
-    height: 32px;
-    padding: 8px;
-    border: 1px solid #374151;
-    border-radius: 9999px;
-    transform: rotate(45deg);
-    transition: transform 0.3s ease, background 0.3s ease, border 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    transform: none;
+    transition: transform 0.3s ease;
 }
 
-.arrow-path {
-    fill: #1f2937;
-    transition: fill 0.3s ease;
+.btn-arrow span {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid #c0392b;
+    border-left: 2px solid #c0392b;
+    transform: rotate(45deg);
+    margin: -4px 0;
+    animation: btnArrowPulse 2s infinite;
+    opacity: 1;
+}
+
+.btn-arrow span:nth-child(2) {
+    animation-delay: -0.2s;
+}
+
+.btn-arrow span:nth-child(3) {
+    animation-delay: -0.4s;
 }
 
 .btn-open:hover .btn-arrow {
-    transform: rotate(90deg);
-    background: #f9fafb;
-    border: none;
+    transform: translateX(2px);
 }
 
-.btn-open:hover .arrow-path {
-    fill: #1f2937;
+.btn-open:hover .btn-arrow span {
+    border-color: #ffffff;
+}
+
+@keyframes btnArrowPulse {
+    0% {
+        opacity: 0;
+        transform: rotate(45deg) translate(8px, 8px);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(45deg) translate(-8px, -8px);
+    }
 }
 
 /* --- animasi hilang --- */
@@ -871,7 +984,6 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
     margin: 0 auto;
     padding: 10px 20px;
     font-size: 1rem;
@@ -908,31 +1020,6 @@ html, body {
 
 .btn-open:hover {
     color: #f9fafb;
-}
-
-.btn-arrow {
-    width: 32px;
-    height: 32px;
-    padding: 8px;
-    border: 1px solid #374151;
-    border-radius: 9999px;
-    transform: rotate(45deg);
-    transition: transform 0.3s ease, background 0.3s ease, border 0.3s ease;
-}
-
-.arrow-path {
-    fill: #1f2937;
-    transition: fill 0.3s ease;
-}
-
-.btn-open:hover .btn-arrow {
-    transform: rotate(90deg);
-    background: #f9fafb;
-    border: none;
-}
-
-.btn-open:hover .arrow-path {
-    fill: #1f2937;
 }
 /* --- animasi hilang --- */
 .hide-cover {
@@ -1998,6 +2085,8 @@ html, body {
     z-index: 30;
 }
 
+/* Detail Acara: judul ditampilkan (di-toggle via class .tampil pada #detailAcaraContainer) */
+
 .detail-acara-container {
     position: fixed;
     top: 40px;
@@ -2011,6 +2100,136 @@ html, body {
 
 .detail-acara-container.tampil {
     opacity: 1;
+}
+
+/* Override khusus untuk container Detail Acara: mengalir normal mengikuti scroll utama halaman (bukan fixed), supaya tidak bentrok dengan scroll antar-section */
+#detailAcaraContainer {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: 320px;
+    max-width: calc(100% - 48px);
+    margin: 24px auto;
+    z-index: 15;
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+#detailAcaraContainer .save-date-inner.acara-scroll-inner {
+    width: 100%;
+    padding-bottom: 20px;
+}
+
+#detailAcaraContainer .save-date-title {
+    margin-bottom: 22px;
+}
+
+.acara-card {
+    margin-bottom: 32px;
+}
+
+.acara-card-title {
+    font-family: 'Playball', serif;
+    font-size: 30px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #6b0f1a;
+    margin-bottom: 14px;
+}
+
+.acara-divider {
+    width: 70%;
+    height: 1px;
+    background: rgba(107,15,26,0.35);
+    margin: 0 auto 18px;
+}
+
+.acara-info-bold {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    font-size: 13px;
+    color: #3b1a1a;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.acara-icon-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 16px 0;
+}
+.acara-icon-line {
+    height: 1px;
+    width: 40px;
+    background: rgba(59,26,26,0.35);
+}
+.acara-icon-building {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b1a1a' stroke-width='1.4'%3E%3Crect x='6' y='3' width='12' height='18' rx='1'/%3E%3Cline x1='9' y1='7' x2='9' y2='7.01'/%3E%3Cline x1='12' y1='7' x2='12' y2='7.01'/%3E%3Cline x1='15' y1='7' x2='15' y2='7.01'/%3E%3Cline x1='9' y1='11' x2='9' y2='11.01'/%3E%3Cline x1='12' y1='11' x2='12' y2='11.01'/%3E%3Cline x1='15' y1='11' x2='15' y2='11.01'/%3E%3Cline x1='9' y1='15' x2='9' y2='15.01'/%3E%3Cline x1='12' y1='15' x2='12' y2='15.01'/%3E%3Cline x1='15' y1='15' x2='15' y2='15.01'/%3E%3Cline x1='10' y1='21' x2='10' y2='18'/%3E%3Cline x1='14' y1='21' x2='14' y2='18'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.75;
+}
+
+.acara-venue {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #3b1a1a;
+    margin-bottom: 6px;
+}
+.acara-address {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    color: #5a3535;
+    line-height: 1.6;
+    margin-bottom: 18px;
+}
+
+.acara-btn-lokasi {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(180deg,#7a3d3d,#5b2a2a);
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 22px;
+    border-radius: 28px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-style: italic;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+
+.acara-card-dresscode .acara-dresscode-desc {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    color: #4a2a2a;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+.dresscode-palette {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+}
+.dresscode-color {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    display: inline-block;
+}
+.dresscode-color-white {
+    border: 1px solid #ddd;
 }
 
 .detail-acara-judul {
@@ -2272,41 +2491,170 @@ html, body {
 
 /* ================= SEC STORY OF US ================= */
 #secStoryOfUs {
+    position: relative;
+    width: 100%;
+    height: 815px;
+    min-height: 815px;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative;
     z-index: 30;
-    
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+#secStoryOfUs.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#secAfterStory {
+    position: relative;
+    width: 100%;
+    height: 815px;
+    min-height: 815px;
+    overflow: hidden;
+    z-index: 25;
+    background: linear-gradient(180deg, #f6ebde 0%, #ead4bf 100%);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+#secAfterStory.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.after-story-shell {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #efe0ce 0%, #e3c9ab 100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+    pointer-events: none;
+    touch-action: pan-y;
+    z-index: 35;
+}
+
+.after-story-shell.is-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.after-story-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transform: scale(1.03);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+    z-index: 0;
+}
+
+.after-story-photo.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.after-story-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(58,44,40,0.08) 0%, rgba(58,44,40,0.22) 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.after-story-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 1.5rem 1rem 1.6rem;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.after-story-card {
+    width: min(88vw, 320px);
+    padding: 1rem 1.1rem 1.05rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 18px;
+    background: rgba(255,249,242,0.72);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 14px 40px -18px rgba(58,44,40,0.45);
+    text-align: center;
+}
+
+.after-story-label {
+    display: block;
+    font-size: 0.64rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #C9A24B;
+    margin-bottom: 0.3rem;
+}
+
+.after-story-title {
+    font-family: 'Great Vibes', cursive;
+    font-size: 1.55rem;
+    color: #7D3C4A;
+    line-height: 1.1;
 }
 
 .sou-wrapper {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    position: relative;
+    width: min(92vw, 360px);
+    max-height: 86vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 1.2rem;
+    gap: 1rem;
+    padding: 1.3rem 1rem 1.1rem;
     opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+    visibility: hidden;
+    transform: translateY(0) scale(0.98);
+    transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s ease;
     pointer-events: none;
-    background: radial-gradient(circle at 1px 1px, rgba(125,60,74,0.06) 1.4px, transparent 0);
-    background-size: 26px 26px;
-    
+    background: rgba(255,250,245,0.72);
+    border: 1px solid rgba(125,60,74,0.12);
+    border-radius: 24px;
+    box-shadow: 0 18px 50px -24px rgba(58,44,40,0.45);
+    backdrop-filter: blur(6px);
 }
 
 .sou-wrapper.visible {
     opacity: 1;
-    transform: translateY(0);
+    visibility: visible;
+    transform: translateY(0) scale(1);
     pointer-events: auto;
+    position: fixed;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%) scale(1);
+    z-index: 40;
 }
 
-.sou-wrapper.exit-up {
+.sou-wrapper.is-hidden {
     opacity: 0;
-    transform: translateY(-40px);
+    visibility: hidden;
+    transform: translateY(10px) scale(0.98);
     pointer-events: none;
 }
 
@@ -2755,8 +3103,13 @@ html, body {
     text-transform: uppercase;
     color: #7A6A63;
     text-align: center;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
+    line-height: 1.15;
+    margin-top: 0.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.7rem;
+    white-space: nowrap;
 }
 
 .sou-item.is-active .sou-node-date { color: #7D3C4A; }
@@ -2767,9 +3120,9 @@ html, body {
 
 .sou-item-photo {
     width: 100%;
-    aspect-ratio: 5/3;
-    border-radius: 10px;
-    border: 1px solid #E7DACB;
+    aspect-ratio: 9 / 16;
+    border-radius: 0;
+    border: 2px solid #E7DACB;
     background: linear-gradient(155deg, #FFFBF6 0%, #F3E3DF 65%, #F0DCE0 100%);
     display: flex;
     flex-direction: column;
@@ -2781,6 +3134,29 @@ html, body {
     box-shadow: 0 10px 28px -14px rgba(58,44,40,0.35);
     overflow: hidden;
     position: relative;
+}
+
+.sou-item-photo::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px solid rgba(125, 60, 74, 0.16);
+    pointer-events: none;
+}
+
+.sou-item-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    will-change: opacity;
+}
+
+.sou-item-photo img.is-visible {
+    opacity: 1;
 }
 
 .sou-item-photo svg {
@@ -3219,9 +3595,6 @@ html, body {
                     <h2 class="cover-tamu">Nama Tamu</h2>
                     <button class="btn-open" onclick="bukaUndangan()">
                         Buka Undangan
-                        <svg class="btn-arrow" viewBox="0 0 16 19" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7 18C7 18.5523 7.44772 19 8 19C8.55228 19 9 18.5523 9 18H7ZM8.70711 0.292893C8.31658 -0.0976311 7.68342 -0.0976311 7.29289 0.292893L0.928932 6.65685C0.538408 7.04738 0.538408 7.68054 0.928932 8.07107C1.31946 8.46159 1.95262 8.46159 2.34315 8.07107L8 2.41421L13.6569 8.07107C14.0474 8.46159 14.6805 8.46159 15.0711 8.07107C15.4616 7.68054 15.4616 7.04738 15.0711 6.65685L8.70711 0.292893ZM9 18L9 1H7L7 18H9Z" class="arrow-path"></path>
-                        </svg>
                     </button>
                 </div>
             </section>
@@ -3243,13 +3616,22 @@ html, body {
                     <p class="keterangan-mempelai">
                         Anak Kedua dari <br>
                         Bapak M. Alwi <br>& <br>
-                        Ibu Iva Irawati
+                        Ibu Wahidah
                     </p>
                 </div>
             </div>
 
             <!-- Main Sections -->
-            <section id="secStart" class="app-section"></section>
+            <section id="secStart" class="app-section">
+                <div id="scrollHint" class="scroll-hint">
+                    <div class="scroll-hint-chevrons">
+                        <span class="chevron c1"></span>
+                        <span class="chevron c2"></span>
+                        <span class="chevron c3"></span>
+                    </div>
+                    <span class="scroll-hint-text">Geser ke Atas</span>
+                </div>
+            </section>
             <section id="secPria" class="app-section"></section>
             <section id="secWanita" class="app-section"></section>
             <section id="secDoa" class="app-section">
@@ -3380,7 +3762,7 @@ html, body {
                     </div>
 
                     <div class="sou-title">Story of Us</div>
-                    <div class="sou-subtitle">Titik Temu</div>
+                    <div class="sou-subtitle">Khrisna & Amira</div>
 
                     <!-- Preview 3 titik -->
                     <div class="sou-preview">
@@ -3415,6 +3797,77 @@ html, body {
                     </button>
 
                 </div>
+            </section>
+
+            <section id="secAfterStory" class="app-section">
+                <div class="after-story-shell">
+                    <img id="afterStoryPhoto" class="after-story-photo" src="" alt="Foto kenangan kami" loading="lazy">
+                    <div class="after-story-overlay"></div>
+                    <div class="after-story-content">
+                        <div class="after-story-card">
+                            <span class="after-story-label">Our Journey</span>
+                            <div class="after-story-title">Dan setiap langkah kami penuh makna</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="secDetailAcara" class="app-section">
+                <!-- Detail Acara Section (dulunya Save The Date repeat, tanpa countdown/tombol) -->
+                <div id="detailAcaraContainer" class="save-date-container detail-acara-container">
+                    <div class="save-date-overlay" aria-hidden="true"></div>
+                    <div class="save-date-inner acara-scroll-inner">
+                        <h2 class="save-date-title">Detail Acara</h2>
+
+                        <div class="acara-card">
+                            <h3 class="acara-card-title">Akad</h3>
+                            <div class="acara-divider"></div>
+                            <p class="acara-info-bold">Senin, 20 Juli 2026</p>
+                            <p class="acara-info-bold">09.00 WIB &ndash; Selesai</p>
+                            <div class="acara-icon-row">
+                                <span class="acara-icon-line"></span>
+                                <span class="acara-icon-building" aria-hidden="true"></span>
+                                <span class="acara-icon-line"></span>
+                            </div>
+                            <p class="acara-venue">Sidrap</p>
+                            <p class="acara-address">Jl. Belum tau, Kec. Apa, Kab. Sidrap</p>
+                            <a href="#" class="acara-btn-lokasi" target="_blank" rel="noopener">
+                                Lihat Lokasi
+                            </a>
+                        </div>
+
+                        <div class="acara-card">
+                            <h3 class="acara-card-title">Resepsi</h3>
+                            <div class="acara-divider"></div>
+                            <p class="acara-info-bold">Selasa, 21 juli 2026</p>
+                            <p class="acara-info-bold">11.00 WIB &ndash; Selesai</p>
+                            <div class="acara-icon-row">
+                                <span class="acara-icon-line"></span>
+                                <span class="acara-icon-building" aria-hidden="true"></span>
+                                <span class="acara-icon-line"></span>
+                            </div>
+                            <p class="acara-venue">Perumahan Kariango Residence</p>
+                            <p class="acara-address">Jl. Poros Kariango, Kec. Tanralili, Kab. Maros</p>
+                            <a href="#" class="acara-btn-lokasi" target="_blank" rel="noopener">
+                                Lihat Lokasi
+                            </a>
+                        </div>
+
+                        <div class="acara-card acara-card-dresscode">
+                            <h3 class="acara-card-title">Dresscode</h3>
+                            <div class="acara-divider"></div>
+                            <p class="acara-dresscode-desc">Kami dengan hormat meminta anda untuk mengenakan pakaian dengan palet warna berikut di hari istimewa kami.</p>
+                            <div class="dresscode-palette">
+                                <span class="dresscode-color" style="background:#5c1a2b;"></span>
+                                <span class="dresscode-color" style="background:#a9808a;"></span>
+                                <span class="dresscode-color" style="background:#b8904a;"></span>
+                                <span class="dresscode-color dresscode-color-white" style="background:#ffffff;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animasi-bawah-wrapper"></div>
             </section>
 
             <!-- Story Data (hidden) -->
@@ -3550,15 +4003,8 @@ html, body {
                         <span class="sou-node-date">13 Nov 2023</span>
                     </div>
                     <div class="sou-item-content">
-                        <span class="sou-item-label">Titik Pertama</span>
                         <div class="sou-item-photo">
-                            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                                <path d="M10 90 C 28 62, 42 42, 50 35"/>
-                                <path d="M90 90 C 72 62, 58 42, 50 35"/>
-                                <circle cx="50" cy="35" r="4" fill="currentColor" stroke="none"/>
-                                <path d="M50 35 L50 14" stroke-dasharray="3 4"/>
-                            </svg>
-                            <span class="sou-photo-caption">Foto Titik Pertama</span>
+                            <img src="https://drive.google.com/thumbnail?id=15WFYB-yfM77Ly7u0BJ6KL-tHeGBHUYly&sz=w400" alt="Foto Titik Pertama" loading="lazy" data-cycle="1">
                         </div>
                         <h3>Titik Temu</h3>
                         <p>Semesta mempertemukan kami di kantor DPRD Kota Makassar lewat Program Kuliah Kerja Profesi Hukum, tanpa pernah kami rencanakan. Pertemuan yang awalnya tampak biasa, perlahan menjelma menjadi awal dari cerita panjang yang kini kami rajut bersama.</p>
@@ -3572,16 +4018,8 @@ html, body {
                         <span class="sou-node-date">30 Des 2023</span>
                     </div>
                     <div class="sou-item-content">
-                        <span class="sou-item-label">Titik Kedua</span>
                         <div class="sou-item-photo">
-                            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                                <path d="M32 95 C 26 70, 42 60, 36 40 C 31 26, 45 16, 50 10"/>
-                                <path d="M68 95 C 74 70, 58 60, 64 40 C 69 26, 55 16, 50 10"/>
-                                <circle cx="36" cy="40" r="3" fill="currentColor" stroke="none"/>
-                                <circle cx="64" cy="40" r="3" fill="currentColor" stroke="none"/>
-                                <circle cx="50" cy="10" r="3" fill="currentColor" stroke="none"/>
-                            </svg>
-                            <span class="sou-photo-caption">Foto Titik Kedua</span>
+                            <img src="https://drive.google.com/thumbnail?id=1SCHEm9IH3pNaFw6ulK60ro0Nfon_HzHE&sz=w400" alt="Foto Titik Kedua" loading="lazy" data-cycle="2">
                         </div>
                         <h3>Bertumbuh Dalam Cerita Yang Sama</h3>
                         <p>Dari sapaan sederhana dan perhatian kecil, kedekatan kami tumbuh tanpa disadari. Hingga di penghujung tahun, 30 Desember 2023, kami memutuskan melangkah lebih jauh dengan merajut ikatan yang dijalani dengan kesungguhan, harapan, dan komitmen.</p>
@@ -3595,17 +4033,11 @@ html, body {
                         <span class="sou-node-date">22 Apr 2026</span>
                     </div>
                     <div class="sou-item-content">
-                        <span class="sou-item-label">Titik Ketiga</span>
                         <div class="sou-item-photo">
-                            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                                <circle cx="50" cy="60" r="24"/>
-                                <path d="M40 36 L50 18 L60 36 Z" stroke-linejoin="round"/>
-                                <path d="M50 4 L50 12 M28 14 L34 20 M72 14 L66 20"/>
-                            </svg>
-                            <span class="sou-photo-caption">Foto Titik Ketiga</span>
+                            <img src="https://drive.google.com/thumbnail?id=1mAZIkQ0kziK8fPTjGMjPfaLodPMyfmuY&sz=w400" alt="Foto Titik Ketiga" loading="lazy" data-cycle="3">
                         </div>
                         <h3>Langkah Menuju Janji</h3>
-                        <p>Setelah lebih dari dua tahun menapaki perjalanan bersama, kami melangkah ke fase baru — menyatukan dua hati dalam satu tujuan, satu harapan, dan satu doa. Sebagai langkah awal menuju masa depan yang kami impikan, kami melangsungkan acara lamaran pada 22 April 2026.</p>
+                        <p>Setelah lebih dari dua tahun menapaki perjalanan bersama, kami melangkah ke fase baru, menyatukan dua hati dalam satu tujuan, satu harapan, dan satu doa. Sebagai langkah awal menuju masa depan yang kami impikan, kami melangsungkan acara lamaran pada 22 April 2026.</p>
                         <button class="sou-read-more" onclick="openSouModal('titik3')">Baca kisah lengkap</button>
                     </div>
                 </article>
@@ -3633,7 +4065,7 @@ html, body {
                         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="7" cy="7" r="5.5"/></svg>
                         <span class="sou-ornament-line"></span>
                     </div>
-                    <span class="sou-scroll-sub">Titik Temu</span>
+                    <span class="sou-scroll-sub">Khrisna & Amira</span>
                 </div>
             </div>
             <div class="sou-scroll-roll sou-roll-bottom"></div>
@@ -3790,7 +4222,6 @@ const sectionList = [
     document.getElementById('secDoa'),
     document.getElementById('secSaveTheDate'),
     document.getElementById('secOurMoments'),
-    document.getElementById('secStoryOfUs'),
     document.getElementById('secEnd'),
 ];
 
@@ -3798,6 +4229,48 @@ let isPlaying = false;
 let burungAktif = false;
 function getActiveSection() {
     if (!appInner) return '';
+
+    const scrollY = appInner.scrollTop;
+    const rootHeight = appInner.clientHeight || 815;
+    const viewportCenter = scrollY + rootHeight / 2;
+
+    const storySec = document.getElementById('secStoryOfUs');
+    const afterSec = document.getElementById('secAfterStory');
+    const ourMomentsSec = document.getElementById('secOurMoments');
+
+    if (storySec) {
+        const storyTop = storySec.offsetTop;
+        const storyBottom = storyTop + storySec.offsetHeight;
+        if (viewportCenter >= storyTop && viewportCenter < storyBottom) {
+            return 'secStoryOfUs';
+        }
+    }
+
+    if (afterSec) {
+        const afterTop = afterSec.offsetTop;
+        const afterBottom = afterTop + afterSec.offsetHeight;
+        if (viewportCenter >= afterTop && viewportCenter < afterBottom) {
+            return 'secAfterStory';
+        }
+    }
+
+    if (ourMomentsSec) {
+        const ourTop = ourMomentsSec.offsetTop;
+        const ourBottom = ourTop + ourMomentsSec.offsetHeight;
+        if (viewportCenter >= ourTop && viewportCenter < ourBottom) {
+            return 'secOurMoments';
+        }
+    }
+
+    const detailAcaraSec = document.getElementById('secDetailAcara');
+    if (detailAcaraSec) {
+        const sdaTop = detailAcaraSec.offsetTop;
+        const sdaBottom = sdaTop + detailAcaraSec.offsetHeight;
+        if (viewportCenter >= sdaTop && viewportCenter < sdaBottom) {
+            return 'secDetailAcara';
+        }
+    }
+
     const rootRect = appInner.getBoundingClientRect();
     const rootMiddle = rootRect.top + rootRect.height / 2;
     let best = { id: '', distance: Infinity };
@@ -4067,6 +4540,18 @@ appInner.addEventListener('scroll', () => {
     const scrollY = appInner.scrollTop;
     const wh = 815;
 
+    const activeId = getActiveSection();
+    const isSaveDateSection = (activeId === 'secSaveTheDate' || activeId === 'secDetailAcara');
+    const scrollHintEl = document.getElementById('scrollHint');
+
+    if (activeId === 'secStart' && scrollY < wh * 0.15 && pohonMunculSelesai) {
+        scrollHintEl?.classList.add('show');
+    } else if (scrollHintEl && scrollY > wh * 0.05) {
+        scrollHintEl.classList.remove('show');
+    } else if (scrollHintEl && activeId !== 'secStart') {
+        scrollHintEl.classList.remove('show');
+    }
+
     const alm = document.getElementById('alm-panorama');
     const rmh = document.getElementById('rmh-depan');
     
@@ -4132,7 +4617,6 @@ appInner.addEventListener('scroll', () => {
     
 
    // ── Deteksi section aktif ──
-    const activeId = getActiveSection();
     const txtDoa = document.getElementById('txtDoa');
 
     txtPria?.classList.toggle('active', activeId === 'secPria');
@@ -4140,7 +4624,7 @@ appInner.addEventListener('scroll', () => {
     txtDoa?.classList.toggle('active', activeId === 'secDoa');
 
         // ✅ KONTROL GIF PENARI
-    if (activeId === 'secSaveTheDate') {
+    if (isSaveDateSection) {
         animasi?.classList.add('tampil');
         
     } else {
@@ -4186,8 +4670,14 @@ appInner.addEventListener('scroll', () => {
 
     // ── Panorama muncul di secSaveTheDate ──
     // ── Panorama muncul di secSaveTheDate ──
-    if (activeId === 'secSaveTheDate') {
-        document.querySelector('.detail-acara-container')?.classList.add('tampil');
+    if (isSaveDateSection) {
+        if (activeId === 'secSaveTheDate') {
+            document.querySelector('.detail-acara-container')?.classList.add('tampil');
+            document.getElementById('detailAcaraContainer')?.classList.remove('tampil');
+        } else {
+            document.querySelector('.detail-acara-container')?.classList.remove('tampil');
+            document.getElementById('detailAcaraContainer')?.classList.add('tampil');
+        }
 
         // Card muncul 1 detik setelah judul
         setTimeout(() => {
@@ -4213,6 +4703,7 @@ appInner.addEventListener('scroll', () => {
         document.querySelector('.save-shape')?.classList.add('show');
     } else {
     document.querySelector('.detail-acara-container')?.classList.remove('tampil');
+    document.getElementById('detailAcaraContainer')?.classList.remove('tampil');
     document.getElementById('card-akad')?.classList.remove('tampil');
     document.getElementById('card-resepsi')?.classList.remove('tampil');
     // hide overlay and decorative shape
@@ -4223,7 +4714,7 @@ appInner.addEventListener('scroll', () => {
 
     
     // ── Logika ornamen ──
-    if (activeId === 'secSaveTheDate') {
+    if (isSaveDateSection) {
         ornamen?.classList.remove('show');
         ornamenBawah?.classList.remove('show');
     } else if (scrollY > wh * 0.9) {
@@ -4236,7 +4727,10 @@ appInner.addEventListener('scroll', () => {
 
 
 // ── Kosongkan tampilan saat secOurMoments ──
+const omWrapper = document.getElementById('omSectionWrapper');
 if (activeId === 'secOurMoments') {
+    omWrapper?.classList.add('visible');
+    omWrapper?.classList.remove('exit-up');
 
     // sembunyikan teks
     txtPria?.classList.remove('active');
@@ -4272,22 +4766,39 @@ if (activeId === 'secOurMoments') {
     sembunyikanPohon?.();
 
         
+} else if (omWrapper) {
+    omWrapper.classList.remove('visible');
 }
 
 // ── Story of Us section entrance ──
+const souSection = document.getElementById('secStoryOfUs');
 const souWrapper = document.getElementById('souSectionWrapper');
+const afterStorySection = document.getElementById('secAfterStory');
+const afterStoryShell = document.querySelector('.after-story-shell');
+
+if (souSection) {
+    souSection.classList.toggle('is-active', activeId === 'secStoryOfUs');
+}
+
 if (souWrapper) {
     if (activeId === 'secStoryOfUs') {
-        souWrapper.classList.remove('exit-up');
+        souWrapper.classList.remove('is-hidden');
         souWrapper.classList.add('visible');
     } else {
-        if (souWrapper.classList.contains('visible')) {
-            souWrapper.classList.remove('visible');
-            souWrapper.classList.add('exit-up');
-            setTimeout(function () { souWrapper.classList.remove('exit-up'); }, 800);
-        }
+        souWrapper.classList.remove('visible');
+        souWrapper.classList.add('is-hidden');
     }
 }
+
+if (afterStorySection) {
+    afterStorySection.classList.toggle('is-active', activeId === 'secAfterStory');
+}
+
+if (afterStoryShell) {
+    afterStoryShell.classList.toggle('is-visible', activeId === 'secAfterStory');
+}
+
+window.updateAfterStoryVisibility?.(activeId);
 
 });
 
@@ -4295,6 +4806,7 @@ if (souWrapper) {
 // POHON MEKAR
 // ================================
 let pohonAktif = false;
+let pohonMunculSelesai = false;
 
 function munculkanPohon() {
     const p1k = document.getElementById('pohon-kiri');
@@ -4306,6 +4818,7 @@ function munculkanPohon() {
 
     if (!p1k || !p1n) return;
     pohonAktif = true;
+    pohonMunculSelesai = false;
 
     // Pasang 1
     p1k.classList.add('mekar');
@@ -4326,12 +4839,13 @@ function munculkanPohon() {
     // Goyang semua setelah selesai
     setTimeout(() => {
         [p1k, p1n, p2k, p2n, p3k, p3n].forEach(p => p?.classList.add('goyang-pohon'));
-        
-    }, 4000);   
-    
-    setTimeout(() => {
-        [p1k, p1n, p2k, p2n, p3k, p3n].forEach(p => p?.classList.add('goyang-pohon'));
         document.getElementById('leaves')?.classList.add('show');
+        pohonMunculSelesai = true;
+
+        const hint = document.getElementById('scrollHint');
+        if (hint && window.scrollY < 815 * 0.15) {
+            hint.classList.add('show');
+        }
     }, 4000); 
 }
 
@@ -4547,12 +5061,10 @@ function initSaveTheDate(){
     const obs = new MutationObserver(() => {
         if (container.classList.contains('tampil')) {
             updateSaveDate(true);
-            document.getElementById('saveOverlay')?.classList.add('show');
-            document.querySelector('.save-shape')?.classList.add('show');
-        } else {
-            document.getElementById('saveOverlay')?.classList.remove('show');
-            document.querySelector('.save-shape')?.classList.remove('show');
         }
+        // Catatan: show/hide #saveOverlay & .save-shape sepenuhnya dikelola oleh
+        // scroll handler (isSaveDateSection) supaya tetap konsisten antara
+        // secSaveTheDate dan secDetailAcara. Jangan diubah di sini.
     });
     obs.observe(container, { attributes: true, attributeFilter: ['class'] });
 
@@ -4688,6 +5200,7 @@ window.addEventListener('DOMContentLoaded', () => {
     "https://drive.google.com/thumbnail?id=1CxAwhian1ohOO1ilLzUJB2eWXthy7GH0&sz=w400",
   ];
 
+  window.ourMomentsImages = images;
   images.forEach(src => { new Image().src = src; });
 
   const totalPages = Math.ceil(images.length / 4);
@@ -4912,6 +5425,183 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 })();
 
+(function () {
+    const storyImages = Array.from(document.querySelectorAll('.sou-item-photo img'));
+    if (!storyImages.length) return;
+
+    const sources = (window.ourMomentsImages && window.ourMomentsImages.length)
+        ? window.ourMomentsImages
+        : [
+            'https://drive.google.com/thumbnail?id=15WFYB-yfM77Ly7u0BJ6KL-tHeGBHUYly&sz=w400',
+            'https://drive.google.com/thumbnail?id=1SCHEm9IH3pNaFw6ulK60ro0Nfon_HzHE&sz=w400',
+            'https://drive.google.com/thumbnail?id=1mAZIkQ0kziK8fPTjGMjPfaLodPMyfmuY&sz=w400'
+        ];
+
+    let souPhotoIndex = 0;
+    let souPhotoTimer = null;
+
+    function getDistinctAssignments(count) {
+        if (!sources.length) return [];
+
+        const assignments = [];
+        const used = new Set();
+
+        for (let offset = 0; offset < Math.max(count, sources.length); offset++) {
+            const candidate = (souPhotoIndex + offset) % sources.length;
+            if (!used.has(candidate)) {
+                used.add(candidate);
+                assignments.push(candidate);
+                if (assignments.length === count) break;
+            }
+        }
+
+        while (assignments.length < count) {
+            assignments.push((souPhotoIndex + assignments.length) % sources.length);
+        }
+
+        return assignments;
+    }
+
+    function rotateStoryPhotos() {
+        const assignments = getDistinctAssignments(storyImages.length);
+
+        storyImages.forEach((img, i) => {
+            const sourceIndex = assignments[i] ?? (souPhotoIndex + i) % sources.length;
+            const nextSrc = sources[sourceIndex];
+
+            if (img.getAttribute('data-current-src') === nextSrc) {
+                return;
+            }
+
+            img.classList.remove('is-visible');
+            img.style.opacity = '0';
+            img.style.filter = 'blur(6px)';
+            img.style.transform = 'scale(1.04)';
+
+            const tempImg = new Image();
+            tempImg.onload = function () {
+                img.src = nextSrc;
+                img.alt = 'Foto Story of Us ' + (sourceIndex + 1);
+                img.setAttribute('data-current-src', nextSrc);
+
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        img.classList.add('is-visible');
+                        img.style.opacity = '1';
+                        img.style.filter = 'blur(0)';
+                        img.style.transform = 'scale(1.02)';
+                    });
+                });
+            };
+            tempImg.onerror = function () {
+                img.src = nextSrc;
+                img.alt = 'Foto Story of Us ' + (sourceIndex + 1);
+                img.setAttribute('data-current-src', nextSrc);
+
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        img.classList.add('is-visible');
+                        img.style.opacity = '1';
+                        img.style.filter = 'blur(0)';
+                        img.style.transform = 'scale(1.02)';
+                    });
+                });
+            };
+            tempImg.src = nextSrc;
+        });
+
+        souPhotoIndex = (souPhotoIndex + 1) % sources.length;
+    }
+
+    function startSouSlideshow() {
+        if (souPhotoTimer) clearInterval(souPhotoTimer);
+        rotateStoryPhotos();
+        souPhotoTimer = setInterval(rotateStoryPhotos, 4500);
+    }
+
+    function stopSouSlideshow() {
+        if (souPhotoTimer) clearInterval(souPhotoTimer);
+        souPhotoTimer = null;
+    }
+
+    window.startSouSlideshow = startSouSlideshow;
+    window.stopSouSlideshow = stopSouSlideshow;
+    startSouSlideshow();
+})();
+
+(function () {
+    const afterStoryPhoto = document.getElementById('afterStoryPhoto');
+    if (!afterStoryPhoto) return;
+
+    const sources = (window.ourMomentsImages && window.ourMomentsImages.length)
+        ? window.ourMomentsImages
+        : [
+            'https://drive.google.com/thumbnail?id=15WFYB-yfM77Ly7u0BJ6KL-tHeGBHUYly&sz=w400',
+            'https://drive.google.com/thumbnail?id=1SCHEm9IH3pNaFw6ulK60ro0Nfon_HzHE&sz=w400',
+            'https://drive.google.com/thumbnail?id=1mAZIkQ0kziK8fPTjGMjPfaLodPMyfmuY&sz=w400'
+        ];
+
+    let afterStoryIndex = 0;
+    let afterStoryTimer = null;
+    let afterStoryActive = false;
+
+    function showAfterStoryPhoto() {
+        if (!sources.length) return;
+        const nextSrc = sources[afterStoryIndex];
+        afterStoryPhoto.classList.remove('is-visible');
+
+        const tempImg = new Image();
+        tempImg.onload = function () {
+            afterStoryPhoto.src = nextSrc;
+            afterStoryPhoto.alt = 'Foto kenangan kami ' + (afterStoryIndex + 1);
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    if (afterStoryActive) {
+                        afterStoryPhoto.classList.add('is-visible');
+                    }
+                });
+            });
+        };
+        tempImg.onerror = function () {
+            afterStoryPhoto.src = nextSrc;
+            afterStoryPhoto.alt = 'Foto kenangan kami ' + (afterStoryIndex + 1);
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    if (afterStoryActive) {
+                        afterStoryPhoto.classList.add('is-visible');
+                    }
+                });
+            });
+        };
+        tempImg.src = nextSrc;
+
+        afterStoryIndex = (afterStoryIndex + 1) % sources.length;
+    }
+
+    function stopAfterStorySlideshow() {
+        if (afterStoryTimer) clearInterval(afterStoryTimer);
+        afterStoryTimer = null;
+    }
+
+    function updateAfterStoryVisibility(activeId) {
+        afterStoryActive = activeId === 'secAfterStory';
+        if (!afterStoryPhoto) return;
+
+        if (afterStoryActive) {
+            afterStoryPhoto.classList.add('is-visible');
+            if (!afterStoryTimer) {
+                showAfterStoryPhoto();
+                afterStoryTimer = setInterval(showAfterStoryPhoto, 5000);
+            }
+        } else {
+            afterStoryPhoto.classList.remove('is-visible');
+            stopAfterStorySlideshow();
+        }
+    }
+
+    window.updateAfterStoryVisibility = updateAfterStoryVisibility;
+})();
+
 /* ============================================================
    STORY OF US — Gulungan Kertas + Overlay
    ============================================================ */
@@ -4961,6 +5651,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             // Init track dan mulai autoscroll
             updateTrack();
+            window.startSouSlideshow?.();
             setTimeout(startAuto, 1200);
         }, 1150);
     };
@@ -4968,6 +5659,7 @@ window.addEventListener('DOMContentLoaded', () => {
     /* ---- Tutup overlay ---- */
     window.closeSouOverlay = function () {
         stopAuto();
+        window.stopSouSlideshow?.();
         overlay.classList.remove('is-open');
         autoBtn.classList.remove('is-visible');
         document.body.style.overflow = '';
@@ -5157,10 +5849,50 @@ document.getElementById('souModal').addEventListener('click', function (e) {
         video.load();
     }
 
-    /* Alur utama: tunggu window.load dulu, lalu pastikan video siap */
+    /* Tunggu font web selesai dimuat, supaya teks tidak "loncat" setelah preloader hilang */
+    function waitForFonts(callback) {
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(callback, callback);
+        } else {
+            callback();
+        }
+    }
+
+    /* Tunggu gambar-gambar yang langsung terlihat (section cover) benar-benar didekode & siap digambar */
+    function waitForCriticalImages(callback) {
+        var imgs = Array.prototype.slice.call(document.querySelectorAll('#cover img'));
+        if (!imgs.length) { callback(); return; }
+
+        var tasks = imgs.map(function (img) {
+            if (img.decode) {
+                return img.decode().catch(function () {});
+            }
+            if (img.complete) return Promise.resolve();
+            return new Promise(function (resolve) {
+                img.addEventListener('load', resolve, { once: true });
+                img.addEventListener('error', resolve, { once: true });
+            });
+        });
+
+        Promise.all(tasks).then(callback, callback);
+    }
+
+    /* Tunggu browser benar-benar menggambar (paint) frame konten sebelum loader ditutup.
+       Dua requestAnimationFrame berturut-turut = frame pertama sudah selesai dirender. */
+    function waitForPaint(callback) {
+        requestAnimationFrame(function () {
+            requestAnimationFrame(callback);
+        });
+    }
+
+    /* Alur utama: tunggu window.load -> video siap -> font siap -> gambar cover siap -> sudah ter-paint -> baru tutup loader */
     function onWindowLoad() {
         waitForVideo(function () {
-            finish();
+            waitForFonts(function () {
+                waitForCriticalImages(function () {
+                    waitForPaint(finish);
+                });
+            });
         });
     }
 
