@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Undangan Pernikahan — Khrisna & Amira</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tangerine:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#FBF6EC;
+    --ivory-2:#F4EBDC;
+    --emerald:#1F3B31;
+    --emerald-2:#2E5245;
+    --gold:#B8905A;
+    --gold-light:#D9B77E;
+    --rose:#BE7A63;
+    --ink:#2B2620;
+    --ink-soft:#5B5346;
+    --line: rgba(184,144,90,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 10%, rgba(184,144,90,0.10), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(46,82,69,0.10), transparent 45%),
+      var(--ivory);
+    color:var(--ink);
+    font-family:'Poppins', sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 64px;
+  }
+  .stage{
+    width:100%;
+    max-width:560px;
+    position:relative;
+  }
+  .frame{
+    position:relative;
+    background:var(--ivory);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:44px 30px 36px;
+    box-shadow:0 30px 60px -25px rgba(31,59,49,0.35), 0 2px 0 rgba(184,144,90,0.15) inset;
+    overflow:hidden;
+  }
+  .corner{
+    position:absolute;
+    width:78px;
+    height:78px;
+    opacity:0.9;
+    pointer-events:none;
+  }
+  .corner svg{width:100%;height:100%;display:block;}
+  .corner.tl{top:8px;left:8px;}
+  .corner.tr{top:8px;right:8px;transform:scaleX(-1);}
+  .corner.bl{bottom:8px;left:8px;transform:scaleY(-1);}
+  .corner.br{bottom:8px;right:8px;transform:scale(-1,-1);}
+
+  .eyebrow{
+    text-align:center;
+    letter-spacing:0.32em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--gold);
+    font-weight:500;
+    margin-bottom:6px;
+  }
+  .monogram{
+    text-align:center;
+    font-family:'Tangerine', cursive;
+    font-size:76px;
+    line-height:1;
+    color:var(--emerald);
+    margin:0;
+  }
+  .monogram .amp{color:var(--rose); padding:0 6px;}
+  .divider{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:14px 0 26px;
+    color:var(--gold);
+  }
+  .divider .rule{height:1px;width:56px;background:linear-gradient(90deg, transparent, var(--gold), transparent);}
+  .divider .dot{width:5px;height:5px;background:var(--gold);transform:rotate(45deg);}
+
+  .lede{
+    text-align:center;
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:16px;
+    margin:0 0 30px;
+    padding:0 6px;
+  }
+
+  form{ display:flex; flex-direction:column; gap:20px; }
+
+  label.field-label{
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--emerald-2);
+    font-weight:600;
+    margin-bottom:8px;
+    display:block;
+  }
+
+  input[type="text"]{
+    width:100%;
+    padding:13px 14px;
+    border-radius:4px;
+    border:1px solid rgba(43,38,32,0.18);
+    background:#fff;
+    font-family:'Cormorant Garamond', serif;
+    font-size:19px;
+    color:var(--ink);
+  }
+  input[type="text"]:focus{
+    outline:none;
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(184,144,90,0.18);
+  }
+  input[type="text"]::placeholder{color:#B7ABA0; font-style:italic;}
+
+  .choices{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .choice{
+    position:relative;
+    border:1px solid rgba(43,38,32,0.18);
+    border-radius:6px;
+    padding:14px 12px;
+    background:#fff;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .15s ease;
+    text-align:center;
+  }
+  .choice input{position:absolute; opacity:0; inset:0; cursor:pointer; margin:0;}
+  .choice .name{
+    font-family:'Cormorant Garamond', serif;
+    font-size:20px;
+    font-weight:600;
+    color:var(--emerald);
+    display:block;
+  }
+  .choice .sub{
+    font-size:10.5px;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+    display:block;
+    margin-top:3px;
+  }
+  .choice:hover{border-color:var(--gold-light);}
+  .choice.active{
+    border-color:var(--gold);
+    background:linear-gradient(180deg, #FFFDF9, var(--ivory-2));
+    box-shadow:0 0 0 1px var(--gold) inset;
+  }
+  .choice.active .name{color:var(--rose);}
+  .choice .check{
+    position:absolute;
+    top:8px; right:9px;
+    width:14px; height:14px;
+    border-radius:50%;
+    border:1.4px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .choice.active .check::after{
+    content:'';
+    width:6px;height:6px;border-radius:50%;
+    background:var(--gold);
+  }
+
+  button.submit{
+    margin-top:4px;
+    padding:14px 18px;
+    background:var(--emerald);
+    color:var(--ivory);
+    border:none;
+    border-radius:4px;
+    font-family:'Poppins', sans-serif;
+    font-weight:500;
+    font-size:14.5px;
+    letter-spacing:0.03em;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  button.submit:hover{background:var(--emerald-2);}
+  button.submit:active{transform:scale(0.99);}
+  button.submit:disabled{background:#B7ABA0; cursor:not-allowed;}
+
+  .hint{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-top:-8px;
+  }
+
+  /* Result */
+  #result{
+    margin-top:34px;
+    display:none;
+  }
+  .result-divider{
+    display:flex; align-items:center; gap:10px; margin:0 0 22px;
+    color:var(--gold);
+  }
+  .result-divider .rule{flex:1;height:1px;background:linear-gradient(90deg, var(--gold), transparent);}
+  .result-divider .rule.right{background:linear-gradient(90deg, transparent, var(--gold));}
+  .result-divider .label{font-size:10.5px;letter-spacing:0.25em;text-transform:uppercase;color:var(--emerald-2);white-space:nowrap;}
+
+  .letter{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:28px 24px;
+    font-family:'Cormorant Garamond', serif;
+    font-size:17px;
+    line-height:1.75;
+    color:var(--ink);
+  }
+  .letter .to-name{
+    font-weight:600;
+    color:var(--rose);
+    font-size:19px;
+  }
+  .letter .kop{margin-bottom:2px;}
+  .letter hr.sep{
+    border:none;
+    border-top:1px dashed var(--line);
+    margin:14px 0 18px;
+  }
+  .letter .arab{color:var(--emerald); font-style:italic;}
+  .letter p{margin:0 0 14px;}
+  .linkbox{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--ivory-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:10px 12px;
+    margin:0 0 16px;
+  }
+  .linkbox a{
+    color:var(--emerald);
+    font-weight:600;
+    word-break:break-all;
+    font-size:14.5px;
+    font-family:'Poppins', sans-serif;
+    text-decoration:none;
+    flex:1;
+  }
+  .linkbox a:hover{text-decoration:underline;}
+  .linkbox button{
+    flex-shrink:0;
+    border:1px solid var(--gold);
+    background:#fff;
+    color:var(--gold);
+    font-family:'Poppins', sans-serif;
+    font-size:11px;
+    padding:6px 10px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .linkbox button:hover{background:var(--gold); color:#fff;}
+  .signoff{margin-top:6px;}
+  .signoff .amp2{font-family:'Tangerine', cursive; font-size:28px; color:var(--rose);}
+
+  .share{
+    margin-top:24px;
+  }
+  .share-label{
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--emerald-2);
+    font-weight:600;
+    margin-bottom:10px;
+    text-align:center;
+  }
+  .share-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:8px;
+  }
+  .share-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding:12px 6px;
+    border-radius:6px;
+    border:1px solid rgba(43,38,32,0.14);
+    background:#fff;
+    cursor:pointer;
+    font-family:'Poppins', sans-serif;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    transition:transform .12s ease, border-color .12s ease;
+  }
+  .share-btn:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .share-btn svg{width:20px;height:20px;}
+
+  .copy-all{
+    width:100%;
+    margin-top:10px;
+    padding:11px;
+    background:transparent;
+    border:1px solid var(--emerald);
+    color:var(--emerald);
+    border-radius:4px;
+    font-family:'Poppins', sans-serif;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+  }
+  .copy-all:hover{background:var(--emerald); color:#fff;}
+
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:28px;
+    transform:translate(-50%, 16px);
+    background:var(--emerald);
+    color:var(--ivory);
+    padding:11px 18px;
+    border-radius:5px;
+    font-family:'Poppins', sans-serif;
+    font-size:13px;
+    opacity:0;
+    transition:opacity .2s ease, transform .2s ease;
+    pointer-events:none;
+    z-index:10;
+    box-shadow:0 10px 24px rgba(0,0,0,0.2);
+  }
+  .toast.show{opacity:1; transform:translate(-50%, 0);}
+
+  @media (max-width:400px){
+    .frame{padding:34px 18px 28px;}
+    .monogram{font-size:60px;}
+    .letter{font-size:16px; padding:22px 16px;}
+    .share-grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="frame">
+    <div class="corner tl">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 4 Q4 40 40 40" stroke="#B8905A" stroke-width="1.2"/>
+        <path d="M4 4 Q40 4 40 40" stroke="#B8905A" stroke-width="1.2"/>
+        <circle cx="40" cy="40" r="3" fill="#B8905A"/>
+        <path d="M4 20 Q16 20 16 8" stroke="#B8905A" stroke-width="1"/>
+        <path d="M20 4 Q20 16 8 16" stroke="#B8905A" stroke-width="1"/>
+        <path d="M30 4 C 45 4 45 20 60 20" stroke="#D9B77E" stroke-width="0.8"/>
+      </svg>
+    </div>
+    <div class="corner tr"><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4 Q4 40 40 40" stroke="#B8905A" stroke-width="1.2"/><path d="M4 4 Q40 4 40 40" stroke="#B8905A" stroke-width="1.2"/><circle cx="40" cy="40" r="3" fill="#B8905A"/><path d="M4 20 Q16 20 16 8" stroke="#B8905A" stroke-width="1"/><path d="M20 4 Q20 16 8 16" stroke="#B8905A" stroke-width="1"/><path d="M30 4 C 45 4 45 20 60 20" stroke="#D9B77E" stroke-width="0.8"/></svg></div>
+    <div class="corner bl"><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4 Q4 40 40 40" stroke="#B8905A" stroke-width="1.2"/><path d="M4 4 Q40 4 40 40" stroke="#B8905A" stroke-width="1.2"/><circle cx="40" cy="40" r="3" fill="#B8905A"/><path d="M4 20 Q16 20 16 8" stroke="#B8905A" stroke-width="1"/><path d="M20 4 Q20 16 8 16" stroke="#B8905A" stroke-width="1"/><path d="M30 4 C 45 4 45 20 60 20" stroke="#D9B77E" stroke-width="0.8"/></svg></div>
+    <div class="corner br"><svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4 Q4 40 40 40" stroke="#B8905A" stroke-width="1.2"/><path d="M4 4 Q40 4 40 40" stroke="#B8905A" stroke-width="1.2"/><circle cx="40" cy="40" r="3" fill="#B8905A"/><path d="M4 20 Q16 20 16 8" stroke="#B8905A" stroke-width="1"/><path d="M20 4 Q20 16 8 16" stroke="#B8905A" stroke-width="1"/><path d="M30 4 C 45 4 45 20 60 20" stroke="#D9B77E" stroke-width="0.8"/></svg></div>
+
+    <div class="eyebrow">Undangan Pernikahan</div>
+    <p class="monogram">Khrisna <span class="amp">&amp;</span> Amira</p>
+    <div class="divider"><span class="rule"></span><span class="dot"></span><span class="rule"></span></div>
+    <p class="lede">Isi nama tamu dan pilih sisi undangan, lalu bagikan langsung ke WhatsApp, Instagram, TikTok, atau X.</p>
+
+    <form id="inviteForm">
+      <div>
+        <label class="field-label" for="namaTamu">Nama Tamu</label>
+        <input type="text" id="namaTamu" placeholder="Contoh: Adi Indra" autocomplete="off" required>
+      </div>
+
+      <div>
+        <label class="field-label">Pilihan Undangan</label>
+        <div class="choices">
+          <label class="choice" id="choiceKhrisna">
+            <input type="radio" name="pilihan" value="khrisna" checked>
+            <span class="check"></span>
+            <span class="name">Khrisna</span>
+            <span class="sub">khrisna-amira</span>
+          </label>
+          <label class="choice" id="choiceAmira">
+            <input type="radio" name="pilihan" value="amira">
+            <span class="check"></span>
+            <span class="name">Amira</span>
+            <span class="sub">amira-khrisna</span>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="submit">Buat Undangan</button>
+      <p class="hint">Undangan akan tersusun otomatis, siap dibagikan.</p>
+    </form>
+
+    <div id="result">
+      <div class="result-divider"><span class="rule"></span><span class="label">Pratinjau Undangan</span><span class="rule right"></span></div>
+
+      <div class="letter">
+        <p class="kop">Kepada Yth.<br>Bapak/Ibu/Saudara/i<br><span class="to-name" id="outName">Nama</span></p>
+        <hr class="sep">
+        <p class="arab">Assalamualaikum Warahmatullahi Wabarakatuh</p>
+        <p>Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami.</p>
+        <p>Untuk informasi detail Acara, Lokasi, dan Waktu lebih lengkap bisa akses link undangan berikut:</p>
+        <div class="linkbox">
+          <a id="outLink" href="#" target="_blank" rel="noopener">https://aiidentity.web.id/...</a>
+          <button type="button" id="copyLinkBtn">Salin</button>
+        </div>
+        <p>Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu di acara pernikahan kami.</p>
+        <p>Karena keterbatasan jarak dan waktu tidak dapat mengirimkan undangan ini secara langsung, maka melalui e-invitation ini dapat menjadi pengganti undangan resmi sehingga tujuan kami tersampaikan.</p>
+        <p class="arab">Wassalamualaikum Warahmatullahi Wabarakatuh</p>
+        <p class="signoff">Hormat kami,<br><span class="amp2">Khrisna &amp; Amira</span></p>
+      </div>
+
+      <div class="share">
+        <div class="share-label">Bagikan Undangan</div>
+        <div class="share-grid">
+          <button type="button" class="share-btn" id="shareWA">
+            <svg viewBox="0 0 24 24" fill="#25D366"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21h.005c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm0 18.14c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.13 8.13 0 0 1-1.25-4.37c0-4.5 3.66-8.16 8.16-8.16 2.18 0 4.23.85 5.77 2.39a8.1 8.1 0 0 1 2.39 5.77c0 4.5-3.66 8.23-8.08 8.23z"/></svg>
+            WhatsApp
+          </button>
+          <button type="button" class="share-btn" id="shareX">
+            <svg viewBox="0 0 24 24" fill="#111"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.6-6.8L4.1 22H1l8.1-9.3L.9 2h7.3l5.1 6.2L18.9 2zm-1.2 18h1.9L7.4 4H5.4l12.3 16z"/></svg>
+            X
+          </button>
+          <button type="button" class="share-btn" id="shareIG">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C13584" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg>
+            Instagram
+          </button>
+          <button type="button" class="share-btn" id="shareTT">
+            <svg viewBox="0 0 24 24" fill="#111"><path d="M16.6 5.82c-.9-.6-1.53-1.53-1.72-2.6h-3v13.1c0 1.46-1.19 2.65-2.65 2.65a2.65 2.65 0 0 1 0-5.3c.29 0 .57.05.83.13V10.5c-.27-.04-.55-.06-.83-.06-3.24 0-5.87 2.63-5.87 5.87S6.49 22.18 9.73 22.18s5.87-2.63 5.87-5.87V9.1a7.5 7.5 0 0 0 4.4 1.41V7.29a4.6 4.6 0 0 1-3.4-1.47z"/></svg>
+            TikTok
+          </button>
+        </div>
+        <button type="button" class="copy-all" id="copyAllBtn">Salin Seluruh Teks Undangan</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">Tersalin</div>
+
+<script>
+  const BASE_LINKS = {
+    khrisna: "https://aiidentity.web.id/wedding/khrisna-amira?untuk=",
+    amira:   "https://aiidentity.web.id/wedding/amira-khrisna?untuk="
+  };
+
+  const form = document.getElementById('inviteForm');
+  const result = document.getElementById('result');
+  const outName = document.getElementById('outName');
+  const outLink = document.getElementById('outLink');
+  const toast = document.getElementById('toast');
+  const choiceKhrisna = document.getElementById('choiceKhrisna');
+  const choiceAmira = document.getElementById('choiceAmira');
+
+  let currentFullText = "";
+  let currentLink = "";
+  let currentName = "";
+
+  function updateChoiceStyle(){
+    const val = form.pilihan.value;
+    choiceKhrisna.classList.toggle('active', val === 'khrisna');
+    choiceAmira.classList.toggle('active', val === 'amira');
+  }
+  form.pilihan.forEach ? null : null;
+  document.querySelectorAll('input[name="pilihan"]').forEach(r => r.addEventListener('change', updateChoiceStyle));
+  updateChoiceStyle();
+
+  function buildLink(pilihan, nama){
+    const encoded = encodeURIComponent(nama.trim()).replace(/%20/g, '+');
+    return BASE_LINKS[pilihan] + encoded;
+  }
+
+  function buildFullText(nama, link){
+    return `Kepada Yth.
+Bapak/Ibu/Saudara/i
+*${nama}*
+_______
+Assalamualaikum Warahmatullahi Wabarakatuh
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami.
+Untuk informasi detail Acara, Lokasi, dan Waktu lebih lengkap bisa akses link undangan berikut:
+${link}
+Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu di acara pernikahan kami.
+Karena keterbatasan jarak dan waktu tidak dapat mengirimkan undangan ini secara langsung, maka melalui e-invitation ini dapat menjadi pengganti undangan resmi sehingga tujuan kami tersampaikan.
+Wassalamualaikum Warahmatullahi Wabarakatuh
+Hormat kami,
+Khrisna & Amira`;
+  }
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(()=> toast.classList.remove('show'), 2200);
+  }
+
+  async function copyText(text){
+    try{
+      await navigator.clipboard.writeText(text);
+      return true;
+    }catch(e){
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return true;
+    }
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const nama = document.getElementById('namaTamu').value.trim();
+    if(!nama){ return; }
+    const pilihan = form.pilihan.value;
+
+    currentName = nama;
+    currentLink = buildLink(pilihan, nama);
+    currentFullText = buildFullText(nama, currentLink);
+
+    outName.textContent = nama;
+    outLink.textContent = currentLink;
+    outLink.href = currentLink;
+
+    result.style.display = 'block';
+    result.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  document.getElementById('copyLinkBtn').addEventListener('click', async ()=>{
+    await copyText(currentLink);
+    showToast('Link tersalin');
+  });
+
+  document.getElementById('copyAllBtn').addEventListener('click', async ()=>{
+    await copyText(currentFullText);
+    showToast('Teks undangan tersalin');
+  });
+
+  document.getElementById('shareWA').addEventListener('click', ()=>{
+    const url = 'https://wa.me/?text=' + encodeURIComponent(currentFullText);
+    window.open(url, '_blank');
+  });
+
+  document.getElementById('shareX').addEventListener('click', ()=>{
+    const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(currentFullText);
+    window.open(url, '_blank');
+  });
+
+  document.getElementById('shareIG').addEventListener('click', async ()=>{
+    await copyText(currentFullText);
+    showToast('Teks tersalin — tempel di caption/DM Instagram');
+    setTimeout(()=> window.open('https://www.instagram.com/', '_blank'), 900);
+  });
+
+  document.getElementById('shareTT').addEventListener('click', async ()=>{
+    await copyText(currentFullText);
+    showToast('Teks tersalin — tempel di caption/DM TikTok');
+    setTimeout(()=> window.open('https://www.tiktok.com/', '_blank'), 900);
+  });
+</script>
+
+</body>
+</html>
