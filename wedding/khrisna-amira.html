@@ -689,6 +689,7 @@ html, body {
 /* --- SECTIONS --- */
 .app-section { height: 815px; scroll-snap-align: start; position: relative; }
 #secDetailAcara { height: auto; min-height: 815px; }
+#secRSVP, #secGift, #secBestWishes { height: auto; min-height: 815px; }
 
 /* ================= COVER ================= */
 #cover {
@@ -1063,6 +1064,7 @@ html, body {
     text-align: center;
     color: #000;
     opacity: 0;
+    pointer-events: none; /* teks dekoratif saja, cegah menutupi klik di section lain */
     transition: all 1.2s ease;
     z-index: 20;
 }
@@ -1100,7 +1102,7 @@ html, body {
 
 .img-mempelai { width: 100%; max-width: 414px; transform-origin: 30% 45%; opacity: 0; transition: opacity 1.5s ease-out; transform: scale(0.5) translateX(19%) translateY(0%);}
 .img-fade-in { opacity: 1 !important; }
-.info-top { position: fixed; top: 15%; opacity: 0; transition: 0.6s ease; z-index: 21; }
+.info-top { position: fixed; top: 15%; opacity: 0; pointer-events: none; transition: 0.6s ease; z-index: 21; }
 .info-pria-top { left: 8%; right: 10%; text-align: left; transform: translateY(-20px); }
 .info-wanita-top { right: 8%; left: 10%; text-align: right; transform: translateY(-20px); }
 .active { opacity: 1 !important; transform: translateY(0) !important; }
@@ -2094,12 +2096,14 @@ html, body {
     transform: translateX(-50%);
     width: max-content;
     opacity: 0;
+    pointer-events: none; /* cegah elemen fixed yang tersembunyi "bocor" menutupi klik di section lain */
     transition: opacity 0.6s ease;
     z-index: 6; /* ensure container and cards sit above overlay */
 }
 
 .detail-acara-container.tampil {
     opacity: 1;
+    pointer-events: auto;
 }
 
 /* Override khusus untuk container Detail Acara: mengalir normal mengikuti scroll utama halaman (bukan fixed), supaya tidak bentrok dengan scroll antar-section */
@@ -2108,6 +2112,7 @@ html, body {
     top: auto;
     left: auto;
     transform: none;
+    pointer-events: auto; /* elemen ini in-flow (bukan fixed), aman selalu bisa diklik */
     width: 320px;
     max-width: calc(100% - 48px);
     margin: 24px auto;
@@ -2122,6 +2127,35 @@ html, body {
 }
 
 #detailAcaraContainer .save-date-title {
+    margin-bottom: 22px;
+}
+
+/* Override khusus untuk container Wedding Gift: sama seperti Detail Acara,
+   mengalir normal mengikuti scroll (bukan fixed) dan judul selalu tampil
+   tanpa bergantung pada trigger animasi Save the Date */
+#giftDetailContainer {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto; /* elemen ini in-flow (bukan fixed), aman selalu bisa diklik */
+    width: 320px;
+    max-width: calc(100% - 48px);
+    margin: 24px auto;
+    z-index: 15;
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+#giftDetailContainer .save-date-inner.acara-scroll-inner {
+    width: 100%;
+    padding-bottom: 20px;
+}
+
+#giftDetailContainer .save-date-title {
+    opacity: 1;
+    transform: none;
     margin-bottom: 22px;
 }
 
@@ -3515,6 +3549,355 @@ html, body {
     letter-spacing: 0.2em;
 }
 /* ================= END LOADING SCREEN ================= */
+/* ================================================================
+   SEC RSVP / SEC GIFT / SEC BEST WISHES
+   Tema mengikuti palet & tipografi yang sudah dipakai di Detail Acara:
+   Great Vibes / Playball untuk judul (maroon #6b0f1a), Open Sans untuk
+   isi (#3b1a1a / #5a3535), tombol pill gradient maroon (#7a3d3d -> #5b2a2a).
+================================================================ */
+
+#secRSVP, #secGift, #secBestWishes {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: linear-gradient(180deg,#fbf6ee 0%,#f4ecdd 55%,#efe4d0 100%);
+    overflow: hidden;
+}
+
+/* Sec Wedding Gift memakai latar yang sama dengan Sec Detail Acara (transparan,
+   sehingga menampilkan background utama halaman/aset bgut.png) */
+#secGift {
+    background: transparent;
+}
+
+/* Motif batik pojok (formsec-motif) telah dihapus sesuai permintaan */
+
+.formsec-leaf {
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.5;
+}
+.formsec-leaf svg { display: block; }
+.formsec-leaf.leaf-tl { top: 34px; left: -22px; width: 96px; transform: rotate(-18deg); }
+.formsec-leaf.leaf-br { bottom: 18px; right: -26px; width: 120px; transform: rotate(8deg) scaleX(-1); }
+
+.formsec-shell {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+    padding: 64px 24px 56px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.formsec-title {
+    font-family: 'Great Vibes', cursive;
+    font-size: 46px;
+    color: #6b0f1a;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 10px rgba(107,15,26,0.12);
+    margin-bottom: 10px;
+}
+
+.formsec-ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #6b0f1a;
+    margin-bottom: 18px;
+}
+.formsec-ornament .line { width: 34px; height: 1px; background: rgba(107,15,26,0.4); }
+
+.formsec-desc {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: #5a3535;
+    margin-bottom: 30px;
+}
+
+.formsec-field { text-align: left; margin-bottom: 20px; }
+.formsec-field label {
+    display: block;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #3b1a1a;
+    margin-bottom: 8px;
+}
+.formsec-field input[type="text"],
+.formsec-field textarea {
+    width: 100%;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px; /* >=16px wajib supaya Safari/iOS tidak auto-zoom saat fokus */
+    color: #3b1a1a;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(107,15,26,0.28);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-sizing: border-box;
+    outline: none;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+    -webkit-user-select: text;
+    user-select: text;
+    touch-action: manipulation;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.formsec-field textarea { resize: vertical; min-height: 100px; }
+.formsec-field input[type="text"]:focus,
+.formsec-field textarea:focus {
+    border-color: #6b0f1a;
+    box-shadow: 0 0 0 3px rgba(107,15,26,0.12);
+}
+.formsec-counter {
+    text-align: right;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 11px;
+    color: #a58a8a;
+    margin-top: 4px;
+}
+
+/* --- Konfirmasi kehadiran (toggle) --- */
+.rsvp-toggle-row { display: flex; gap: 12px; margin-bottom: 8px; }
+.rsvp-toggle-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(107,15,26,0.3);
+    background: rgba(255,255,255,0.85);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #3b1a1a;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.rsvp-toggle-btn .dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+.rsvp-toggle-btn.active {
+    background: linear-gradient(180deg,#7a3d3d,#5b2a2a);
+    border-color: #5b2a2a;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(91,42,42,0.28);
+}
+
+.formsec-submit {
+    display: block;
+    width: 100%;
+    margin-top: 26px;
+    background: linear-gradient(180deg,#7a3d3d,#5b2a2a);
+    color: #fff;
+    border: none;
+    padding: 14px 22px;
+    border-radius: 28px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.formsec-submit:active { transform: scale(0.97); }
+.formsec-submit:disabled { opacity: 0.55; cursor: default; }
+
+.formsec-success {
+    display: none;
+    text-align: center;
+    padding: 30px 10px;
+    font-family: 'Open Sans', sans-serif;
+    color: #3b1a1a;
+}
+.formsec-success.show { display: block; animation: fsFadeUp 0.5s ease; }
+.formsec-success .check {
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    background: linear-gradient(180deg,#7a3d3d,#5b2a2a);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 26px;
+    box-shadow: 0 8px 18px rgba(91,42,42,0.3);
+}
+.formsec-success p { font-size: 13.5px; line-height: 1.7; color: #5a3535; }
+.formsec-success strong { display: block; font-size: 16px; color: #6b0f1a; margin-bottom: 6px; }
+
+@keyframes fsFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- GIFT --- */
+.gift-card {
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(107,15,26,0.15);
+    border-radius: 16px;
+    padding: 22px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(91,42,42,0.08);
+    text-align: left;
+}
+.gift-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.gift-bank-badge {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(180deg,#7a3d3d,#5b2a2a);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+.gift-bank-name {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #3b1a1a;
+}
+.gift-account-number {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 19px;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    color: #6b0f1a;
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+.gift-account-name {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12.5px;
+    color: #5a3535;
+    margin-bottom: 16px;
+}
+.gift-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid #6b0f1a;
+    color: #6b0f1a;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+}
+.gift-copy-btn.copied {
+    background: linear-gradient(180deg,#7a3d3d,#5b2a2a);
+    color: #fff;
+    border-color: #5b2a2a;
+}
+.gift-qris-box {
+    width: 190px;
+    height: 190px;
+    margin: 0 auto 14px;
+    border: 1.5px dashed rgba(107,15,26,0.4);
+    border-radius: 14px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+.gift-qris-box img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+}
+.gift-qris-placeholder {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    color: #a58a8a;
+    text-align: center;
+    padding: 0 14px;
+    line-height: 1.6;
+}
+.gift-qris-note {
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    color: #5a3535;
+    line-height: 1.6;
+}
+
+/* --- BEST WISHES LIST --- */
+.wishes-list {
+    text-align: left;
+    max-height: 260px;
+    overflow-y: auto;
+    margin-top: 30px;
+    padding-right: 4px;
+}
+.wishes-list::-webkit-scrollbar { width: 4px; }
+.wishes-list::-webkit-scrollbar-thumb { background: rgba(107,15,26,0.25); border-radius: 4px; }
+.wishes-empty {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12.5px;
+    color: #a58a8a;
+    text-align: center;
+    padding: 10px 0;
+}
+.wish-item {
+    background: rgba(255,255,255,0.8);
+    border: 1px solid rgba(107,15,26,0.12);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+.wish-item .wish-name {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #6b0f1a;
+    margin-bottom: 4px;
+}
+.wish-item .wish-msg {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12.5px;
+    color: #4a2a2a;
+    line-height: 1.6;
+}
+.wishes-list-title {
+    font-family: 'Playball', serif;
+    font-size: 22px;
+    color: #6b0f1a;
+    text-align: left;
+    margin-top: 34px;
+    margin-bottom: 4px;
+}
+
+@media (max-width: 380px) {
+    .formsec-shell { padding: 56px 18px 46px; max-width: 100%; }
+    .formsec-title { font-size: 40px; }
+}
+
 </style>
 </head>
 <body>
@@ -3769,21 +4152,21 @@ html, body {
                         <div class="sou-preview-item">
                             <span class="sou-preview-dot"></span>
                             <div class="sou-preview-text">
-                                <span class="sou-preview-label">Titik Pertama</span>
+                                <span class="sou-preview-label">Titik Temu</span>
                                 <span class="sou-preview-date">13 November 2023</span>
                             </div>
                         </div>
                         <div class="sou-preview-item">
                             <span class="sou-preview-dot"></span>
                             <div class="sou-preview-text">
-                                <span class="sou-preview-label">Titik Kedua</span>
+                                <span class="sou-preview-label">Bertumbuh Dalam Cerita Yang Sama</span>
                                 <span class="sou-preview-date">30 Desember 2023</span>
                             </div>
                         </div>
                         <div class="sou-preview-item">
                             <span class="sou-preview-dot"></span>
                             <div class="sou-preview-text">
-                                <span class="sou-preview-label">Titik Ketiga</span>
+                                <span class="sou-preview-label">Langkah Menuju Janji</span>
                                 <span class="sou-preview-date">22 April 2026</span>
                             </div>
                         </div>
@@ -3870,19 +4253,147 @@ html, body {
                 <div class="animasi-bawah-wrapper"></div>
             </section>
 
+            <!-- ================= SEC RSVP ================= -->
+            <section id="secRSVP" class="app-section">
+                <div class="formsec-leaf leaf-tl" aria-hidden="true">
+                    <svg viewBox="0 0 100 140" fill="none"><path d="M90 5C40 20 10 60 15 110c35-5 65-35 75-85z" fill="#6b0f1a" fill-opacity="0.18"/></svg>
+                </div>
+                <div class="formsec-leaf leaf-br" aria-hidden="true">
+                    <svg viewBox="0 0 100 140" fill="none"><path d="M90 5C40 20 10 60 15 110c35-5 65-35 75-85z" fill="#6b0f1a" fill-opacity="0.18"/></svg>
+                </div>
+
+                <div class="formsec-shell">
+                    <h2 class="formsec-title">RSVP Form</h2>
+                    <div class="formsec-ornament" aria-hidden="true">
+                        <span class="line"></span>
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="7" cy="7" r="5.5"/></svg>
+                        <span class="line"></span>
+                    </div>
+                    <p class="formsec-desc">Kami tidak sabar menunggu hari pernikahan kami bersama anda, mohon konfirmasi kehadiran melalui form RSVP di bawah ini.</p>
+
+                    <form id="rsvpForm">
+                        <div class="formsec-field">
+                            <label for="rsvpNama">Nama</label>
+                            <input type="text" id="rsvpNama" name="rsvpNama" autocomplete="name" required>
+                        </div>
+                        <div class="formsec-field">
+                            <label for="rsvpAlamat">Alamat</label>
+                            <input type="text" id="rsvpAlamat" name="rsvpAlamat" autocomplete="address-line1" required>
+                        </div>
+                        <div class="formsec-field">
+                            <label>Konfirmasi Kehadiran</label>
+                            <div class="rsvp-toggle-row" id="rsvpToggleRow">
+                                <button type="button" class="rsvp-toggle-btn" data-value="Hadir">
+                                    <span class="dot">&#10003;</span> Hadir
+                                </button>
+                                <button type="button" class="rsvp-toggle-btn" data-value="Tidak Hadir">
+                                    <span class="dot">&#10005;</span> Tidak Hadir
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="formsec-submit" id="rsvpSubmitBtn">Kirim</button>
+                    </form>
+
+                    <div class="formsec-success" id="rsvpSuccess">
+                        <div class="check">&#10003;</div>
+                        <strong>Terima kasih!</strong>
+                        <p>Konfirmasi kehadiran anda telah kami terima. Sampai jumpa di hari bahagia kami.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= SEC GIFT ================= -->
+            <section id="secGift" class="app-section">
+                <div id="giftDetailContainer" class="save-date-container detail-acara-container">
+                    <div class="save-date-overlay" aria-hidden="true"></div>
+                    <div class="save-date-inner acara-scroll-inner">
+                        <h2 class="save-date-title">Wedding Gift</h2>
+                        <div class="formsec-ornament" aria-hidden="true">
+                            <span class="line"></span>
+                            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="7" cy="7" r="5.5"/></svg>
+                            <span class="line"></span>
+                        </div>
+                        <p class="acara-dresscode-desc">Doa restu anda adalah karunia yang paling berarti bagi kami. Namun jika ingin memberi tanda kasih, anda dapat mengirimkannya melalui:</p>
+
+                        <div class="gift-card">
+                            <div class="gift-card-head">
+                                <div class="gift-bank-badge">BNI</div>
+                                <div class="gift-bank-name">Bank Negara Indonesia</div>
+                            </div>
+                            <div class="gift-account-number" id="giftRekNumber">0123456789</div>
+                            <div class="gift-account-name">a.n. Khrisna &amp; Amira</div>
+                            <button type="button" class="gift-copy-btn" id="giftCopyBtn" onclick="copyRekening()">
+                                <span id="giftCopyLabel">Salin Nomor Rekening</span>
+                            </button>
+                        </div>
+
+                        <div class="gift-card" style="text-align:center;">
+                            <div class="gift-card-head" style="justify-content:center;">
+                                <div class="gift-bank-name">Scan QRIS</div>
+                            </div>
+                            <div class="gift-qris-box">
+                                <img src="aset/qris.png" alt="QRIS" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="gift-qris-placeholder" style="display:none; align-items:center; justify-content:center; height:100%; flex-direction:column;">
+                                    Gambar QRIS akan tampil di sini.<br>Silakan unggah aset/qris.png
+                                </div>
+                            </div>
+                            <p class="gift-qris-note">Dapat digunakan melalui aplikasi mobile banking, e-wallet, atau dompet digital apapun yang mendukung QRIS.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= SEC BEST WISHES ================= -->
+            <section id="secBestWishes" class="app-section">
+                <div class="formsec-leaf leaf-tl" aria-hidden="true">
+                    <svg viewBox="0 0 100 140" fill="none"><path d="M90 5C40 20 10 60 15 110c35-5 65-35 75-85z" fill="#6b0f1a" fill-opacity="0.18"/></svg>
+                </div>
+                <div class="formsec-leaf leaf-br" aria-hidden="true">
+                    <svg viewBox="0 0 100 140" fill="none"><path d="M90 5C40 20 10 60 15 110c35-5 65-35 75-85z" fill="#6b0f1a" fill-opacity="0.18"/></svg>
+                </div>
+
+                <div class="formsec-shell">
+                    <h2 class="formsec-title">Best Wishes</h2>
+                    <div class="formsec-ornament" aria-hidden="true">
+                        <span class="line"></span>
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="7" cy="7" r="5.5"/></svg>
+                        <span class="line"></span>
+                    </div>
+                    <p class="formsec-desc">Berikan harapan dan doa terbaikmu disini untuk kami berdua.</p>
+
+                    <form id="wishForm">
+                        <div class="formsec-field">
+                            <label for="wishNama">Nama</label>
+                            <input type="text" id="wishNama" name="wishNama" autocomplete="name" required>
+                        </div>
+                        <div class="formsec-field">
+                            <label for="wishPesan">Ucapan dan Doa</label>
+                            <textarea id="wishPesan" name="wishPesan" maxlength="500" required></textarea>
+                            <div class="formsec-counter"><span id="wishCounter">500</span></div>
+                        </div>
+                        <button type="submit" class="formsec-submit">Kirim Ucapan</button>
+                    </form>
+
+                    <h3 class="wishes-list-title">Ucapan &amp; Doa</h3>
+                    <div class="wishes-list" id="wishesList">
+                        <p class="wishes-empty" id="wishesEmpty">Jadilah yang pertama mengirimkan ucapan &amp; doa.</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- Story Data (hidden) -->
             <div id="souData" hidden>
-                <div data-story="titik1" data-label="Titik Pertama" data-title="Titik Temu">
+                <div data-story="titik1" data-label="Titik Temu" data-title="Titik Temu">
                     <p>Kami percaya bahwa di dunia ini tak ada yang benar-benar terjadi secara kebetulan. 13 November 2023, semesta mempertemukan kami di kantor DPRD Kota Makassar, melalui Program Kuliah Kerja Profesi Hukum (KKPH). Tanpa pernah kami rencanakan, kami ditempatkan dalam divisi yang sama.</p>
                     <p>Kala itu, pertemuan tersebut tampak seperti bagian kecil dari perjalanan yang biasa. Namun siapa sangka, dari langkah yang sederhana itu tumbuh kisah yang begitu berarti.</p>
                     <p>Sebuah perjumpaan yang awalnya terasa biasa, perlahan menjelma menjadi awal dari cerita panjang yang dipenuhi tawa, harapan, dan impian yang kini kami rajut bersama.</p>
                 </div>
-                <div data-story="titik2" data-label="Titik Kedua" data-title="Bertumbuh Dalam Cerita Yang Sama">
+                <div data-story="titik2" data-label="Bertumbuh Dalam Cerita Yang Sama" data-title="Bertumbuh Dalam Cerita Yang Sama">
                     <p>Hubungan kami bermula dari sapaan-sapaan sederhana dan perhatian kecil yang perlahan menghadirkan kehangatan. Hari demi hari, tanpa kami sadari, kedekatan itu tumbuh dengan begitu alami.</p>
                     <p>Dari dua orang yang saling memberi perhatian, kami menjadi teman berbagi cerita, tempat bertukar pendapat, serta tempat pulang bagi segala suka dan duka.</p>
                     <p>Hingga akhirnya, di penghujung tahun, tepat pada 30 Desember 2023, kami memutuskan untuk melangkah lebih jauh. Bukan sekadar menjaga rasa yang telah tumbuh, tetapi merajut sebuah ikatan yang lebih bermakna yaitu sebuah hubungan yang kami pilih untuk dijalani dengan kesungguhan, harapan, dan komitmen.</p>
                 </div>
-                <div data-story="titik3" data-label="Titik Ketiga" data-title="Langkah Menuju Janji">
+                <div data-story="titik3" data-label="Langkah Menuju Janji" data-title="Langkah Menuju Janji">
                     <p>Setelah lebih dari dua tahun menapaki perjalanan cinta bersama, kami memutuskan untuk melangkah ke fase kehidupan yang baru. Menyatukan dua hati dalam satu tujuan, satu harapan, dan satu doa.</p>
                     <p>Atas kehendak-Nya, pertemuan yang dahulu terasa sederhana tumbuh menjadi kisah yang penuh makna, hingga membawa kami pada ikatan suci yang diridhai dan dicintai-Nya.</p>
                     <p>Sebagai langkah awal menuju masa depan yang kami impikan, kami melangsungkan acara lamaran pada 22 April 2026. Inilah sepenggal kisah cinta kami, yang dengan penuh rasa syukur dan suka cita kami bagikan, seraya memohon doa agar perjalanan ini senantiasa dipenuhi keberkahan dan kebahagiaan.</p>
@@ -4004,7 +4515,7 @@ html, body {
                     </div>
                     <div class="sou-item-content">
                         <div class="sou-item-photo">
-                            <img src="https://drive.google.com/thumbnail?id=15WFYB-yfM77Ly7u0BJ6KL-tHeGBHUYly&sz=w400" alt="Foto Titik Pertama" loading="lazy" data-cycle="1">
+                            <img src="https://drive.google.com/thumbnail?id=15WFYB-yfM77Ly7u0BJ6KL-tHeGBHUYly&sz=w400" alt="Foto Titik Temu" loading="lazy" data-cycle="1">
                         </div>
                         <h3>Titik Temu</h3>
                         <p>Semesta mempertemukan kami di kantor DPRD Kota Makassar lewat Program Kuliah Kerja Profesi Hukum, tanpa pernah kami rencanakan. Pertemuan yang awalnya tampak biasa, perlahan menjelma menjadi awal dari cerita panjang yang kini kami rajut bersama.</p>
@@ -4019,7 +4530,7 @@ html, body {
                     </div>
                     <div class="sou-item-content">
                         <div class="sou-item-photo">
-                            <img src="https://drive.google.com/thumbnail?id=1SCHEm9IH3pNaFw6ulK60ro0Nfon_HzHE&sz=w400" alt="Foto Titik Kedua" loading="lazy" data-cycle="2">
+                            <img src="https://drive.google.com/thumbnail?id=1SCHEm9IH3pNaFw6ulK60ro0Nfon_HzHE&sz=w400" alt="Foto Bertumbuh Dalam Cerita Yang Sama" loading="lazy" data-cycle="2">
                         </div>
                         <h3>Bertumbuh Dalam Cerita Yang Sama</h3>
                         <p>Dari sapaan sederhana dan perhatian kecil, kedekatan kami tumbuh tanpa disadari. Hingga di penghujung tahun, 30 Desember 2023, kami memutuskan melangkah lebih jauh dengan merajut ikatan yang dijalani dengan kesungguhan, harapan, dan komitmen.</p>
@@ -4034,7 +4545,7 @@ html, body {
                     </div>
                     <div class="sou-item-content">
                         <div class="sou-item-photo">
-                            <img src="https://drive.google.com/thumbnail?id=1mAZIkQ0kziK8fPTjGMjPfaLodPMyfmuY&sz=w400" alt="Foto Titik Ketiga" loading="lazy" data-cycle="3">
+                            <img src="https://drive.google.com/thumbnail?id=1mAZIkQ0kziK8fPTjGMjPfaLodPMyfmuY&sz=w400" alt="Foto Langkah Menuju Janji" loading="lazy" data-cycle="3">
                         </div>
                         <h3>Langkah Menuju Janji</h3>
                         <p>Setelah lebih dari dua tahun menapaki perjalanan bersama, kami melangkah ke fase baru, menyatukan dua hati dalam satu tujuan, satu harapan, dan satu doa. Sebagai langkah awal menuju masa depan yang kami impikan, kami melangsungkan acara lamaran pada 22 April 2026.</p>
@@ -4268,6 +4779,19 @@ function getActiveSection() {
         const sdaBottom = sdaTop + detailAcaraSec.offsetHeight;
         if (viewportCenter >= sdaTop && viewportCenter < sdaBottom) {
             return 'secDetailAcara';
+        }
+    }
+
+    // Sections berukuran auto (tinggi konten dinamis) dideteksi eksplisit
+    // agar tidak salah dianggap sebagai section lain oleh fallback di bawah.
+    const dynamicSections = ['secRSVP', 'secGift', 'secBestWishes'];
+    for (let i = 0; i < dynamicSections.length; i++) {
+        const el = document.getElementById(dynamicSections[i]);
+        if (!el) continue;
+        const elTop = el.offsetTop;
+        const elBottom = elTop + el.offsetHeight;
+        if (viewportCenter >= elTop && viewportCenter < elBottom) {
+            return dynamicSections[i];
         }
     }
 
@@ -4799,6 +5323,49 @@ if (afterStoryShell) {
 }
 
 window.updateAfterStoryVisibility?.(activeId);
+
+// ── Sembunyikan elemen dekorasi taman saat berada di RSVP / Best Wishes ──
+// Sec Wedding Gift dikecualikan: latarnya menampilkan pohon/awan/rumah/rumput
+// sama seperti Save the Date & Detail Acara.
+const isFormSection = (activeId === 'secRSVP' || activeId === 'secGift' || activeId === 'secBestWishes');
+const isGiftSceneSection = (activeId === 'secGift');
+
+if (isFormSection && !isGiftSceneSection) {
+    document.querySelectorAll('.bunga').forEach(b => { b.style.opacity = '0'; });
+    document.querySelectorAll('.rumput').forEach(r => { r.style.opacity = '0'; });
+    cloudBack && (cloudBack.style.opacity = '0');
+    cloudFront && (cloudFront.style.opacity = '0');
+    cloudTop && (cloudTop.style.opacity = '0');
+    const almEl = document.getElementById('alm-panorama');
+    const rmhEl = document.getElementById('rmh-depan');
+    almEl && (almEl.style.opacity = '0');
+    rmhEl && (rmhEl.style.opacity = '0');
+    ornamen?.classList.remove('show');
+    ornamenBawah?.classList.remove('show');
+    sembunyikanFrame?.();
+    sembunyikanPohon?.();
+}
+
+if (isGiftSceneSection) {
+    const almEl = document.getElementById('alm-panorama');
+    const rmhEl = document.getElementById('rmh-depan');
+    almEl && (almEl.style.opacity = '1');
+    rmhEl && (rmhEl.style.opacity = '1');
+    rumput.forEach(r => {
+        r.classList.add('show');
+        r.style.opacity = '1';
+    });
+    tampilkanPohon();
+    cloudBack && (cloudBack.style.opacity = '1');
+    cloudFront && (cloudFront.style.opacity = '1');
+    cloudTop && (cloudTop.style.opacity = '1');
+    ornamen?.classList.remove('show');
+    ornamenBawah?.classList.remove('show');
+    sembunyikanFrame?.();
+    document.querySelector('.save-shape')?.classList.add('show');
+}
+
+
 
 });
 
@@ -5765,6 +6332,265 @@ document.getElementById('souModal').addEventListener('click', function (e) {
 });
 
 </script>
+
+<!-- ===== SEC RSVP / SEC GIFT / SEC BEST WISHES SCRIPT (Google Spreadsheet backend) ===== -->
+<script>
+(function () {
+    /* =========================================================
+       GANTI URL DI BAWAH INI dengan URL Web App hasil deploy
+       Google Apps Script kamu (harus diakhiri "/exec").
+       Lihat kode Apps Script & cara deploy di jawaban chat.
+    ========================================================== */
+    var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCq4AO6ZKOWDrR6IfuFOTIObZNb8aJPZwfcLiI14k2p69RIRz08UaFEbZ1nC84gTOW1A/exec';
+
+    function kirimKeSheet(payload) {
+        return fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // hindari CORS preflight
+            body: JSON.stringify(payload)
+        }).then(function (res) { return res.json(); });
+    }
+
+    function ambilDariSheet(action) {
+        return fetch(SCRIPT_URL + '?action=' + action).then(function (res) { return res.json(); });
+    }
+
+    /* ---------- RSVP ---------- */
+    var rsvpForm      = document.getElementById('rsvpForm');
+    var rsvpToggleRow = document.getElementById('rsvpToggleRow');
+    var rsvpSubmitBtn = document.getElementById('rsvpSubmitBtn');
+    var rsvpSuccess   = document.getElementById('rsvpSuccess');
+    var kehadiranTerpilih = null;
+
+    if (rsvpToggleRow) {
+        rsvpToggleRow.querySelectorAll('.rsvp-toggle-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                rsvpToggleRow.querySelectorAll('.rsvp-toggle-btn').forEach(function (b) {
+                    b.classList.remove('active');
+                });
+                btn.classList.add('active');
+                kehadiranTerpilih = btn.dataset.value;
+            });
+        });
+    }
+
+    if (rsvpForm) {
+        rsvpForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var nama   = document.getElementById('rsvpNama').value.trim();
+            var alamat = document.getElementById('rsvpAlamat').value.trim();
+
+            if (!nama || !alamat) {
+                alert('Mohon lengkapi nama dan alamat terlebih dahulu.');
+                return;
+            }
+            if (!kehadiranTerpilih) {
+                alert('Mohon pilih konfirmasi kehadiran anda.');
+                return;
+            }
+
+            rsvpSubmitBtn.disabled = true;
+            rsvpSubmitBtn.textContent = 'Mengirim...';
+
+            kirimKeSheet({
+                type: 'rsvp',
+                nama: nama,
+                alamat: alamat,
+                kehadiran: kehadiranTerpilih
+            }).then(function (res) {
+                if (res.status === 'success') {
+                    rsvpForm.style.display = 'none';
+                    rsvpSuccess.classList.add('show');
+                } else {
+                    throw new Error(res.message || 'Gagal mengirim RSVP');
+                }
+            }).catch(function (err) {
+                alert('Maaf, konfirmasi gagal terkirim. Silakan coba lagi.\n(' + err.message + ')');
+                rsvpSubmitBtn.disabled = false;
+                rsvpSubmitBtn.textContent = 'Kirim';
+            });
+        });
+    }
+
+    /* ---------- GIFT ---------- */
+    window.copyRekening = function () {
+        var teks = document.getElementById('giftRekNumber').textContent.trim();
+        var label = document.getElementById('giftCopyLabel');
+        var btn   = document.getElementById('giftCopyBtn');
+
+        function tampilkanSukses() {
+            label.textContent = 'Tersalin!';
+            btn.classList.add('copied');
+            setTimeout(function () {
+                label.textContent = 'Salin Nomor Rekening';
+                btn.classList.remove('copied');
+            }, 1600);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(teks).then(tampilkanSukses).catch(function () {
+                fallbackCopy(teks, tampilkanSukses);
+            });
+        } else {
+            fallbackCopy(teks, tampilkanSukses);
+        }
+
+        function fallbackCopy(text, cb) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+            cb();
+        }
+    };
+
+    /* ---------- BEST WISHES ---------- */
+    var wishForm       = document.getElementById('wishForm');
+    var wishSubmitBtn  = wishForm ? wishForm.querySelector('.formsec-submit') : null;
+    var wishPesan      = document.getElementById('wishPesan');
+    var wishCounter    = document.getElementById('wishCounter');
+    var wishesList     = document.getElementById('wishesList');
+    var wishesEmpty    = document.getElementById('wishesEmpty');
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderWish(entry, prepend) {
+        if (wishesEmpty) wishesEmpty.style.display = 'none';
+        var item = document.createElement('div');
+        item.className = 'wish-item';
+        item.innerHTML =
+            '<div class="wish-name">' + escapeHtml(entry.nama) + '</div>' +
+            '<div class="wish-msg">' + escapeHtml(entry.pesan) + '</div>';
+        if (prepend && wishesList.firstChild) {
+            wishesList.insertBefore(item, wishesList.firstChild);
+        } else {
+            wishesList.appendChild(item);
+        }
+    }
+
+    function muatUcapanDariSheet() {
+        if (wishesEmpty) wishesEmpty.textContent = 'Memuat ucapan...';
+        ambilDariSheet('getUcapan').then(function (res) {
+            if (res.status === 'success' && res.data && res.data.length) {
+                res.data.forEach(function (entry) { renderWish(entry, false); });
+            } else if (wishesEmpty) {
+                wishesEmpty.style.display = 'block';
+                wishesEmpty.textContent = 'Jadilah yang pertama mengirimkan ucapan & doa.';
+            }
+        }).catch(function () {
+            if (wishesEmpty) {
+                wishesEmpty.style.display = 'block';
+                wishesEmpty.textContent = 'Jadilah yang pertama mengirimkan ucapan & doa.';
+            }
+        });
+    }
+    muatUcapanDariSheet();
+
+    if (wishPesan && wishCounter) {
+        wishPesan.addEventListener('input', function () {
+            wishCounter.textContent = 500 - wishPesan.value.length;
+        });
+    }
+
+    if (wishForm) {
+        wishForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var nama  = document.getElementById('wishNama').value.trim();
+            var pesan = wishPesan.value.trim();
+
+            if (!nama || !pesan) {
+                alert('Mohon isi nama dan ucapan terlebih dahulu.');
+                return;
+            }
+
+            if (wishSubmitBtn) {
+                wishSubmitBtn.disabled = true;
+                wishSubmitBtn.textContent = 'Mengirim...';
+            }
+
+            kirimKeSheet({ type: 'ucapan', nama: nama, pesan: pesan }).then(function (res) {
+                if (res.status === 'success') {
+                    renderWish({ nama: nama, pesan: pesan }, true);
+                    wishForm.reset();
+                    if (wishCounter) wishCounter.textContent = '500';
+                } else {
+                    throw new Error(res.message || 'Gagal mengirim ucapan');
+                }
+            }).catch(function (err) {
+                alert('Maaf, ucapan gagal terkirim. Silakan coba lagi.\n(' + err.message + ')');
+            }).finally(function () {
+                if (wishSubmitBtn) {
+                    wishSubmitBtn.disabled = false;
+                    wishSubmitBtn.textContent = 'Kirim Ucapan';
+                }
+            });
+        });
+    }
+})();
+</script>
+<!-- ===== END SEC RSVP / SEC GIFT / SEC BEST WISHES SCRIPT ===== -->
+
+<!-- ===== FIX: INPUT TIDAK BISA DIISI (konflik scroll-snap vs keyboard HP) ===== -->
+<script>
+(function () {
+    var appInnerEl = document.getElementById('app-inner');
+    if (!appInnerEl) return;
+
+    var blurTimeout = null;
+
+    // Field yang perlu di-fix: semua input/textarea di dalam form RSVP & Best Wishes
+    var fields = document.querySelectorAll(
+        '#rsvpForm input, #rsvpForm textarea, #wishForm input, #wishForm textarea'
+    );
+
+    function nonaktifkanSnap() {
+        if (blurTimeout) { clearTimeout(blurTimeout); blurTimeout = null; }
+        appInnerEl.style.scrollSnapType = 'none';
+    }
+
+    function aktifkanKembaliSnap() {
+        // delay supaya tidak "berkedip" ketika user pindah antar field (blur lalu focus lagi)
+        blurTimeout = setTimeout(function () {
+            appInnerEl.style.scrollSnapType = 'y mandatory';
+        }, 300);
+    }
+
+    fields.forEach(function (field) {
+        field.addEventListener('focus', function () {
+            nonaktifkanSnap();
+            // beri waktu keyboard HP muncul dulu, baru angkat field ke posisi yang aman
+            setTimeout(function () {
+                field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }, 250);
+        });
+
+        field.addEventListener('blur', function () {
+            aktifkanKembaliSnap();
+        });
+    });
+
+    // Jaga-jaga: saat viewport mengecil karena keyboard muncul (visualViewport API),
+    // pastikan snap tetap nonaktif selama ada field yang fokus.
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', function () {
+            var aktif = document.activeElement;
+            var sedangIsiForm = aktif && (aktif.closest('#rsvpForm') || aktif.closest('#wishForm'));
+            if (sedangIsiForm) {
+                appInnerEl.style.scrollSnapType = 'none';
+            }
+        });
+    }
+})();
+</script>
+<!-- ===== END FIX INPUT TIDAK BISA DIISI ===== -->
 
 <!-- ===== PRELOADER SCRIPT ===== -->
 <script>
