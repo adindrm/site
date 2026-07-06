@@ -9,6 +9,8 @@
     <link rel="icon" href="aset/logo_main.png" type="image/png">
     <meta property="og:title" content="THE WEDDING OF KHRISNA & AMIRA" />
     <meta property="og:description" content="SABTU, 20 JUNI 2026" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image" content="https://aiidentity.web.id/aset/ogimg.jpg" />
     <meta property="og:url" content="https://aiidentity.web.id" />
     <meta property="og:type" content="website" />
@@ -4115,7 +4117,7 @@ html, body {
                 <!-- Video card -->
                 <div class="video-card">
                   <video id="mainVideo" autoplay muted loop controls playsinline preload="auto">
-                    <source src="aset/video_high.mp4" type="video/mp4">
+                    <source src="aset/video_high.webm" type="video/webm">
                     Your browser does not support the video element.
                   </video>
                 </div>
@@ -6708,7 +6710,7 @@ document.getElementById('souModal').addEventListener('click', function (e) {
         }, 500);
     }
 
-    /* Tunggu cover.mp4 siap diputar (readyState >= 3 = HAVE_FUTURE_DATA) */
+    /* Tunggu cover.webm siap diputar (readyState >= 3 = HAVE_FUTURE_DATA) */
     function waitForVideo(callback) {
         var video = document.getElementById('coverVideo');
         if (!video) { callback(); return; }
