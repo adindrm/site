@@ -11,7 +11,6 @@
     <meta property="og:description" content="SABTU, 20 JUNI 2026" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:type" content="image/jpg" />
     <meta property="og:image" content="https://aiidentity.web.id/wedding/aset/ogimg.jpg" />
     <meta property="og:url" content="https://aiidentity.web.id" />
     <meta property="og:type" content="website" />
@@ -1101,7 +1100,113 @@ html, body {
 
 .show-sticky { visibility: visible !important; }
 
-.img-mempelai { width: 100%; max-width: 414px; transform-origin: 30% 45%; opacity: 0; transition: opacity 1.5s ease-out; transform: scale(0.5) translateX(19%) translateY(0%);}
+.img-mempelai { width: 100%; max-width: 414px; transform-origin: 30% 45%; opacity: 0; transition: opacity 1.5s ease-out; transform: scale(0.5) translateX(19%) translateY(0%); cursor: pointer; pointer-events: auto; }
+
+/* ================= PROFILE OVERLAY CARD ================= */
+#profileOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background: rgba(30, 10, 12, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+#profileOverlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+.profile-card {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    background: #fffaf6;
+    border-radius: 22px;
+    padding: 28px 22px 24px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    border: 1px solid rgba(107,15,26,0.15);
+    transform: scale(0.85) translateY(15px);
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+#profileOverlay.show .profile-card {
+    transform: scale(1) translateY(0);
+}
+.profile-card::before {
+    content: '';
+    position: absolute;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    border: 1px solid rgba(107,15,26,0.25);
+    border-radius: 16px;
+    pointer-events: none;
+}
+.profile-card-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(107,15,26,0.08);
+    color: #6b0f1a;
+    border: none;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+.profile-card-photo {
+    width: 108px;
+    height: 108px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 6px auto 14px;
+    border: 3px solid #6b0f1a;
+    box-shadow: 0 6px 16px rgba(107,15,26,0.25);
+}
+.profile-card-name {
+    font-family: 'Playball', cursive;
+    font-size: 1.7rem;
+    color: #6b0f1a;
+    margin-bottom: 4px;
+}
+.profile-card-desc {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.78rem;
+    color: #6b4444;
+    line-height: 1.5;
+    margin-bottom: 18px;
+    white-space: pre-line;
+}
+.profile-card-ig {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #7a3d3d, #5b2a2a);
+    color: #fff !important;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    box-shadow: 0 8px 18px rgba(91,42,42,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.profile-card-ig:active {
+    transform: scale(0.96);
+}
+.profile-card-ig svg { width: 15px; height: 15px; flex-shrink: 0; }
 .img-fade-in { opacity: 1 !important; }
 .info-top { position: fixed; top: 15%; opacity: 0; pointer-events: none; transition: 0.6s ease; z-index: 21; }
 .info-pria-top { left: 8%; right: 10%; text-align: left; transform: translateY(-20px); }
@@ -1128,6 +1233,118 @@ html, body {
 }
 .spinning { animation: spin 3s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Animasi kemunculan tombol kontrol (dipakai bareng oleh music-control & navmini-toggle) */
+@keyframes ctrlPopIn {
+    0%   { opacity: 0; transform: scale(0.4); }
+    60%  { opacity: 1; transform: scale(1.12); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.ctrl-pop-in { animation: ctrlPopIn 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+
+/* ================================
+   MINI NAVBAR (kontrol navigasi kecil, pojok kanan atas)
+================================ */
+#navmini-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7b1020 0%, #4a0510 100%);
+    border: 1px solid rgba(201,169,110,0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+#navmini-toggle:active { transform: scale(0.92); }
+#navmini-toggle svg {
+    width: 16px;
+    height: 16px;
+    stroke: #c9a96e;
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.3s ease;
+}
+#navmini-toggle.open svg { transform: rotate(90deg); }
+
+#navmini-panel {
+    position: fixed;
+    top: 60px;
+    right: 16px;
+    width: 176px;
+    max-height: 0;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(74,5,16,0.96) 0%, rgba(30,3,7,0.97) 100%);
+    border: 1px solid rgba(201,169,110,0.35);
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease;
+    backdrop-filter: blur(6px);
+}
+#navmini-panel.open {
+    max-height: 62vh;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    overflow-y: auto;
+}
+#navmini-panel::-webkit-scrollbar { width: 4px; }
+#navmini-panel::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.4); border-radius: 4px; }
+
+.navmini-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 14px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(201,169,110,0.12);
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Poppins', sans-serif;
+}
+.navmini-item:last-child { border-bottom: none; }
+.navmini-item:active { background: rgba(201,169,110,0.12); }
+.navmini-item.active { background: rgba(201,169,110,0.16); }
+.navmini-item.active .navmini-label { color: #f2e4c5; }
+.navmini-item.active .navmini-icon svg { stroke: #f2e4c5; }
+
+.navmini-icon {
+    flex-shrink: 0;
+    width: 17px;
+    height: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.navmini-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: #c9a96e;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.navmini-label {
+    font-size: 10.5px;
+    letter-spacing: 0.3px;
+    color: rgba(240,228,197,0.75);
+    white-space: nowrap;
+}
 
 /* --- OVERLAY TRANSISI --- */
 #transition-overlay {
@@ -3580,12 +3797,14 @@ html, body {
    sehingga menampilkan background utama halaman/aset bgut.png) */
 #secGift {
     background: transparent;
+    align-items: center;
 }
 
 /* Sec RSVP disamakan tampilannya dengan secDoa: latar transparan (menampilkan
    aset/bgut.png) + dekorasi bunga sudut, bukan lagi gradasi krem + daun */
 #secRSVP {
     background: transparent;
+    align-items: center;
 }
 
 /* Motif batik pojok (formsec-motif) telah dihapus sesuai permintaan */
@@ -3981,6 +4200,61 @@ html, body {
                 <span id="music-icon">♪</span>
             </div>
 
+            <!-- Mini Navbar (navigasi cepat antar section) -->
+            <div id="navmini-toggle" onclick="toggleNavMini()" aria-label="Menu Navigasi">
+                <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+            </div>
+            <nav id="navmini-panel">
+                <button class="navmini-item" data-target="secStart" onclick="navMiniGoTo('secStart')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><path d="M12 3l7 5v11a1 1 0 0 1-1 1h-4v-6H10v6H6a1 1 0 0 1-1-1V8z"/></svg></span>
+                    <span class="navmini-label">Beranda</span>
+                </button>
+                <button class="navmini-item" data-target="secPria" onclick="navMiniGoTo('secPria')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M12 10v3M9 14h6l-1.2 4H10.2z"/></svg></span>
+                    <span class="navmini-label">Mempelai Pria</span>
+                </button>
+                <button class="navmini-item" data-target="secWanita" onclick="navMiniGoTo('secWanita')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M8 20l4-9 4 9M10 15h4"/></svg></span>
+                    <span class="navmini-label">Mempelai Wanita</span>
+                </button>
+                <button class="navmini-item" data-target="secDoa" onclick="navMiniGoTo('secDoa')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><path d="M12 4c-1 3-1 4-3 5.5C7 11 6 13 6 15a6 6 0 0 0 12 0c0-2-1-4-3-5.5C13 8 13 7 12 4z"/></svg></span>
+                    <span class="navmini-label">Doa</span>
+                </button>
+                <button class="navmini-item" data-target="secSaveTheDate" onclick="navMiniGoTo('secSaveTheDate')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M4 9.5h16M8 3v3M16 3v3"/><path d="M12 12.5l1 2 2.2.3-1.6 1.5.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.5 2.2-.3z"/></svg></span>
+                    <span class="navmini-label">Save the Date</span>
+                </button>
+                <button class="navmini-item" data-target="secOurMoments" onclick="navMiniGoTo('secOurMoments')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="1.5"/><path d="M10 9.3v5.4l4.5-2.7z"/></svg></span>
+                    <span class="navmini-label">Our Moments</span>
+                </button>
+                <button class="navmini-item" data-target="secStoryOfUs" onclick="navMiniGoTo('secStoryOfUs')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><path d="M12 6c-1.5-1.3-4-2-6.5-1.5v12c2.5-.5 5 .2 6.5 1.5m0-12c1.5-1.3 4-2 6.5-1.5v12c-2.5-.5-5 .2-6.5 1.5m0-12v12"/></svg></span>
+                    <span class="navmini-label">Story of Us</span>
+                </button>
+                <button class="navmini-item" data-target="secAfterStory" onclick="navMiniGoTo('secAfterStory')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1-2h6l1 2h2.5A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.2"/></svg></span>
+                    <span class="navmini-label">After Story</span>
+                </button>
+                <button class="navmini-item" data-target="secDetailAcara" onclick="navMiniGoTo('secDetailAcara')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11A6.5 6.5 0 0 1 12 3.5 6.5 6.5 0 0 1 18.5 10c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.2"/></svg></span>
+                    <span class="navmini-label">Detail Acara</span>
+                </button>
+                <button class="navmini-item" data-target="secRSVP" onclick="navMiniGoTo('secRSVP')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="1.5"/><path d="M4 7l8 6 8-6"/></svg></span>
+                    <span class="navmini-label">RSVP</span>
+                </button>
+                <button class="navmini-item" data-target="secGift" onclick="navMiniGoTo('secGift')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><rect x="4" y="9.5" width="16" height="10" rx="1"/><path d="M4 9.5V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v.5M12 7V19M12 7c-1-2.4-5-2.6-5 0s4 1.4 5 0M12 7c1-2.4 5-2.6 5 0s-4 1.4-5 0"/></svg></span>
+                    <span class="navmini-label">Wedding Gift</span>
+                </button>
+                <button class="navmini-item" data-target="secBestWishes" onclick="navMiniGoTo('secBestWishes')">
+                    <span class="navmini-icon"><svg viewBox="0 0 24 24"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v8A1.5 1.5 0 0 1 18.5 16H9l-4 3v-3H5.5A1.5 1.5 0 0 1 4 14.5z"/><path d="M12 8.6c-1.4-1.6-4.3-.4-3 1.6.8 1.2 3 2.4 3 2.4s2.2-1.2 3-2.4c1.3-2-1.6-3.2-3-1.6z"/></svg></span>
+                    <span class="navmini-label">Best Wishes</span>
+                </button>
+            </nav>
+
             <!-- Cover Section -->
             <section id="cover" class="app-section">
                 <div class="cover-video">
@@ -4019,6 +4293,20 @@ html, body {
                         Bapak M. Alwi <br>& <br>
                         Ibu Wahida
                     </p>
+                </div>
+            </div>
+
+            <!-- Profile Overlay Card (Instagram link) -->
+            <div id="profileOverlay">
+                <div class="profile-card">
+                    <button class="profile-card-close" onclick="tutupProfilOverlay()" aria-label="Tutup">&times;</button>
+                    <img id="profileCardPhoto" class="profile-card-photo" src="aset/ava.png" alt="Foto Profil">
+                    <h3 id="profileCardName" class="profile-card-name">Nama</h3>
+                    <p id="profileCardDesc" class="profile-card-desc"></p>
+                    <a id="profileCardIg" class="profile-card-ig" href="#" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.256 1.216.6 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.05 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 0 1-1.153 1.772 4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.428.465-1.066.05-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 0 1-1.772-1.153 4.904 4.904 0 0 1-1.153-1.772c-.248-.637-.415-1.363-.465-2.428-.05-1.066-.06-1.405-.06-4.122 0-2.717.01-3.056.06-4.122.05-1.065.217-1.79.465-2.428a4.88 4.88 0 0 1 1.153-1.772A4.897 4.897 0 0 1 5.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.01 9.283 2 12 2zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.25a3.25 3.25 0 1 1 0-6.5 3.25 3.25 0 0 1 0 6.5zm5.5-8.44a1.17 1.17 0 1 1-2.34 0 1.17 1.17 0 0 1 2.34 0z"/></svg>
+                        <span id="profileCardIgLabel">Instagram</span>
+                    </a>
                 </div>
             </div>
 
@@ -4240,7 +4528,7 @@ html, body {
                         <div class="acara-card">
                             <h3 class="acara-card-title">Resepsi</h3>
                             <div class="acara-divider"></div>
-                            <p class="acara-info-bold">Selasa, 21 juli 2026</p>
+                            <p class="acara-info-bold">Selasa, 20 juli 2026</p>
                             <p class="acara-info-bold">11.00 WIB &ndash; Selesai</p>
                             <div class="acara-icon-row">
                                 <span class="acara-icon-line"></span>
@@ -4342,8 +4630,8 @@ html, body {
                         </div>
                         <p class="acara-dresscode-desc">Doa restu anda adalah karunia yang paling berarti bagi kami. Namun jika ingin memberi tanda kasih, anda dapat mengirimkannya melalui:</p>
 
-                        <div class="gift-card">
-                            <div class="gift-card-head">
+                        <div class="gift-card" style="text-align:center;">
+                            <div class="gift-card-head" style="justify-content:center;">
                                 <div class="gift-bank-badge">BRI</div>
                                 <div class="gift-bank-name">Bank Rakyat Indonesi</div>
                             </div>
@@ -4352,19 +4640,6 @@ html, body {
                             <button type="button" class="gift-copy-btn" id="giftCopyBtn" onclick="copyRekening()">
                                 <span id="giftCopyLabel">Salin Nomor Rekening</span>
                             </button>
-                        </div>
-
-                        <div class="gift-card" style="text-align:center;">
-                            <div class="gift-card-head" style="justify-content:center;">
-                                <div class="gift-bank-name">Scan QRIS</div>
-                            </div>
-                            <div class="gift-qris-box">
-                                <img src="aset/qris.png" alt="QRIS" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <div class="gift-qris-placeholder" style="display:none; align-items:center; justify-content:center; height:100%; flex-direction:column;">
-                                    Gambar QRIS akan tampil di sini.<br>Silakan unggah aset/qris.png
-                                </div>
-                            </div>
-                            <p class="gift-qris-note">Dapat digunakan melalui aplikasi mobile banking, e-wallet, atau dompet digital apapun yang mendukung QRIS.</p>
                         </div>
                     </div>
                 </div>
@@ -4750,8 +5025,57 @@ const sticky = document.getElementById('stickyContainer');
 const song = document.getElementById('weddingSong');
 const musicBtn = document.getElementById('music-control');
 const musicIcon = document.getElementById('music-icon');
+const navMiniToggle = document.getElementById('navmini-toggle');
+const navMiniPanel = document.getElementById('navmini-panel');
 const loading = document.getElementById('loading-screen');
 const appInner = document.getElementById('app-inner');
+
+// ================================
+// PROFILE OVERLAY (foto + link Instagram)
+// ================================
+const DATA_MEMPELAI = {
+    secPria: {
+        nama: 'Khrisna Juvano Agung Mukti',
+        deskripsi: 'Anak kedua dari\nBapak Bongga Karaeng & Ibu Iva Irawati',
+        foto: 'aset/avapria.jpg',
+        // TODO: ganti dengan link Instagram mempelai pria yang sebenarnya
+        instagram: 'https://www.instagram.com/khrisna.juvano?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==',
+        igLabel: '@khrisna.juvano'
+    },
+    secWanita: {
+        nama: 'Nur Amira Syafira',
+        deskripsi: 'Anak Kedua dari\nBapak M. Alwi & Ibu Wahida',
+        foto: 'aset/avawanita.jpg',
+        // TODO: ganti dengan link Instagram mempelai wanita yang sebenarnya
+        instagram: 'https://www.instagram.com/syafiraa.amira?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==',
+        igLabel: '@syafiraa.amira'
+    }
+};
+
+function bukaProfilOverlay(key) {
+    const data = DATA_MEMPELAI[key];
+    if (!data) return;
+    document.getElementById('profileCardPhoto').src = data.foto;
+    document.getElementById('profileCardName').textContent = data.nama;
+    document.getElementById('profileCardDesc').textContent = data.deskripsi;
+    const igLink = document.getElementById('profileCardIg');
+    igLink.href = data.instagram;
+    document.getElementById('profileCardIgLabel').textContent = data.igLabel;
+    document.getElementById('profileOverlay').classList.add('show');
+}
+
+function tutupProfilOverlay() {
+    document.getElementById('profileOverlay').classList.remove('show');
+}
+
+document.getElementById('profileOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'profileOverlay') tutupProfilOverlay();
+});
+
+document.getElementById('imgParallax')?.addEventListener('click', () => {
+    const target = window.mempelaiSectionAktif === 'secWanita' ? 'secWanita' : 'secPria';
+    bukaProfilOverlay(target);
+});
 
 const sectionList = [
     document.getElementById('secStart'),
@@ -4873,7 +5197,6 @@ function bukaUndangan() {
     if (song) {
         song.play();
         isPlaying = true;
-        musicBtn.style.display = 'flex';
         musicIcon.classList.add('spinning');
     }
 
@@ -4951,6 +5274,15 @@ function bukaUndangan() {
         if (sticky) sticky.classList.add('show-sticky');
         if (imgMempelai) imgMempelai.classList.add('img-fade-in');
 
+        setTimeout(() => {
+            musicBtn.style.display = 'flex';
+            musicBtn.classList.add('ctrl-pop-in');
+            if (navMiniToggle) {
+                navMiniToggle.style.display = 'flex';
+                navMiniToggle.classList.add('ctrl-pop-in');
+            }
+        }, 400);
+
           appInner.style.overflowY = 'auto';
         
        document.getElementById('heroText')?.classList.add('show'); 
@@ -4976,6 +5308,55 @@ function toggleMusic() {
     }
     isPlaying = !isPlaying;
 }
+
+// ================================
+// MINI NAVBAR (navigasi cepat antar section)
+// ================================
+function toggleNavMini() {
+    if (!navMiniToggle || !navMiniPanel) return;
+    const willOpen = !navMiniPanel.classList.contains('open');
+    navMiniToggle.classList.toggle('open', willOpen);
+    navMiniPanel.classList.toggle('open', willOpen);
+    if (willOpen) updateNavMiniActive();
+}
+
+function navMiniGoTo(targetId) {
+    const target = document.getElementById(targetId);
+    if (!target || !appInner) return;
+    appInner.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+    navMiniToggle?.classList.remove('open');
+    navMiniPanel?.classList.remove('open');
+}
+
+function updateNavMiniActive() {
+    if (!navMiniPanel) return;
+    const activeId = getActiveSection();
+    navMiniPanel.querySelectorAll('.navmini-item').forEach(function (item) {
+        item.classList.toggle('active', item.dataset.target === activeId);
+    });
+}
+
+// Tutup panel jika tap di luar area navbar
+document.addEventListener('click', function (e) {
+    if (!navMiniPanel || !navMiniPanel.classList.contains('open')) return;
+    if (navMiniPanel.contains(e.target) || navMiniToggle.contains(e.target)) return;
+    navMiniToggle.classList.remove('open');
+    navMiniPanel.classList.remove('open');
+});
+
+// Sinkronkan indikator section aktif saat scroll
+(function () {
+    if (!appInner) return;
+    let ticking = false;
+    appInner.addEventListener('scroll', function () {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () {
+            updateNavMiniActive();
+            ticking = false;
+        });
+    });
+})();
 
 // Pause music when page is hidden (tab minimized or switched)
 // and resume only if it was playing before hide.
@@ -5202,6 +5583,11 @@ appInner.addEventListener('scroll', () => {
     txtPria?.classList.toggle('active', activeId === 'secPria');
     txtWanita?.classList.toggle('active', activeId === 'secWanita');
     txtDoa?.classList.toggle('active', activeId === 'secDoa');
+
+    // simpan section pria/wanita terakhir yang aktif, dipakai saat foto di-tap
+    if (activeId === 'secPria' || activeId === 'secWanita') {
+        window.mempelaiSectionAktif = activeId;
+    }
 
         // ✅ KONTROL GIF PENARI
     if (isSaveDateSection) {
