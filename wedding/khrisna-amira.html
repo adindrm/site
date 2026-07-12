@@ -7098,7 +7098,15 @@ document.getElementById('souModal').addEventListener('click', function (e) {
     }
 
     // Membuat elemen "meneruskan" gesture swipe vertikal ke scroll utama,
-    // walau elemen itu sendiri punya area klik/tap (ava, halaman buku, video, tombol card).
+    // walau elemen itu sendiri punya area klik/tap (ava, halaman buku, video, tombol card, teks doa).
+    //
+    // PENTING: listener dipasang di FASE CAPTURE (bukan bubble). Elemen-elemen
+    // ini punya anak dengan handler sentuh sendiri (halaman buku, kontrol video,
+    // card story-of-us) yang biasanya memanggil stopPropagation() untuk gesture
+    // drag miliknya sendiri. Kalau listener kita di bubble phase, event yang
+    // sudah di-stop di anak tidak akan pernah sampai ke kita. Dengan capture
+    // phase, listener kita SELALU jalan lebih dulu (dari luar ke dalam),
+    // sebelum sempat di-stop oleh siapa pun di dalamnya.
     function aktifkanSwipePassthrough(el) {
         if (!el) return;
 
@@ -7107,6 +7115,7 @@ document.getElementById('souModal').addEventListener('click', function (e) {
         var isScrollGesture = false;
         var suppressClickUntil = 0;
         var THRESHOLD = 8;
+        var snapDimatikanOleh = 0; // timestamp id sederhana buat cegah race antar elemen
 
         el.addEventListener('touchstart', function (e) {
             if (e.touches.length !== 1) return;
@@ -7114,7 +7123,7 @@ document.getElementById('souModal').addEventListener('click', function (e) {
             startX = e.touches[0].clientX;
             isDragging = true;
             isScrollGesture = false;
-        }, { passive: true });
+        }, { passive: true, capture: true });
 
         el.addEventListener('touchmove', function (e) {
             if (!isDragging || e.touches.length !== 1) return;
@@ -7130,6 +7139,12 @@ document.getElementById('souModal').addEventListener('click', function (e) {
                 // video/lightbox tetap tidak terganggu).
                 if (Math.abs(totalDy) > THRESHOLD && Math.abs(totalDy) > Math.abs(totalDx)) {
                     isScrollGesture = true;
+                    // Matikan scroll-snap SELAMA gesture berlangsung. Tanpa ini,
+                    // scroll-snap-type: y mandatory milik #app-inner bisa menarik
+                    // balik posisi scroll di tengah-tengah perubahan scrollTop
+                    // manual di bawah, sehingga swipe terasa tidak merespons.
+                    appInnerEl.style.scrollSnapType = 'none';
+                    snapDimatikanOleh = Date.now();
                 }
             }
 
@@ -7137,7 +7152,7 @@ document.getElementById('souModal').addEventListener('click', function (e) {
                 appInnerEl.scrollTop -= dy;
                 lastY = curY;
             }
-        }, { passive: true });
+        }, { passive: true, capture: true });
 
         el.addEventListener('touchend', function () {
             if (isScrollGesture) {
@@ -7146,9 +7161,17 @@ document.getElementById('souModal').addEventListener('click', function (e) {
                 suppressClickUntil = Date.now() + 400;
                 snapKeSectionTerdekat();
             }
+            if (snapDimatikanOleh) {
+                // Nyalakan lagi snap-nya setelah animasi smooth-scroll ke
+                // section terdekat selesai.
+                setTimeout(function () {
+                    appInnerEl.style.scrollSnapType = 'y mandatory';
+                }, 450);
+                snapDimatikanOleh = 0;
+            }
             isDragging = false;
             isScrollGesture = false;
-        }, { passive: true });
+        }, { passive: true, capture: true });
 
         // Tangkap klik di fase capture supaya bisa "menelan" klik yang
         // sebenarnya adalah ujung dari gesture swipe, sebelum handler
@@ -7165,6 +7188,10 @@ document.getElementById('souModal').addEventListener('click', function (e) {
     aktifkanSwipePassthrough(document.getElementById('book'));
     aktifkanSwipePassthrough(document.querySelector('.video-card'));
     aktifkanSwipePassthrough(document.getElementById('souSectionWrapper'));
+    // FIX: sebelumnya teks doa (#secDoa) tidak pernah dimasukkan ke daftar
+    // ini sama sekali, padahal saat aktif ia jadi position:fixed
+    // (.doa-container.doa-fixed) — persis kasus yang sama dengan ava.
+    aktifkanSwipePassthrough(document.querySelector('.doa-container'));
 })();
 </script>
 <!-- ===== END FIX SWIPE SCROLL TERBLOKIR ===== -->
