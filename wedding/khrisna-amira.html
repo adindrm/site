@@ -115,6 +115,7 @@ html, body, #app-inner, #scale-wrapper {
   aspect-ratio: 16 / 9;
   box-sizing: border-box;
   padding: 0 8px;
+  touch-action: pan-y;
 }
 
 .video-card video,
@@ -145,6 +146,7 @@ html, body, #app-inner, #scale-wrapper {
   transition: 1s;
   box-shadow: 20px 10px 40px rgba(0,0,0,0.3);
   z-index: 2;
+  touch-action: pan-y;
 }
 
 .book:hover {
@@ -1100,7 +1102,7 @@ html, body {
 
 .show-sticky { visibility: visible !important; }
 
-.img-mempelai { width: 100%; max-width: 414px; transform-origin: 30% 45%; opacity: 0; transition: opacity 1.5s ease-out; transform: scale(0.5) translateX(19%) translateY(0%); cursor: pointer; pointer-events: auto; }
+.img-mempelai { width: 100%; max-width: 414px; transform-origin: 30% 45%; opacity: 0; transition: opacity 1.5s ease-out; transform: scale(0.5) translateX(19%) translateY(0%); cursor: pointer; pointer-events: auto; touch-action: pan-y; }
 
 /* ================= PROFILE OVERLAY CARD ================= */
 #profileOverlay {
@@ -2200,6 +2202,7 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 10;
+    touch-action: pan-y;
 }
 
 .doa-title {
@@ -2322,6 +2325,22 @@ html, body {
 .detail-acara-container.tampil {
     opacity: 1;
     pointer-events: auto;
+}
+
+/* Override khusus untuk container Save The Date: sama seperti Detail Acara/Gift,
+   mengalir normal mengikuti scroll (bukan fixed) supaya tidak bentrok dengan
+   scroll antar-section */
+#saveDateContainer {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto; /* elemen ini in-flow (bukan fixed), aman selalu bisa diklik */
+    width: 320px;
+    max-width: calc(100% - 48px);
+    margin: 24px auto;
+    z-index: 15;
 }
 
 /* Override khusus untuk container Detail Acara: mengalir normal mengikuti scroll utama halaman (bukan fixed), supaya tidak bentrok dengan scroll antar-section */
@@ -2895,6 +2914,7 @@ html, body {
     border-radius: 24px;
     box-shadow: 0 18px 50px -24px rgba(58,44,40,0.45);
     backdrop-filter: blur(6px);
+    touch-action: pan-y;
 }
 
 .sou-wrapper.visible {
@@ -4362,7 +4382,7 @@ html, body {
 
             <section id="secSaveTheDate" class="app-section">
                 <!-- Save The Date Section -->
-                <div class="save-date-container detail-acara-container">
+                <div id="saveDateContainer" class="save-date-container detail-acara-container">
                     <div id="saveOverlay" class="save-date-overlay" aria-hidden="true"></div>
                     <div class="save-date-inner">
                         <h2 class="save-date-title">Save the Date</h2>
@@ -5085,6 +5105,7 @@ document.getElementById('profileOverlay')?.addEventListener('click', (e) => {
 });
 
 document.getElementById('imgParallax')?.addEventListener('click', () => {
+    if (window.currentActiveSection !== 'secPria' && window.currentActiveSection !== 'secWanita') return;
     const target = window.mempelaiSectionAktif === 'secWanita' ? 'secWanita' : 'secPria';
     bukaProfilOverlay(target);
 });
@@ -5514,6 +5535,7 @@ appInner.addEventListener('scroll', () => {
     const wh = 815;
 
     const activeId = getActiveSection();
+    window.currentActiveSection = activeId;
     const isSaveDateSection = (activeId === 'secSaveTheDate' || activeId === 'secDetailAcara');
     const scrollHintEl = document.getElementById('scrollHint');
 
@@ -7053,6 +7075,99 @@ document.getElementById('souModal').addEventListener('click', function (e) {
 })();
 </script>
 <!-- ===== END FIX INPUT TIDAK BISA DIISI ===== -->
+
+<!-- ===== FIX: SWIPE SCROLL TERBLOKIR DI ELEMEN INTERAKTIF (ava, buku, video, card) ===== -->
+<script>
+(function () {
+    var appInnerEl = document.getElementById('app-inner');
+    if (!appInnerEl) return;
+
+    // Cari posisi scrollTop terdekat dari batas antar-section, lalu snap ke sana.
+    function snapKeSectionTerdekat() {
+        var sections = document.querySelectorAll('#app-inner .app-section');
+        var currentTop = appInnerEl.scrollTop;
+        var best = null;
+        var bestDist = Infinity;
+        sections.forEach(function (sec) {
+            var dist = Math.abs(sec.offsetTop - currentTop);
+            if (dist < bestDist) { bestDist = dist; best = sec; }
+        });
+        if (best) {
+            appInnerEl.scrollTo({ top: best.offsetTop, behavior: 'smooth' });
+        }
+    }
+
+    // Membuat elemen "meneruskan" gesture swipe vertikal ke scroll utama,
+    // walau elemen itu sendiri punya area klik/tap (ava, halaman buku, video, tombol card).
+    function aktifkanSwipePassthrough(el) {
+        if (!el) return;
+
+        var startY = 0, startX = 0, lastY = 0;
+        var isDragging = false;
+        var isScrollGesture = false;
+        var suppressClickUntil = 0;
+        var THRESHOLD = 8;
+
+        el.addEventListener('touchstart', function (e) {
+            if (e.touches.length !== 1) return;
+            startY = lastY = e.touches[0].clientY;
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            isScrollGesture = false;
+        }, { passive: true });
+
+        el.addEventListener('touchmove', function (e) {
+            if (!isDragging || e.touches.length !== 1) return;
+            var curY = e.touches[0].clientY;
+            var curX = e.touches[0].clientX;
+            var dy = curY - lastY;
+            var totalDy = curY - startY;
+            var totalDx = curX - startX;
+
+            if (!isScrollGesture) {
+                // Baru dianggap gesture scroll kalau gerakan vertikal jelas
+                // dominan dibanding horizontal (supaya swipe horizontal di
+                // video/lightbox tetap tidak terganggu).
+                if (Math.abs(totalDy) > THRESHOLD && Math.abs(totalDy) > Math.abs(totalDx)) {
+                    isScrollGesture = true;
+                }
+            }
+
+            if (isScrollGesture) {
+                appInnerEl.scrollTop -= dy;
+                lastY = curY;
+            }
+        }, { passive: true });
+
+        el.addEventListener('touchend', function () {
+            if (isScrollGesture) {
+                // Tandai supaya tap/klik yang menyusul (ghost click) tidak
+                // ikut memicu aksi (buka overlay / flip halaman / dll).
+                suppressClickUntil = Date.now() + 400;
+                snapKeSectionTerdekat();
+            }
+            isDragging = false;
+            isScrollGesture = false;
+        }, { passive: true });
+
+        // Tangkap klik di fase capture supaya bisa "menelan" klik yang
+        // sebenarnya adalah ujung dari gesture swipe, sebelum handler
+        // asli (onclick / addEventListener klik) elemen sempat berjalan.
+        el.addEventListener('click', function (e) {
+            if (Date.now() < suppressClickUntil) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        }, true);
+    }
+
+    aktifkanSwipePassthrough(document.getElementById('imgParallax'));
+    aktifkanSwipePassthrough(document.getElementById('book'));
+    aktifkanSwipePassthrough(document.querySelector('.video-card'));
+    aktifkanSwipePassthrough(document.getElementById('souSectionWrapper'));
+})();
+</script>
+<!-- ===== END FIX SWIPE SCROLL TERBLOKIR ===== -->
 
 <!-- ===== PRELOADER SCRIPT ===== -->
 <script>
