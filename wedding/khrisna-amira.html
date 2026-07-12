@@ -4278,6 +4278,9 @@ html, body {
             <section id="cover" class="app-section">
                 <div class="cover-video">
                     <video id="coverVideo" autoplay muted loop playsinline preload="auto">
+                        <!-- mp4 diletakkan PERTAMA supaya Safari (yang umumnya tidak
+                             mendukung webm) langsung memakai ini, bukan diam/hitam -->
+                        <source src="aset/cover.mp4" type="video/mp4">
                         <source src="aset/cover.webm" type="video/webm">
                     </video>
                 </div>
@@ -4425,6 +4428,7 @@ html, body {
                 <!-- Video card -->
                 <div class="video-card">
                   <video id="mainVideo" autoplay muted loop controls playsinline preload="auto">
+                    <source src="aset/video_high.mp4" type="video/mp4">
                     <source src="aset/video_high.webm" type="video/webm">
                     Your browser does not support the video element.
                   </video>
@@ -7251,13 +7255,24 @@ document.getElementById('souModal').addEventListener('click', function (e) {
         }, 500);
     }
 
-    /* Tunggu cover.webm siap diputar (readyState >= 3 = HAVE_FUTURE_DATA) */
+    /* Tunggu cover video siap diputar (readyState >= 3 = HAVE_FUTURE_DATA).
+       Dibuat tahan-banting: kalau video error/gagal decode (mis. format tidak
+       didukung browser) atau kelamaan, preloader TETAP lanjut jalan alih-alih
+       nge-hang sampai fallback global 10 detik. */
     function waitForVideo(callback) {
         var video = document.getElementById('coverVideo');
         if (!video) { callback(); return; }
 
         // Sudah cukup buffered
         if (video.readyState >= 3) { callback(); return; }
+
+        var selesai = false;
+        function finishOnce() {
+            if (selesai) return;
+            selesai = true;
+            clearTimeout(batasWaktu);
+            callback();
+        }
 
         // Naikkan progress saat video mulai loading
         video.addEventListener('progress', function () {
@@ -7269,10 +7284,17 @@ document.getElementById('souModal').addEventListener('click', function (e) {
             }
         });
 
-        video.addEventListener('canplay', function onCanPlay() {
-            video.removeEventListener('canplay', onCanPlay);
-            callback();
-        });
+        video.addEventListener('canplay', finishOnce);
+
+        // Kalau video gagal dimuat sama sekali (mis. semua <source> tidak
+        // didukung browser), jangan biarkan preloader menunggu selamanya.
+        video.addEventListener('error', finishOnce);
+        video.addEventListener('stalled', finishOnce);
+
+        // Batas atas: maksimal 4 detik menunggu video, sisanya lanjut saja.
+        // Video akan tetap coba lanjut memuat di background walau preloader
+        // sudah ditutup.
+        var batasWaktu = setTimeout(finishOnce, 4000);
 
         // Paksa browser mulai load jika belum
         if (video.preload !== 'auto') video.preload = 'auto';
