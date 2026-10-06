@@ -152,6 +152,8 @@
     padding:14px 16px; border-radius:16px; background:rgba(255,255,255,0.06);
     border:1px solid rgba(255,255,255,0.08);
   }
+  .idCard > div{ text-align:left; min-width:0; }
+  .idCard button{ flex:none; }
   .idCard .idLabel{ font-size:11px; color:var(--ink-soft); letter-spacing:0.04em; text-transform:uppercase; }
   .idCard .idVal{ font-size:18px; letter-spacing:0.08em; font-weight:500; }
   .idCard button{
@@ -838,9 +840,9 @@
       <input type="password" id="loginPass" autocomplete="current-password">
       <div id="loginErr"></div>
       <button type="button" id="loginBtn"></button>
+      <button type="button" id="createBtn"></button>
       <button type="button" id="guestBtn"></button>
       <div class="lgWarn" id="lgWarn"></div>
-      <button type="button" id="createBtn"></button>
     </div>
 
     <div id="regPane" hidden>
@@ -1882,7 +1884,7 @@
   const lsDel = k => { try{ localStorage.removeItem(k); }catch(e){} };
 
   const loginEl = $('loginScreen'), loginErrEl = $('loginErr'), regErrEl = $('regErr');
-  let myUid = null, myCode = null, mySession = null, friendsCache = [], curFriend = null;
+  let myUid = null, myCode = null, mySession = null, friendsCache = [], curFriend = null, lastProg = null, progReady = false;
 
   function readSession(){ try{ return JSON.parse(lsGet(SESSION_KEY) || 'null'); }catch(e){ return null; } }
   function writeSession(s){ lsSet(SESSION_KEY, JSON.stringify(s)); }
@@ -1890,19 +1892,19 @@
 
   // ----- teks layar login (3 bahasa, mengikuti pilihan bahasa) -----
   const LG = {
-    en:{ about:'Sky Meet is a companion web app for players of Sky: Children of the Light. It shows live Sky time and event timers (geyser, Grandma, turtle, shards, Eden, concerts), tracks your progress (candles, constellations, seasons, daily candle run) and lets you add friends by ID to chat.',
+    en:{ about:'Companion app for Sky: Children of the Light. Live Sky time, event timers, progress tracking, and chat with friends.',
       note:'For now, all data is saved on this device only.', user:'Username', pass:'Password', login:'Log in', guest:'Continue as guest', create:'Create account',
       warn:'Heads-up: guest accounts that stay inactive for 7 days in a row are deleted automatically, together with their progress, friends and chats.',
       reg:'Create a new account: choose a username (3\u201316 lowercase letters, numbers or _) and a password (min. 6 characters). Your account, progress and friends are stored on this device only \u2014 there is no server yet, so you can\u2019t log in from another device, and clearing your browser data removes it. Unlike guest accounts, it is not deleted for inactivity.',
       rUser:'New username', rPass:'Password (min. 6 characters)', rPass2:'Repeat password', rBtn:'Create account', rBack:'Back',
       eBad:'Incorrect username or password.', eName:'Username must be 3\u201316 characters: lowercase letters, numbers or _.', ePw:'Password must be at least 6 characters.', eMatch:'Passwords do not match.', eTaken:'That username is already taken.' },
-    id:{ about:'Sky Meet adalah aplikasi web pendamping untuk pemain Sky: Children of the Light. Menampilkan waktu Sky dan pengatur waktu event (geyser, Grandma, turtle, shard, Eden, konser), mencatat progresmu (lilin, rasi bintang, season, candle run harian), dan memungkinkan kamu menambah teman lewat ID untuk ngobrol.',
+    id:{ about:'Aplikasi pendamping Sky: Children of the Light. Waktu Sky, timer event, pelacak progres, dan chat dengan teman.',
       note:'Saat ini semua data hanya tersimpan di perangkat ini.', user:'Username', pass:'Kata sandi', login:'Masuk', guest:'Lanjut sebagai tamu', create:'Buat akun',
       warn:'Perhatian: akun tamu yang tidak aktif 7 hari berturut-turut akan dihapus otomatis beserta progres, teman, dan obrolannya.',
       reg:'Buat akun baru: pilih username (3\u201316 huruf kecil, angka, atau _) dan kata sandi (min. 6 karakter). Akun, progres, dan temanmu disimpan hanya di perangkat ini \u2014 belum ada server, jadi tidak bisa login dari perangkat lain, dan menghapus data browser akan menghapus akunmu. Berbeda dengan akun tamu, akun ini tidak dihapus karena tidak aktif.',
       rUser:'Username baru', rPass:'Kata sandi (min. 6 karakter)', rPass2:'Ulangi kata sandi', rBtn:'Buat akun', rBack:'Kembali',
       eBad:'Username atau kata sandi salah.', eName:'Username 3\u201316 karakter: huruf kecil, angka, atau _.', ePw:'Kata sandi minimal 6 karakter.', eMatch:'Kata sandi tidak sama.', eTaken:'Username sudah dipakai.' },
-    es:{ about:'Sky Meet es una aplicaci\u00f3n web complementaria para jugadores de Sky: Children of the Light. Muestra la hora de Sky y los temporizadores de eventos (g\u00e9iser, Grandma, tortuga, shards, Ed\u00e9n, conciertos), registra tu progreso (velas, constelaciones, temporadas, candle run diario) y te permite a\u00f1adir amigos por ID para chatear.',
+    es:{ about:'App complementaria de Sky: Children of the Light. Hora de Sky, temporizadores de eventos, seguimiento de progreso y chat con amigos.',
       note:'Por ahora todos los datos se guardan solo en este dispositivo.', user:'Usuario', pass:'Contrase\u00f1a', login:'Iniciar sesi\u00f3n', guest:'Continuar como invitado', create:'Crear cuenta',
       warn:'Aviso: las cuentas de invitado inactivas durante 7 d\u00edas seguidos se eliminan autom\u00e1ticamente, junto con su progreso, amigos y chats.',
       reg:'Crea una cuenta nueva: elige un usuario (3\u201316 min\u00fasculas, n\u00fameros o _) y una contrase\u00f1a (m\u00edn. 6 caracteres). Tu cuenta, progreso y amigos se guardan solo en este dispositivo: a\u00fan no hay servidor, as\u00ed que no puedes iniciar sesi\u00f3n desde otro dispositivo y borrar los datos del navegador elimina tu cuenta. A diferencia de las de invitado, no se elimina por inactividad.',
@@ -1910,6 +1912,33 @@
       eBad:'Usuario o contrase\u00f1a incorrectos.', eName:'El usuario debe tener 3\u201316 caracteres: min\u00fasculas, n\u00fameros o _.', ePw:'La contrase\u00f1a debe tener al menos 6 caracteres.', eMatch:'Las contrase\u00f1as no coinciden.', eTaken:'Ese usuario ya existe.' }
   };
   const curL = () => LG[window.SkyApp.getLang()] || LG.en;
+  // ----- teks halaman Visit & chat (3 bahasa, mengikuti pilihan bahasa) -----
+  const VT = {
+    en:{ idLabel:'Your ID', copy:'Copy', fid:'Friend ID', fname:'Save as (name)', add:'Add', empty:'No friends yet. Add one by ID above.', name:'Name', save:'Save', chat:'Chat', remove:'Remove', msg:'Message', send:'Send', back:'Back', conn:'Connecting...', ready:'Ready',
+      guestWho:'Guest \u00b7 deleted after 7 days in a row of inactivity', guestToast:'Guest accounts inactive for 7 days in a row are deleted', who:'Logged in as ', tap:'Tap to view',
+      own:"That's your own ID", dup:'Already added', added:'Friend added', nf:'ID not found. Ask your friend for the 6-character ID on their Visit page.', bad:'Enter a valid 6-character ID.', saved:'Name saved', copied:'ID copied',
+      prog:'Progress', load:'Loading...', na:"Progress isn't available for this friend yet. Each account's progress is stored on its own device, so it can be shown here only after a server (backend) is connected.", loc:'Read from another account on this device.', rm:'Remove {n} from your friends?' },
+    id:{ idLabel:'ID kamu', copy:'Salin', fid:'ID teman', fname:'Simpan sebagai (nama)', add:'Tambah', empty:'Belum ada teman. Tambahkan lewat ID di atas.', name:'Nama', save:'Simpan', chat:'Chat', remove:'Hapus', msg:'Pesan', send:'Kirim', back:'Kembali', conn:'Menghubungkan...', ready:'Siap',
+      guestWho:'Tamu \u00b7 dihapus setelah 7 hari berturut-turut tidak aktif', guestToast:'Akun tamu yang tidak aktif 7 hari berturut-turut akan dihapus', who:'Masuk sebagai ', tap:'Ketuk untuk melihat',
+      own:'Itu ID kamu sendiri', dup:'Sudah ditambahkan', added:'Teman ditambahkan', nf:'ID tidak ditemukan. Minta temanmu mengirim ID 6 karakter dari halaman Visit-nya.', bad:'Masukkan ID 6 karakter yang valid.', saved:'Nama disimpan', copied:'ID disalin',
+      prog:'Progres', load:'Memuat...', na:'Progres teman ini belum tersedia. Progres tiap akun tersimpan di perangkatnya sendiri, jadi baru bisa tampil di sini setelah server (backend) tersambung.', loc:'Dibaca dari akun lain di perangkat ini.', rm:'Hapus {n} dari daftar teman?' },
+    es:{ idLabel:'Tu ID', copy:'Copiar', fid:'ID del amigo', fname:'Guardar como (nombre)', add:'A\u00f1adir', empty:'A\u00fan no tienes amigos. A\u00f1ade uno por ID arriba.', name:'Nombre', save:'Guardar', chat:'Chat', remove:'Quitar', msg:'Mensaje', send:'Enviar', back:'Volver', conn:'Conectando...', ready:'Listo',
+      guestWho:'Invitado \u00b7 se elimina tras 7 d\u00edas seguidos sin actividad', guestToast:'Las cuentas de invitado inactivas 7 d\u00edas seguidos se eliminan', who:'Sesi\u00f3n iniciada como ', tap:'Toca para ver',
+      own:'Ese es tu propio ID', dup:'Ya a\u00f1adido', added:'Amigo a\u00f1adido', nf:'ID no encontrado. Pide a tu amigo el ID de 6 caracteres de su p\u00e1gina Visit.', bad:'Introduce un ID v\u00e1lido de 6 caracteres.', saved:'Nombre guardado', copied:'ID copiado',
+      prog:'Progreso', load:'Cargando...', na:'El progreso de este amigo a\u00fan no est\u00e1 disponible. El progreso de cada cuenta se guarda en su propio dispositivo, as\u00ed que solo se podr\u00e1 mostrar aqu\u00ed cuando haya un servidor (backend).', loc:'Le\u00eddo de otra cuenta en este dispositivo.', rm:'\u00bfQuitar a {n} de tus amigos?' }
+  };
+  const vt = () => VT[window.SkyApp.getLang()] || VT.en;
+  function setWho(){ if(mySession) $('whoAmI').textContent = mySession.type === 'guest' ? vt().guestWho : vt().who + mySession.id; }
+  function applyVisitLang(){
+    const v = vt(), set = (id, t) => { const e = $(id); if(e) e.textContent = t; }, ph = (id, t) => { const e = $(id); if(e) e.placeholder = t; };
+    set('idLabelT', v.idLabel); set('copyIdBtn', v.copy); ph('addFriendInput', v.fid); ph('addFriendName', v.fname); set('addFriendBtn', v.add);
+    ph('fName', v.name); set('fSave', v.save); set('fChat', v.chat); set('fRemove', v.remove); ph('chatInput', v.msg); set('chatSend', v.send);
+    ['fBack', 'chatBack'].forEach(id => $(id).setAttribute('aria-label', v.back));
+    loadMsgEl.textContent = loadingDone ? v.ready : v.conn;
+    setWho(); renderFriends();
+    if(curFriend && progReady) renderProgress(lastProg);
+  }
+  window.addEventListener('sky:lang', applyVisitLang);
   function applyLoginLang(){
     const L = curL(), code = window.SkyApp.getLang();
     $('lgAbout').textContent = L.about; $('lgNote').textContent = L.note; $('lgWarn').textContent = L.warn; $('regInfo').textContent = L.reg;
@@ -1954,7 +1983,7 @@
   setInterval(() => { touchGuest(false); if(!mySession || mySession.type !== 'guest') checkGuestExpiry(); }, 3600000);
 
   function showLogin(){
-    loadMsgEl.textContent = 'Ready';
+    loadMsgEl.textContent = vt().ready;
     loadingDone = true; hideLoading();
     $('regPane').hidden = true; $('loginMain').hidden = false;
     applyLoginLang();
@@ -1972,10 +2001,10 @@
     $('myIdVal').textContent = myCode;
     if(session.type === 'guest'){
       touchGuest(true);
-      $('whoAmI').textContent = 'Guest \u00b7 deleted after 7 days in a row of inactivity';
-      toast('Guest accounts inactive for 7 days in a row are deleted');
+      setWho();
+      toast(vt().guestToast);
     } else {
-      $('whoAmI').textContent = 'Logged in as ' + session.id;
+      setWho();
     }
     loadFriends();
   }
@@ -2052,7 +2081,7 @@
   setTimeout(() => {
     checkGuestExpiry();
     const existing = readSession();
-    if(existing){ loadMsgEl.textContent = 'Ready'; loadingDone = true; hideLoading(); enterApp(existing); }
+    if(existing){ loadMsgEl.textContent = vt().ready; loadingDone = true; hideLoading(); enterApp(existing); }
     else showLogin();
   }, 600);
 
@@ -2070,26 +2099,31 @@
     const listEl = $('friendList'), emptyEl = $('visitEmpty');
     if(!listEl) return;
     listEl.innerHTML = '';
-    if(!friendsCache.length){ emptyEl.textContent = 'No friends yet. Add one by ID above.'; emptyEl.style.display = 'block'; return; }
+    if(!friendsCache.length){ emptyEl.textContent = vt().empty; emptyEl.style.display = 'block'; return; }
     emptyEl.style.display = 'none';
     friendsCache.forEach(f => {
       const b = mkEl('button', 'friendRow'); b.type = 'button';
       const av = mkEl('span', 'friendAvatar', fLabel(f)[0].toUpperCase());
       const tx = mkEl('span', 'friendTxt');
-      tx.append(mkEl('div', 'friendName', fLabel(f)), mkEl('div', 'friendHint', (f.name ? f.code + ' · ' : '') + 'Tap to view'));
+      tx.append(mkEl('div', 'friendName', fLabel(f)), mkEl('div', 'friendHint', (f.name ? f.code + ' · ' : '') + vt().tap));
       b.append(av, tx);
       b.addEventListener('click', () => openFriend(f));
       listEl.appendChild(b);
     });
   }
-  function addFriendByCode(raw, nameRaw){
-    const code = (raw || '').trim().toUpperCase();
-    const name = (nameRaw || '').trim().slice(0, 20);
-    if(!code) return false;
-    if(code === myCode){ toast("That's your own ID"); SFX.error(); return false; }
-    if(friendsCache.some(f => f.code === code)){ toast('Already added'); return false; }
+  // ID harus berformat benar dan benar-benar ada: akun lain di perangkat ini, atau (bila backend dipasang) SkyVisitAdapter.exists(code)
+  async function addFriendByCode(raw, nameRaw){
+    const v = vt(), code = (raw || '').trim().toUpperCase(), name = (nameRaw || '').trim().slice(0, 20);
+    const fail = m => { toast(m); SFX.error(); return false; };
+    if(!new RegExp('^[' + CODE_CHARS + ']{6}$').test(code)) return fail(v.bad);
+    if(code === myCode) return fail(v.own);
+    if(friendsCache.some(f => f.code === code)) return fail(v.dup);
+    let ok = !!findLocalUid(code);
+    const ad = window.SkyVisitAdapter;
+    if(!ok && ad && typeof ad.exists === 'function'){ try{ ok = !!(await ad.exists(code)); }catch(e){} }
+    if(!ok) return fail(v.nf);
     friendsCache.push({ code, name }); saveFriends(); renderFriends();
-    toast('Friend added'); SFX.success();
+    toast(v.added); SFX.success();
     return true;
   }
 
@@ -2118,10 +2152,10 @@
   }
   function renderProgress(r, loading){
     const box = $('fProg'); box.textContent = '';
-    box.appendChild(mkEl('div', 'fSecT', 'Progress'));
-    if(loading){ box.appendChild(mkEl('div', 'fNote', 'Loading...')); return; }
+    box.appendChild(mkEl('div', 'fSecT', vt().prog));
+    if(loading){ box.appendChild(mkEl('div', 'fNote', vt().load)); return; }
     if(!r){
-      box.appendChild(mkEl('div', 'fNote', "Progress isn't available for this friend yet. Each account's progress is only stored on its own device, so it can be shown here only after a server (backend) is connected."));
+      box.appendChild(mkEl('div', 'fNote', vt().na));
       return;
     }
     const S = window.SkyApp.summary(r.data), t = window.SkyApp.labels();
@@ -2131,24 +2165,24 @@
     sub(t.cons); S.cons.forEach(c => row(c.name, c.done + '/' + c.cnt + ' ' + t.sp + (c.pct ? ' · ' + c.pct + '%' : '')));
     if(S.seasons.length){ sub(t.seas); S.seasons.forEach(m => row(m.n || '-', (m.p || 0) + '%')); }
     sub(t.trk); row(t.run + ' (' + t.runS.toLowerCase() + ')', S.run.done + '/' + S.run.total + ' ' + t.ar); row(t.eden, S.eden ? '\u2713' : '\u2014');
-    if(r.src === 'local') box.appendChild(mkEl('div', 'fNote', 'Read from another account on this device.'));
+    if(r.src === 'local') box.appendChild(mkEl('div', 'fNote', vt().loc));
   }
   function openFriend(f){
     curFriend = f;
     $('fTitle').textContent = fLabel(f); $('fName').value = f.name || ''; $('fCode').textContent = 'ID: ' + f.code;
     $('friendOverlay').classList.add('open');
-    renderProgress(null, true);
-    getFriendData(f.code).then(r => { if(curFriend === f) renderProgress(r); });
+    progReady = false; renderProgress(null, true);
+    getFriendData(f.code).then(r => { if(curFriend === f){ lastProg = r; progReady = true; renderProgress(r); } });
   }
   $('fBack').addEventListener('click', () => { $('friendOverlay').classList.remove('open'); curFriend = null; });
   $('fSave').addEventListener('click', () => {
     if(!curFriend) return;
     curFriend.name = ($('fName').value || '').trim().slice(0, 20);
     saveFriends(); renderFriends(); $('fTitle').textContent = fLabel(curFriend);
-    toast('Name saved'); SFX.success();
+    toast(vt().saved); SFX.success();
   });
   $('fRemove').addEventListener('click', () => {
-    if(!curFriend || !confirm('Remove ' + fLabel(curFriend) + ' from your friends?')) return;
+    if(!curFriend || !confirm(vt().rm.replace('{n}', fLabel(curFriend)))) return;
     friendsCache = friendsCache.filter(x => x !== curFriend); saveFriends(); renderFriends();
     $('friendOverlay').classList.remove('open'); curFriend = null;
   });
@@ -2156,20 +2190,22 @@
 
   // ---------- chat ----------
   const pairId = (a,b) => [a,b].sort().join('__');
-  let chatPid = null;
+  let chatPid = null, chatRaw = null;
   function chatKey(pid){ return 'sky_chat_' + pid; }
   function openChat(friend){
     $('chatTitle').textContent = fLabel(friend);
     $('chatOverlay').classList.add('open');
-    chatPid = pairId(myCode, friend.code);
+    chatPid = pairId(myCode, friend.code); chatRaw = null;
     renderChat();
     setTimeout(() => $('chatInput').focus(), 350);
   }
+  const readMsgs = pid => { try{ const m = JSON.parse(localStorage.getItem(chatKey(pid)) || '[]'); return Array.isArray(m) ? m : []; }catch(e){ return []; } };
   function renderChat(){
-    const msgsEl = $('chatMsgs');
-    let msgs = []; try{ msgs = JSON.parse(localStorage.getItem(chatKey(chatPid)) || '[]'); }catch(e){}
-    msgsEl.innerHTML = '';
-    msgs.forEach(m => {
+    const raw = localStorage.getItem(chatKey(chatPid)) || '[]';
+    if(raw === chatRaw) return;   // tidak ada pesan baru: jangan gambar ulang
+    chatRaw = raw;
+    const msgsEl = $('chatMsgs'); msgsEl.innerHTML = '';
+    readMsgs(chatPid).forEach(m => {
       const d = document.createElement('div');
       d.className = 'msg ' + (m.from === myCode ? 'me' : 'them');
       d.textContent = m.text;
@@ -2177,31 +2213,53 @@
     });
     msgsEl.scrollTop = msgsEl.scrollHeight;
   }
+  // sinkron: bila SkyVisitAdapter.fetchMessages(pid) tersedia (backend), pesan server digabung ke lokal
+  async function syncChat(){
+    if(!chatPid) return;
+    const pid = chatPid, ad = window.SkyVisitAdapter;
+    if(ad && typeof ad.fetchMessages === 'function'){
+      try{
+        const remote = await ad.fetchMessages(pid);
+        if(chatPid === pid && Array.isArray(remote)){
+          const loc = readMsgs(pid), seen = new Set(loc.map(m => m.ts + '|' + m.from + '|' + m.text));
+          remote.forEach(m => { if(m && m.text && !seen.has(m.ts + '|' + m.from + '|' + m.text)) loc.push(m); });
+          loc.sort((x, y) => x.ts - y.ts);
+          localStorage.setItem(chatKey(pid), JSON.stringify(loc.slice(-200)));
+        }
+      }catch(e){}
+    }
+    if(chatPid === pid) renderChat();
+  }
+  window.addEventListener('storage', e => { if(chatPid && e.key === chatKey(chatPid)) renderChat(); });   // pesan dari tab/akun lain di browser ini
+  setInterval(syncChat, 2500);
   $('chatBack').addEventListener('click', () => { $('chatOverlay').classList.remove('open'); chatPid = null; });
   $('chatForm').addEventListener('submit', e => {
     e.preventDefault();
     const input = $('chatInput'), text = input.value.trim();
     if(!text || !chatPid) return;
     input.value = ''; SFX.send();
-    let msgs = []; try{ msgs = JSON.parse(localStorage.getItem(chatKey(chatPid)) || '[]'); }catch(e){}
-    msgs.push({ from: myCode, text, ts: Date.now() });
+    const msgs = readMsgs(chatPid), msg = { from: myCode, text, ts: Date.now() };
+    msgs.push(msg);
     if(msgs.length > 200) msgs.splice(0, msgs.length - 200);
     localStorage.setItem(chatKey(chatPid), JSON.stringify(msgs));
     renderChat();
+    const ad = window.SkyVisitAdapter;
+    if(ad && typeof ad.sendMessage === 'function'){ try{ ad.sendMessage(chatPid, msg); }catch(err){} }
   });
 
   // ---------- tambah teman ----------
-  function submitAdd(){
+  async function submitAdd(){
     const ci = $('addFriendInput'), ni = $('addFriendName');
-    if(addFriendByCode(ci.value, ni.value)){ ci.value = ''; ni.value = ''; }
+    if(await addFriendByCode(ci.value, ni.value)){ ci.value = ''; ni.value = ''; }
   }
   $('addFriendBtn').addEventListener('click', submitAdd);
   ['addFriendInput', 'addFriendName'].forEach(id => $(id).addEventListener('keydown', e => { if(e.key === 'Enter') submitAdd(); }));
   $('copyIdBtn').addEventListener('click', () => {
     if(!myCode) return;
-    (navigator.clipboard?.writeText(myCode) || Promise.reject()).then(() => { toast('ID copied'); SFX.tap(); }).catch(() => {});
+    (navigator.clipboard?.writeText(myCode) || Promise.reject()).then(() => { toast(vt().copied); SFX.tap(); }).catch(() => {});
   });
 
+  applyVisitLang();
   window.SkyVisit = { render: renderFriends };
 })();
 </script>
