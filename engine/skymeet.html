@@ -2133,7 +2133,7 @@
   }
   function logout(){
     touchGuest(true);   // keluar juga dihitung sebagai aktivitas terakhir
-    lsDel(SESSION_KEY); lsDel(TOKEN_KEY); stopNet(); meta = {}; typingMap = {};
+    lsDel(SESSION_KEY); stopNet(); meta = {}; typingMap = {};
     $('chatOverlay').classList.remove('open'); $('friendOverlay').classList.remove('open');
     chatPid = null; curFriend = null; myUid = null; myCode = null; mySession = null; friendsCache = [];
     editingName = false; renderMyName();
@@ -2217,7 +2217,7 @@
   setTimeout(() => {
     checkGuestExpiry();
     const existing = readSession();
-    if(existing && !(SKY_API && existing.type === 'account' && !lsGet(TOKEN_KEY))){ loadMsgEl.textContent = vt().ready; loadingDone = true; hideLoading(); enterApp(existing); }
+    if(existing && !(SKY_API && existing.type === 'account' && !lsGet(tokenKey(existing.id)))){ loadMsgEl.textContent = vt().ready; loadingDone = true; hideLoading(); enterApp(existing); }
     else showLogin();
   }, 600);
 
@@ -2230,7 +2230,7 @@
     if(!Array.isArray(friendsCache)) friendsCache = [];
     renderFriends();
   }
-  function saveFriends(){ try{ localStorage.setItem(friendsKey(), JSON.stringify(friendsCache)); }catch(e){} if(SKY_API && lsGet(TOKEN_KEY)) api('saveFriends', { list: friendsCache }); }
+  function saveFriends(){ try{ localStorage.setItem(friendsKey(), JSON.stringify(friendsCache)); }catch(e){} if(SKY_API && myToken()) api('saveFriends', { list: friendsCache }); }
   function renderFriends(){   // dikelompokkan Online / Offline, lengkap dengan status, jam teman, lambaian & badge pesan baru
     const listEl = $('friendList'), emptyEl = $('visitEmpty'), v = vt();
     if(!listEl) return;
@@ -2435,7 +2435,7 @@
     if(n) lsSet('sky_myname_' + myUid, n); else lsDel('sky_myname_' + myUid);
     editingName = false; renderMyName();
     window.SkyApp.setUser(dispName(myUid), myUid);   // perbarui sapaan di beranda
-    if(SKY_API && lsGet(TOKEN_KEY)) api('updateProfile', { name: n || myUid });
+    if(SKY_API && myToken()) api('updateProfile', { name: n || myUid });
     toast(vt().saved); SFX.success();
   }
   $('myNameBtn').addEventListener('click', () => {
@@ -2453,6 +2453,9 @@
   // Mode lokal (SKY_API kosong): semua jalan di browser ini. Mode server: isi SKY_API dengan URL web app Apps Script (lihat Code.gs).
   const SKY_API = 'https://script.google.com/macros/s/AKfycbzlrUGOvvCiu5UPB1aiFbDjW1fYKilyBabltRYRbtrdMiiUuUZPlexjY4QNU4fqb_jFWw/exec';
   const TOKEN_KEY = 'sky_token';
+  const tokenKey = uid => TOKEN_KEY + '_' + uid;   // satu token per akun
+  const myToken = () => (myUid ? lsGet(tokenKey(myUid)) : null);
+  let authFails = 0, netGen = 0;
   const AVATARS = ['🌙', '⭐', '☁️', '🦋', '🐋', '🕯️', '🌸', '🍃', '❄️', '🔥', '☀️', '🪽'];
   const tzNow = () => -new Date().getTimezoneOffset();
   const profKey = uid => 'sky_prof_' + uid;
@@ -2460,17 +2463,17 @@
   const readProf = uid => { try{ return Object.assign(defProf(), JSON.parse(lsGet(profKey(uid)) || '{}')); }catch(e){ return defProf(); } };
   let prof = defProf(), meta = {}, typingMap = {}, since = 0, pollTimer = null, lastUnread = 0, lastType = 0, lastTypeSend = 0;
 
-  async function api(action, data){
+  async function api(action, data, uid){   // uid opsional: pakai token akun itu (mis. saat simpan data tertunda)
     if(!SKY_API) return { ok:false, error:'off' };
     try{
-      const r = await fetch(SKY_API, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action, token: lsGet(TOKEN_KEY) || '' }, data || {})) });
+      const r = await fetch(SKY_API, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action, token: (uid || myUid) ? (lsGet(tokenKey(uid || myUid)) || '') : '' }, data || {})) });
       return await r.json();
     }catch(e){ return { ok:false, error:'net' }; }
   }
   if(SKY_API){   // progres akun & data teman lewat server
     window.SkyApp.store.useAdapter({
-      load: () => lsGet(TOKEN_KEY) ? api('getData').then(r => (r.ok ? r.data : null)) : null,
-      save: (id, snap) => lsGet(TOKEN_KEY) ? api('saveData', { data: snap }) : null
+      load: id => lsGet(tokenKey(id)) ? api('getData', null, id).then(r => (r.ok ? r.data : null)) : null,
+      save: (id, snap) => lsGet(tokenKey(id)) ? api('saveData', { data: snap }, id) : null
     });
     window.SkyVisitAdapter = {
       exists: async code => { const r = await api('exists', { code }); return !!(r.ok && r.exists); },
@@ -2479,19 +2482,19 @@
     };
   }
   function hydrate(u, r){   // hasil login/daftar server -> tulis ke penyimpanan lokal, lalu enterApp memakainya
-    lsSet(TOKEN_KEY, r.token); lsSet('sky_code_' + u, r.code); lsSet('sky_friends_' + u, JSON.stringify(r.friends || []));
+    lsSet(tokenKey(u), r.token); lsSet('sky_code_' + u, r.code); lsSet('sky_friends_' + u, JSON.stringify(r.friends || []));
     lsSet(profKey(u), JSON.stringify(Object.assign(readProf(u), r.profile || {}, { email: r.email || '' })));
     if(r.profile && r.profile.name) lsSet('sky_myname_' + u, r.profile.name);
   }
   function moveAccount(from, to){
-    ['sky:v1:u:', 'sky_friends_', 'sky_myname_', 'sky_prof_', 'sky_code_'].forEach(pfx => { const v = lsGet(pfx + from); if(v !== null){ lsSet(pfx + to, v); lsDel(pfx + from); } });
+    ['sky:v1:u:', 'sky_friends_', 'sky_myname_', 'sky_prof_', 'sky_code_', 'sky_token_'].forEach(pfx => { const v = lsGet(pfx + from); if(v !== null){ lsSet(pfx + to, v); lsDel(pfx + from); } });
   }
 
   // ----- profil -----
   function saveProf(patch, push){
     Object.assign(prof, patch); lsSet(profKey(myUid), JSON.stringify(prof));
     window.SkyMuted = !!prof.mute; paintProf();
-    if(push && SKY_API && lsGet(TOKEN_KEY)){ const o = Object.assign({}, patch); delete o.mute; api('updateProfile', o); }
+    if(push && SKY_API && myToken()){ const o = Object.assign({}, patch); delete o.mute; api('updateProfile', o); }
   }
   function paintProf(){
     if(!$('avBtn')) return;
@@ -2553,7 +2556,7 @@
       let data = {}; try{ data = JSON.parse(lsGet('sky:v1:u:' + gid) || '{}'); }catch(e){}
       const r = await api('register', { username:u, password:pw, code:myCode, friends:friendsCache, data });
       if(!r.ok) return fail(r.error === 'taken' ? L.eTaken : L.eName);
-      lsSet(TOKEN_KEY, r.token);
+      lsSet(tokenKey(u), r.token);
     } else {
       const accs = readAccounts();
       if(BUILTIN[u] || Object.prototype.hasOwnProperty.call(accs, u)) return fail(L.eTaken);
@@ -2607,9 +2610,10 @@
     let nudges = [];
     if(SKY_API){
       const typing = (chatPid && Date.now() - lastType < 4000 && chatFriend()) ? chatFriend().code : '';
-      const r = await api('poll', { since, tz: tzNow(), typing });
-      if(!myUid) return;
-      if(!r.ok){ if(r.error === 'auth') logout(); return; }
+      const me = myUid, r = await api('poll', { since, tz: tzNow(), typing });
+      if(myUid !== me) return;   // sudah ganti akun/keluar: hasil lama dibuang
+      if(!r.ok){ if(r.error === 'auth' && ++authFails >= 3) logout(); return; }
+      authFails = 0;
       meta = r.metas || {}; typingMap = r.typing || {};
       (r.msgs || []).forEach(m => { mergeMsg(m); since = Math.max(since, m.ts); });
       lsSet('sky_since_' + myUid, String(since)); lsSet('sky_meta_' + myUid, JSON.stringify(meta));   // cache: tampil instan saat app dibuka lagi
@@ -2634,10 +2638,11 @@
     since = parseInt(lsGet('sky_since_' + myUid), 10) || 0;
     lastUnread = friendsCache.reduce((a, f) => a + unreadOf(f), 0); paintDots(lastUnread);
     paintProf(); renderFriends();
-    const loop = async () => { await pollNow(); if(myUid) pollTimer = setTimeout(loop, document.hidden ? 30000 : (SKY_API ? (chatPid ? 3000 : 10000) : 2500)); };
+    const gen = ++netGen;   // cegah loop ganda
+    const loop = async () => { await pollNow(); if(myUid && gen === netGen) pollTimer = setTimeout(loop, document.hidden ? 30000 : (SKY_API ? (chatPid ? 3000 : 10000) : 2500)); };
     loop();
   }
-  function stopNet(){ clearTimeout(pollTimer); pollTimer = null; paintDots(0); }
+  function stopNet(){ netGen++; clearTimeout(pollTimer); pollTimer = null; paintDots(0); }
 
   // ----- perayaan saat rasi bintang / season mencapai 100% -----
   window.addEventListener('sky:celebrate', e => {
