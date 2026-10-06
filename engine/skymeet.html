@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Sky Meet</title>
+<title>Sky — day &amp; night clock</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -503,6 +503,11 @@
       <span data-t="journey">Daily &amp; weekly</span>
       <span class="soon" data-t="soon">Soon</span>
     </button>
+    <button class="nav-item" type="button" role="menuitem" data-go="friends" disabled aria-disabled="true">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="5.5" r="2.3"/><path d="M1.8 13c.3-2.3 2-3.6 4.2-3.6s3.9 1.3 4.2 3.6"/><path d="M10.4 3.4a2.3 2.3 0 0 1 0 4.2M11.6 9.6c1.5.4 2.5 1.5 2.7 3.4"/></svg>
+      <span data-t="friends">Visit friends</span>
+      <span class="soon" data-t="soon">Soon</span>
+    </button>
   </div>
 </div>
 
@@ -623,7 +628,7 @@
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Fairy ring', sunset:'Sunset', rainbow:'Forest Brook rainbow', daily:'Daily reset', weekly:'Weekly reset', ts:'Traveling Spirit', seats:'Take your seats', concert:'Concert starts', shardRed:'Red shard', shardBlack:'Black shard' },
       cat:{ candles:'Candles', shards:'Shards', environment:'Environment', reset:'Reset', spirits:'Spirits', aurora:'AURORA concert' },
       act:{ title:'Active now', none:'No active events right now', next:'Next', endsIn:'ends in' },
-      menu:{ label:'Menu', home:'Home', events:'Events', journey:'Daily & weekly', soon:'Soon' },
+      menu:{ label:'Menu', home:'Home', events:'Events', journey:'Daily & weekly', friends:'Visit friends', soon:'Soon' },
       date: (d,dd,m,y) => `${d}, ${m} ${dd}, ${y}`
     },
     id: {
@@ -636,7 +641,7 @@
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Cincin peri', sunset:'Matahari terbenam', rainbow:'Pelangi Sungai Hutan', daily:'Reset harian', weekly:'Reset mingguan', ts:'Roh pengembara', seats:'Ambil kursi', concert:'Konser dimulai', shardRed:'Shard merah', shardBlack:'Shard hitam' },
       cat:{ candles:'Lilin', shards:'Shard', environment:'Lingkungan', reset:'Reset', spirits:'Roh', aurora:'Konser Aurora' },
       act:{ title:'Aktif sekarang', none:'Tidak ada event aktif saat ini', next:'Berikutnya', endsIn:'berakhir dalam' },
-      menu:{ label:'Menu', home:'Beranda', events:'Event', journey:'Harian & mingguan', soon:'Segera' },
+      menu:{ label:'Menu', home:'Beranda', events:'Event', journey:'Harian & mingguan', friends:'Visit teman', soon:'Segera' },
       date: (d,dd,m,y) => `${d}, ${dd} ${m} ${y}`
     },
     es: {
@@ -649,7 +654,7 @@
       ev:{ geyser:'Géiser', grandma:'Abuela', turtle:'Tortuga', eden:'Edén', fairy:'Círculo de hadas', sunset:'Atardecer', rainbow:'Arcoíris del Arroyo del Bosque', daily:'Reinicio diario', weekly:'Reinicio semanal', ts:'Espíritu viajero', seats:'Toma asiento', concert:'Empieza el concierto', shardRed:'Fragmento rojo', shardBlack:'Fragmento negro' },
       cat:{ candles:'Velas', shards:'Fragmentos', environment:'Entorno', reset:'Reinicio', spirits:'Espíritus', aurora:'Concierto de AURORA' },
       act:{ title:'Activos ahora', none:'No hay eventos activos ahora', next:'Siguiente', endsIn:'termina en' },
-      menu:{ label:'Menú', home:'Inicio', events:'Eventos', journey:'Diario y semanal', soon:'Pronto' },
+      menu:{ label:'Menú', home:'Inicio', events:'Eventos', journey:'Diario y semanal', friends:'Visitar amigos', soon:'Pronto' },
       date: (d,dd,m,y) => `${d}, ${dd} de ${m} de ${y}`
     }
   };
@@ -1129,7 +1134,7 @@
     toggleNav(false);
     if(b.dataset.go === 'home') goHome();
     else if(b.dataset.go === 'events') goEvents();
-    // 'journey' (halaman 3: kontrol perjalanan harian & mingguan) belum aktif
+    // 'journey' (halaman 3: kontrol perjalanan harian & mingguan) dan 'friends' (halaman 4: visit teman) belum aktif
   });
   document.addEventListener('click', e => {
     if(!document.getElementById('nav').contains(e.target)) toggleNav(false);
