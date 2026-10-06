@@ -110,13 +110,25 @@
 
   /* ===== layar login (demo) ===== */
   #loginScreen{
-    position:fixed; inset:0; z-index:9998;
-    display:flex; align-items:center; justify-content:center; padding:24px;
+    position:fixed; inset:0; z-index:9998; overflow-y:auto;
+    display:flex; align-items:flex-start; justify-content:center; padding:24px;
     background: linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%);
     transition: opacity 0.4s ease, visibility 0.4s ease;
   }
   #loginScreen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
-  #loginCard{ width:100%; max-width:340px; display:flex; flex-direction:column; gap:14px; text-align:center; }
+  #loginCard{ width:100%; max-width:360px; margin:auto; display:flex; flex-direction:column; gap:14px; text-align:center; }
+  #loginMain, #regPane{ display:flex; flex-direction:column; gap:12px; }
+  #loginMain[hidden], #regPane[hidden]{ display:none; }
+  #loginLang{ display:flex; justify-content:center; gap:6px; }
+  #loginLang button{ font-family:inherit; font-size:12px; color:var(--ink-soft); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:999px; padding:6px 14px; cursor:pointer; }
+  #loginLang button[aria-pressed="true"]{ color:var(--top); background:var(--ink); border-color:transparent; }
+  #loginCard p.about{ font-size:12.5px; line-height:1.55; color:var(--ink-soft); text-align:left; margin:0; }
+  #loginCard p.about.note{ font-size:11.5px; opacity:0.85; }
+  .lgWarn{ font-size:11.5px; line-height:1.5; color:#ffd9a0; background:rgba(255,200,120,0.08); border:1px solid rgba(255,200,120,0.18); border-radius:12px; padding:9px 12px; text-align:left; }
+  .lgInfo{ font-size:12px; line-height:1.55; color:var(--ink-soft); background:rgba(255,255,255,0.05); border-radius:12px; padding:10px 12px; text-align:left; margin:0; }
+  #regErr{ font-size:12px; color:#ff9b9b; min-height:16px; }
+  #createBtn, #regBack{ font-family:inherit; font-size:13px; color:var(--ink); background:rgba(255,255,255,0.08); border:none; border-radius:12px; padding:11px; cursor:pointer; }
+  #regBtn{ font-family:inherit; font-size:14px; color:var(--top); background:var(--ink); border:none; border-radius:12px; padding:12px; cursor:pointer; font-weight:500; }
   #loginCard h1{ font-size:20px; font-weight:500; margin-bottom:2px; }
   #loginCard p.sub{ font-size:12.5px; color:var(--ink-soft); margin-bottom:6px; }
   #loginCard input{
@@ -167,21 +179,48 @@
   }
   .friendName{ font-size:14px; }
   .friendHint{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .idWho{ font-size:12px; color:var(--ink-soft); margin-top:3px; }
+  .addFriendBox{ display:flex; flex-direction:column; gap:8px; }
+  .addFriendBox > input{
+    font-family:inherit; font-size:14px; color:var(--ink); background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:10px 14px; outline:none; box-sizing:border-box; width:100%;
+    text-transform:uppercase;
+  }
+  .addFriendBox > input::placeholder{ text-transform:none; }
+  .friendRow .friendTxt{ min-width:0; }
+  .friendName, .friendHint{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #fBody{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px; }
+  .fCard{ padding:14px 16px; border-radius:16px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:10px; }
+  .fNameRow{ display:flex; gap:8px; }
+  .fNameRow input{
+    flex:1; min-width:0; font-family:inherit; font-size:14px; color:var(--ink); background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:10px 14px; outline:none;
+  }
+  .fBtns{ display:flex; gap:8px; }
+  .fBtn{ font-family:inherit; font-size:13px; color:var(--ink); background:rgba(255,255,255,0.1); border:none; border-radius:12px; padding:10px 16px; cursor:pointer; }
+  .fBtn.main{ flex:1; color:var(--top); background:var(--ink); }
+  .fBtn.danger{ color:#ff9b9b; }
+  .fSecT{ font-size:15px; font-weight:500; }
+  .fSub{ font-size:11px; color:var(--ink-soft); letter-spacing:0.04em; text-transform:uppercase; margin-top:6px; }
+  .fRow{ display:flex; justify-content:space-between; gap:10px; font-size:13.5px; }
+  .fVal{ color:var(--ink-soft); white-space:nowrap; }
+  .fNote{ font-size:12px; color:var(--ink-soft); line-height:1.5; }
   #visitEmpty{ font-size:13px; color:var(--ink-soft); text-align:center; padding:20px 0; }
 
   /* overlay obrolan */
-  #chatOverlay{
+  #chatOverlay, #friendOverlay{
     position:fixed; inset:0; z-index:60; display:flex; flex-direction:column;
     background: linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%);
     transform:translateX(100%); transition:transform 0.35s ease; visibility:hidden;
   }
-  #chatOverlay.open{ transform:translateX(0); visibility:visible; }
-  #chatHead{
+  #chatOverlay.open, #friendOverlay.open{ transform:translateX(0); visibility:visible; }
+  #chatOverlay{ z-index:61; }
+  #chatHead, #fHead{
     display:flex; align-items:center; gap:10px; padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 14px;
     border-bottom:1px solid rgba(255,255,255,0.08);
   }
-  #chatBack{ background:none; border:none; color:var(--ink); font-size:20px; cursor:pointer; padding:4px 8px; }
-  #chatTitle{ font-size:15px; }
+  #chatBack, #fBack{ background:none; border:none; color:var(--ink); font-size:20px; cursor:pointer; padding:4px 8px; }
+  #chatTitle, #fTitle{ font-size:15px; }
   #chatMsgs{ flex:1; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:8px; }
   .msg{ max-width:75%; padding:9px 13px; border-radius:16px; font-size:13.5px; line-height:1.4; }
   .msg.me{ align-self:flex-end; background:var(--ink); color:var(--top); border-bottom-right-radius:4px; }
@@ -631,6 +670,7 @@
   .nav-item svg{ width:18px; height:18px; flex:none; }
   @media (hover:hover){ .nav-item:hover:not(:disabled){ color: var(--ink); background: rgba(255,255,255,0.08); } }
   .nav-item[aria-current="page"]{ color: var(--ink); background: rgba(255,255,255,0.18); }
+  .nav-item.logout{ margin-top:4px; border-top:1px solid rgba(255,255,255,0.1); border-radius:0 0 12px 12px; padding-top:12px; }
   .nav-item:disabled{ opacity:0.55; cursor:default; }
   .nav-item .soon{
     margin-left:auto; padding:3px 8px; border-radius:999px; border:1px solid rgba(255,255,255,0.3);
@@ -659,6 +699,9 @@
     #hint, #hint svg, .row .lv::before, #clock .digit.settled{ animation:none; }
     #track, .rv, .rv3, .in, .act, #skyClock .sd, #skyClock .sc{ transition-duration:0.01s !important; transition-delay:0s !important; }
   }
+  /* sembunyikan scrollbar (tetap bisa di-scroll) */
+  *{ scrollbar-width:none; -ms-overflow-style:none; }
+  *::-webkit-scrollbar{ display:none; width:0; height:0; }
 </style>
 </head>
 <body class="notranslate" translate="no">
@@ -722,12 +765,16 @@
             <div>
               <div class="idLabel" id="idLabelT">Your ID</div>
               <div class="idVal" id="myIdVal">------</div>
+              <div class="idWho" id="whoAmI"></div>
             </div>
             <button type="button" id="copyIdBtn">Copy</button>
           </div>
-          <div class="addFriendRow">
-            <input type="text" id="addFriendInput" maxlength="8" placeholder="Enter friend ID" autocomplete="off">
-            <button type="button" id="addFriendBtn">Add</button>
+          <div class="addFriendBox">
+            <input type="text" id="addFriendInput" maxlength="8" placeholder="Friend ID" autocomplete="off">
+            <div class="addFriendRow">
+              <input type="text" id="addFriendName" maxlength="20" placeholder="Save as (name)" autocomplete="off">
+              <button type="button" id="addFriendBtn">Add</button>
+            </div>
           </div>
           <div id="friendList"></div>
           <div id="visitEmpty">No friends yet. Share your ID or add one above.</div>
@@ -735,6 +782,27 @@
       </div>
     </section>
 
+  </div>
+</div>
+
+<div id="friendOverlay">
+  <div id="fHead">
+    <button type="button" id="fBack" aria-label="Back">&#8592;</button>
+    <span id="fTitle"></span>
+  </div>
+  <div id="fBody">
+    <div class="fCard">
+      <div class="idLabel" id="fCode"></div>
+      <div class="fNameRow">
+        <input type="text" id="fName" maxlength="20" placeholder="Name" autocomplete="off">
+        <button type="button" class="fBtn" id="fSave">Save</button>
+      </div>
+      <div class="fBtns">
+        <button type="button" class="fBtn main" id="fChat">Chat</button>
+        <button type="button" class="fBtn danger" id="fRemove">Remove</button>
+      </div>
+    </div>
+    <div class="fCard" id="fProg"></div>
   </div>
 </div>
 
@@ -756,13 +824,34 @@
 </div>
 <div id="loginScreen" class="hidden">
   <div id="loginCard">
+    <div id="loginLang" role="group" aria-label="Language">
+      <button type="button" data-l="en">EN</button>
+      <button type="button" data-l="id">ID</button>
+      <button type="button" data-l="es">ES</button>
+    </div>
     <h1>Sky Meet</h1>
-    <p class="sub">Demo login &mdash; email/username &amp; password placeholder (not yet connected to a real backend).</p>
-    <input type="text" id="loginUser" placeholder="Email or username" autocomplete="username">
-    <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
-    <div id="loginErr"></div>
-    <button type="button" id="loginBtn">Log in</button>
-    <button type="button" id="guestBtn">Continue as guest</button>
+    <p class="about" id="lgAbout"></p>
+    <p class="about note" id="lgNote"></p>
+
+    <div id="loginMain">
+      <input type="text" id="loginUser" autocomplete="username" autocapitalize="none" spellcheck="false">
+      <input type="password" id="loginPass" autocomplete="current-password">
+      <div id="loginErr"></div>
+      <button type="button" id="loginBtn"></button>
+      <button type="button" id="guestBtn"></button>
+      <div class="lgWarn" id="lgWarn"></div>
+      <button type="button" id="createBtn"></button>
+    </div>
+
+    <div id="regPane" hidden>
+      <p class="lgInfo" id="regInfo"></p>
+      <input type="text" id="regUser" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="16">
+      <input type="password" id="regPass" autocomplete="new-password">
+      <input type="password" id="regPass2" autocomplete="new-password">
+      <div id="regErr"></div>
+      <button type="button" id="regBtn"></button>
+      <button type="button" id="regBack"></button>
+    </div>
   </div>
 </div>
 
@@ -787,6 +876,10 @@
     <button class="nav-item" type="button" role="menuitem" data-go="visit">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14s4.5-4.4 4.5-7.5a4.5 4.5 0 0 0-9 0C3.5 9.6 8 14 8 14Z"/><circle cx="8" cy="6.5" r="1.6"/></svg>
       <span data-t="visit">Visit</span>
+    </button>
+    <button class="nav-item logout" type="button" role="menuitem" data-go="logout">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 2.5H4a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h2.5M10 5l3 3-3 3M13 8H6.5"/></svg>
+      <span data-t="logout">Log out</span>
     </button>
   </div>
 </div>
@@ -913,7 +1006,7 @@
       pg:{ cur:'Currency', cons:'Constellations', main:'Main', seas:'Seasons', trk:'Trackers', run:'Candle run', runS:'Resets daily', eden:'Eden', edenS:'Resets weekly', done:'Done this week', sp:'spirits', nm:'Season name', all:'Complete all areas', cap:'Gray / 20', capL:'Candles turned gray or reached 20 today', add:'Add season', hist:'History', nohist:'No history yet', ar:'areas', wk:'Week of', del:'Remove', n:{ candles:'Candles', hearts:'Hearts', asc:'Ascended Candles', season:'Season Candles', event:'Event Candles' } },
       cat:{ candles:'Candles', shards:'Shards', environment:'Environment', reset:'Reset', spirits:'Spirits', aurora:'AURORA concert' },
       act:{ title:'Active now', none:'No active events right now', next:'Next', endsIn:'ends in', live:'Active' },
-      menu:{ label:'Menu', home:'Home', events:'Events', journey:'Progress', visit:'Visit', soon:'Soon' },
+      menu:{ label:'Menu', home:'Home', events:'Events', journey:'Progress', visit:'Visit', soon:'Soon', logout:'Log out' },
       date: (d,dd,m,y) => `${d}, ${m} ${dd}, ${y}`
     },
     id: {
@@ -929,7 +1022,7 @@
       pg:{ cur:'Mata uang', cons:'Rasi bintang', main:'Utama', seas:'Season', trk:'Pelacak', run:'Candle run', runS:'Reset harian', eden:'Eden', edenS:'Reset mingguan', done:'Selesai minggu ini', sp:'roh', nm:'Nama season', all:'Selesaikan semua area', cap:'Abu-abu / 20', capL:'Lilin sudah abu-abu atau mencapai 20 hari ini', add:'Tambah season', hist:'Riwayat', nohist:'Belum ada riwayat', ar:'area', wk:'Minggu', del:'Hapus', n:{ candles:'Lilin', hearts:'Hati', asc:'Lilin Ascended', season:'Lilin Season', event:'Lilin Event' } },
       cat:{ candles:'Lilin', shards:'Shard', environment:'Lingkungan', reset:'Reset', spirits:'Roh', aurora:'Konser Aurora' },
       act:{ title:'Aktif sekarang', none:'Tidak ada event aktif saat ini', next:'Berikutnya', endsIn:'berakhir dalam', live:'Aktif' },
-      menu:{ label:'Menu', home:'Beranda', events:'Event', journey:'Progres', visit:'Visit', soon:'Segera' },
+      menu:{ label:'Menu', home:'Beranda', events:'Event', journey:'Progres', visit:'Visit', soon:'Segera', logout:'Keluar' },
       date: (d,dd,m,y) => `${d}, ${dd} ${m} ${y}`
     },
     es: {
@@ -945,7 +1038,7 @@
       pg:{ cur:'Moneda', cons:'Constelaciones', main:'Principales', seas:'Temporadas', trk:'Seguimiento', run:'Candle run', runS:'Se reinicia a diario', eden:'Edén', edenS:'Se reinicia cada semana', done:'Hecho esta semana', sp:'espíritus', nm:'Nombre de la temporada', all:'Completar todas las zonas', cap:'Gris / 20', capL:'Las velas están grises o llegaste a 20 hoy', add:'Añadir temporada', hist:'Historial', nohist:'Aún no hay historial', ar:'zonas', wk:'Semana del', del:'Quitar', n:{ candles:'Velas', hearts:'Corazones', asc:'Velas ascendidas', season:'Velas de temporada', event:'Velas de evento' } },
       cat:{ candles:'Velas', shards:'Fragmentos', environment:'Entorno', reset:'Reinicio', spirits:'Espíritus', aurora:'Concierto de AURORA' },
       act:{ title:'Activos ahora', none:'No hay eventos activos ahora', next:'Siguiente', endsIn:'termina en', live:'Activo' },
-      menu:{ label:'Menú', home:'Inicio', events:'Eventos', journey:'Progreso', visit:'Visit', soon:'Pronto' },
+      menu:{ label:'Menú', home:'Inicio', events:'Eventos', journey:'Progreso', visit:'Visit', soon:'Pronto', logout:'Cerrar sesión' },
       date: (d,dd,m,y) => `${d}, ${dd} de ${m} de ${y}`
     }
   };
@@ -1384,6 +1477,7 @@
       renderTip();
       renderPg();
       tick();
+      window.dispatchEvent(new CustomEvent('sky:lang', { detail:{ lang: code } }));
     };
 
     // panggilan awal (saat halaman dimuat): langsung terapkan, animasi masuk sudah menangani tampilan
@@ -1447,6 +1541,7 @@
     else if(b.dataset.go === 'events') goEvents();
     else if(b.dataset.go === 'journey') goProgress();
     else if(b.dataset.go === 'visit') goVisit();
+    else if(b.dataset.go === 'logout' && window.SkyLogout) window.SkyLogout();
   });
   document.addEventListener('click', e => {
     if(!document.getElementById('nav').contains(e.target)) toggleNav(false);
@@ -1697,6 +1792,21 @@
     setUser: (name, id) => window.setSkyUser(name, id),
     dayKey: () => skyDayKey(Date.now()),
     weekKey: () => skyWeekKey(Date.now()),
+    labels: () => I18N[lang].pg,
+    getLang: () => lang,
+    setLang: c => { try{ localStorage.setItem('sky-lang', c); }catch(e){} setLang(c, true); },
+    // ringkasan progres dari data 'pg' (milik sendiri atau teman) untuk ditampilkan read-only
+    summary: d => {
+      d = d || {};
+      const runs = (d.runs || {})[dayK()] || [];
+      return {
+        nums: NUMS.map(k => [k, (d.n || {})[k] || 0]),
+        cons: REALMS.map(([name, cnt]) => { const id = 'main:' + name; return { name, cnt, done: pop(((d.c || {})[id] || 0) & ((1 << cnt) - 1)), pct: (d.p || {})[id] || 0 }; }),
+        seasons: (d.ms || []).filter(m => m && (m.n || m.p)),
+        run: { done: AREAS.reduce((a, r, i) => a + pop(runs[i] || 0), 0), total: AREAS.reduce((a, r) => a + r[1].length, 0) },
+        eden: !!(d.ew || {})[weekK()]
+      };
+    },
     go: n => (n === 2 ? goEvents() : n === 3 ? goProgress() : n === 4 ? goVisit() : goHome())
   };
 
@@ -1751,111 +1861,312 @@
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
   }
 
-  // ---------- login demo (sementara, murni lokal di device ini) ----------
-  // CATATAN: ini BUKAN autentikasi sungguhan. Kredensial di-hardcode di sisi
-  // klien hanya sebagai placeholder sampai backend spreadsheet-mu siap.
-  // Jangan dipakai untuk data sungguhan / publik.
-  const DEMO_USER = 'aii123', DEMO_PASS = 'aii123';
-  const SESSION_KEY = 'sky_session_v1';
+  // ---------- login & akun (murni lokal di device ini) ----------
+  // CATATAN: ini BUKAN autentikasi sungguhan. Belum ada server: akun & data hanya ada di browser ini.
+  // Ganti doLogin/doRegister saat backend siap.
+  //
+  // ALUR:
+  //  1. Buka app -> ada sesi tersimpan? langsung masuk. Tidak? layar login.
+  //  2. Pilih: Log in (akun bawaan / akun buatan sendiri), Create account, atau Continue as guest.
+  //  3. Menu -> Log out -> sesi dihapus -> kembali ke layar login.
+  //  Akun tamu yang tidak aktif 7 hari berturut-turut dihapus otomatis (progres, teman, obrolan, ID).
+  const BUILTIN = { aii123:'aii123', hei123:'hei123' };   // id = username
+  const SESSION_KEY = 'sky_session_v1', GUEST_KEY = 'sky_guest_id', GUEST_SEEN = 'sky_guest_seen', ACC_KEY = 'sky_accounts_v1';
+  const GUEST_MS = 7 * 24 * 3600 * 1000;
   const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   function genCode(){ let s=''; for(let i=0;i<6;i++) s += CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]; return s; }
+  const $ = id => document.getElementById(id);
+  const mkEl = (tag, cls, txt) => { const e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; return e; };
+  const lsGet = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
+  const lsSet = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} };
+  const lsDel = k => { try{ localStorage.removeItem(k); }catch(e){} };
 
-  const loginEl = document.getElementById('loginScreen'), loginErrEl = document.getElementById('loginErr');
-  let myUid = null, myCode = null, friendsCache = [];
+  const loginEl = $('loginScreen'), loginErrEl = $('loginErr'), regErrEl = $('regErr');
+  let myUid = null, myCode = null, mySession = null, friendsCache = [], curFriend = null;
 
-  function readSession(){ try{ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }catch(e){ return null; } }
-  function writeSession(s){ try{ localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }catch(e){} }
+  function readSession(){ try{ return JSON.parse(lsGet(SESSION_KEY) || 'null'); }catch(e){ return null; } }
+  function writeSession(s){ lsSet(SESSION_KEY, JSON.stringify(s)); }
+  function readAccounts(){ try{ return JSON.parse(lsGet(ACC_KEY) || '{}') || {}; }catch(e){ return {}; } }
+
+  // ----- teks layar login (3 bahasa, mengikuti pilihan bahasa) -----
+  const LG = {
+    en:{ about:'Sky Meet is a companion web app for players of Sky: Children of the Light. It shows live Sky time and event timers (geyser, Grandma, turtle, shards, Eden, concerts), tracks your progress (candles, constellations, seasons, daily candle run) and lets you add friends by ID to chat.',
+      note:'For now, all data is saved on this device only.', user:'Username', pass:'Password', login:'Log in', guest:'Continue as guest', create:'Create account',
+      warn:'Heads-up: guest accounts that stay inactive for 7 days in a row are deleted automatically, together with their progress, friends and chats.',
+      reg:'Create a new account: choose a username (3\u201316 lowercase letters, numbers or _) and a password (min. 6 characters). Your account, progress and friends are stored on this device only \u2014 there is no server yet, so you can\u2019t log in from another device, and clearing your browser data removes it. Unlike guest accounts, it is not deleted for inactivity.',
+      rUser:'New username', rPass:'Password (min. 6 characters)', rPass2:'Repeat password', rBtn:'Create account', rBack:'Back',
+      eBad:'Incorrect username or password.', eName:'Username must be 3\u201316 characters: lowercase letters, numbers or _.', ePw:'Password must be at least 6 characters.', eMatch:'Passwords do not match.', eTaken:'That username is already taken.' },
+    id:{ about:'Sky Meet adalah aplikasi web pendamping untuk pemain Sky: Children of the Light. Menampilkan waktu Sky dan pengatur waktu event (geyser, Grandma, turtle, shard, Eden, konser), mencatat progresmu (lilin, rasi bintang, season, candle run harian), dan memungkinkan kamu menambah teman lewat ID untuk ngobrol.',
+      note:'Saat ini semua data hanya tersimpan di perangkat ini.', user:'Username', pass:'Kata sandi', login:'Masuk', guest:'Lanjut sebagai tamu', create:'Buat akun',
+      warn:'Perhatian: akun tamu yang tidak aktif 7 hari berturut-turut akan dihapus otomatis beserta progres, teman, dan obrolannya.',
+      reg:'Buat akun baru: pilih username (3\u201316 huruf kecil, angka, atau _) dan kata sandi (min. 6 karakter). Akun, progres, dan temanmu disimpan hanya di perangkat ini \u2014 belum ada server, jadi tidak bisa login dari perangkat lain, dan menghapus data browser akan menghapus akunmu. Berbeda dengan akun tamu, akun ini tidak dihapus karena tidak aktif.',
+      rUser:'Username baru', rPass:'Kata sandi (min. 6 karakter)', rPass2:'Ulangi kata sandi', rBtn:'Buat akun', rBack:'Kembali',
+      eBad:'Username atau kata sandi salah.', eName:'Username 3\u201316 karakter: huruf kecil, angka, atau _.', ePw:'Kata sandi minimal 6 karakter.', eMatch:'Kata sandi tidak sama.', eTaken:'Username sudah dipakai.' },
+    es:{ about:'Sky Meet es una aplicaci\u00f3n web complementaria para jugadores de Sky: Children of the Light. Muestra la hora de Sky y los temporizadores de eventos (g\u00e9iser, Grandma, tortuga, shards, Ed\u00e9n, conciertos), registra tu progreso (velas, constelaciones, temporadas, candle run diario) y te permite a\u00f1adir amigos por ID para chatear.',
+      note:'Por ahora todos los datos se guardan solo en este dispositivo.', user:'Usuario', pass:'Contrase\u00f1a', login:'Iniciar sesi\u00f3n', guest:'Continuar como invitado', create:'Crear cuenta',
+      warn:'Aviso: las cuentas de invitado inactivas durante 7 d\u00edas seguidos se eliminan autom\u00e1ticamente, junto con su progreso, amigos y chats.',
+      reg:'Crea una cuenta nueva: elige un usuario (3\u201316 min\u00fasculas, n\u00fameros o _) y una contrase\u00f1a (m\u00edn. 6 caracteres). Tu cuenta, progreso y amigos se guardan solo en este dispositivo: a\u00fan no hay servidor, as\u00ed que no puedes iniciar sesi\u00f3n desde otro dispositivo y borrar los datos del navegador elimina tu cuenta. A diferencia de las de invitado, no se elimina por inactividad.',
+      rUser:'Nuevo usuario', rPass:'Contrase\u00f1a (m\u00edn. 6 caracteres)', rPass2:'Repite la contrase\u00f1a', rBtn:'Crear cuenta', rBack:'Volver',
+      eBad:'Usuario o contrase\u00f1a incorrectos.', eName:'El usuario debe tener 3\u201316 caracteres: min\u00fasculas, n\u00fameros o _.', ePw:'La contrase\u00f1a debe tener al menos 6 caracteres.', eMatch:'Las contrase\u00f1as no coinciden.', eTaken:'Ese usuario ya existe.' }
+  };
+  const curL = () => LG[window.SkyApp.getLang()] || LG.en;
+  function applyLoginLang(){
+    const L = curL(), code = window.SkyApp.getLang();
+    $('lgAbout').textContent = L.about; $('lgNote').textContent = L.note; $('lgWarn').textContent = L.warn; $('regInfo').textContent = L.reg;
+    $('loginUser').placeholder = L.user; $('loginPass').placeholder = L.pass;
+    $('loginBtn').textContent = L.login; $('guestBtn').textContent = L.guest; $('createBtn').textContent = L.create;
+    $('regUser').placeholder = L.rUser; $('regPass').placeholder = L.rPass; $('regPass2').placeholder = L.rPass2;
+    $('regBtn').textContent = L.rBtn; $('regBack').textContent = L.rBack;
+    loginErrEl.textContent = ''; regErrEl.textContent = '';
+    document.querySelectorAll('#loginLang button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.l === code)));
+  }
+  document.querySelectorAll('#loginLang button').forEach(b => b.addEventListener('click', () => { SFX.tap(); window.SkyApp.setLang(b.dataset.l); }));
+  window.addEventListener('sky:lang', applyLoginLang);
+  applyLoginLang();
+
+  // ----- hapus otomatis akun tamu yang tidak aktif 7 hari berturut-turut -----
+  function purgeGuest(gid){
+    try{
+      const code = lsGet('sky_code_' + gid), rm = [];
+      for(let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i); if(!k) continue;
+        if(k === 'sky:v1:u:' + gid || k === 'sky_code_' + gid || k === 'sky_friends_' + gid) rm.push(k);
+        else if(code && k.indexOf('sky_chat_') === 0 && k.slice(9).split('__').indexOf(code) > -1) rm.push(k);
+      }
+      rm.forEach(lsDel); lsDel(GUEST_KEY); lsDel(GUEST_SEEN);
+      const ses = readSession(); if(ses && ses.type === 'guest' && ses.id === gid) lsDel(SESSION_KEY);
+    }catch(e){}
+  }
+  function checkGuestExpiry(){
+    const gid = lsGet(GUEST_KEY); if(!gid) return;
+    const seen = parseInt(lsGet(GUEST_SEEN), 10) || 0;
+    if(!seen){ lsSet(GUEST_SEEN, String(Date.now())); return; }   // data lama tanpa stempel: hitung mulai sekarang
+    if(Date.now() - seen > GUEST_MS) purgeGuest(gid);
+  }
+  let lastTouch = 0;
+  function touchGuest(force){
+    if(!mySession || mySession.type !== 'guest') return;
+    const n = Date.now(); if(!force && n - lastTouch < 60000) return;
+    lastTouch = n; lsSet(GUEST_SEEN, String(n));
+  }
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => touchGuest(false), { passive:true }));
+  document.addEventListener('visibilitychange', () => { if(!document.hidden){ touchGuest(false); if(!mySession || mySession.type !== 'guest') checkGuestExpiry(); } });
+  setInterval(() => { touchGuest(false); if(!mySession || mySession.type !== 'guest') checkGuestExpiry(); }, 3600000);
 
   function showLogin(){
     loadMsgEl.textContent = 'Ready';
     loadingDone = true; hideLoading();
+    $('regPane').hidden = true; $('loginMain').hidden = false;
+    applyLoginLang();
     loginEl.classList.remove('hidden');
   }
   function enterApp(session){
-    myUid = session.id;
+    mySession = session; myUid = session.id;
     loginEl.classList.add('hidden');
+    loginErrEl.textContent = ''; regErrEl.textContent = '';
+    ['loginUser','loginPass','regUser','regPass','regPass2'].forEach(id => { $(id).value = ''; });
     window.SkyApp.store.setUser(myUid);   // data tersimpan lokal per akun, lewat Store yang sudah ada
     const codeKey = 'sky_code_' + myUid;
-    myCode = localStorage.getItem(codeKey);
-    if(!myCode){ myCode = genCode(); localStorage.setItem(codeKey, myCode); }
-    const idEl = document.getElementById('myIdVal'); if(idEl) idEl.textContent = myCode;
+    myCode = lsGet(codeKey);
+    if(!myCode){ myCode = genCode(); lsSet(codeKey, myCode); }
+    $('myIdVal').textContent = myCode;
+    if(session.type === 'guest'){
+      touchGuest(true);
+      $('whoAmI').textContent = 'Guest \u00b7 deleted after 7 days in a row of inactivity';
+      toast('Guest accounts inactive for 7 days in a row are deleted');
+    } else {
+      $('whoAmI').textContent = 'Logged in as ' + session.id;
+    }
     loadFriends();
   }
-  document.getElementById('loginBtn').addEventListener('click', () => {
-    const u = (document.getElementById('loginUser').value || '').trim();
-    const p = document.getElementById('loginPass').value || '';
-    if(u === DEMO_USER && p === DEMO_PASS){
+  function logout(){
+    touchGuest(true);   // keluar juga dihitung sebagai aktivitas terakhir
+    lsDel(SESSION_KEY);
+    $('chatOverlay').classList.remove('open'); $('friendOverlay').classList.remove('open');
+    chatPid = null; curFriend = null; myUid = null; myCode = null; mySession = null; friendsCache = [];
+    $('myIdVal').textContent = '------'; $('whoAmI').textContent = '';
+    $('friendList').textContent = '';
+    window.SkyApp.store.setUser(null);   // kembali ke penyimpanan 'guest' kosong sampai login lagi
+    window.SkyApp.go(1);
+    showLogin();
+  }
+  window.SkyLogout = logout;
+
+  // ----- hash sandi (SHA-256 bila tersedia; hanya mencegah sandi terbaca polos di storage lokal) -----
+  async function hashPw(id, pw){
+    try{
+      if(window.crypto && crypto.subtle){
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('skymeet:' + id + ':' + pw));
+        return 'h:' + Array.from(new Uint8Array(buf)).map(x => x.toString(16).padStart(2, '0')).join('');
+      }
+    }catch(e){}
+    return 'p:' + pw;
+  }
+  async function checkPw(id, pw, stored){
+    if(stored.indexOf('p:') === 0) return stored === 'p:' + pw;
+    return (await hashPw(id, pw)) === stored;
+  }
+
+  async function doLogin(){
+    const u = ($('loginUser').value || '').trim().toLowerCase(), p = $('loginPass').value || '';
+    let ok = false;
+    if(Object.prototype.hasOwnProperty.call(BUILTIN, u)) ok = BUILTIN[u] === p;
+    else { const accs = readAccounts(); if(Object.prototype.hasOwnProperty.call(accs, u)) ok = await checkPw(u, p, accs[u]); }
+    if(ok){
       SFX.success();
-      const session = { type:'demo', id: u };
+      const session = { type:'account', id: u };
       writeSession(session); enterApp(session);
     } else {
       SFX.error();
-      loginErrEl.textContent = 'Incorrect email/username or password.';
+      loginErrEl.textContent = curL().eBad;
     }
-  });
-  document.getElementById('guestBtn').addEventListener('click', () => {
+  }
+  async function doRegister(){
+    const L = curL(), u = ($('regUser').value || '').trim().toLowerCase(), p = $('regPass').value || '', p2 = $('regPass2').value || '';
+    const fail = m => { SFX.error(); regErrEl.textContent = m; };
+    if(!/^[a-z0-9_]{3,16}$/.test(u) || u.indexOf('guest') === 0) return fail(L.eName);
+    if(p.length < 6) return fail(L.ePw);
+    if(p !== p2) return fail(L.eMatch);
+    const accs = readAccounts();
+    if(Object.prototype.hasOwnProperty.call(BUILTIN, u) || Object.prototype.hasOwnProperty.call(accs, u)) return fail(L.eTaken);
+    accs[u] = await hashPw(u, p); lsSet(ACC_KEY, JSON.stringify(accs));
+    SFX.success();
+    const session = { type:'account', id: u };
+    writeSession(session); enterApp(session);
+  }
+  $('loginBtn').addEventListener('click', doLogin);
+  $('loginPass').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+  $('regBtn').addEventListener('click', doRegister);
+  $('regPass2').addEventListener('keydown', e => { if(e.key === 'Enter') doRegister(); });
+  $('createBtn').addEventListener('click', () => { SFX.tap(); loginErrEl.textContent = ''; $('loginMain').hidden = true; $('regPane').hidden = false; $('regUser').focus(); });
+  $('regBack').addEventListener('click', () => { SFX.tap(); regErrEl.textContent = ''; $('regPane').hidden = true; $('loginMain').hidden = false; });
+  $('guestBtn').addEventListener('click', () => {
     SFX.tap();
-    let session = readSession();
-    if(!session || session.type !== 'guest'){
-      session = { type:'guest', id: 'guest_' + Math.random().toString(36).slice(2,10) };
-      writeSession(session);
-    }
-    enterApp(session);
+    let gid = lsGet(GUEST_KEY);
+    if(!gid){ gid = 'guest_' + Math.random().toString(36).slice(2,10); lsSet(GUEST_KEY, gid); }
+    const session = { type:'guest', id: gid };
+    writeSession(session); enterApp(session);
   });
 
-  // layar loading singkat, lalu tampilkan login (kecuali sesi sebelumnya masih ada di device ini)
+  // layar loading singkat, lalu masuk otomatis bila sesi masih ada (setelah cek kedaluwarsa akun tamu)
   setTimeout(() => {
+    checkGuestExpiry();
     const existing = readSession();
     if(existing){ loadMsgEl.textContent = 'Ready'; loadingDone = true; hideLoading(); enterApp(existing); }
     else showLogin();
   }, 600);
 
   // ---------- teman & chat (demo lokal — belum tersambung ke spreadsheet/backend) ----------
-  // Semua disimpan di localStorage device ini. Menambahkan ID teman di sini TIDAK akan
-  // terhubung ke device/pengguna lain sampai backend spreadsheet-mu terpasang.
+  // Teman disimpan sebagai { code, name }. name = nama panggilan pilihanmu (opsional).
   function friendsKey(){ return 'sky_friends_' + myUid; }
+  const fLabel = f => f.name || f.code;
   function loadFriends(){
     try{ friendsCache = JSON.parse(localStorage.getItem(friendsKey()) || '[]'); }catch(e){ friendsCache = []; }
+    if(!Array.isArray(friendsCache)) friendsCache = [];
     renderFriends();
   }
   function saveFriends(){ try{ localStorage.setItem(friendsKey(), JSON.stringify(friendsCache)); }catch(e){} }
   function renderFriends(){
-    const listEl = document.getElementById('friendList'), emptyEl = document.getElementById('visitEmpty');
+    const listEl = $('friendList'), emptyEl = $('visitEmpty');
     if(!listEl) return;
     listEl.innerHTML = '';
     if(!friendsCache.length){ emptyEl.textContent = 'No friends yet. Add one by ID above.'; emptyEl.style.display = 'block'; return; }
     emptyEl.style.display = 'none';
     friendsCache.forEach(f => {
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'friendRow';
-      b.innerHTML = '<span class="friendAvatar">' + f.code[0] + '</span>' +
-        '<span><div class="friendName">' + f.code + '</div><div class="friendHint">Tap to chat</div></span>';
-      b.addEventListener('click', () => openChat(f));
+      const b = mkEl('button', 'friendRow'); b.type = 'button';
+      const av = mkEl('span', 'friendAvatar', fLabel(f)[0].toUpperCase());
+      const tx = mkEl('span', 'friendTxt');
+      tx.append(mkEl('div', 'friendName', fLabel(f)), mkEl('div', 'friendHint', (f.name ? f.code + ' · ' : '') + 'Tap to view'));
+      b.append(av, tx);
+      b.addEventListener('click', () => openFriend(f));
       listEl.appendChild(b);
     });
   }
-  function addFriendByCode(raw){
+  function addFriendByCode(raw, nameRaw){
     const code = (raw || '').trim().toUpperCase();
-    if(!code) return;
-    if(code === myCode){ toast("That's your own ID"); SFX.error(); return; }
-    if(friendsCache.some(f => f.code === code)){ toast('Already added'); return; }
-    friendsCache.push({ code }); saveFriends(); renderFriends();
-    toast('Friend added (local demo only)'); SFX.success();
+    const name = (nameRaw || '').trim().slice(0, 20);
+    if(!code) return false;
+    if(code === myCode){ toast("That's your own ID"); SFX.error(); return false; }
+    if(friendsCache.some(f => f.code === code)){ toast('Already added'); return false; }
+    friendsCache.push({ code, name }); saveFriends(); renderFriends();
+    toast('Friend added'); SFX.success();
+    return true;
   }
 
+  // ---------- profil teman + progres ----------
+  // Progres teman dibaca dari: (1) window.SkyVisitAdapter.getFriendProgress(code) bila backend sudah dipasang
+  // (harus mengembalikan data 'pg' milik teman itu), (2) akun lain di device INI saja. Selain itu: tidak tersedia.
+  function findLocalUid(code){
+    try{
+      for(let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i);
+        if(k && k.indexOf('sky_code_') === 0 && localStorage.getItem(k) === code) return k.slice(9);
+      }
+    }catch(e){}
+    return null;
+  }
+  async function getFriendData(code){
+    const ad = window.SkyVisitAdapter;
+    if(ad && typeof ad.getFriendProgress === 'function'){
+      try{ const r = await ad.getFriendProgress(code); if(r) return { data: r, src: 'server' }; }catch(e){}
+    }
+    const uid = findLocalUid(code);
+    if(uid){
+      try{ const raw = JSON.parse(localStorage.getItem('sky:v1:u:' + uid) || '{}'); if(raw && raw.pg) return { data: raw.pg, src: 'local' }; }catch(e){}
+    }
+    return null;
+  }
+  function renderProgress(r, loading){
+    const box = $('fProg'); box.textContent = '';
+    box.appendChild(mkEl('div', 'fSecT', 'Progress'));
+    if(loading){ box.appendChild(mkEl('div', 'fNote', 'Loading...')); return; }
+    if(!r){
+      box.appendChild(mkEl('div', 'fNote', "Progress isn't available for this friend yet. Each account's progress is only stored on its own device, so it can be shown here only after a server (backend) is connected."));
+      return;
+    }
+    const S = window.SkyApp.summary(r.data), t = window.SkyApp.labels();
+    const row = (a, b) => { const d = mkEl('div', 'fRow'); d.append(mkEl('span', '', a), mkEl('span', 'fVal', b)); box.appendChild(d); };
+    const sub = x => box.appendChild(mkEl('div', 'fSub', x));
+    sub(t.cur); S.nums.forEach(([k, v]) => row(t.n[k], String(v)));
+    sub(t.cons); S.cons.forEach(c => row(c.name, c.done + '/' + c.cnt + ' ' + t.sp + (c.pct ? ' · ' + c.pct + '%' : '')));
+    if(S.seasons.length){ sub(t.seas); S.seasons.forEach(m => row(m.n || '-', (m.p || 0) + '%')); }
+    sub(t.trk); row(t.run + ' (' + t.runS.toLowerCase() + ')', S.run.done + '/' + S.run.total + ' ' + t.ar); row(t.eden, S.eden ? '\u2713' : '\u2014');
+    if(r.src === 'local') box.appendChild(mkEl('div', 'fNote', 'Read from another account on this device.'));
+  }
+  function openFriend(f){
+    curFriend = f;
+    $('fTitle').textContent = fLabel(f); $('fName').value = f.name || ''; $('fCode').textContent = 'ID: ' + f.code;
+    $('friendOverlay').classList.add('open');
+    renderProgress(null, true);
+    getFriendData(f.code).then(r => { if(curFriend === f) renderProgress(r); });
+  }
+  $('fBack').addEventListener('click', () => { $('friendOverlay').classList.remove('open'); curFriend = null; });
+  $('fSave').addEventListener('click', () => {
+    if(!curFriend) return;
+    curFriend.name = ($('fName').value || '').trim().slice(0, 20);
+    saveFriends(); renderFriends(); $('fTitle').textContent = fLabel(curFriend);
+    toast('Name saved'); SFX.success();
+  });
+  $('fRemove').addEventListener('click', () => {
+    if(!curFriend || !confirm('Remove ' + fLabel(curFriend) + ' from your friends?')) return;
+    friendsCache = friendsCache.filter(x => x !== curFriend); saveFriends(); renderFriends();
+    $('friendOverlay').classList.remove('open'); curFriend = null;
+  });
+  $('fChat').addEventListener('click', () => { if(curFriend) openChat(curFriend); });
+
+  // ---------- chat ----------
   const pairId = (a,b) => [a,b].sort().join('__');
   let chatPid = null;
   function chatKey(pid){ return 'sky_chat_' + pid; }
   function openChat(friend){
-    const overlay = document.getElementById('chatOverlay');
-    document.getElementById('chatTitle').textContent = friend.code;
-    overlay.classList.add('open');
+    $('chatTitle').textContent = fLabel(friend);
+    $('chatOverlay').classList.add('open');
     chatPid = pairId(myCode, friend.code);
     renderChat();
-    setTimeout(() => document.getElementById('chatInput').focus(), 350);
+    setTimeout(() => $('chatInput').focus(), 350);
   }
   function renderChat(){
-    const msgsEl = document.getElementById('chatMsgs');
+    const msgsEl = $('chatMsgs');
     let msgs = []; try{ msgs = JSON.parse(localStorage.getItem(chatKey(chatPid)) || '[]'); }catch(e){}
     msgsEl.innerHTML = '';
     msgs.forEach(m => {
@@ -1866,12 +2177,10 @@
     });
     msgsEl.scrollTop = msgsEl.scrollHeight;
   }
-  document.getElementById('chatBack').addEventListener('click', () => {
-    document.getElementById('chatOverlay').classList.remove('open'); chatPid = null;
-  });
-  document.getElementById('chatForm').addEventListener('submit', e => {
+  $('chatBack').addEventListener('click', () => { $('chatOverlay').classList.remove('open'); chatPid = null; });
+  $('chatForm').addEventListener('submit', e => {
     e.preventDefault();
-    const input = document.getElementById('chatInput'), text = input.value.trim();
+    const input = $('chatInput'), text = input.value.trim();
     if(!text || !chatPid) return;
     input.value = ''; SFX.send();
     let msgs = []; try{ msgs = JSON.parse(localStorage.getItem(chatKey(chatPid)) || '[]'); }catch(e){}
@@ -1881,14 +2190,14 @@
     renderChat();
   });
 
-  document.getElementById('addFriendBtn').addEventListener('click', () => {
-    const input = document.getElementById('addFriendInput');
-    addFriendByCode(input.value); input.value = '';
-  });
-  document.getElementById('addFriendInput').addEventListener('keydown', e => {
-    if(e.key === 'Enter'){ addFriendByCode(e.target.value); e.target.value = ''; }
-  });
-  document.getElementById('copyIdBtn').addEventListener('click', () => {
+  // ---------- tambah teman ----------
+  function submitAdd(){
+    const ci = $('addFriendInput'), ni = $('addFriendName');
+    if(addFriendByCode(ci.value, ni.value)){ ci.value = ''; ni.value = ''; }
+  }
+  $('addFriendBtn').addEventListener('click', submitAdd);
+  ['addFriendInput', 'addFriendName'].forEach(id => $(id).addEventListener('keydown', e => { if(e.key === 'Enter') submitAdd(); }));
+  $('copyIdBtn').addEventListener('click', () => {
     if(!myCode) return;
     (navigator.clipboard?.writeText(myCode) || Promise.reject()).then(() => { toast('ID copied'); SFX.tap(); }).catch(() => {});
   });
