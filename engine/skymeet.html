@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta http-equiv="Content-Language" content="en">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0b1026">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="application-name" content="Sky Meet">
+<meta name="apple-mobile-web-app-title" content="Sky Meet">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -89,10 +94,11 @@
 
   /* ===== sistem halaman penuh: tiap halaman = satu layar, scroll sendiri-sendiri ===== */
   #pages{ position:fixed; inset:0; z-index:5; overflow:hidden; }
-  #track{ height:200%; transition: transform 0.85s cubic-bezier(.65,0,.25,1); will-change:transform; }
-  body.p2 #track{ transform: translateY(-50%); }
+  #track{ height:300%; transition: transform 0.85s cubic-bezier(.65,0,.25,1); will-change:transform; }
+  body.p2 #track{ transform: translateY(-33.3334%); }
+  body.p3 #track{ transform: translateY(-66.6667%); }
   .page{
-    position:relative; height:50%;
+    position:relative; height:33.3334%;
     overflow-y:auto; overflow-x:hidden;
     overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
   }
@@ -100,9 +106,9 @@
     min-height:100%;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center;
-    padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px calc(env(safe-area-inset-bottom, 0px) + 16px);
+    padding: calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-right, 0px) + 20px) calc(env(safe-area-inset-bottom, 0px) + 16px) calc(env(safe-area-inset-left, 0px) + 20px);
   }
-  #p1 .page-in{ gap:10px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
+  #p1 .page-in{ gap:clamp(12px, 2.2vh, 20px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
   #p2 .page-in{ justify-content:flex-start; padding-top:0; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); }
   .p2wrap{ width:100%; max-width:520px; display:flex; flex-direction:column; gap:22px; }
 
@@ -111,7 +117,7 @@
   body.ready .in{ opacity:1; transform:none; }
   body.ready .in.fading{ opacity:0; transform: translateY(-6px); transition-duration:0.28s; transition-delay:0s; }
 
-  #greet{ display:flex; flex-direction:column; gap:4px; margin-bottom:6px; }
+  #greet{ display:flex; flex-direction:column; gap:4px; margin:clamp(28px, 8vh, 64px) 0 clamp(28px, 6.5vh, 56px); }
   #greet .gh{ font-size: clamp(20px, 5.2vw, 30px); font-weight:500; color: var(--ink); letter-spacing:0.2px; }
   #greet .gs{ font-size: clamp(13px, 3.4vw, 16px); color: var(--ink-soft); }
 
@@ -121,9 +127,14 @@
     display:flex; align-items:center; justify-content:space-between;
     padding: calc(env(safe-area-inset-top, 0px) + 16px) 0 14px;
     height: calc(env(safe-area-inset-top, 0px) + 74px);
-    /* warna langit di belakang header agar isi yang di-scroll tidak tembus */
-    background: linear-gradient(to bottom, var(--top) 0%, var(--top) 90%, transparent 100%);
   }
+  /* latar header hanya muncul saat isi halaman benar-benar di-scroll di bawahnya; saat pindah halaman tidak ada kotak */
+  .p2head::before{
+    content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+    background: linear-gradient(to bottom, var(--top) 0%, var(--top) 90%, transparent 100%);
+    opacity:0; transition: opacity 0.3s ease;
+  }
+  .p2head.stuck::before{ opacity:1; }
   .sysHead{
     position:absolute; left:0; right:0;
     top: calc(env(safe-area-inset-top, 0px) + 16px); height:44px;
@@ -134,6 +145,11 @@
   #sysClock{ font-size:21px; font-weight:400; line-height:1.1; font-variant-numeric: tabular-nums; color: var(--ink); }
   #sysS{ font-size:10px; letter-spacing:0.3px; }
   #sysBlock .lt{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:9px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color: var(--ink-soft); }
+
+  /* jam sistem di header halaman 2: muncul paling akhir, setelah halaman selesai bergeser, hanya memudar pelan (tanpa naik/blur) */
+  body.p2 #sysBlock.rv{ transform:none; filter:none; transition: opacity 1s ease 1.15s; }
+  body.p2.rvdone #sysBlock.rv{ transition: opacity 0.28s ease 0s; }
+  body.p2 #sysBlock.rv.fading{ opacity:0; transform:none; transition: opacity 0.28s ease 0s; }
 
   /* jam Sky (halaman 2) */
   #skyBlock{ display:flex; flex-direction:column; align-items:center; gap:6px; }
@@ -161,18 +177,17 @@
   /* event aktif + jadwal (halaman 2) */
   .sec{ display:flex; flex-direction:column; gap:10px; }
   .sec-t{ padding:0 4px; text-align:left; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color: var(--ink-soft); }
-  #active{ display:flex; flex-direction:column; gap:10px; }
+  /* "Aktif sekarang": SATU kartu berisi semua sub kategori yang sedang aktif (tampilannya sama dengan kartu kategori) */
+  #active.off, .act.off, #actEmpty.off{ display:none; }
   .act{
     display:flex; flex-direction:column; gap:10px;
     padding:14px 16px; text-align:left;
-    border-radius:16px; border:1px solid var(--ink);
-    background: rgba(0,0,0,0.15);
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     font-variant-numeric: tabular-nums;
   }
-  .act.off, #actEmpty.off{ display:none; }
-  .act:not(.off){ animation: actIn 0.5s ease; }
-  @keyframes actIn{ from{ scale:0.97; } to{ scale:1; } }
+  .act:not(.off) ~ .act:not(.off){ border-top:1px solid rgba(255,255,255,0.12); }
+  .act{ transition: opacity 0.35s ease, display 0.35s allow-discrete; }
+  .act.off{ opacity:0; }
+  @starting-style{ .act:not(.off){ opacity:0; } }
   .act .top{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
   .act .en{ font-size:12px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color: var(--ink); }
   .act .ec{ font-size: clamp(24px, 7vw, 32px); font-weight:500; color: var(--ink); white-space:nowrap; }
@@ -206,6 +221,15 @@
   .row.live{ background: rgba(255,255,255,0.1); }
   .row.live::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--ink); }
   .row .evl{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .row .enw{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 8px; }
+  .row .lv{
+    display:none; align-items:center; gap:5px;
+    padding:2px 7px 2px 6px; border-radius:999px; border:1px solid var(--ink);
+    font-size:9px; font-weight:600; font-style:normal; letter-spacing:0.6px; line-height:1.4; text-transform:uppercase; color: var(--ink);
+  }
+  .row.live .lv{ display:inline-flex; }
+  .row .lv::before{ content:''; width:5px; height:5px; border-radius:50%; background: var(--ink); animation: livePulse 1.6s ease-in-out infinite; }
+  @keyframes livePulse{ 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.35; transform:scale(0.7); } }
   .row .en{ font-size:12px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color: var(--ink); }
   .row .el{ font-size:12px; color: var(--ink-soft); min-height:1em; }
   .row .ec{ font-size: clamp(20px, 5.5vw, 26px); font-weight:500; color: var(--ink); white-space:nowrap; }
@@ -236,7 +260,7 @@
     transition: opacity 0.28s ease;
     animation: fadeFrom 1s ease 2.8s backwards;
   }
-  #hint:hover{ color: var(--ink); }
+  @media (hover:hover){ #hint:hover{ color: var(--ink); } }
   #hint.fading{ opacity:0; }
   #hint svg{ width:16px; height:16px; transition: transform 0.6s ease; animation: nudge 1.8s ease-in-out infinite; }
   @keyframes nudge{ 0%,100%{ translate: 0 0; } 50%{ translate: 0 4px; } }
@@ -270,15 +294,15 @@
   }
 
   /* hanya pemilih bahasa yang muncul saat halaman siap */
-  #control{ opacity:0; transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s; }
-  body.ready #control{ opacity:1; }
+  #control{ opacity:0; pointer-events:none; transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s; }
+  body.ready #control{ opacity:1; pointer-events:auto; }
 
   /* animasi muncul berurutan: setiap elemen .rv masuk satu per satu (--r = urutan) */
-  .rv{
+  .rv, .rv3{
     opacity:0; transform: translateY(14px); filter: blur(5px);
     transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
   }
-  body.p2 .rv{
+  body.p2 .rv, body.p3 .rv3{
     opacity:1; transform:none; filter:none;
     transition: opacity 0.7s ease, transform 0.8s cubic-bezier(.2,.8,.2,1), filter 0.7s ease;
     transition-delay: calc(0.45s + var(--r, 0) * 0.09s);
@@ -305,6 +329,82 @@
     letter-spacing: 0.2px;
   }
 
+
+  /* halaman 3: progres */
+  .pgl{ display:flex; align-items:center; gap:12px; min-width:0; }
+  .ic{ flex:none; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; background:rgba(0,0,0,0.28); }
+  .ic svg{ width:20px; height:20px; fill:currentColor; }
+  .stp{ display:flex; align-items:center; gap:6px; }
+  .stp button, .chip, .pill, .cbtn{ font-family:inherit; cursor:pointer; touch-action:manipulation; }
+  .stp button{ width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.28); background:transparent; color:var(--ink); font-size:20px; line-height:1; }
+  .stp input{ width:64px; height:40px; text-align:center; border-radius:12px; border:1px solid rgba(255,255,255,0.28); background:rgba(0,0,0,0.15); color:var(--ink); font:500 16px 'Space Grotesk', sans-serif; font-variant-numeric:tabular-nums; }
+  .gt{ padding:12px 16px 6px; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); }
+  .cn + .cn, .cn + .gt, .gt + .cn:not(:first-child){ border-top:1px solid rgba(255,255,255,0.12); }
+  .cbtn{ display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:14px 16px; border:0; background:none; color:inherit; text-align:left; }
+  .cbtn svg{ width:14px; height:14px; flex:none; transition:transform 0.25s ease; }
+  .cbtn[aria-expanded="true"] svg{ transform:rotate(180deg); }
+  .cn .evl, .trk .evl{ display:flex; flex-direction:column; gap:3px; }
+  .cn .en, .trk .en{ font-size:12px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--ink); }
+  .cn .el, .trk .el{ font-size:12px; color:var(--ink-soft); }
+  .cpanel{ display:grid; grid-template-rows:0fr; transition:grid-template-rows 0.3s ease; }
+  .cpanel.open{ grid-template-rows:1fr; }
+  .cpanel > div{ overflow:hidden; display:flex; flex-wrap:wrap; gap:8px; padding:0 16px; }
+  .cpanel.open > div{ padding-bottom:14px; }
+  .chip, .pill{ border:1px solid rgba(255,255,255,0.3); background:transparent; color:var(--ink); }
+  .chip{ width:40px; height:40px; border-radius:50%; font-size:14px; font-weight:500; }
+  .pill{ min-height:40px; padding:0 14px; border-radius:999px; font-size:13px; font-weight:500; }
+  .chip[aria-pressed="true"], .pill[aria-pressed="true"]{ background:var(--ink); color:var(--top); border-color:var(--ink); }
+  .trk{ display:flex; flex-direction:column; gap:10px; padding:14px 16px; text-align:left; }
+  .trk + .trk{ border-top:1px solid rgba(255,255,255,0.12); }
+  .pills{ display:flex; flex-wrap:wrap; gap:8px; }
+  .cbtn:focus-visible, .chip:focus-visible, .pill:focus-visible, .stp button:focus-visible, .stp input:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+  .chd{ display:flex; align-items:center; }
+  .chd .cbtn{ flex:1; min-width:0; }
+  .pc{ display:flex; align-items:center; gap:4px; padding-right:16px; font-size:13px; color:var(--ink-soft); }
+  .pc input, .ms input{ height:40px; text-align:center; border-radius:12px; border:1px solid rgba(255,255,255,0.28); background:rgba(0,0,0,0.15); color:var(--ink); font:500 16px 'Space Grotesk', sans-serif; font-variant-numeric:tabular-nums; }
+  .pc input{ width:56px; }
+  .ms{ display:flex; align-items:center; gap:8px; padding:10px 16px; border-top:1px solid rgba(255,255,255,0.12); }
+  .ms .nm{ flex:1; min-width:0; text-align:left; padding:0 12px; }
+  .ms .pc{ padding-right:0; }
+  .ms .del{ flex:none; width:40px; height:40px; border-radius:50%; border:1px solid rgba(255,255,255,0.28); background:transparent; color:var(--ink); font:inherit; font-size:18px; cursor:pointer; touch-action:manipulation; }
+  .cadd{ padding:10px 16px 14px; }
+  .trk + .cn, .cn + .trk, .cn + .gt, .gt + .ms{ border-top:1px solid rgba(255,255,255,0.12); }
+  .hl{ width:100%; font-size:13px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .ms .del:focus-visible, .pc input:focus-visible, .ms input:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+  .thd{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .cap{ display:inline-flex; align-items:center; flex:none; }
+  .cap svg{ width:16px; height:16px; margin-right:6px; fill:#9aa0b4; }
+  .cap[aria-pressed="true"] svg{ fill:currentColor; }
+  .all{ flex:none; width:40px; height:40px; margin-right:12px; display:grid; place-items:center; border-radius:50%; border:1px solid rgba(255,255,255,0.3); background:transparent; color:var(--ink); cursor:pointer; touch-action:manipulation; }
+  .all svg{ width:18px; height:18px; }
+  .all[aria-pressed="true"]{ background:var(--ink); color:var(--top); border-color:var(--ink); }
+  /* kategori utama (realm) ikut putih bila semua area di dalamnya selesai */
+  .cn.done .chd{ background:var(--ink); }
+  .cn.done .chd .en, .cn.done .chd .el, .cn.done .chd .cbtn{ color:var(--top); }
+  .cn.done .all{ background:var(--top); color:var(--ink); border-color:var(--top); }
+  .cn .chd{ transition:background 0.3s ease; }
+  .all:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+  .sec.col{ gap:0; }
+  #pgRoot{ display:flex; flex-direction:column; gap:22px; }
+  .hrow{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .sec-h{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; width:100%; min-height:92px; padding:12px 10px; text-align:center; border-radius:16px; border:1px solid rgba(255,255,255,0.18); background:rgba(0,0,0,0.15); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--ink); font-family:inherit; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; cursor:pointer; touch-action:manipulation; }
+  .sec-h .tx{ max-width:100%; line-height:1.25; overflow-wrap:anywhere; }
+  .sec-h .chv{ position:absolute; top:10px; right:10px; width:12px; height:12px; flex:none; transition:transform 0.25s ease; }
+  .sec-h[aria-expanded="true"] .chv{ transform:rotate(180deg); }
+  .sec-h:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .fold{ display:grid; grid-template-rows:0fr; transition:grid-template-rows 0.35s ease; }
+  .fold.open{ grid-template-rows:1fr; }
+  .fold > div{ overflow:hidden; min-height:0; }
+  .fold.open > div{ padding-top:10px; }
+  /* kata-kata pengingat / motivasi di bawah jam (berganti pelan-pelan) */
+  #tip{
+    max-width:min(340px, 100%); min-height:3em; margin-top:clamp(38px, 8vh, 68px); padding:0 8px;
+    font-size: clamp(12px, 3.3vw, 14px); line-height:1.5; letter-spacing:0.2px;
+    color: var(--ink-soft); text-wrap:balance; overflow-wrap:anywhere;
+  }
 
   /* pemilih bahasa: satu label, klik untuk membuka pilihan */
   #control{
@@ -378,7 +478,7 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
   .lang-btn span:last-child{ font-weight:400; font-size:12px; opacity:.8; }
-  .lang-btn:hover{ color: var(--ink); background: rgba(255,255,255,0.08); }
+  @media (hover:hover){ .lang-btn:hover{ color: var(--ink); background: rgba(255,255,255,0.08); } }
   .lang-btn[aria-selected="true"]{ color: var(--ink); background: rgba(255,255,255,0.18); }
   #langCurrent:focus-visible, .lang-btn:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
 
@@ -414,7 +514,7 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
   .nav-item svg{ width:18px; height:18px; flex:none; }
-  .nav-item:hover:not(:disabled){ color: var(--ink); background: rgba(255,255,255,0.08); }
+  @media (hover:hover){ .nav-item:hover:not(:disabled){ color: var(--ink); background: rgba(255,255,255,0.08); } }
   .nav-item[aria-current="page"]{ color: var(--ink); background: rgba(255,255,255,0.18); }
   .nav-item:disabled{ opacity:0.55; cursor:default; }
   .nav-item .soon{
@@ -426,19 +526,27 @@
   @media (max-width:480px){
     #date{ padding:0 8px; }
   }
+  /* layar sangat sempit: tombol menu jadi ikon saja agar tidak menabrak jam sistem di tengah */
+  @media (max-width:400px){
+    #navLabel{ display:none; }
+    #navBtn{ width:44px; padding:0; justify-content:center; }
+    #sysBlock{ max-width: calc(100% - 150px); }
+    #sysClock{ font-size:19px; }
+  }
   @media (max-height:420px) and (orientation:landscape){
-    #greet{ margin-bottom:0; }
+    #greet{ margin:8px 0 10px; }
+    #tip{ margin-top:14px; }
   }
 
   @media (prefers-reduced-motion: reduce){
     .star, #horizon, #stars, #celestial, #clock{ animation:none; }
     #langMenu, #navMenu, #nav, #langCurrent svg, .cat-card, .row{ transition:none; }
-    #hint, #hint svg{ animation:none; }
-    #track, .rv, .in, .act, #skyClock .sd, #skyClock .sc{ transition-duration:0.01s !important; transition-delay:0s !important; }
+    #hint, #hint svg, .row .lv::before, #clock .digit.settled{ animation:none; }
+    #track, .rv, .rv3, .in, .act, #skyClock .sd, #skyClock .sc{ transition-duration:0.01s !important; transition-delay:0s !important; }
   }
 </style>
 </head>
-<body>
+<body class="notranslate" translate="no">
 
 <div id="horizon"></div>
 <div id="stars"></div>
@@ -453,10 +561,11 @@
         <div id="clock">
           <span class="digit">-</span><span class="digit">-</span><span class="colon">:</span><span class="digit">-</span><span class="digit">-</span>
         </div>
-        <div id="date" class="in" style="--d:0.3s">—</div>
+        <div id="date" class="in" style="--d:0.3s"></div>
+        <div id="tip" class="in" style="--d:0.5s"></div>
       </div>
       <button id="hint" type="button" aria-controls="p2">
-        <span id="hintText">Scroll</span>
+        <span id="hintText">Tap</span>
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6 8 10.5 12.5 6"/></svg>
       </button>
     </section>
@@ -481,6 +590,15 @@
       </div>
     </section>
 
+    <section class="page" id="p3" inert aria-hidden="true" tabindex="-1">
+      <div class="page-in">
+        <div class="p2wrap">
+          <header class="p2head" id="p3head"></header>
+          <div id="pgRoot"></div>
+        </div>
+      </div>
+    </section>
+
   </div>
 </div>
 
@@ -498,14 +616,13 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M8 4.8V8l2.2 1.4"/></svg>
       <span data-t="events">Events</span>
     </button>
-    <button class="nav-item" type="button" role="menuitem" data-go="journey" disabled aria-disabled="true">
+    <button class="nav-item" type="button" role="menuitem" data-go="journey">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 4.5 1.3 1.3L6.5 3.6M3 10.5l1.3 1.3 2.2-2.2M8.5 5h4.5M8.5 11h4.5"/></svg>
-      <span data-t="journey">Daily &amp; weekly</span>
-      <span class="soon" data-t="soon">Soon</span>
+      <span data-t="journey">Progress</span>
     </button>
-    <button class="nav-item" type="button" role="menuitem" data-go="friends" disabled aria-disabled="true">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="5.5" r="2.3"/><path d="M1.8 13c.3-2.3 2-3.6 4.2-3.6s3.9 1.3 4.2 3.6"/><path d="M10.4 3.4a2.3 2.3 0 0 1 0 4.2M11.6 9.6c1.5.4 2.5 1.5 2.7 3.4"/></svg>
-      <span data-t="friends">Visit friends</span>
+    <button class="nav-item" type="button" role="menuitem" data-go="visit" disabled aria-disabled="true">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14s4.5-4.4 4.5-7.5a4.5 4.5 0 0 0-9 0C3.5 9.6 8 14 8 14Z"/><circle cx="8" cy="6.5" r="1.6"/></svg>
+      <span data-t="visit">Visit</span>
       <span class="soon" data-t="soon">Soon</span>
     </button>
   </div>
@@ -614,47 +731,58 @@
   const clockEl = document.getElementById('clock');
   const digitEls = clockEl.querySelectorAll('.digit');
   const dateEl = document.getElementById('date');
+  const tipEl = document.getElementById('tip');
+  let tipIdx = Math.floor(Math.random() * 12);   // mulai dari kalimat acak tiap halaman dibuka
   const greetEl = document.getElementById('greet'), greetH = document.getElementById('greetH'), greetS = document.getElementById('greetS');
   let userName = null;   // diisi sistem login nanti lewat window.setSkyUser('Nama')
   const celestialEl = document.getElementById('celestial');
   const I18N = {
     en: {
-      title: 'Sky — day & night clock',
+      title: 'Sky Meet',
       days: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
       months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
-      greet: { midnight:'Good night', predawn:'Good early morning', morning:'Good morning', midday:'Good day', afternoon:'Good afternoon', dusk:'Good evening', night:'Good evening' },
-      sys:'System time', sky:'Sky time', hint:'Scroll', hintUp:'Back',
+      greet: { midnight:'Good night', predawn:'Good morning', morning:'Good morning', midday:'Good day', afternoon:'Good afternoon', dusk:'Good evening', night:'Good evening' },
+      sys:'System time', sky:'Sky time', hint:'Tap', hintUp:'Back',
       pac:'Pacific', langLabel:'Language', welcome:'Welcome, Sky kid', welcomeBack:'Welcome back',
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Fairy ring', sunset:'Sunset', rainbow:'Forest Brook rainbow', daily:'Daily reset', weekly:'Weekly reset', ts:'Traveling Spirit', seats:'Take your seats', concert:'Concert starts', shardRed:'Red shard', shardBlack:'Black shard' },
+      tips:['Don\'t lose track of time, your candles are waiting.', 'Got a spare candle? Light one for someone today.', 'Even a tiny light can help someone find their way.', 'No rush, the sky isn\'t going anywhere.', 'Did you grab your daily candles yet?', 'Take a break, Sky kid. Tomorrow\'s flight will still be here.', 'Hold someone\'s hand and share your light.', 'Drink some water and stretch a bit between flights.', 'Some spirits are still waiting for you to remember them.', 'Sunsets are worth slowing down for.', 'Go to bed on time, the stars will be back tomorrow.', 'Keep shining, wherever you fly.'],
+      reward:{ ascended:'Ascended Candle', wax:'Wax' },
+      pg:{ cur:'Currency', cons:'Constellations', main:'Main', seas:'Seasons', trk:'Trackers', run:'Candle run', runS:'Resets daily', eden:'Eden', edenS:'Resets weekly', done:'Done this week', sp:'spirits', nm:'Season name', all:'Complete all areas', cap:'Gray / 20', capL:'Candles turned gray or reached 20 today', add:'Add season', hist:'History', nohist:'No history yet', ar:'areas', wk:'Week of', del:'Remove', n:{ candles:'Candles', hearts:'Hearts', asc:'Ascended Candles', season:'Season Candles', event:'Event Candles' } },
       cat:{ candles:'Candles', shards:'Shards', environment:'Environment', reset:'Reset', spirits:'Spirits', aurora:'AURORA concert' },
-      act:{ title:'Active now', none:'No active events right now', next:'Next', endsIn:'ends in' },
-      menu:{ label:'Menu', home:'Home', events:'Events', journey:'Daily & weekly', friends:'Visit friends', soon:'Soon' },
+      act:{ title:'Active now', none:'No active events right now', next:'Next', endsIn:'ends in', live:'Active' },
+      menu:{ label:'Menu', home:'Home', events:'Events', journey:'Progress', visit:'Visit', soon:'Soon' },
       date: (d,dd,m,y) => `${d}, ${m} ${dd}, ${y}`
     },
     id: {
-      title: 'Langit — jam siang & malam',
+      title: 'Sky Meet',
       days: ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],
       months: ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],
       greet: { midnight:'Selamat malam', predawn:'Selamat dini hari', morning:'Selamat pagi', midday:'Selamat siang', afternoon:'Selamat sore', dusk:'Selamat petang', night:'Selamat malam' },
-      sys:'Waktu sistem', sky:'Waktu Sky', hint:'Gulir', hintUp:'Kembali',
+      sys:'Waktu sistem', sky:'Waktu Sky', hint:'Tekan', hintUp:'Kembali',
       pac:'Pasifik', langLabel:'Bahasa', welcome:'Selamat datang, Sky kid', welcomeBack:'Selamat datang kembali',
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Cincin peri', sunset:'Matahari terbenam', rainbow:'Pelangi Sungai Hutan', daily:'Reset harian', weekly:'Reset mingguan', ts:'Roh pengembara', seats:'Ambil kursi', concert:'Konser dimulai', shardRed:'Shard merah', shardBlack:'Shard hitam' },
+      tips:['Jangan lupa waktu ya, lilinmu sudah menunggu.', 'Ada lilin cadangan? Nyalakan satu buat seseorang hari ini.', 'Cahaya sekecil apa pun bisa bantu orang lain menemukan jalan.', 'Santai aja, langitnya nggak ke mana-mana.', 'Sudah ambil lilin harianmu belum?', 'Istirahat dulu, Sky kid. Besok masih bisa terbang lagi.', 'Gandeng tangan temanmu, bagikan cahayamu.', 'Jangan lupa minum air dan regangkan badan di sela-sela terbang.', 'Ada roh yang masih menunggu untuk kamu ingat.', 'Pemandangan sunset layak buat berhenti sebentar.', 'Jangan begadang ya, bintangnya masih ada besok.', 'Terus bersinar, ke mana pun kamu terbang.'],
+      reward:{ ascended:'Ascended Candle', wax:'Wax' },
+      pg:{ cur:'Mata uang', cons:'Rasi bintang', main:'Utama', seas:'Season', trk:'Pelacak', run:'Candle run', runS:'Reset harian', eden:'Eden', edenS:'Reset mingguan', done:'Selesai minggu ini', sp:'roh', nm:'Nama season', all:'Selesaikan semua area', cap:'Abu-abu / 20', capL:'Lilin sudah abu-abu atau mencapai 20 hari ini', add:'Tambah season', hist:'Riwayat', nohist:'Belum ada riwayat', ar:'area', wk:'Minggu', del:'Hapus', n:{ candles:'Lilin', hearts:'Hati', asc:'Lilin Ascended', season:'Lilin Season', event:'Lilin Event' } },
       cat:{ candles:'Lilin', shards:'Shard', environment:'Lingkungan', reset:'Reset', spirits:'Roh', aurora:'Konser Aurora' },
-      act:{ title:'Aktif sekarang', none:'Tidak ada event aktif saat ini', next:'Berikutnya', endsIn:'berakhir dalam' },
-      menu:{ label:'Menu', home:'Beranda', events:'Event', journey:'Harian & mingguan', friends:'Visit teman', soon:'Segera' },
+      act:{ title:'Aktif sekarang', none:'Tidak ada event aktif saat ini', next:'Berikutnya', endsIn:'berakhir dalam', live:'Aktif' },
+      menu:{ label:'Menu', home:'Beranda', events:'Event', journey:'Progres', visit:'Visit', soon:'Segera' },
       date: (d,dd,m,y) => `${d}, ${dd} ${m} ${y}`
     },
     es: {
-      title: 'Cielo — reloj de día y noche',
+      title: 'Sky Meet',
       days: ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],
       months: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
       greet: { midnight:'Buenas noches', predawn:'Buenos días', morning:'Buenos días', midday:'Buen día', afternoon:'Buenas tardes', dusk:'Buenas tardes', night:'Buenas noches' },
-      sys:'Hora del sistema', sky:'Hora de Sky', hint:'Desliza', hintUp:'Volver',
+      sys:'Hora del sistema', sky:'Hora de Sky', hint:'Toca', hintUp:'Volver',
       pac:'Pacífico', langLabel:'Idioma', welcome:'Bienvenido, Sky kid', welcomeBack:'Bienvenido de nuevo',
       ev:{ geyser:'Géiser', grandma:'Abuela', turtle:'Tortuga', eden:'Edén', fairy:'Círculo de hadas', sunset:'Atardecer', rainbow:'Arcoíris del Arroyo del Bosque', daily:'Reinicio diario', weekly:'Reinicio semanal', ts:'Espíritu viajero', seats:'Toma asiento', concert:'Empieza el concierto', shardRed:'Fragmento rojo', shardBlack:'Fragmento negro' },
+      tips:['No pierdas la noción del tiempo, tus velas te esperan.', '¿Tienes una vela de sobra? Enciende una por alguien hoy.', 'Hasta una lucecita puede ayudar a alguien a encontrar su camino.', 'Sin prisa, el cielo no se va a ir a ningún lado.', '¿Ya recogiste tus velas de hoy?', 'Tómate un descanso, Sky kid. El vuelo de mañana seguirá ahí.', 'Dale la mano a alguien y comparte tu luz.', 'Toma un poco de agua y estírate entre vuelos.', 'Hay espíritus que todavía esperan que los recuerdes.', 'Un atardecer vale la pena para ir más despacio.', 'Duerme a tu hora, las estrellas vuelven mañana.', 'Sigue brillando, vueles donde vueles.'],
+      reward:{ ascended:'Vela ascendida', wax:'Cera' },
+      pg:{ cur:'Moneda', cons:'Constelaciones', main:'Principales', seas:'Temporadas', trk:'Seguimiento', run:'Candle run', runS:'Se reinicia a diario', eden:'Edén', edenS:'Se reinicia cada semana', done:'Hecho esta semana', sp:'espíritus', nm:'Nombre de la temporada', all:'Completar todas las zonas', cap:'Gris / 20', capL:'Las velas están grises o llegaste a 20 hoy', add:'Añadir temporada', hist:'Historial', nohist:'Aún no hay historial', ar:'zonas', wk:'Semana del', del:'Quitar', n:{ candles:'Velas', hearts:'Corazones', asc:'Velas ascendidas', season:'Velas de temporada', event:'Velas de evento' } },
       cat:{ candles:'Velas', shards:'Fragmentos', environment:'Entorno', reset:'Reinicio', spirits:'Espíritus', aurora:'Concierto de AURORA' },
-      act:{ title:'Activos ahora', none:'No hay eventos activos ahora', next:'Siguiente', endsIn:'termina en' },
-      menu:{ label:'Menú', home:'Inicio', events:'Eventos', journey:'Diario y semanal', friends:'Visitar amigos', soon:'Pronto' },
+      act:{ title:'Activos ahora', none:'No hay eventos activos ahora', next:'Siguiente', endsIn:'termina en', live:'Activo' },
+      menu:{ label:'Menú', home:'Inicio', events:'Eventos', journey:'Progreso', visit:'Visit', soon:'Pronto' },
       date: (d,dd,m,y) => `${d}, ${dd} de ${m} de ${y}`
     }
   };
@@ -805,8 +933,8 @@
     { k:'grandma', c:'candles',     type:'cycle', period:7200,  o:2100,  d:600,  place:'Hidden Forest · Elevated Clearing' },      // :35, tiap 2 jam
     { k:'turtle',  c:'candles',     type:'cycle', period:7200,  o:3000,  d:600,  place:'Daylight Prairie · Sanctuary Islands' },   // :50, tiap 2 jam
     { k:'eden',    c:'candles',     type:'weekly' },                                                                              // Minggu 00:00
-    { k:'shardRed',   c:'shards',   type:'shard', red:true,  reward:'Ascended Candle' },
-    { k:'shardBlack', c:'shards',   type:'shard', red:false, reward:'Wax' },
+    { k:'shardRed',   c:'shards',   type:'shard', red:true,  reward:'ascended' },
+    { k:'shardBlack', c:'shards',   type:'shard', red:false, reward:'wax' },
     { k:'fairy',   c:'environment', type:'cycle', period:3600,  o:3000,  d:600,  place:'Daylight Prairie' },                       // :50, tiap jam
     { k:'sunset',  c:'environment', type:'cycle', period:7200,  o:3000,  d:600,  place:'Daylight Prairie · Sanctuary Islands' },   // Sunset Sanctuary, :50 (satu jendela dengan Turtle)
     { k:'rainbow', c:'environment', type:'cycle', period:43200, o:18000, d:1800, place:'Hidden Forest · Forest Brook' },           // 05:00 & 17:00, 30 menit
@@ -913,22 +1041,21 @@
 
   // --- bangun kartu sekali saja (kategori -> kartu), lalu tiap detik hanya teksnya yang diperbarui ---
   const evRootEl = document.getElementById('evRoot');
-  const rowInner = '<div class="evl"><span class="en"></span><span class="pl"></span><span class="el"></span></div><span class="ec">--:--:--</span>';
+  const rowInner = '<div class="evl"><span class="enw"><span class="en"></span><i class="lv"></i></span><span class="pl"></span><span class="el"></span></div><span class="ec">--:--:--</span>';
   const actInner = '<div class="top"><span class="en"></span><span class="ec">0:00:00</span></div><span class="pl"></span><div class="bar"><i></i></div><div class="sub"><span class="el"></span><span class="eo"></span></div>';
   const mk = (tag, cls, html, r) => { const e = document.createElement(tag); e.className = cls; if(html) e.innerHTML = html; if(r !== undefined) e.style.setProperty('--r', Math.min(r, 10)); return e; };
   const cards = {}, acts = {}, catTitles = [], catCards = {};
   let rn = 3;
   const actSec = mk('div', 'sec');
   const actTEl = mk('div', 'sec-t rv', '', rn++);
-  const actList = mk('div', 'evlist');
+  const actList = mk('div', 'cat-card live rv off', '', rn++);   // satu kartu untuk semua yang aktif
   actList.id = 'active';
   EVENTS.filter(ev => ev.type === 'cycle' || ev.type === 'window' || ev.type === 'shard').forEach(ev => {
-    const a = mk('div', 'act rv off', actInner, rn); a.dataset.act = ev.k; acts[ev.k] = a; actList.appendChild(a);
+    const a = mk('div', 'act off', actInner); a.dataset.act = ev.k; acts[ev.k] = a; actList.appendChild(a);
   });
   const actEmptyEl = mk('div', 'rv', '', rn++);
   actEmptyEl.id = 'actEmpty';
-  actList.appendChild(actEmptyEl);
-  actSec.append(actTEl, actList);
+  actSec.append(actTEl, actList, actEmptyEl);
   evRootEl.appendChild(actSec);
   // tiap kategori = satu kartu berisi semua sub kategorinya (baris)
   CATS.forEach(c => {
@@ -936,7 +1063,7 @@
     title.dataset.cat = c; catTitles.push(title); catCards[c] = card;
     EVENTS.filter(ev => ev.c === c).forEach(ev => {
       const row = mk('div', 'row', rowInner); row.dataset.ev = ev.k; card.appendChild(row);
-      cards[ev.k] = { root: row, en: row.querySelector('.en'), pl: row.querySelector('.pl'), el: row.querySelector('.el'), ec: row.querySelector('.ec') };
+      cards[ev.k] = { root: row, en: row.querySelector('.en'), lv: row.querySelector('.lv'), pl: row.querySelector('.pl'), el: row.querySelector('.el'), ec: row.querySelector('.ec') };
     });
     sec.append(title, card); evRootEl.appendChild(sec);
   });
@@ -955,9 +1082,10 @@
       const row = cards[ev.k];
       const place = r.place || ev.place || '';
       row.en.textContent = t.ev[ev.k];
+      row.lv.textContent = t.act.live;
       row.pl.textContent = place;
       row.ec.textContent = fmtCD(left);
-      row.el.textContent = (r.name ? r.name + ' · ' : '') + fmtLocal(r.nextTs, far ? 1e9 : left) + (ev.reward ? ' · ' + ev.reward : '');
+      row.el.textContent = (r.name ? r.name + ' · ' : '') + fmtLocal(r.nextTs, far ? 1e9 : left) + (ev.reward ? ' · ' + t.reward[ev.reward] : '');
       row.root.classList.toggle('live', !!r.live);
       if(r.live) liveCats[ev.c] = true;
       if(ev.type !== 'daily' && ev.type !== 'weekly' && left < nextLeft){ nextLeft = left; nextKey = ev.k; }
@@ -976,10 +1104,18 @@
       }
     });
     CATS.forEach(c => catCards[c].classList.toggle('live', !!liveCats[c]));
+    actList.classList.toggle('off', !anyLive);
     actEmptyEl.classList.toggle('off', anyLive);
     if(!anyLive) actEmptyEl.textContent = t.act.none + '\n' + t.act.next + ': ' + t.ev[nextKey] + ' · ' + fmtCD(nextLeft);
   }
 
+
+  function renderTip(){ const a = I18N[lang].tips; tipEl.textContent = a[tipIdx % a.length]; }
+  function nextTip(){   // kalimat baru (tidak sama dengan sebelumnya) tiap kembali ke halaman 1
+    const n = I18N[lang].tips.length;
+    tipIdx = (tipIdx + 1 + Math.floor(Math.random() * (n - 1))) % n;
+    renderTip();
+  }
 
   function renderGreeting(t, key){
     greetH.textContent = t.greet[key] + (userName ? ', ' + userName : '');
@@ -1008,6 +1144,7 @@
     if(!introActive) applySky(h);   // selama intro, langit dikendalikan animasi masuk
     updateTwoClocks(now, t);
     updateEvents(now, t);
+    if(page === 3) paintPg();
 
     dateEl.textContent = t.date(t.days[now.getDay()], now.getDate(), t.months[now.getMonth()], now.getFullYear());
     renderGreeting(t, phaseKey(h));
@@ -1021,43 +1158,48 @@
 
   const langBtns = document.querySelectorAll('.lang-btn');
   // --- halaman penuh: halaman 1 (jam) <-> halaman 2 (jam Sky & event), dipindah dengan tombol ---
-  const p1El = document.getElementById('p1'), p2El = document.getElementById('p2');
+  const p1El = document.getElementById('p1'), p2El = document.getElementById('p2'), p3El = document.getElementById('p3');
   let page = 1, rvTimer = null, pushed = false;
-  let pendingPage = location.hash === '#/events' ? 2 : 1;   // dibuka langsung di #events
+  const hashPage = () => location.hash === '#/events' ? 2 : location.hash === '#/progress' ? 3 : 1;
+  let pendingPage = hashPage();   // dibuka langsung di #events
+  const pgEls = [p1El, p2El, p3El];
   function show(n){
     if(introActive){ pendingPage = n; return; }
     if(n === page) return;
     page = n;
     updateNavCurrent();
     document.body.classList.toggle('p2', n === 2);
-    p1El.inert = n === 2; p2El.inert = n !== 2;
-    p1El.setAttribute('aria-hidden', String(n === 2)); p2El.setAttribute('aria-hidden', String(n !== 2));
+    document.body.classList.toggle('p3', n === 3);
+    pgEls.forEach((el, i) => { el.inert = i + 1 !== n; el.setAttribute('aria-hidden', String(i + 1 !== n)); });
     clearTimeout(rvTimer);
     document.body.classList.remove('rvdone');
-    if(n === 2){
-      rvTimer = setTimeout(() => document.body.classList.add('rvdone'), 2200);
-      p2El.focus({ preventScroll:true });
-    } else {
-      setTimeout(() => { if(page === 1) p2El.scrollTop = 0; }, 950);   // halaman 2 kembali ke atas
-      hintEl.focus({ preventScroll:true });
-    }
+    p2HeadEl.classList.remove('stuck'); p3HeadEl.classList.remove('stuck');
+    if(n === 1) nextTip();
+    if(n === 2) rvTimer = setTimeout(() => document.body.classList.add('rvdone'), 2200);
+    if(n === 3) paintPg();
+    (n === 1 ? hintEl : pgEls[n - 1]).focus({ preventScroll:true });
+    setTimeout(() => { if(page !== 2) p2El.scrollTop = 0; if(page !== 3) p3El.scrollTop = 0; }, 950);   // halaman yang ditinggalkan kembali ke atas
   }
   // pengaman: kontainer halaman tidak boleh bergeser sendiri (mis. karena fokus/anchor)
+  const p2HeadEl = document.querySelector('.p2head');
+  p2El.addEventListener('scroll', () => p2HeadEl.classList.toggle('stuck', page === 2 && p2El.scrollTop > 8), { passive:true });
+  const p3HeadEl = document.getElementById('p3head');
+  p3El.addEventListener('scroll', () => p3HeadEl.classList.toggle('stuck', page === 3 && p3El.scrollTop > 8), { passive:true });
   const pagesEl = document.getElementById('pages');
   pagesEl.addEventListener('scroll', () => { pagesEl.scrollTop = 0; pagesEl.scrollLeft = 0; });
-  function goEvents(){
-    if(page === 2 || introActive) return;
-    pushed = true; location.hash = '#/events';        // tombol Back peramban/HP ikut bekerja
+  function goPage(n, h){
+    if(page === n || introActive) return;
+    pushed = page === 1; location.hash = h;        // tombol Back peramban/HP ikut bekerja
   }
+  const goEvents = () => goPage(2, '#/events'), goProgress = () => goPage(3, '#/progress');
   function goHome(){
     if(page === 1 || introActive) return;
-    if(pushed){ pushed = false; history.back(); }
-    else { try { history.replaceState(null, '', location.pathname + location.search); } catch(e) {} show(1); }
+    if(pushed){ pushed = false; history.back(); } else location.hash = '#/';
   }
   hintEl.addEventListener('click', goEvents);
-  window.addEventListener('hashchange', () => show(location.hash === '#/events' ? 2 : 1));
+  window.addEventListener('hashchange', () => show(hashPage()));
 
-  const fadeEls = [greetEl, dateEl, sysBlockEl, ...document.querySelectorAll('#evRoot .rv'), skyLabelEl, hintEl];
+  const fadeEls = [greetEl, dateEl, tipEl, sysBlockEl, ...document.querySelectorAll('#evRoot .rv'), skyLabelEl, hintEl];
   let langTimer = null;
   function setLang(code, save){
     if(!I18N[code]) return;
@@ -1072,6 +1214,8 @@
       document.getElementById('langCurrent').setAttribute('aria-label', I18N[code].langLabel);
       document.getElementById('langMenu').setAttribute('aria-label', I18N[code].langLabel);
       renderNav(I18N[code]);
+      renderTip();
+      renderPg();
       tick();
     };
 
@@ -1114,7 +1258,7 @@
     navBtn.setAttribute('aria-expanded', String(open));
   }
   function updateNavCurrent(){
-    const cur = page === 2 ? 'events' : 'home';
+    const cur = page === 2 ? 'events' : page === 3 ? 'journey' : 'home';
     navItems.forEach(b => { if(b.dataset.go === cur) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   }
   function renderNav(t){
@@ -1134,7 +1278,7 @@
     toggleNav(false);
     if(b.dataset.go === 'home') goHome();
     else if(b.dataset.go === 'events') goEvents();
-    // 'journey' (halaman 3: kontrol perjalanan harian & mingguan) dan 'friends' (halaman 4: visit teman) belum aktif
+    else if(b.dataset.go === 'journey') goProgress();
   });
   document.addEventListener('click', e => {
     if(!document.getElementById('nav').contains(e.target)) toggleNav(false);
@@ -1202,16 +1346,193 @@
     requestAnimationFrame(frame);
   }
 
+  // ===== halaman 3: progres (tersimpan per akun lewat Store, kunci 'pg') =====
+  // Ikon di bawah gambar sendiri (bukan aset resmi game). Untuk memakai ikon resmi, ganti isi NICON dengan <image href="..."> / tag img.
+  const REALMS = [['Isle of Dawn',4],['Daylight Prairie',8],['Hidden Forest',8],['Valley of Triumph',7],['Golden Wasteland',6],['Vault of Knowledge',5]];   // Prairie/Forest/Wasteland terverifikasi; Isle/Valley/Vault perlu dicek
+  const AREAS = [   // area tiap realm untuk candle run (bisa disesuaikan)
+    ['Isle of Dawn', ['Dune Caves','Isle Temple','Cave of Prophecies']],
+    ['Daylight Prairie', ['Butterfly Fields','Village Islands','Cave','Bird Nest','Sanctuary Island','Prairie Temple']],
+    ['Hidden Forest', ['Forest Clearing','Forest Brook','Elevated Clearing','Boneyard','Treehouse','Forest Garden','Forest End']],
+    ['Valley of Triumph', ['Ice Rink','Village of Dreams','Hermit Valley','Valley Temple']],
+    ['Golden Wasteland', ['Broken Temple','Battlefield','Graveyard','Crabfield','Forgotten Ark','Treasure Reef','Wasteland Temple']],
+    ['Vault of Knowledge', ['Starlight Desert','Jellyfish Cove','Vault Summit']]
+  ];
+  const NUMS = ['candles','hearts','asc','season','event'];
+  const NCOL = { candles:'#ffd27a', hearts:'#ff8fa3', asc:'#a8dcff', season:'#ffb26b', event:'#d2a8ff' };
+  const FL = '<path d="M12 2c2.2 3.2 4 5.2 4 8a4 4 0 0 1-8 0c0-2.8 1.8-4.8 4-8Z"/><rect x="9" y="15" width="6" height="7" rx="1.5"/>';
+  const NICON = {
+    candles: FL,
+    hearts: '<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11Z"/>',
+    asc: FL + '<path d="M19.5 2l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8Z"/>',
+    season: '<path d="M12 2l3.4 4.4L12 10.8 8.6 6.4Z"/><rect x="9" y="13" width="6" height="9" rx="1.5"/>',
+    event: FL + '<circle cx="4.5" cy="5" r="1.3"/><circle cx="20" cy="9" r="1.3"/><circle cx="5" cy="16" r="1.3"/>'
+  };
+  const pgRoot = document.getElementById('pgRoot'), pgRefs = { n:{}, cn:[], gt:[], titles:[] };
+  const pgData = () => Store.get('pg', {});
+  const pgWrite = fn => { const d = pgData(); fn(d); Store.set('pg', d); };   // Store.set -> onChange -> paintPg
+  let rr = 1;
+  const COINI = '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 9.4c0 1.7 3.1 3 7 3s7-1.3 7-3v3c0 1.7-3.1 3-7 3s-7-1.3-7-3Z"/><path d="M5 15.9c0 1.7 3.1 3 7 3s7-1.3 7-3v2.6c0 1.7-3.1 3-7 3s-7-1.3-7-3Z"/>';   // simbol umum (tumpukan koin)
+  const CONI = '<path d="M5 18l5-8 5 5 4-10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="18" r="2"/><circle cx="10" cy="10" r="2"/><circle cx="15" cy="15" r="2"/><circle cx="19" cy="5" r="2"/>';
+  const folds = [];
+  const topSec = mk('div', 'sec col'), hrow = mk('div', 'hrow'), fcol = mk('div', 'fcol');
+  topSec.append(hrow, fcol); pgRoot.appendChild(topSec);
+  // pgSection(ikon, warna): dengan ikon = kartu tertutup, header ber-ikon diketuk baru terbuka; tanpa ikon = langsung tampil
+  function pgSection(icon, col){
+    const sec = mk('div', 'sec'), card = mk('div', 'cat-card rv3', '', rr + 1);
+    let title;
+    if(icon){
+      title = mk('button', 'sec-h rv3', '<span class="ic" style="color:' + col + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + icon + '</svg></span><span class="tx"></span><svg class="chv" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>', rr);
+      title.type = 'button'; title.setAttribute('aria-expanded', 'false');
+      const fold = mk('div', 'fold'), inner = mk('div', ''); fold.inert = true; inner.appendChild(card); fold.appendChild(inner);
+      const setOpen = o => { fold.classList.toggle('open', o); title.setAttribute('aria-expanded', String(o)); fold.inert = !o; };
+      folds.push(setOpen);
+      title.onclick = () => { const o = !fold.classList.contains('open'); folds.forEach(f => f(false)); setOpen(o); };   // satu terbuka, yang lain tertutup
+      hrow.appendChild(title); fcol.appendChild(fold);   // header berdampingan di atas, isi terbuka di bawahnya
+    } else { title = mk('div', 'sec-t rv3', '', rr); sec.append(title, card); pgRoot.appendChild(sec); }
+    rr += 2; pgRefs.titles.push(title); return card;
+  }
+  // kartu 1: mata uang
+  const cardCur = pgSection(COINI, '#f2dca0');
+  NUMS.forEach(k => {
+    const row = mk('div', 'row', '<div class="pgl"><span class="ic" style="color:' + NCOL[k] + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + NICON[k] + '</svg></span><span class="en"></span></div><div class="stp"><button type="button" aria-label="-1">-</button><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6"><button type="button" aria-label="+1">+</button></div>');
+    const inp = row.querySelector('input'), bs = row.querySelectorAll('button');
+    const cur = () => (pgData().n || {})[k] || 0, setN = v => pgWrite(d => { (d.n = d.n || {})[k] = Math.max(0, Math.min(999999, v | 0)); });
+    bs[0].onclick = () => setN(cur() - 1); bs[1].onclick = () => setN(cur() + 1);
+    inp.onfocus = () => inp.select();
+    inp.onchange = () => setN(parseInt(inp.value.replace(/\D/g, ''), 10) || 0);
+    pgRefs.n[k] = { en: row.querySelector('.en'), inp }; cardCur.appendChild(row);
+  });
+  const dayK = () => skyDayKey(Date.now()), weekK = () => skyWeekKey(Date.now());
+  const pop = n => { let c = 0; while(n){ c += n & 1; n >>= 1; } return c; };
+  const pct = v => Math.max(0, Math.min(100, parseInt(String(v).replace(/\D/g, ''), 10) || 0));
+  const kLabel = k => { const q = k.split('-'); return +q[2] + ' ' + I18N[lang].months[q[1] - 1]; };
+  const CHEV = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>';
+  function mkDrop(name, withPct, withAll){   // baris dropdown: judul + ringkasan (+ kolom persen manual) + panel isi
+    const wrap = mk('div', 'cn', '<div class="chd"><button type="button" class="cbtn" aria-expanded="false"><span class="evl"><span class="en"></span><span class="el"></span></span>' + CHEV + '</button>' + (withAll ? '<button type="button" class="all"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg></button>' : '') + (withPct ? '<label class="pc"><input type="text" inputmode="numeric" maxlength="3" placeholder="0">%</label>' : '') + '</div><div class="cpanel" inert><div></div></div>');
+    const btn = wrap.querySelector('button'), panel = wrap.querySelector('.cpanel'), en = wrap.querySelector('.en');
+    en.textContent = name;
+    btn.onclick = () => { const o = panel.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); panel.inert = !o; };
+    return { wrap, en, all: wrap.querySelector('.all'), el: wrap.querySelector('.el'), box: panel.firstElementChild, pin: wrap.querySelector('.pc input') };
+  }
+  // kartu 2: rasi bintang utama (dropdown roh + persen manual) dan season (nama & persen manual)
+  const cardCon = pgSection(CONI, '#cfd6ff'), gtMain = mk('div', 'gt'), gtSeas = mk('div', 'gt');
+  cardCon.appendChild(gtMain);
+  REALMS.forEach(([name, cnt]) => {
+    const id = 'main:' + name, dd = mkDrop(name, true), chips = [];
+    for(let i = 0; i < cnt; i++){
+      const c = mk('button', 'chip', String(i + 1)); c.type = 'button';
+      c.onclick = () => pgWrite(d => { d.c = d.c || {}; d.c[id] = (d.c[id] || 0) ^ (1 << i); });
+      chips.push(c); dd.box.appendChild(c);
+    }
+    dd.pin.onfocus = () => dd.pin.select();
+    dd.pin.onchange = () => pgWrite(d => { (d.p = d.p || {})[id] = pct(dd.pin.value); });
+    pgRefs.cn.push({ id, cnt, chips, el: dd.el, pin: dd.pin }); cardCon.appendChild(dd.wrap);
+  });
+  cardCon.appendChild(gtSeas);
+  const msList = mk('div', 'mslist'), addWrap = mk('div', 'cadd'), addBtn = mk('button', 'pill'); addBtn.type = 'button';
+  addBtn.onclick = () => pgWrite(d => { (d.ms = d.ms || []).push({ n:'', p:0 }); });
+  addWrap.appendChild(addBtn); cardCon.append(msList, addWrap);
+  function paintMs(d, t){
+    const list = d.ms || [];
+    if(msList.children.length !== list.length){
+      msList.textContent = '';
+      list.forEach((m, i) => {
+        const row = mk('div', 'ms', '<input class="nm" type="text" maxlength="40"><label class="pc"><input type="text" inputmode="numeric" maxlength="3" placeholder="0">%</label><button type="button" class="del">×</button>');
+        const [nm, pc] = row.querySelectorAll('input');
+        nm.onchange = () => pgWrite(x => { x.ms[i].n = nm.value.trim().slice(0, 40); });
+        pc.onfocus = () => pc.select(); pc.onchange = () => pgWrite(x => { x.ms[i].p = pct(pc.value); });
+        row.querySelector('.del').onclick = () => pgWrite(x => { x.ms.splice(i, 1); });
+        msList.appendChild(row);
+      });
+    }
+    [...msList.children].forEach((row, i) => {
+      const [nm, pc] = row.querySelectorAll('input'), m = list[i];
+      nm.placeholder = t.nm; row.querySelector('.del').setAttribute('aria-label', t.del);
+      if(document.activeElement !== nm) nm.value = m.n;
+      if(document.activeElement !== pc) pc.value = m.p || '';
+    });
+  }
+  // kartu 3: candle run (6 realm, tiap realm dropdown berisi area; reset harian) & Eden (reset mingguan). Riwayat tidak pernah dihapus.
+  const cardTrk = pgSection();
+  const runBox = mk('div', 'trk', '<div class="thd"><div class="evl"><span class="en"></span><span class="el"></span></div><button type="button" class="pill cap"><svg viewBox="0 0 24 24" aria-hidden="true">' + FL + '</svg><span></span></button></div>');
+  const capBtn = runBox.querySelector('.cap');
+  capBtn.onclick = () => pgWrite(d => { const k = dayK(); d.cap = d.cap || {}; if(d.cap[k]) delete d.cap[k]; else d.cap[k] = 1; });
+  cardTrk.appendChild(runBox);
+  const runDrops = AREAS.map(([realm, list], ri) => {
+    const dd = mkDrop(realm, false, true);
+    dd.all.onclick = () => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0), full = (1 << list.length) - 1; r[ri] = r[ri] === full ? 0 : full; if(r.every(x => !x)) delete d.runs[k]; });
+    dd.pills = list.map((a, ai) => {
+      const b = mk('button', 'pill', a); b.type = 'button';
+      b.onclick = () => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0); r[ri] ^= 1 << ai; if(r.every(x => !x)) delete d.runs[k]; });
+      dd.box.appendChild(b); return b;
+    });
+    cardTrk.appendChild(dd.wrap); return dd;
+  });
+  const runHist = mkDrop('', false); cardTrk.appendChild(runHist.wrap);
+  const edenBox = mk('div', 'trk', '<div class="evl"><span class="en"></span><span class="el"></span></div><div class="pills"></div>');
+  const edenPill = mk('button', 'pill'); edenPill.type = 'button';
+  edenPill.onclick = () => pgWrite(d => { const k = weekK(); d.ew = d.ew || {}; if(d.ew[k]) delete d.ew[k]; else d.ew[k] = 1; });
+  edenBox.querySelector('.pills').appendChild(edenPill); cardTrk.appendChild(edenBox);
+  const edenHist = mkDrop('', false); cardTrk.appendChild(edenHist.wrap);
+  function paintHist(dd, keys, fmt, t){   // daftar riwayat (kunci lama -> baru), hanya digambar ulang bila isinya berubah
+    const sig = keys.map(k => k + fmt(k)).join('|') + lang;
+    if(dd.sig === sig) return; dd.sig = sig;
+    const rows = keys.length ? keys.map(k => { const e = mk('div', 'hl'); e.textContent = fmt(k); return e; }) : [Object.assign(mk('div', 'hl'), { textContent: t.nohist })];
+    dd.box.replaceChildren(...rows);
+  }
+
+  function renderPg(){
+    const t = I18N[lang].pg;
+    [t.cur, t.cons, t.trk].forEach((x, i) => { (pgRefs.titles[i].querySelector('.tx') || pgRefs.titles[i]).textContent = x; });
+    NUMS.forEach(k => { pgRefs.n[k].en.textContent = t.n[k]; });
+    gtMain.textContent = t.main; gtSeas.textContent = t.seas; addBtn.textContent = '+ ' + t.add;
+    runBox.querySelector('.en').textContent = t.run; edenBox.querySelector('.en').textContent = t.eden;
+    runHist.en.textContent = t.run + ' · ' + t.hist; edenHist.en.textContent = t.eden + ' · ' + t.hist;
+    edenPill.textContent = t.done;
+    capBtn.querySelector('span').textContent = t.cap; capBtn.setAttribute('aria-label', t.capL); capBtn.title = t.capL;
+    paintPg();
+  }
+  function paintPg(){
+    const d = pgData(), t = I18N[lang].pg;
+    NUMS.forEach(k => { const r = pgRefs.n[k]; if(document.activeElement !== r.inp) r.inp.value = (d.n || {})[k] || 0; });
+    pgRefs.cn.forEach(c => {
+      const m = (d.c || {})[c.id] || 0; let n = 0;
+      c.chips.forEach((b, i) => { const on = !!(m >> i & 1); n += on; b.setAttribute('aria-pressed', String(on)); });
+      c.el.textContent = n + '/' + c.cnt + ' ' + t.sp;
+      const pv = (d.p || {})[c.id]; if(document.activeElement !== c.pin) c.pin.value = pv ? pv : '';
+    });
+    paintMs(d, t);
+    const runs = d.runs || {}, today = runs[dayK()] || [];
+    let tot = 0, all = 0;
+    runDrops.forEach((dd, ri) => {
+      const n = pop(today[ri] || 0); tot += n; all += dd.pills.length;
+      dd.pills.forEach((b, ai) => b.setAttribute('aria-pressed', String(!!((today[ri] || 0) >> ai & 1))));
+      dd.el.textContent = n + '/' + dd.pills.length + ' ' + t.ar;
+      const full = n === dd.pills.length;
+      dd.wrap.classList.toggle('done', full); dd.all.setAttribute('aria-pressed', String(full)); dd.all.setAttribute('aria-label', t.all); dd.all.title = t.all;
+    });
+    runBox.querySelector('.el').textContent = t.runS + ' · ' + tot + '/' + all + ' ' + t.ar;
+    const cap = d.cap || {};
+    capBtn.setAttribute('aria-pressed', String(!!cap[dayK()]));
+    const rk = [...new Set([...Object.keys(runs), ...Object.keys(cap)])].filter(k => k !== dayK()).sort().reverse().slice(0, 60);
+    paintHist(runHist, rk, k => kLabel(k) + ' · ' + (runs[k] || []).reduce((a, x) => a + pop(x), 0) + '/' + all + ' ' + t.ar + (cap[k] ? ' · ' + t.cap : ''), t);
+    const ew = d.ew || {}, ek = Object.keys(ew).filter(k => k !== weekK()).sort().reverse().slice(0, 52);
+    edenPill.setAttribute('aria-pressed', String(!!ew[weekK()]));
+    edenBox.querySelector('.el').textContent = t.edenS;
+    paintHist(edenHist, ek, k => t.wk + ' ' + kLabel(k), t);
+  }
+  Store.onChange(k => { if(k === '*' || k === 'pg') paintPg(); });
+
   // API untuk sistem login & halaman lain (mis. halaman 3 nanti)
   window.SkyApp = {
     store: Store,
     setUser: (name, id) => window.setSkyUser(name, id),
     dayKey: () => skyDayKey(Date.now()),
     weekKey: () => skyWeekKey(Date.now()),
-    go: n => (n === 2 ? goEvents() : goHome())
+    go: n => (n === 2 ? goEvents() : n === 3 ? goProgress() : goHome())
   };
 
-  makeStars(90);
+  makeStars(window.innerWidth < 600 ? 55 : 90);
   setLang(lang, false);                 // langit aktif sejak frame pertama
   (function loop(){ tick(); setTimeout(loop, 1000 - (Date.now() % 1000) + 5); })();   // sinkron ke batas detik
   startIntro();            // digit jam beranimasi masuk, langit mengikuti
