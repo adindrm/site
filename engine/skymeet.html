@@ -92,30 +92,45 @@
   }
 
 
-  /* ===== loading screen ===== */
+  /* ===== loading screen (logo -> partikel bintang) ===== */
   #loadingScreen{
     position:fixed; inset:0; z-index:9999;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
-    background: linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%);
+    background:transparent;   /* latar = latar layar login di bawahnya, jadi tidak ada loncatan saat transisi */
+    --ld-accent:#ffe9a8; --ld-fg:#eaf1ff;
     transition: opacity 0.6s ease, visibility 0.6s ease;
   }
+  #loadingScreen.reveal{ pointer-events:none; }   /* login/aplikasi di bawahnya sudah boleh diklik */
   #loadingScreen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
-  #loadRing{
-    width:46px; height:46px; border-radius:50%;
-    border:2px solid rgba(244,245,251,0.18); border-top-color: var(--ink);
-    animation: loadspin 0.9s linear infinite;
-  }
-  @keyframes loadspin{ to{ transform:rotate(360deg); } }
-  #loadMsg{ font-size:13px; letter-spacing:0.02em; color:var(--ink-soft); }
+  #ldCanvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #ldHud{ position:absolute; left:0; right:0; bottom:calc(10vh + env(safe-area-inset-bottom,0px)); display:flex; justify-content:center; pointer-events:none; }
+  #ldRing{ position:relative; width:58px; height:58px; }
+  #ldRing svg{ width:100%; height:100%; display:block; transform:rotate(-90deg); overflow:visible; }
+  #ldRing .ld-tr{ fill:none; stroke:rgba(255,255,255,calc(.12 + var(--hit,0) * .3)); stroke-width:3; }
+  #ldRing .ld-arc{ fill:none; stroke:var(--ld-accent); stroke-width:3; stroke-linecap:round; stroke-dasharray:213.63; stroke-dashoffset:213.63; filter:drop-shadow(0 0 calc(6px + var(--hit,0) * 14px) var(--ld-accent)); }
+  #ldPct{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--ld-fg); text-shadow:0 0 calc(var(--hit,0) * 12px) var(--ld-accent); font-variant-numeric:tabular-nums; transition:opacity .25s; }
+  #ldRing.ld-full #ldPct{ opacity:0; }
+  .ld-wh{ position:absolute; inset:0; opacity:0; transition:opacity .35s; pointer-events:none; }
+  #ldRing.ld-full .ld-wh{ opacity:1; }
+  .ld-wh i{ position:absolute; left:50%; top:50%; border-radius:50%; transform:translate(-50%,-50%); }
+  .ld-wh i:first-child{ width:11px; height:11px; background:radial-gradient(circle,#fff 30%,#fff7d6 100%); box-shadow:0 0 calc(8px + var(--hit,0) * 10px) 2px #fff, 0 0 calc(18px + var(--hit,0) * 18px) 6px rgba(255,233,168,.75); }
+  .ld-wh i:last-child{ width:26px; height:26px; border:1.5px solid rgba(255,255,255,.9); box-shadow:0 0 8px 1px rgba(255,255,255,.8), inset 0 0 8px 1px rgba(159,208,255,.7), 0 0 calc(14px + var(--hit,0) * 14px) rgba(255,233,168,.5); }
+
 
   /* ===== layar login (demo) ===== */
   #loginScreen{
     position:fixed; inset:0; z-index:9998; overflow-y:auto;
     display:flex; align-items:flex-start; justify-content:center; padding:24px;
-    background: linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%);
+    background: radial-gradient(ellipse at 50% 40%, #0b1330, #03050d 75%);   /* sama dengan loading screen */
     transition: opacity 0.4s ease, visibility 0.4s ease;
   }
   #loginScreen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  /* latar login = latar loading screen (langit malam + bintang berkelip) */
+  #loginStars{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+  #loginStars i{ position:absolute; border-radius:50%; background:#cfe0ff; opacity:.25; animation: lgTw var(--d,4s) ease-in-out var(--dl,0s) infinite; }
+  @keyframes lgTw{ 0%,100%{ opacity:.25; } 50%{ opacity:.7; } }
+  #loginScreen.hidden #loginStars i{ animation-play-state:paused; }
+  #loginCard{ position:relative; z-index:1; transition: opacity 1.4s ease; }
+  #loginScreen:not(.ready) #loginCard{ opacity:0; visibility:hidden; pointer-events:none; }   /* kartu login muncul perlahan saat bintang terserap */
   #loginCard{ width:100%; max-width:360px; margin:auto; display:flex; flex-direction:column; gap:14px; text-align:center; }
   #loginMain, #regPane{ display:flex; flex-direction:column; gap:12px; }
   #loginMain[hidden], #regPane[hidden]{ display:none; }
@@ -910,11 +925,17 @@
   </form>
 </div>
 <div id="toast"></div>
-<div id="loadingScreen">
-  <div id="loadRing"></div>
-  <div id="loadMsg">Connecting...</div>
+<div id="loadingScreen" role="status" aria-label="Loading">
+  <canvas id="ldCanvas"></canvas>
+  <div id="ldHud"><div id="ldRing">
+    <svg viewBox="0 0 84 84" aria-hidden="true"><circle class="ld-tr" cx="42" cy="42" r="34"/><circle class="ld-arc" id="ldArc" cx="42" cy="42" r="34"/></svg>
+    <div id="ldPct">0%</div>
+    <div class="ld-wh"><i id="ldW1"></i><i id="ldW2"></i></div>
+  </div></div>
+  <div id="loadMsg" hidden></div>
 </div>
-<div id="loginScreen" class="hidden">
+<div id="loginScreen">
+  <div id="loginStars" aria-hidden="true"></div>
   <div id="loginCard">
     <div id="loginLang" role="group" aria-label="Language">
       <button type="button" data-l="en">EN</button>
@@ -1961,8 +1982,7 @@
   // ---------- loading screen ----------
   const loadEl = document.getElementById('loadingScreen'), loadMsgEl = document.getElementById('loadMsg');
   let loadingDone = false;
-  function hideLoading(){ loadEl.classList.add('hidden'); }
-  setTimeout(() => { if(!loadingDone) hideLoading(); }, 4500);   // jaring pengaman bila capability tidak tersedia
+  function hideLoading(){}   // loading screen ditutup oleh animasinya sendiri (event skymeetb:reveal / skymeetb:done), bukan timer
 
   // ---------- toast kecil ----------
   const toastEl = document.getElementById('toast');
@@ -2106,7 +2126,7 @@
     loadingDone = true; hideLoading();
     $('regPane').hidden = true; $('loginMain').hidden = false;
     applyLoginLang();
-    loginEl.classList.remove('hidden');
+    loginEl.classList.remove('hidden'); loginEl.classList.add('ready');   // kartu login muncul perlahan
   }
   function enterApp(session){
     const firstEntry = !myUid;
@@ -2213,13 +2233,17 @@
     writeSession(session); enterApp(session);
   });
 
-  // layar loading singkat, lalu masuk otomatis bila sesi masih ada (setelah cek kedaluwarsa akun tamu)
-  setTimeout(() => {
+  // loading screen: login / masuk otomatis baru jalan saat animasi memberi sinyal (20% bintang sudah terserap)
+  let flowStarted = false;
+  function startFlow(){
+    if(flowStarted) return; flowStarted = true;
     checkGuestExpiry();
     const existing = readSession();
     if(existing && !(SKY_API && existing.type === 'account' && !lsGet(tokenKey(existing.id)))){ loadMsgEl.textContent = vt().ready; loadingDone = true; hideLoading(); enterApp(existing); }
     else showLogin();
-  }, 600);
+  }
+  window.addEventListener('skymeetb:reveal', startFlow);
+  setTimeout(startFlow, 30000);   // jaring pengaman bila animasi loading gagal berjalan
 
   // ---------- teman & chat (demo lokal — belum tersambung ke spreadsheet/backend) ----------
   // Teman disimpan sebagai { code, name }. name = nama panggilan pilihanmu (opsional).
@@ -2657,5 +2681,291 @@
   window.SkyVisit = { render: renderFriends };
 })();
 </script>
+<script>
+/* ===== Loading screen Sky Meet: logo pecah jadi partikel bintang, persen mengikuti proses memuat asli =====
+   - Persen minimal 5 detik. Jika semua sudah termuat, 100% tepat di 5 detik.
+     Jika belum, persen tertahan di 99% sampai benar-benar selesai (jaring pengaman 20 dtk).
+   - Event: 'skymeetb:reveal' (20% bintang sudah terserap -> tampilkan login / masuk app)
+            'skymeetb:done'   (bintang terakhir terserap -> loading screen ditutup)  */
+(function(){
+  const screenEl = document.getElementById('loadingScreen');
+
+  // bintang berkelip untuk latar login (dipakai juga sebagai latar loading)
+  (function(){
+    const box = document.getElementById('loginStars'); if(!box) return;
+    const n = Math.max(40, Math.min(160, Math.round(innerWidth * innerHeight / 9000)));
+    for(let i = 0; i < n; i++){
+      const s = document.createElement('i'), d = 0.8 + Math.random() * 1.8;
+      s.style.cssText = 'left:' + (Math.random() * 100).toFixed(2) + '%;top:' + (Math.random() * 100).toFixed(2) + '%;width:' + d.toFixed(2) + 'px;height:' + d.toFixed(2) + 'px;--d:' + (3 + Math.random() * 4).toFixed(2) + 's;--dl:-' + (Math.random() * 6).toFixed(2) + 's';
+      box.appendChild(s);
+    }
+  })();
+
+  function bail(){   // bila canvas/animasi gagal: jangan pernah mengunci pengguna di loading
+    screenEl.classList.add('reveal', 'hidden');
+    window.dispatchEvent(new Event('skymeetb:reveal'));
+    window.dispatchEvent(new Event('skymeetb:done'));
+  }
+  try{ init(); }catch(e){ console.error('loader', e); bail(); }
+
+  function init(){
+    const SVG = `<svg width="716" height="413" fill="#ffffff" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 716.2 412.76"><path d="M421,761.57c16.58-7.32,26.38-11.81,33-23,1.62-2.74,8.3-14,5-26-2.67-9.7-10.33-14.29-21-22-14.91-10.79-31.68-24.77-41-35-4.24-4.66-22.57-24.79-25-51-2.67-28.9,15.49-51.16,27-66,35.35-45.57,93.51-66.85,140-61,11.27,1.42,33.07,4.18,51,21,6.13,5.75,21,19.7,19,35-2.22,16.9-23.19,21.19-62,46-39.32,25.13-60.54,38.7-62,58-2.18,28.94,33.72,39.14,32,68-2.71,45.6-99.73,69.35-111,72-17.11,4-68.24,14.36-79-5-8.72-15.7,10.81-48,48-79,50.49-32.6,127.29-73.35,227-94,201.07-41.64,432.64,13.09,439,78,8.78,89.51-411.28,192.19-411,193s415.09-104.54,406-192c-6.08-58.52-200.44-94.52-339-86-78.94,4.85-131.47,23.45-198,47,0,0-144.64,51.2-159.76,107.54-.8,3-3.09,11.55,1.25,18,1.63,2.43,6.16,7.53,24.51,8.41C372.76,773.94,392.75,774,421,761.57Z" transform="translate(-324.9 -476.62)"/><path d="M510,794.57c-1-1.29-.21-3.4,0-4,8.38-23.8,11.18-49.36,20-73,6.4-17.14,1.58-9.13,17-62,6.91-23.68,10.74-35.05,20-48,4.68-6.54,19.64-27.47,37-26,1.69.14,7.65.68,11,5,4.32,5.55,2.35,14.83-5,31-10.05,22.11-20.22,35.23-37,62-7.77,12.4-16.09,26.34-14,28,.74.58,2.44-.61,13-7,3.33-2,6.68-4,10-6,17.54-10.7,28.47-14.29,36-16,6.3-1.43,8.42-1.11,10,0,5.22,3.64,3.15,14.79,2,21-1.56,8.42-3,16.08-9,22-5.5,5.4-13.07,6.71-28,9-19.53,3-27.32,1.25-31,7-3.13,4.9-.86,11.49,0,14,1.56,4.52,5.46,11.48,22,20,21.81,11.22,41.27,12.63,41,16,0,.54-.61,1.27-3,2a193.94,193.94,0,0,1-23-5c-10.85-3.07-18.21-5.11-27-10s-19.68-11-26-23c-4.19-8-4.48-15-7-15-2.06,0-3,4.69-7,15-5.89,15.35-6.93,13.32-10,23-3.8,12-3.73,20-8,21C513,795.8,510.87,795.75,510,794.57Z" transform="translate(-324.9 -476.62)"/><path d="M634,702.57c2.06-8,3.83-14.64,9-22,3-4.31,10.31-14.65,22-16,2.77-.32,7.69-.89,11,2,4.84,4.22,3,13,0,27-5.4,24.85-15.62,45.3-17,47a5.72,5.72,0,0,0-1,2c-.05.2-.45,1.7,0,2,.68.45,3-2,4-3,1.35-1.41,2.72-3,7-9,1.25-1.74,3-3.14,4-5a4.18,4.18,0,0,1,2-2c.14-.06,1.34-.52,2,0,1,.76.25,3.18,0,4-2.24,7.47-17.28,23.24-18,24-2.94,3.09-6.29,7.73-13,17-8.87,12.27-10.58,16.37-18,27-5.82,8.34-5.81,7.3-18,23-18,23.25-19.46,27.32-30,39-9.21,10.21-10.54,9.78-17,18a31.9,31.9,0,0,1-7,7c-1.89,1.34-9.64,6.86-16,4-.65-.3-3.46-1.56-4-4-.86-4,6.14-8.17,9-10,3.52-2.26,14.35-12.17,36-32a232.3,232.3,0,0,0,21-22c24-28.15,37.88-57.29,38.71-58.43a1.68,1.68,0,0,0,.29-.57,1.89,1.89,0,0,0,0-1,30,30,0,0,1-4-4C624.1,741,630.47,716.19,634,702.57Z" transform="translate(-324.9 -476.62)"/><path d="M683,711.57c3.18-13.78,7-21.41,9-25,4-7.23,6.53-11.68,12-14,1.11-.47,9.7-4,15,1a11.52,11.52,0,0,1,3,11c-.66,2.5-2,3.34-4,6-4.78,6.26-7.19,14.19-6,15s5-4.4,14-13c16.5-15.72,22.65-16.84,26-17,2.58-.12,7.94-.38,11,3,7.68,8.47-6.4,31.79-4,33,1.2.61,4.15-5.54,12-12a54.4,54.4,0,0,1,16-9c7.39-2.63,12.7-4.53,16-2,4.9,3.75,2.49,15,1,22a77.62,77.62,0,0,1-3,10c-3.75,11.11-6.33,20.87-9,31-4,15-4.63,20.55-9,22-2.54.84-6.24.27-8-2-3.71-4.8,5-12.48,7-29,.55-4.48,2-16.09-4-20-3-2-6.64-1.26-8-1-2.25.42-7.52,2-14,12-6.65,10.29-4.1,13.3-11,25-6.46,11-11.25,12.64-14,13-1.71.22-4.63.61-6-1-4.26-5,14.78-20.05,19-46,.34-2,3-19.21-3-22-2.64-1.23-6,.8-11,4a60.05,60.05,0,0,0-19,19c-1.06,1.92-1.73,3.33-8,20-6.2,16.48-7.5,20.31-12,23-4.1,2.45-11.28,4.2-15,1-4.35-3.75-.48-11.3,4-40C681.43,720.19,681.48,718,683,711.57Z" transform="translate(-324.9 -476.62)"/><path d="M791.94,761.19c-1.26-.86,2.23-12,12.08-20.28,8.6-7.21,13.74-5.23,31.57-15,11.71-6.4,14.71-10.1,15.79-14.1,1.49-5.48-.38-12.36-3.71-13.23-4.41-1.14-10.95,8.37-13.93,14.11-5.61,10.78-10.45,30.9-.93,37.91,10.22,7.53,31-1,42.72-11.46s16.33-24.46,18.43-23.58c1.32.55.31,6.47-1,11-5.55,19.23-23.68,38.42-48.08,44.31-9.74,2.36-17.74,4-25.07,0-17.34-9.37-11.93-44.26-4.65-63.47,3.78-10,10.19-26.86,26.93-32.62,6.73-2.31,19.12-4.2,25.08,1.77,9.77,9.78-3.08,35.38-14.86,48.48a49.35,49.35,0,0,1-17.64,13.22c-7.67,3.29-10.4,1.39-17.65,4.41C800.46,749.57,793.38,762.16,791.94,761.19Z" transform="translate(-324.9 -476.62)"/><path d="M870.89,742.67c25.84-17.95,46-20.85,46.09-31.23,0-3.59-2.3-7.7-5.23-8.44-5.24-1.31-11.73,8.31-12.41,9.32a35.55,35.55,0,0,0-4.38,10c-1.29,5.05-5.4,21.11,3.45,27.94,5.16,4,12.72,3.28,17.55,1.35,8.31-3.33,11-11.52,12-11,1.3.69-1,17-14,26-7.43,5.14-19.58,8.72-28.56,3.93-16.83-9-14.47-43-4.64-63.47,5.13-10.67,10.75-14.74,13.34-16.37,10-6.29,27.17-9.32,35.29-.88,8.5,8.83,2.59,25.52-4.64,34.38-2.83,3.47-4.46,4-23.22,15-19.6,11.45-20.13,12.2-28.79,16.75-11.07,5.82-27.29,14.34-28.79,12.34S855.76,753.17,870.89,742.67Z" transform="translate(-324.9 -476.62)"/><path d="M955.26,661.4c3.37-1.45,2.46-4.95,8.09-16.78,3.67-7.74,6.08-13,11.67-15.85.71-.36,8.28-4.11,16.17-.94,2.33.94,3.58,1.44,4.49,2.8,4,6-3.83,18.44-8.08,25.18-5.16,8.16-8.68,11.11-7.64,12.76,2.32,3.65,21-8.77,27-3,4.52,4.33,1,18.13-5,20-4.13,1.28-6.32-4-12-5-14-2.47-31.21,24.43-38.29,46.1-3.57,10.93-6.34,21.39-.9,28,7.55,9.13,28.53,7.47,40.19-2.07,10.25-8.38,13.46-23,17-22,1.6.43,2,3.66,2,4,1.22,11.51-20.58,25.88-40,31-12.74,3.35-25.72,6.77-32.66.26-17.12-16.07,22.07-74.36,4.66-89.26-8.36-7.16-23.66.84-27-6-2.84-5.83,4.9-18.54,14-20C940.06,648.79,948,664.55,955.26,661.4Z" transform="translate(-324.9 -476.62)"/></svg>`;
+    const MIN_MS = 5000, SAFETY_MS = 20000, G = 2600;
+    const cvs = document.getElementById('ldCanvas'), ctx = cvs.getContext('2d');
+    if(!ctx) throw new Error('canvas');
+    const hud = document.getElementById('ldHud'), ringEl = document.getElementById('ldRing');
+    const arc = document.getElementById('ldArc'), pct = document.getElementById('ldPct');
+    const w1 = document.getElementById('ldW1'), w2 = document.getElementById('ldW2');
+    const COLORS = ['#ffffff', '#ffe9a8', '#9fd0ff'];
+    const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    let W, H_, dpr, parts = [], logoImg, logoBox, cx, cy, sc, sx;
+
+    // ---- progres memuat yang asli ----
+    const loaded = { dom: document.readyState !== 'loading', fonts: false, win: document.readyState === 'complete' };
+    if(document.fonts && document.fonts.ready){
+      Promise.all([document.fonts.ready, document.fonts.load('400 16px "Space Grotesk"').catch(() => {})]).then(() => { loaded.fonts = true; }, () => { loaded.fonts = true; });
+    } else loaded.fonts = true;
+    if(!loaded.win) addEventListener('load', () => { loaded.win = true; });
+    if(!loaded.dom) document.addEventListener('DOMContentLoaded', () => { loaded.dom = true; });
+
+    // ---- sprite bintang 4 sudut ----
+    const sprites = COLORS.map(col => {
+      const s = 64, c = document.createElement('canvas'); c.width = c.height = s;
+      const x = c.getContext('2d'), m = s / 2;
+      const g = x.createRadialGradient(m, m, 0, m, m, m);
+      g.addColorStop(0, col); g.addColorStop(.25, col + '88'); g.addColorStop(1, 'transparent');
+      x.fillStyle = g; x.globalAlpha = .5; x.fillRect(0, 0, s, s); x.globalAlpha = 1;
+      x.fillStyle = col; x.beginPath();
+      for(let i = 0; i < 8; i++){ const r = i % 2 ? 9 : 30, a = i * Math.PI / 4 - Math.PI / 2; x.lineTo(m + Math.cos(a) * r, m + Math.sin(a) * r); }
+      x.closePath(); x.fill();
+      return c;
+    });
+
+    const TN = 7, TA = [.5, .3, .14], TW = [1.8, 1.3, .8];
+    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const outQuart = v => 1 - Math.pow(1 - v, 4);
+    const rk = { x: 0, y: 0, vx: 0, vy: 0, hit: 0 };   // reaksi lingkaran: bergoyang + berpendar
+    let ring = { x: -999, y: -999, r: 0 }, ringK = 1;
+    const PULL = 1400, DRAG = 1.0, DRAG_IN = 2.5, REST_WALL = .9;
+
+    function measure(){
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = innerWidth; H_ = innerHeight;
+      cvs.width = W * dpr; cvs.height = H_ * dpr;
+      const hb = hud.getBoundingClientRect();
+      ring = { x: hb.left + hb.width / 2, y: hb.top + hb.height / 2, r: ringEl.offsetWidth * .45 + 4 };
+    }
+    function build(){
+      measure();
+      const lw = Math.min(W * .72, 520), lh = lw * 412.76 / 716.2;
+      cx = W / 2; cy = H_ * .44;
+      logoBox = { x: cx - lw / 2, y: cy - lh / 2, w: lw, h: lh };
+      sc = document.createElement('canvas'); sc.width = Math.ceil(lw * dpr); sc.height = Math.ceil(lh * dpr); sx = sc.getContext('2d');
+      const off = document.createElement('canvas'); off.width = Math.ceil(lw); off.height = Math.ceil(lh);
+      const o = off.getContext('2d', { willReadFrequently: true });
+      o.drawImage(logoImg, 0, 0, lw, lh);
+      const data = o.getImageData(0, 0, off.width, off.height).data;
+      const step = Math.max(3, Math.round(lw / 150));
+      parts = [];
+      for(let y = 0; y < off.height; y += step) for(let x = 0; x < off.width; x += step){
+        if(data[(y * off.width + x) * 4 + 3] < 128) continue;
+        const tx = logoBox.x + x + rnd(0, step), ty = logoBox.y + y + rnd(0, step);
+        const ang = Math.random() * Math.PI * 2, rad = Math.max(W, H_) * rnd(.55, .9), ci = (Math.random() * 3) | 0;
+        parts.push({
+          tx, ty, sx: cx + Math.cos(ang) * rad, sy: cy + Math.sin(ang) * rad,
+          delay: Math.random() * .45, curve: rnd(-.6, .6),
+          size: rnd(step * 1.2, step * 2.8), ci, spr: sprites[ci], hx: new Float32Array(TN), hy: new Float32Array(TN), hn: 0,
+          rot: Math.random() * 6.28, spin: rnd(-1.5, 1.5), ph: Math.random() * 6.28,
+          ba: Math.atan2(ty - cy, tx - cx) + rnd(-.7, .7), bd: rnd(.35, 1) * Math.max(W, H_) * .5,
+          bdel: ((ty - logoBox.y) / lh) * 900 + Math.random() * 150, g: rnd(.8, 1.2)   // pecah menyapu dari atas ke bawah
+        });
+      }
+    }
+
+    // ---- fisika: menyebar, lalu ditarik ke lingkaran persen dan terserap ----
+    function step(p, dt){
+      if(p.done) return;
+      p.age += dt;
+      const dx = ring.x - p.x, dy = ring.y - p.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
+      p.d = d;
+      const k = clamp((p.age - .35) / .7);
+      const a = PULL * p.g * k * clamp(.6 + d / 800, .6, 1.5) * (1 + 3 / (d / 40 + 1));
+      p.vx += (nx * a - ny * a * .05) * dt;
+      p.vy += (ny * a + nx * a * .05) * dt;
+      const f = Math.exp(-(p.age > 1.5 ? DRAG_IN : DRAG) * dt); p.vx *= f; p.vy *= f;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if(p.x < 0){ p.x = -p.x; p.vx = Math.abs(p.vx) * REST_WALL; }
+      else if(p.x > W){ p.x = 2 * W - p.x; p.vx = -Math.abs(p.vx) * REST_WALL; }
+      if(d < ring.r * .8 * Math.max(ringK, .2)){ p.done = true; rk.hit = Math.min(1, rk.hit + .03); }
+    }
+
+    function whitehole(time, full, calm){   // di 100%: dua lingkaran bercahaya bergetar berlawanan arah
+      ringEl.classList.toggle('ld-full', full);
+      if(!full) return;
+      if(calm){
+        w1.style.transform = w2.style.transform = 'translate(-50%,-50%)';
+        w1.style.opacity = w2.style.opacity = (.65 + .35 * Math.sin(time * 3)).toFixed(2); return;
+      }
+      const jx = Math.sin(time * 47) * 1.4, jy = Math.cos(time * 53) * 1.4;
+      w1.style.opacity = w2.style.opacity = 1;
+      w1.style.transform = `translate(-50%,-50%) translate(${jx.toFixed(2)}px,${jy.toFixed(2)}px) scale(${(1 + .15 * Math.sin(time * 9)).toFixed(3)})`;
+      w2.style.transform = `translate(-50%,-50%) translate(${(-jx * 1.3).toFixed(2)}px,${(-jy * 1.3).toFixed(2)}px) scale(${(1 + .1 * Math.sin(time * 7 + 1)).toFixed(3)})`;
+    }
+
+    function drawShine(pr){   // pita cahaya menyapu logo dari atas ke bawah tepat sebelum pecah
+      const w = sc.width, h = sc.height, bh = h * .22, y = -bh + (h + 2 * bh) * pr;
+      sx.globalCompositeOperation = 'source-over'; sx.clearRect(0, 0, w, h);
+      const g = sx.createLinearGradient(0, y - bh, 0, y + bh);
+      g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,248,220,1)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+      sx.fillStyle = g; sx.fillRect(0, 0, w, h);
+      sx.globalCompositeOperation = 'destination-in'; sx.drawImage(logoImg, 0, 0, w, h);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1;
+      ctx.drawImage(sc, logoBox.x, logoBox.y, logoBox.w, logoBox.h);
+    }
+    function drawStar(spr, x, y, size, rot, a){
+      if(a <= .01) return;
+      const c = Math.cos(rot) * size / 64 * dpr, s = Math.sin(rot) * size / 64 * dpr;
+      ctx.globalAlpha = a; ctx.setTransform(c, s, -s, c, x * dpr, y * dpr); ctx.drawImage(spr, -32, -32);
+    }
+    function logoGlow(a){
+      if(a <= 0) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = a; ctx.shadowColor = '#ffe9a8'; ctx.shadowBlur = 24;
+      ctx.drawImage(logoImg, logoBox.x, logoBox.y, logoBox.w, logoBox.h); ctx.shadowBlur = 0;
+    }
+
+    // ---- alur utama ----
+    const t0 = performance.now();
+    let last = t0, raf = 0, bursting = false, BS = 0, tBurst = Infinity, realP = 0, shown = 0, realDoneAt = -1, revealed = false, finished = false, rmAt = 0;
+    function reveal(){
+      if(revealed) return; revealed = true;
+      screenEl.classList.add('reveal');
+      window.dispatchEvent(new Event('skymeetb:reveal'));
+    }
+    function finish(){
+      if(finished) return; finished = true;
+      reveal();
+      screenEl.classList.add('hidden');
+      window.dispatchEvent(new Event('skymeetb:done'));
+      cancelAnimationFrame(raf); removeEventListener('resize', onResize);
+      setTimeout(() => { cvs.width = cvs.height = 1; }, 800);
+    }
+
+    function frame(now){
+      if(finished) return;
+      const t = now - t0, time = t / 1000;
+      const dt = Math.min(.033, Math.max(0, (now - last) / 1000)); last = now;
+
+      // persen = yang lebih lambat antara waktu (5 detik) dan proses memuat asli
+      const rt = (loaded.dom ? .3 : 0) + (loaded.fonts ? .35 : 0) + (loaded.win ? .35 : 0);
+      realP += (rt - realP) * (1 - Math.exp(-6 * dt));
+      const realDone = (loaded.dom && loaded.fonts && loaded.win) || t > SAFETY_MS;
+      if(realDone && realDoneAt < 0){ realDoneAt = t; tBurst = Math.max(MIN_MS, t + 900); }
+      const target = Math.min(t / MIN_MS, realDone ? 1 : Math.min(realP, .99));
+      shown += (target - shown) * (1 - Math.exp(-10 * dt));
+      if(target >= 1 && shown > .998) shown = 1;
+      if(!reduced && !bursting && t >= G && t >= tBurst && shown >= .995){ bursting = true; BS = t; }
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cvs.width, cvs.height);
+      ctx.globalCompositeOperation = 'lighter';
+      arc.style.strokeDashoffset = 213.63 * (1 - shown);
+      pct.textContent = Math.round(shown * 100) + '%';
+
+      if(reduced){   // mode tanpa gerak: logo diam, hanya berkelap-kelip
+        for(const p of parts){
+          const tw = Math.sin(time * 2.2 + p.ph) * .5 + .5;
+          drawStar(p.spr, p.tx, p.ty, p.size * (.7 + .4 * tw), p.rot, .3 + .7 * tw);
+        }
+        logoGlow(.3 + .15 * Math.sin(time * 1.6));
+        ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+        const full = shown >= .995;
+        whitehole(time, full, true);
+        if(full && t >= tBurst){
+          if(!rmAt) rmAt = t;
+          const k = t - rmAt;
+          ringEl.style.opacity = (1 - clamp((k - 800) / 900)).toFixed(3);
+          if(k > 800) reveal();
+          if(k > 1700){ finish(); return; }
+        }
+        raf = requestAnimationFrame(frame); return;
+      }
+
+      let pending = 0;
+      const tails = Array.from({ length: 9 }, () => new Path2D());
+      for(const p of parts){
+        let x, y, a = 1, sz = p.size, rot = p.rot + time * p.spin;
+        if(t < G){   // berkumpul membentuk logo
+          p.sim = false; p.done = false;
+          const g = clamp((t / G - p.delay) / .55), e = outQuart(g);
+          const dx = p.tx - p.sx, dy = p.ty - p.sy, k = (1 - e) * Math.sin(e * Math.PI) * p.curve;
+          x = p.sx + dx * e - dy * k; y = p.sy + dy * e + dx * k; a = clamp(g * 3);
+        } else if(!bursting){   // menunggu persen 100%: berkelip
+          const tw = Math.sin(time * 3 + p.ph) * .5 + .5;
+          x = p.tx; y = p.ty; a = .7 + .3 * tw; sz *= .85 + .35 * tw;
+        } else {   // pecah
+          if(p.done) continue;
+          pending++;
+          const tb = t - BS - p.bdel;
+          if(tb < 0){ x = p.tx; y = p.ty; }
+          else {
+            if(!p.sim){
+              p.sim = true; p.age = 0; p.x = p.tx; p.y = p.ty; p.hn = 0;
+              const v0 = p.bd * DRAG * 1.25;
+              p.vx = Math.cos(p.ba) * v0; p.vy = Math.sin(p.ba) * v0;
+            }
+            step(p, dt / 2); step(p, dt / 2);
+            x = p.x; y = p.y;
+            if(p.done || y > H_ + 200){ p.done = true; continue; }
+            sz *= .35 + .65 * clamp((p.d - 24 * Math.max(ringK, .2)) / 60);
+            for(let i = TN - 1; i > 0; i--){ p.hx[i] = p.hx[i - 1]; p.hy[i] = p.hy[i - 1]; }
+            p.hx[0] = x; p.hy[0] = y; if(p.hn < TN) p.hn++;
+            if(p.vx * p.vx + p.vy * p.vy > 400)
+              for(let i = 0; i < p.hn - 1; i++){ const tp = tails[p.ci * 3 + (i >> 1)]; tp.moveTo(p.hx[i], p.hy[i]); tp.lineTo(p.hx[i + 1], p.hy[i + 1]); }
+          }
+        }
+        drawStar(p.spr, x, y, sz, rot, a);
+      }
+
+      // lingkaran: bereaksi, mengecil setelah 20% bintang masuk, hilang bersama bintang terakhir
+      const om = 22;
+      rk.vx += (-om * om * rk.x - .36 * om * rk.vx) * dt; rk.vy += (-om * om * rk.y - .36 * om * rk.vy) * dt;
+      rk.x = clamp(rk.x + rk.vx * dt, -6, 6); rk.y = clamp(rk.y + rk.vy * dt, -6, 6); rk.hit *= Math.exp(-5 * dt);
+      let ro = t < G ? clamp(t / 700) : 1;
+      ringK = 1;
+      if(bursting){
+        const u = clamp((1 - pending / Math.max(1, parts.length) - .2) / .8);
+        ringK = 1 - u; ro = 1 - clamp((u - .8) / .2);
+        if(u > 0) reveal();
+      }
+      ringEl.style.opacity = ro.toFixed(3);
+      whitehole(time, shown >= .995, false);
+      ringEl.style.transform = `translate(${rk.x.toFixed(2)}px,${rk.y.toFixed(2)}px) scale(${(ringK * (1 + rk.hit * .12)).toFixed(3)})`;
+      ringEl.style.setProperty('--hit', rk.hit.toFixed(3));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.lineCap = 'round';
+      for(let i = 0; i < 9; i++){ ctx.globalAlpha = TA[i % 3]; ctx.lineWidth = TW[i % 3]; ctx.strokeStyle = COLORS[(i / 3) | 0]; ctx.stroke(tails[i]); }
+
+      if(isFinite(tBurst) && t > tBurst - 800 && t < tBurst + 150){ const k = (t - (tBurst - 800)) / 950; drawShine(k * k * (3 - 2 * k)); }
+      let la = 0;
+      if(!bursting){ if(t > G * .85) la = clamp((t - G * .85) / 1100) * .55; }
+      else if(t < BS + 350) la = .55 * (1 - (t - BS) / 350);
+      logoGlow(la);
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+
+      if(bursting && t > BS + 300 && (pending === 0 || t > BS + 15000)){ finish(); return; }
+      raf = requestAnimationFrame(frame);
+    }
+
+    let rz = 0;
+    function onResize(){ clearTimeout(rz); rz = setTimeout(() => { if(bursting || finished) measure(); else build(); }, 150); }
+
+    logoImg = new Image();
+    logoImg.onload = () => { build(); addEventListener('resize', onResize); raf = requestAnimationFrame(frame); };
+    logoImg.onerror = () => bail();
+    logoImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(SVG);
+  }
+})();
+</script>
+
 </body>
 </html>
