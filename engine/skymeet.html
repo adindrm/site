@@ -953,8 +953,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .cbtn .evl{ flex:1; min-width:0; }
   @media (max-width:400px){
     #sysBlock{ max-width:calc(100% - 230px); } .pgBar{ max-width:calc(100% - 230px); }
-    .pgBar{ gap:8px; padding:4px 10px; }
-    .pgName{ font-size:13px; line-height:15px; }
+    /* layar sempit: nama tetap di atas ikon winglight, masih dalam satu kartu */
+    .pgBar{ flex-direction:column; gap:2px; padding:4px 12px 6px; }
+    .pgName{ max-width:100%; font-size:13px; line-height:15px; text-align:center; }
+    .wl{ margin-bottom:6px; }
     #navBtn{ width:auto; padding:0 12px; justify-content:center; gap:8px; }
     .ri{ width:26px; height:26px; } .ri svg, .ri img.ai{ width:17px; height:17px; }
   }
