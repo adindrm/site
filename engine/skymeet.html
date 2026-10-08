@@ -360,6 +360,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .pgT .sm{ font-size:11px; font-weight:500; color:var(--ink-soft); white-space:nowrap; }
   .fIc{ flex:none; width:18px; height:18px; display:grid; place-items:center; }
   .fIc svg{ width:16px; height:16px; fill:currentColor; }
+  .fIc img.ai{ width:16px; height:16px; }
+  .pgl .ic img.ai{ width:20px; height:20px; }
+  .coRow .t .nmw{ display:flex; align-items:center; gap:6px; min-width:0; color:var(--ink-soft); }
+  .coRow .t .nmw .nm{ min-width:0; }
   .cuRow{ display:flex; align-items:center; gap:7px; font-size:12.5px; line-height:1.25; min-width:0; }
   .cuRow .nm{ flex:1; min-width:0; color:var(--ink-soft); }
   .cuRow .vl{ flex:none; font-weight:600; font-variant-numeric:tabular-nums; font-size:14px; }
@@ -2628,7 +2632,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     return null;
   }
   const progCache = {};
-  const pgIc = k => { const M = window.SkyApp.meta, s = mkEl('span', 'fIc'); s.style.color = M.col[k]; s.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + M.icon[k] + '</svg>'; return s; };   // ikon statis (bukan data teman)
+  const pgIc = k => { const M = window.SkyApp.meta, s = mkEl('span', 'fIc'); s.style.color = M.col[k]; s.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + M.icon[k] + '</svg>'; if(window.SkyAsset) window.SkyAsset.swap(s.firstChild, 'matauang/' + k); return s; };   // ikon statis (bukan data teman)
+  function pgRasi(name){   // ikon rasi bintang (aset/skymeet/rasi/<nama>.svg); tersembunyi bila aset tidak ada
+    const s = mkEl('span', 'fIc'), A = window.SkyAsset; s.style.display = 'none';
+    if(A) A.resolve('rasi/' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.svg').then(u => { if(u && s.isConnected){ s.appendChild(A.mkImg(u)); s.style.display = ''; } });
+    return s;
+  }
   function pgBar(frac, full){ const b = mkEl('div', 'bar'), i = mkEl('i', full ? 'full' : ''); i.dataset.w = String(Math.max(0, Math.min(100, Math.round(frac * 100)))); b.appendChild(i); return b; }
   function pgCardEl(i, wide){ const c = mkEl('div', 'pgCard' + (wide ? ' wide' : '')); c.style.setProperty('--i', i); return c; }
   function pgTitle(a, b){ const t = mkEl('div', 'pgT'); t.appendChild(mkEl('span', '', a)); if(b) t.appendChild(mkEl('span', 'sm', b)); return t; }
@@ -2651,7 +2660,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const co = pgCardEl(1); co.appendChild(pgTitle(t.cons)); co.appendChild(mkEl('div', 'pgSub', t.main));
     S.cons.forEach(c => {
       const full = c.pct >= 100 || (c.cnt && c.done === c.cnt), row = mkEl('div', 'coRow'), tt = mkEl('div', 't');
-      tt.append(mkEl('span', 'nm', c.name), mkEl('span', 'vl', c.done + '/' + c.cnt + (c.pct ? ' \u00b7 ' + c.pct + '%' : '')));
+      const nmw = mkEl('span', 'nmw'); nmw.append(pgRasi(c.name), mkEl('span', 'nm', c.name));
+      tt.append(nmw, mkEl('span', 'vl', c.done + '/' + c.cnt + (c.pct ? ' \u00b7 ' + c.pct + '%' : '')));
       row.append(tt, pgBar(Math.max(c.cnt ? c.done / c.cnt : 0, c.pct / 100), full)); co.appendChild(row);
     });
     if(S.seasons.length){
@@ -2786,7 +2796,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
           if(myUid !== me) return;
           if(srvNow() - m.ts > 120000){ patchMsg(pid, m.cid, { st:'failed' }); continue; }
           const r = await api('send', { to: f.code, text: m.text, cid: m.cid });
-          if(r.ok) patchMsg(pid, m.cid, { id:r.id, ts:r.ts, st:undefined });
+          if(r.ok && r.id) patchMsg(pid, m.cid, { id:r.id, ts:r.ts, st:undefined });
+          else if(r.ok){ patchMsg(pid, m.cid, { st:'failed' }); toast('Backend belum versi v3: deploy ulang (New version)'); }
           else if(r.error === 'bad') patchMsg(pid, m.cid, { st:'failed' });
           else break;   // jaringan/server sibuk: coba lagi di putaran berikutnya
         }
@@ -3069,6 +3080,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       if(!r.ok){ if(r.error === 'auth' && mySession && mySession.type === 'account' && ++authFails >= 5){ authFails = 0; logout(); toast(vt().sessEnd); } return; }   // tamu tidak punya token: tidak pernah dikeluarkan
 
       authFails = 0; clockSkew = r.now - Date.now(); sigS = r.sig || '';
+      if(typeof r.seq === 'number' && since > r.seq){ since = 0; lsSet('sky_since_' + myUid, '0'); }   // penghitung server lebih kecil dari yang diingat browser (server/sheet di-reset): ambil ulang dari awal
       meta = r.metas || {}; typingMap = r.typing || {};
       if(Array.isArray(r.friends) && !friendOps && friendRev === rev0) applyServerFriends(r.friends);
       if(r.reads){   // status baca dari perangkat lain
