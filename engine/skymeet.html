@@ -200,12 +200,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   /* header progres: nama + Winged Light */
   #p3head{ justify-content:center; }
-  .pgBar{ display:flex; align-items:center; justify-content:center; gap:10px; min-width:0; max-width:calc(100% - 150px); }
+  .pgBar{ display:flex; align-items:center; justify-content:center; gap:10px; min-width:0; max-width:calc(100% - 150px); padding:5px 14px; border-radius:16px; border:1px solid rgba(255,255,255,0.28); background:rgba(0,0,0,0.15); }
   .pgName{ font-size:14px; font-weight:500; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .wl{ display:inline-flex; align-items:center; gap:6px; flex:none; height:34px; padding:0 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.28); background:rgba(0,0,0,0.15); }
-  .wl svg{ width:16px; height:16px; fill:#ffe9a8; }
-  .wl img.ai{ width:16px; height:16px; }   /* ikon dari aset (aset/skymeet/progres/winglight) */
-  .wl input{ width:3.4ch; background:none; border:0; outline:none; color:var(--ink); font:500 15px 'Space Grotesk', sans-serif; text-align:center; padding:0; }
+  .wl{ position:relative; display:inline-grid; place-items:center; flex:none; width:34px; height:34px; padding:0; margin:0 0 4px; border:0; background:none; }   /* ikon berdiri sendiri, angka kecil di bawah tengah */
+  .wl svg{ width:28px; height:28px; fill:#ffe9a8; }
+  .wl img.ai{ width:28px; height:28px; }   /* ikon dari aset (aset/skymeet/progres/winglight) */
+  .wl input{ position:absolute; left:50%; bottom:-6px; transform:translateX(-50%); width:3.2ch; min-width:20px; box-sizing:content-box; padding:1px 3px; border-radius:7px; border:0; outline:none; background:var(--panel); color:var(--ink); font:600 10px/1.2 'Space Grotesk', sans-serif; text-align:center; font-variant-numeric:tabular-nums; }
   /* halaman Visit: profil, teman, kehadiran */
   .profCard{ display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:16px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); }
   .profTop{ display:flex; align-items:center; gap:12px; }
@@ -326,6 +326,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   #chatBack, #fBack, #aBack{ background:none; border:none; color:var(--ink); font-size:20px; cursor:pointer; padding:4px 8px; }
   #chatTitle, #fTitle, #aTitle{ font-size:15px; }
+  #fTitle{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #fHid{ flex:none; font-size:12px; color:var(--ink-soft); letter-spacing:0.04em; white-space:nowrap; }
   #chatMsgs{ flex:1; overflow-y:auto; overscroll-behavior:contain; padding:14px 16px; display:flex; flex-direction:column; gap:6px; -webkit-overflow-scrolling:touch; }
   .msg{ max-width:78%; padding:8px 12px 6px; border-radius:16px; font-size:14px; line-height:1.4; overflow-wrap:anywhere; white-space:pre-wrap; transition:opacity .25s ease; }
   .msg.in{ animation:msgIn .28s cubic-bezier(.2,.9,.3,1.2) both; }
@@ -951,10 +953,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .cbtn .evl{ flex:1; min-width:0; }
   @media (max-width:400px){
     #sysBlock{ max-width:calc(100% - 230px); } .pgBar{ max-width:calc(100% - 230px); }
-    /* header Progres di layar sempit: nama dipindah ke atas kartu Winged Light (sebelumnya terjepit di sebelahnya sampai tak terbaca) */
-    .pgBar{ flex-direction:column; gap:3px; }
-    .pgName{ max-width:100%; font-size:13px; line-height:15px; text-align:center; }
-    .pgBar .wl{ height:30px; }
+    .pgBar{ gap:8px; padding:4px 10px; }
+    .pgName{ font-size:13px; line-height:15px; }
     #navBtn{ width:auto; padding:0 12px; justify-content:center; gap:8px; }
     .ri{ width:26px; height:26px; } .ri svg, .ri img.ai{ width:17px; height:17px; }
   }
@@ -984,9 +984,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   /* ===== profil teman: nama + aktif, tombol ikon, deret mata uang, dropdown rasi ===== */
   .fTop{ display:flex; align-items:center; gap:10px; }
   .fWho{ flex:1; min-width:0; }
-  .fNmRow{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; min-width:0; }
-  #fNm{ font-size:17px; font-weight:500; min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  #fAct{ font-size:11.5px; color:var(--ink-soft); } #fAct.on{ color:var(--ok); }
+  .fNmRow{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; min-width:0; }
+  #fNm{ font-size:17px; font-weight:500; min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #fAct{ flex:none; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; } #fAct.on{ color:var(--ok); }
   .fWho .idLabel{ font-size:12px; color:var(--ink-soft); letter-spacing:0.02em; margin-top:2px; }
   .fIcoBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.14); background:rgba(255,255,255,0.06); color:var(--ink); display:grid; place-items:center; cursor:pointer; touch-action:manipulation; transition:background .2s ease, color .2s ease, transform .15s ease; }
   .fIcoBtn:active{ transform:scale(.92); }
@@ -1118,7 +1118,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 <div id="friendOverlay">
   <div id="fHead">
     <button type="button" id="fBack" aria-label="Back">&#8592;</button>
-    <span id="fTitle"></span>
+    <span id="fTitle"></span><span id="fHid"></span>
   </div>
   <div id="fBody">
     <div class="fCard fProfile">
@@ -2889,8 +2889,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   function paintFCode(){
     if(!curFriend) return; const m = metaFor(curFriend.code), ti = timeInfo(m);
     $('fNm').textContent = fLabel(curFriend); $('fNm').title = fLabel(curFriend);
-    const at = actText(m); $('fAct').textContent = at ? '\u00b7 ' + at : ''; $('fAct').className = m && m.online ? 'on' : '';
-    $('fCode').textContent = 'ID: ' + curFriend.code + (ti ? ' \u00b7 ' + ti : '');
+    const at = actText(m); $('fAct').textContent = at; $('fAct').className = m && m.online ? 'on' : '';
+    $('fHid').textContent = 'ID: ' + curFriend.code; $('fCode').textContent = ti;
   }
   // dropdown profil teman (edit + rasi): tutup saat klik di luar
   function setFDrop(panel, btn, open){ panel.classList.toggle('open', open); panel.inert = !open; if(btn) btn.setAttribute('aria-expanded', String(open)); }
