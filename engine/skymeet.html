@@ -12,6 +12,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>
+/* hosting di subfolder (mis. /engine/skymeet) yang dibuka TANPA "/" di akhir membuat tautan relatif (manifest, ikon, aset, sw.js) salah folder -> tambahkan <base> */
+(function(){ var p = location.pathname; if(!/\/$/.test(p) && !/\.[A-Za-z0-9]{1,5}$/.test(p.split('/').pop())) document.write('<base href="' + p + '/">'); })();
+</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="ikon/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="ikon/favicon-16.png">
@@ -22,6 +26,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
+<script>
+if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }   /* sw.js: lingkup hanya folder ini, tidak bentrok dengan situs utama */
+</script>
 <script>
 /* bila skrip utama error saat layar loading masih tampil, tulis pesan errornya di layar agar mudah dilacak */
 window.addEventListener('error', function(e){ var m = document.getElementById('loadMsg'), l = document.getElementById('loadingScreen'); if(m && l && !l.classList.contains('hidden')){ m.style.display = 'block'; m.textContent = 'Error: ' + (e.message || 'script'); } });
@@ -205,17 +212,17 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .setPanel, .accF{ display:flex; flex-direction:column; gap:10px; text-align:left; }
   .accF{ gap:8px; }
   .setPanel .fBtn{ width:100%; }
-  .avGrid{ display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; }
-  .avGrid button{ aspect-ratio:1; padding:0; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:transparent; font-size:22px; cursor:pointer; }
+  .avGrid{ display:grid; grid-template-columns:repeat(2, 72px); gap:12px; }
+  .avGrid button{ width:72px; height:72px; padding:0; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:transparent; font-size:42px; cursor:pointer; display:grid; place-items:center; }
   .avGrid button[aria-pressed="true"]{ background:var(--ink); }
   .fgt{ font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); padding:8px 4px 0; text-align:left; }
   .frWrap{ display:flex; align-items:center; gap:8px; }
   .frWrap .friendRow{ flex:1; min-width:0; }
   .friendAvatar{ position:relative; font-size:18px; }
   .dotOn{ position:absolute; right:-1px; bottom:-1px; width:10px; height:10px; border-radius:50%; background:#5ee08a; border:2px solid var(--bottom, #0b1026); }
-  .waveBtn.wv{ animation:wv .6s ease; }
-  @keyframes wv{ 0%{ transform:none; } 25%{ transform:rotate(-22deg) scale(1.18); } 50%{ transform:rotate(18deg) scale(1.18); } 75%{ transform:rotate(-8deg); } 100%{ transform:none; } }
-  .waveBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.14); background:rgba(255,255,255,0.06); font-size:20px; cursor:pointer; }
+  .flameBtn.flm{ animation:flm .6s ease; }
+  @keyframes flm{ 0%{ transform:none; } 25%{ transform:rotate(-22deg) scale(1.18); } 50%{ transform:rotate(18deg) scale(1.18); } 75%{ transform:rotate(-8deg); } 100%{ transform:none; } }
+  .flameBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.14); background:rgba(255,255,255,0.06); font-size:20px; cursor:pointer; }
   .ub{ margin-left:auto; flex:none; min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:#ff5d5d; color:#fff; font-size:11px; display:grid; place-items:center; }
   #navBtn{ position:relative; }
   .udot{ position:absolute; top:6px; right:6px; width:9px; height:9px; border-radius:50%; background:#ff5d5d; }
@@ -958,6 +965,37 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   img.ai.av{ display:inline-block; width:1em; height:1em; vertical-align:middle; animation:none; }
   /* aset berwarna dasar putih: malam tetap putih, siang jadi gelap mengikuti warna teks (var(--ink)) */
   #lgLogoBox img.ai, #hdrLogo img.ai, #navBtn img.ai, .nav-item img.ai, #addOpen img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
+  .avI{ display:inline-grid; place-items:center; width:1em; height:1em; color:var(--ink-soft); vertical-align:middle; }
+  .avI svg{ width:100%; height:100%; display:block; }
+  img.ai.av{ filter:var(--logo-filter); }
+  .avGrid button[aria-pressed="true"] .avI{ color:var(--top); }
+  .friendAvatar .avI{ font-size:1.15em; }
+  /* ===== profil teman: nama + aktif, tombol ikon, deret mata uang, dropdown rasi ===== */
+  .fTop{ display:flex; align-items:center; gap:10px; }
+  .fWho{ flex:1; min-width:0; }
+  .fNmRow{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; min-width:0; }
+  #fNm{ font-size:17px; font-weight:500; min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #fAct{ font-size:11.5px; color:var(--ink-soft); } #fAct.on{ color:var(--ok); }
+  .fWho .idLabel{ font-size:12px; color:var(--ink-soft); letter-spacing:0.02em; margin-top:2px; }
+  .fIcoBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.14); background:rgba(255,255,255,0.06); color:var(--ink); display:grid; place-items:center; cursor:pointer; touch-action:manipulation; transition:background .2s ease, color .2s ease, transform .15s ease; }
+  .fIcoBtn:active{ transform:scale(.92); }
+  .fIcoBtn svg, .fIcoBtn img.ai{ width:20px; height:20px; }
+  .fIcoBtn img.ai{ filter:var(--logo-filter); }
+  .fIcoBtn[aria-expanded="true"]{ background:var(--ink); color:var(--top); }
+  .fSep{ border:0; height:1px; background:rgba(255,255,255,0.12); margin:2px 0 4px; }
+  .fCurRow{ display:flex; justify-content:space-between; gap:2px; }
+  .fCu{ position:relative; flex:1 1 0; min-width:0; max-width:50px; height:46px; display:grid; place-items:center; padding:0; border:0; background:none; border-radius:12px; font:inherit; color:inherit; }
+  button.fCu{ cursor:pointer; touch-action:manipulation; transition:background .2s ease, transform .15s ease; }
+  button.fCu:active{ transform:scale(.92); } button.fCu[aria-expanded="true"]{ background:rgba(255,255,255,0.12); }
+  .fCu .fIc{ width:28px; height:28px; } .fCu .fIc svg, .fCu .fIc img.ai{ width:26px; height:26px; }
+  .fCu .sk{ width:28px; height:28px; border-radius:50%; }
+  .fCuN{ position:absolute; right:0; bottom:1px; min-width:14px; text-align:center; font-size:10px; line-height:1; font-weight:600; padding:2px 4px; border-radius:7px; background:var(--panel); color:var(--ink); font-variant-numeric:tabular-nums; pointer-events:none; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+  .fCuChev svg{ width:8px; height:8px; display:block; transition:transform .25s ease; } .fCu[aria-expanded="true"] .fCuChev svg{ transform:rotate(180deg); }
+  .fDrop{ overflow:hidden; max-height:0; opacity:0; transition:max-height .35s ease, opacity .25s ease; }
+  .fDrop.open{ max-height:900px; opacity:1; }
+  .fDrop > div{ padding-top:8px; display:flex; flex-direction:column; gap:9px; }
+  #fRasi > div{ gap:7px; }
+  @media (prefers-reduced-motion: reduce){ .fDrop, .fIcoBtn, button.fCu{ transition:none; } }
 </style>
 </head>
 <body class="notranslate" translate="no">
@@ -1072,15 +1110,26 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     <span id="fTitle"></span>
   </div>
   <div id="fBody">
-    <div class="fCard">
-      <div class="idLabel" id="fCode"></div>
-      <div class="fNameRow">
-        <input type="text" id="fName" maxlength="20" placeholder="Name" autocomplete="off">
-        <button type="button" class="fBtn" id="fSave">Save</button>
+    <div class="fCard fProfile">
+      <div class="fTop">
+        <div class="fWho">
+          <div class="fNmRow"><span id="fNm"></span><span id="fAct"></span></div>
+          <div class="idLabel" id="fCode"></div>
+        </div>
+        <button type="button" class="fIcoBtn" id="fChat" aria-label="Chat"><svg data-asset="aksi/chat.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a7.5 7.5 0 0 1-10.9 6.7L4 20l1.4-4.3A7.5 7.5 0 1 1 20 12z"/></svg></button>
+        <button type="button" class="fIcoBtn" id="fEdit" aria-haspopup="true" aria-expanded="false" aria-controls="fEditPanel" aria-label="Edit"><svg data-asset="aksi/edit.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
       </div>
-      <div class="fBtns">
-        <button type="button" class="fBtn main" id="fChat">Chat</button>
+      <div class="fDrop" id="fEditPanel"><div>
+        <div class="fNameRow">
+          <input type="text" id="fName" maxlength="20" placeholder="Name" autocomplete="off">
+          <button type="button" class="fBtn" id="fSave">Save</button>
+        </div>
         <button type="button" class="fBtn danger" id="fRemove">Remove</button>
+      </div></div>
+      <div id="fCurWrap" hidden>
+        <hr class="fSep">
+        <div class="fCurRow" id="fCur"></div>
+        <div class="fDrop" id="fRasi"></div>
       </div>
     </div>
     <div id="fProg"></div>
@@ -1215,6 +1264,60 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   </div>
 </div>
 
+<script>
+(function(){
+  // ---------- musik latar: mulai saat login, jeda saat app/tab/jendela lain aktif, lanjut saat kembali ----------
+  // taruh file di: aset/skymeet/musik/lagu.mp3  (boleh juga lagu.ogg / lagu.m4a / lagu.webm; dicoba berurutan)
+  const DIR = 'aset/skymeet/musik/', NAME = 'lagu', VOL = 0.35;
+  const FMT = [['mp3', 'audio/mpeg'], ['ogg', 'audio/ogg'], ['m4a', 'audio/mp4'], ['webm', 'audio/webm']];
+  let au = null, wanted = false, focused = true, armed = false, failed = false, fadeT = null;
+  function make(){
+    if(au || failed) return au;
+    au = document.createElement('audio'); au.loop = true; au.preload = 'auto'; au.volume = 0; au.setAttribute('playsinline', '');
+    FMT.forEach((f, i) => {
+      const so = document.createElement('source'); so.src = DIR + NAME + '.' + f[0]; so.type = f[1];
+      if(i === FMT.length - 1) so.addEventListener('error', () => { failed = true; });   // semua format gagal: diam saja
+      au.appendChild(so);
+    });
+    return au;
+  }
+  const should = () => wanted && !failed && !window.SkyMuted && !document.hidden && focused;
+  function fadeTo(v, ms, done){
+    clearInterval(fadeT); if(!au) return;
+    const v0 = au.volume, t0 = Date.now();
+    fadeT = setInterval(() => {
+      const k = Math.min(1, (Date.now() - t0) / ms); au.volume = Math.max(0, Math.min(1, v0 + (v - v0) * k));
+      if(k >= 1){ clearInterval(fadeT); if(done) done(); }
+    }, 40);
+  }
+  function arm(){   // autoplay diblokir (mis. sesi dipulihkan tanpa klik): tunggu sentuhan pertama
+    if(armed) return; armed = true;
+    const go = () => { armed = false; ['pointerdown', 'keydown', 'touchend'].forEach(ev => document.removeEventListener(ev, go, true)); apply(); };
+    ['pointerdown', 'keydown', 'touchend'].forEach(ev => document.addEventListener(ev, go, true));
+  }
+  function apply(){
+    if(!au) return;
+    if(should()){
+      const pr = au.play(); if(pr && pr.catch) pr.catch(() => arm());
+      fadeTo(VOL, 1200);
+    } else if(document.hidden || !focused){
+      clearInterval(fadeT); au.pause(); au.volume = 0;      // pindah app/tab: langsung jeda (timer di latar belakang lambat)
+    } else {
+      fadeTo(0, 400, () => { if(!should()) au.pause(); });   // dibisukan / logout: pudar lalu jeda
+    }
+  }
+  document.addEventListener('visibilitychange', apply);
+  window.addEventListener('pagehide', () => { if(au){ au.pause(); au.volume = 0; } });
+  window.addEventListener('pageshow', apply);
+  window.addEventListener('blur', () => { focused = false; apply(); });
+  window.addEventListener('focus', () => { focused = true; apply(); });
+  window.SkyMusic = {
+    start(){ wanted = true; make(); apply(); },
+    stop(){ wanted = false; apply(); if(au) setTimeout(() => { if(!wanted) try{ au.currentTime = 0; }catch(e){} }, 450); },
+    sync(){ apply(); }
+  };
+})();
+</script>
 <script>
 // ---------- aset gambar eksternal (folder "aset" di samping html ini); gagal dimuat = tetap pakai ikon/teks bawaan ----------
 (function(){
@@ -2053,6 +2156,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     btn.onclick = () => { const o = panel.classList.toggle('open'); btn.setAttribute('aria-expanded', String(o)); panel.inert = !o; };
     return { wrap, en, all: wrap.querySelector('.all'), el: wrap.querySelector('.el'), box: panel.firstElementChild, pin: wrap.querySelector('.pc input') };
   }
+  document.addEventListener('click', e => {   // dropdown rasi & riwayat: klik di luar = tutup
+    document.querySelectorAll('.cn .cpanel.open').forEach(pn => { const cn = pn.closest('.cn'); if(cn.contains(e.target)) return; pn.classList.remove('open'); pn.inert = true; const b = cn.querySelector('.cbtn'); if(b) b.setAttribute('aria-expanded', 'false'); });
+    document.querySelectorAll('details.hist[open]').forEach(d => { if(!d.contains(e.target)) d.removeAttribute('open'); });
+  });
   // kartu 2: rasi bintang utama (dropdown roh + persen manual) dan season (nama & persen manual)
   const cardCon = pgSection(CONI, '#cfd6ff', 'progres/rasi-bintang'), gtMain = mk('div', 'gt'), gtSeas = mk('div', 'gt');
   cardCon.appendChild(gtMain);
@@ -2197,7 +2304,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         edenHist: Object.keys(ew).filter(k => k !== weekK()).sort().reverse().slice(0, 12).map(kLabel)
       };
     },
-    meta: { nums: NUMS, col: NCOL, icon: NICON },
+    meta: { nums: NUMS, col: NCOL, icon: NICON, cons: CONI },
     go: n => (n === 2 ? goEvents() : n === 3 ? goProgress() : n === 4 ? goVisit() : goHome())
   };
 
@@ -2231,7 +2338,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     success(){ tone(660, 0.08, 'sine', 0.07); setTimeout(()=>tone(880,0.12,'sine',0.07), 70); },
     send(){ tone(900, 0.06, 'triangle', 0.06); },
     error(){ tone(220, 0.14, 'sawtooth', 0.05); },
-    notify(){ [880, 1175, 1568].forEach((f, i) => setTimeout(() => tone(f, 0.16, 'triangle', 0.09), i * 110)); },   // pesan/lambaian masuk
+    notify(){ [880, 1175, 1568].forEach((f, i) => setTimeout(() => tone(f, 0.16, 'triangle', 0.09), i * 110)); },   // pesan/nyalakan-api masuk
     recv(){ tone(740, 0.07, 'sine', 0.07); setTimeout(() => tone(988, 0.1, 'sine', 0.06), 70); },   // pesan masuk saat chat terbuka
     read(){ tone(1319, 0.05, 'sine', 0.035); },   // pesanmu dibaca
     open(){ tone(480, 0.08, 'sine', 0.05); setTimeout(() => tone(640, 0.09, 'sine', 0.05), 60); },
@@ -2361,9 +2468,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       prog:'Progreso', load:'Cargando...', na:'El progreso de este amigo a\u00fan no est\u00e1 disponible. El progreso de cada cuenta se guarda en su propio dispositivo, as\u00ed que solo se podr\u00e1 mostrar aqu\u00ed cuando haya un servidor (backend).', loc:'Le\u00eddo de otra cuenta en este dispositivo.', rm:'\u00bfQuitar a {n} de tus amigos?' }
   };
   const VT2 = {
-    en:{ settings:'Settings', stPh:'Short status (e.g. flying around Prairie)', visT:'Who can see my progress', vPub:'Everyone', vFr:'Friends only', vPri:'Only me', mute:'Sound effects', muteOn:'Off', muteOff:'On', avT:'Choose avatar', uname:'Username', email:'Email', pwOld:'Current password', pwNew:'New password (optional)', accSave:'Save account', accT:'Account', noSrv:'Editing the account needs the server connection (SKY_API).', upT:'Upgrade to a full account (keeps your progress)', upBtn:'Create account', upDone:'Account created. Progress kept.', friendsT:'Friends', online:'Online', offline:'Offline', wave:'Light their flame', waved:'{n} lit your flame', waveSent:'You lit {n}\u2019s flame', typing:'typing...', same:'same time', ahead:'{h} h ahead', behind:'{h} h behind', priv:'This friend keeps their progress private.', c100:'{n} reached 100%!', needPw:'Enter your current password.', bEmail:'Invalid email.', accOk:'Account updated.' },
-    id:{ settings:'Pengaturan', stPh:'Status singkat (mis. lagi terbang di Prairie)', visT:'Siapa yang bisa melihat progresku', vPub:'Semua orang', vFr:'Hanya teman', vPri:'Hanya aku', mute:'Efek suara', muteOn:'Mati', muteOff:'Nyala', avT:'Pilih avatar', uname:'Username', email:'Email', pwOld:'Kata sandi saat ini', pwNew:'Kata sandi baru (opsional)', accSave:'Simpan akun', accT:'Akun', noSrv:'Mengubah akun butuh koneksi server (SKY_API).', upT:'Ubah jadi akun penuh (progres tetap terbawa)', upBtn:'Buat akun', upDone:'Akun dibuat. Progres tetap terbawa.', friendsT:'Teman', online:'Online', offline:'Offline', wave:'Nyalakan apinya', waved:'{n} menyalakan apimu', waveSent:'Kamu menyalakan api {n}', typing:'sedang mengetik...', same:'waktu sama', ahead:'{h} jam lebih cepat', behind:'{h} jam lebih lambat', priv:'Teman ini menyembunyikan progresnya.', c100:'{n} mencapai 100%!', needPw:'Masukkan kata sandi saat ini.', bEmail:'Email tidak valid.', accOk:'Akun diperbarui.' },
-    es:{ settings:'Ajustes', stPh:'Estado breve (p. ej. volando por Prairie)', visT:'Qui\u00e9n puede ver mi progreso', vPub:'Todos', vFr:'Solo amigos', vPri:'Solo yo', mute:'Efectos de sonido', muteOn:'Apagado', muteOff:'Activado', avT:'Elige un avatar', uname:'Usuario', email:'Correo', pwOld:'Contrase\u00f1a actual', pwNew:'Nueva contrase\u00f1a (opcional)', accSave:'Guardar cuenta', accT:'Cuenta', noSrv:'Editar la cuenta requiere conexi\u00f3n al servidor (SKY_API).', upT:'Convertir en cuenta completa (conserva tu progreso)', upBtn:'Crear cuenta', upDone:'Cuenta creada. Progreso conservado.', friendsT:'Amigos', online:'En l\u00ednea', offline:'Desconectados', wave:'Encender su llama', waved:'{n} encendi\u00f3 tu llama', waveSent:'Encendiste la llama de {n}', typing:'escribiendo...', same:'misma hora', ahead:'{h} h por delante', behind:'{h} h por detr\u00e1s', priv:'Este amigo mantiene su progreso privado.', c100:'\u00a1{n} lleg\u00f3 al 100%!', needPw:'Introduce tu contrase\u00f1a actual.', bEmail:'Correo no v\u00e1lido.', accOk:'Cuenta actualizada.' }
+    en:{ settings:'Settings', stPh:'Short status (e.g. flying around Prairie)', visT:'Who can see my progress', vPub:'Everyone', vFr:'Friends only', vPri:'Only me', mute:'Sound effects', muteOn:'Off', muteOff:'On', avT:'Choose avatar', uname:'Username', email:'Email', pwOld:'Current password', pwNew:'New password (optional)', accSave:'Save account', accT:'Account', noSrv:'Editing the account needs the server connection (SKY_API).', upT:'Upgrade to a full account (keeps your progress)', upBtn:'Create account', upDone:'Account created. Progress kept.', friendsT:'Friends', online:'Online', offline:'Offline', flame:'Light their flame', flamed:'{n} lit your flame', flameSent:'You lit {n}\u2019s flame', typing:'typing...', same:'same time', ahead:'{h} h ahead', behind:'{h} h behind', priv:'This friend keeps their progress private.', c100:'{n} reached 100%!', needPw:'Enter your current password.', bEmail:'Invalid email.', accOk:'Account updated.' },
+    id:{ settings:'Pengaturan', stPh:'Status singkat (mis. lagi terbang di Prairie)', visT:'Siapa yang bisa melihat progresku', vPub:'Semua orang', vFr:'Hanya teman', vPri:'Hanya aku', mute:'Efek suara', muteOn:'Mati', muteOff:'Nyala', avT:'Pilih avatar', uname:'Username', email:'Email', pwOld:'Kata sandi saat ini', pwNew:'Kata sandi baru (opsional)', accSave:'Simpan akun', accT:'Akun', noSrv:'Mengubah akun butuh koneksi server (SKY_API).', upT:'Ubah jadi akun penuh (progres tetap terbawa)', upBtn:'Buat akun', upDone:'Akun dibuat. Progres tetap terbawa.', friendsT:'Teman', online:'Online', offline:'Offline', flame:'Nyalakan apinya', flamed:'{n} menyalakan apimu', flameSent:'Kamu menyalakan api {n}', typing:'sedang mengetik...', same:'waktu sama', ahead:'{h} jam lebih cepat', behind:'{h} jam lebih lambat', priv:'Teman ini menyembunyikan progresnya.', c100:'{n} mencapai 100%!', needPw:'Masukkan kata sandi saat ini.', bEmail:'Email tidak valid.', accOk:'Akun diperbarui.' },
+    es:{ settings:'Ajustes', stPh:'Estado breve (p. ej. volando por Prairie)', visT:'Qui\u00e9n puede ver mi progreso', vPub:'Todos', vFr:'Solo amigos', vPri:'Solo yo', mute:'Efectos de sonido', muteOn:'Apagado', muteOff:'Activado', avT:'Elige un avatar', uname:'Usuario', email:'Correo', pwOld:'Contrase\u00f1a actual', pwNew:'Nueva contrase\u00f1a (opcional)', accSave:'Guardar cuenta', accT:'Cuenta', noSrv:'Editar la cuenta requiere conexi\u00f3n al servidor (SKY_API).', upT:'Convertir en cuenta completa (conserva tu progreso)', upBtn:'Crear cuenta', upDone:'Cuenta creada. Progreso conservado.', friendsT:'Amigos', online:'En l\u00ednea', offline:'Desconectados', flame:'Encender su llama', flamed:'{n} encendi\u00f3 tu llama', flameSent:'Encendiste la llama de {n}', typing:'escribiendo...', same:'misma hora', ahead:'{h} h por delante', behind:'{h} h por detr\u00e1s', priv:'Este amigo mantiene su progreso privado.', c100:'\u00a1{n} lleg\u00f3 al 100%!', needPw:'Introduce tu contrase\u00f1a actual.', bEmail:'Correo no v\u00e1lido.', accOk:'Cuenta actualizada.' }
   };
   Object.keys(VT2).forEach(l => Object.assign(VT[l], VT2[l]));
   const VT3 = {
@@ -2378,12 +2485,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       na:'Este amigo a\u00fan no ha sincronizado su progreso.' }
   };
   Object.keys(VT3).forEach(l => Object.assign(VT[l], VT3[l]));
+  const VT4 = {
+    en:{ actOn:'Online', actNow:'Active just now', actAgo:'Active {t} ago', uM:'min', uH:'h', uD:'d' },
+    id:{ actOn:'Online', actNow:'Baru saja aktif', actAgo:'Aktif {t} lalu', uM:'mnt', uH:'jam', uD:'hari' },
+    es:{ actOn:'En l\u00ednea', actNow:'Activo hace un momento', actAgo:'Activo hace {t}', uM:'min', uH:'h', uD:'d' }
+  };
+  Object.keys(VT4).forEach(l => Object.assign(VT[l], VT4[l]));
   const vt = () => VT[window.SkyApp.getLang()] || VT.en;
   function setWho(){ if(mySession) $('whoAmI').textContent = mySession.type === 'guest' ? vt().guestWho : vt().who + mySession.id; }
   function applyVisitLang(){
     const v = vt(), set = (id, t) => { const e = $(id); if(e) e.textContent = t; }, ph = (id, t) => { const e = $(id); if(e) e.placeholder = t; };
     set('idLabelT', v.idLabel); set('nameLabelT', v.nameLabel); renderMyName(); set('copyIdBtn', v.copy); ph('addFriendInput', v.fid.toUpperCase() === v.fid ? v.fid : v.fid); ph('addFriendName', v.fname); set('addFriendBtn', v.add);
-    ph('fName', v.name); set('fSave', v.save); set('fChat', v.chat); set('fRemove', v.remove); ph('chatInput', v.msg); set('chatSend', v.send);
+    ph('fName', v.name); set('fSave', v.save); $('fChat').setAttribute('aria-label', v.chat); $('fChat').title = v.chat; $('fEdit').setAttribute('aria-label', v.edit); $('fEdit').title = v.edit; if(curFriend) paintFCode(); set('fRemove', v.remove); ph('chatInput', v.msg); set('chatSend', v.send);
     ['fBack', 'chatBack'].forEach(id => $(id).setAttribute('aria-label', v.back));
     loadMsgEl.textContent = loadingDone ? v.ready : v.conn;
     setWho(); renderFriends();
@@ -2466,9 +2579,11 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       setWho();
     }
     loadFriends(); startNet();
+    if(window.SkyMusic) window.SkyMusic.start();   // musik mulai saat masuk
   }
   function logout(){
     touchGuest(true);   // keluar juga dihitung sebagai aktivitas terakhir
+    if(window.SkyMusic) window.SkyMusic.stop();
     lsDel(SESSION_KEY); stopNet(); meta = {}; typingMap = {};
     $('chatOverlay').classList.remove('open'); $('friendOverlay').classList.remove('open'); $('addOverlay').classList.remove('open'); chatEls.clear(); readMap = {}; readPushed = {}; friendOps = 0;
     chatPid = null; curFriend = null; myUid = null; myCode = null; mySession = null; friendsCache = [];
@@ -2618,9 +2733,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         if(ti) tx.append(mkEl('div', 'friendHint', ti));
         b.append(av, tx); if(n) b.appendChild(mkEl('span', 'ub', n > 9 ? '9+' : String(n)));
         b.addEventListener('click', () => openFriend(f));
-        const w = mkEl('button', 'waveBtn', '\ud83d\udd25'); w.type = 'button'; w.title = v.wave; w.setAttribute('aria-label', v.wave);
-        { const A = window.SkyAsset; if(A){ const put = u => { if(!u) return; const t = [...w.childNodes].find(n => n.nodeType === 3); if(t) t.replaceWith(A.mkImg(u, 'av')); }; const u0 = A.peek('aksi/lambaian'); if(u0) put(u0); else A.resolve('aksi/lambaian').then(put); } }   // ikon tangan melambai: aset/skymeet/aksi/lambaian
-        w.addEventListener('click', () => { w.classList.remove('wv'); void w.offsetWidth; w.classList.add('wv'); waveTo(f); });
+        const w = mkEl('button', 'flameBtn', '\ud83d\udd25'); w.type = 'button'; w.title = v.flame; w.setAttribute('aria-label', v.flame);
+        { const A = window.SkyAsset; if(A){ const put = u => { if(!u) return; const t = [...w.childNodes].find(n => n.nodeType === 3); if(t) t.replaceWith(A.mkImg(u, 'av')); }; const u0 = A.peek('aksi/nyalakan-api'); if(u0) put(u0); else A.resolve('aksi/nyalakan-api').then(put); } }   // ikon nyalakan api: aset/skymeet/aksi/nyalakan-api
+        w.addEventListener('click', () => { w.classList.remove('flm'); void w.offsetWidth; w.classList.add('flm'); lightFlame(f); });
         wrap.append(b, w); listEl.appendChild(wrap);
       });
     });
@@ -2684,33 +2799,39 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   function pgCardEl(i, wide){ const c = mkEl('div', 'pgCard' + (wide ? ' wide' : '')); c.style.setProperty('--i', i); return c; }
   function pgTitle(a, b){ const t = mkEl('div', 'pgT'); t.appendChild(mkEl('span', '', a)); if(b) t.appendChild(mkEl('span', 'sm', b)); return t; }
   function renderProgress(r, loading){
-    const box = $('fProg'), v = vt(); box.textContent = '';
+    const box = $('fProg'), v = vt(), cw = $('fCurWrap'), cur = $('fCur'), rs = $('fRasi'), wasOpen = rs.classList.contains('open'); box.textContent = ''; cur.textContent = ''; rs.textContent = '';
     const note = (txt, i) => { const c = pgCardEl(i || 0, true); c.appendChild(pgTitle(v.prog)); c.appendChild(mkEl('div', 'fNote', txt)); box.appendChild(c); };
     if(loading){
-      const g = mkEl('div', 'pgGrid');
-      [0, 1].forEach(i => { const c = pgCardEl(i); for(let j = 0; j < 6; j++) c.appendChild(mkEl('div', 'sk')); g.appendChild(c); });
-      box.appendChild(g); const c = pgCardEl(2, true); for(let j = 0; j < 4; j++) c.appendChild(mkEl('div', 'sk')); box.appendChild(c); return;
+      cw.hidden = false; for(let i = 0; i < 7; i++){ const it = mkEl('div', 'fCu'); it.appendChild(mkEl('div', 'sk')); cur.appendChild(it); }
+      const c = pgCardEl(2, true); for(let j = 0; j < 4; j++) c.appendChild(mkEl('div', 'sk')); box.appendChild(c); return;
     }
-    if(r && r.denied) return note(v.priv);
-    if(!r) return note(v.na);
+    if(r && r.denied){ cw.hidden = true; return note(v.priv); }
+    if(!r){ cw.hidden = true; return note(v.na); }
+    cw.hidden = false;
     const S = window.SkyApp.summary(r.data), t = window.SkyApp.labels();
-    const grid = mkEl('div', 'pgGrid');
-    // kiri: mata uang
-    const cu = pgCardEl(0); cu.appendChild(pgTitle(t.cur));
-    S.nums.forEach(([k, n]) => { const row = mkEl('div', 'cuRow'); row.append(pgIc(k), mkEl('span', 'nm', t.n[k]), mkEl('span', 'vl', String(n))); cu.appendChild(row); });
-    // kanan: rasi bintang (+ season)
-    const co = pgCardEl(1); co.appendChild(pgTitle(t.cons)); co.appendChild(mkEl('div', 'pgSub', t.main));
+    // baris ikon: lilin, hati, lilin asc, lilin season, hati season, tiket event (jumlah di sudut kanan bawah) + rasi (dropdown)
+    const N = {}; S.nums.forEach(([k, n]) => { N[k] = n; });
+    ['candles', 'hearts', 'asc', 'season', 'sheart', 'event'].forEach(k => {
+      const it = mkEl('div', 'fCu'); it.title = t.n[k]; it.setAttribute('role', 'img'); it.setAttribute('aria-label', t.n[k] + ': ' + (N[k] || 0));
+      it.append(pgIc(k), mkEl('span', 'fCuN', fmtN(N[k] || 0))); cur.appendChild(it);
+    });
+    const rb = mkEl('button', 'fCu'); rb.type = 'button'; rb.id = 'fRasiBtn'; rb.title = t.cons; rb.setAttribute('aria-label', t.cons); rb.setAttribute('aria-haspopup', 'true'); rb.setAttribute('aria-controls', 'fRasi');
+    const ric = mkEl('span', 'fIc'); ric.style.color = '#cfd6ff'; ric.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + window.SkyApp.meta.cons + '</svg>'; if(window.SkyAsset) window.SkyAsset.swap(ric.firstChild, 'progres/rasi-bintang');
+    const chv = mkEl('span', 'fCuN fCuChev'); chv.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>';
+    rb.append(ric, chv); cur.appendChild(rb);
+    rb.addEventListener('click', () => { const o = !rs.classList.contains('open'); closeFDrops(rs); setFDrop(rs, rb, o); });
+    const inner = mkEl('div'); inner.appendChild(mkEl('div', 'pgSub', t.main));
     S.cons.forEach(c => {
       const full = c.pct >= 100 || (c.cnt && c.done === c.cnt), row = mkEl('div', 'coRow'), tt = mkEl('div', 't');
       const nmw = mkEl('span', 'nmw'); nmw.append(pgRasi(c.name), mkEl('span', 'nm', c.name));
       tt.append(nmw, mkEl('span', 'vl', c.done + '/' + c.cnt + (c.pct ? ' \u00b7 ' + c.pct + '%' : '')));
-      row.append(tt, pgBar(Math.max(c.cnt ? c.done / c.cnt : 0, c.pct / 100), full)); co.appendChild(row);
+      row.append(tt, pgBar(Math.max(c.cnt ? c.done / c.cnt : 0, c.pct / 100), full)); inner.appendChild(row);
     });
     if(S.seasons.length){
-      co.appendChild(mkEl('div', 'pgSub', t.seas));
-      S.seasons.forEach(m => { const p = Math.min(100, m.p || 0), row = mkEl('div', 'coRow'), tt = mkEl('div', 't'); tt.append(mkEl('span', 'nm', m.n || '-'), mkEl('span', 'vl', p + '%')); row.append(tt, pgBar(p / 100, p >= 100)); co.appendChild(row); });
+      inner.appendChild(mkEl('div', 'pgSub', t.seas));
+      S.seasons.forEach(m => { const p = Math.min(100, m.p || 0), row = mkEl('div', 'coRow'), tt = mkEl('div', 't'); tt.append(mkEl('span', 'nm', m.n || '-'), mkEl('span', 'vl', p + '%')); row.append(tt, pgBar(p / 100, p >= 100)); inner.appendChild(row); });
     }
-    grid.append(cu, co); box.appendChild(grid);
+    rs.appendChild(inner); setFDrop(rs, rb, wasOpen);
     // bawah: pelacak lengkap
     const tr = pgCardEl(2, true); tr.appendChild(pgTitle(t.trk));
     const head = mkEl('div', 'trRow'); head.append(mkEl('span', '', t.run + ' \u00b7 ' + t.runS), mkEl('span', 'vl', S.run.done + '/' + S.run.total + ' ' + t.ar));
@@ -2730,12 +2851,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     tr.appendChild(hist(t.eden + ' \u00b7 ' + t.hist, S.edenHist.map(k => t.wk + ' ' + k)));
     box.appendChild(tr);
     if(r.src === 'local') box.appendChild(mkEl('div', 'fNote', v.loc));
-    requestAnimationFrame(() => requestAnimationFrame(() => box.querySelectorAll('.bar i').forEach(i => { i.style.width = i.dataset.w + '%'; })));   // bar mengisi dengan animasi
+    requestAnimationFrame(() => requestAnimationFrame(() => [box, rs].forEach(bx => bx.querySelectorAll('.bar i').forEach(i => { i.style.width = i.dataset.w + '%'; }))));   // bar mengisi dengan animasi
   }
   function openFriend(f){
     curFriend = f;
     $('fTitle').textContent = fLabel(f); $('fName').value = f.name || ''; paintFCode();
-    $('friendOverlay').classList.add('open');
+    closeFDrops(); $('friendOverlay').classList.add('open');
     progReady = false;
     const cached = progCache[f.code];
     if(cached){ lastProg = cached; progReady = true; renderProgress(cached); } else renderProgress(null, true);   // tampilkan data terakhir dulu, lalu segarkan
@@ -2746,13 +2867,37 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       if(!same) renderProgress(r);
     });
   }
-  function paintFCode(){ if(!curFriend) return; const ti = timeInfo(metaFor(curFriend.code)); $('fCode').textContent = 'ID: ' + curFriend.code + (ti ? ' \u00b7 ' + ti : ''); }
-  function closeFriend(){ $('friendOverlay').classList.remove('open'); curFriend = null; }
+  function fmtN(n){ n = Number(n) || 0; return n >= 100000 ? Math.floor(n / 1000) + 'k' : n >= 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n); }
+  function actText(m){   // 'Online' atau 'Aktif 5 mnt lalu'
+    const v = vt(); if(!m) return ''; if(m.online) return v.actOn;
+    const sn = Number(m.seen) || 0; if(!sn) return '';
+    const mi = Math.max(0, Math.floor((srvNow() - sn) / 60000));
+    if(mi < 1) return v.actNow;
+    return v.actAgo.replace('{t}', mi < 60 ? mi + ' ' + v.uM : mi < 1440 ? Math.floor(mi / 60) + ' ' + v.uH : Math.floor(mi / 1440) + ' ' + v.uD);
+  }
+  function paintFCode(){
+    if(!curFriend) return; const m = metaFor(curFriend.code), ti = timeInfo(m);
+    $('fNm').textContent = fLabel(curFriend); $('fNm').title = fLabel(curFriend);
+    const at = actText(m); $('fAct').textContent = at ? '\u00b7 ' + at : ''; $('fAct').className = m && m.online ? 'on' : '';
+    $('fCode').textContent = 'ID: ' + curFriend.code + (ti ? ' \u00b7 ' + ti : '');
+  }
+  // dropdown profil teman (edit + rasi): tutup saat klik di luar
+  function setFDrop(panel, btn, open){ panel.classList.toggle('open', open); panel.inert = !open; if(btn) btn.setAttribute('aria-expanded', String(open)); }
+  function closeFDrops(except){ [[$('fEditPanel'), $('fEdit')], [$('fRasi'), $('fRasiBtn')]].forEach(([p, b]) => { if(p !== except) setFDrop(p, b, false); }); }
+  $('fEditPanel').inert = true; $('fRasi').inert = true;
+  $('fEdit').addEventListener('click', () => { const o = !$('fEditPanel').classList.contains('open'); closeFDrops($('fEditPanel')); setFDrop($('fEditPanel'), $('fEdit'), o); });
+  document.addEventListener('click', e => {
+    if(!$('friendOverlay').classList.contains('open')) return;
+    const t = e.target, rb = $('fRasiBtn');
+    if(!$('fEditPanel').contains(t) && !$('fEdit').contains(t)) setFDrop($('fEditPanel'), $('fEdit'), false);
+    if(!$('fRasi').contains(t) && !(rb && rb.contains(t))) setFDrop($('fRasi'), rb, false);
+  });
+  function closeFriend(){ closeFDrops(); $('friendOverlay').classList.remove('open'); curFriend = null; }
   $('fBack').addEventListener('click', closeFriend);
   $('fSave').addEventListener('click', async () => {
     if(!curFriend) return;
     const nm = ($('fName').value || '').trim().slice(0, 20), code = curFriend.code;
-    curFriend.name = nm; persistFriends(); renderFriends(true); $('fTitle').textContent = fLabel(curFriend);
+    curFriend.name = nm; persistFriends(); renderFriends(true); $('fTitle').textContent = fLabel(curFriend); paintFCode(); setFDrop($('fEditPanel'), $('fEdit'), false);
     toast(vt().saved); SFX.success();
     if(srv()) friendOp('renameFriend', { code, name: nm });
   });
@@ -2926,7 +3071,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   });
 
 
-  // ===== profil, kehadiran, lambaian, notifikasi, upgrade tamu =====
+  // ===== profil, kehadiran, nyalakan api, notifikasi, upgrade tamu =====
   // Mode lokal (SKY_API kosong): semua jalan di browser ini. Mode server: isi SKY_API dengan URL web app Apps Script (lihat Code.gs).
   const SKY_API = 'https://script.google.com/macros/s/AKfycbzlrUGOvvCiu5UPB1aiFbDjW1fYKilyBabltRYRbtrdMiiUuUZPlexjY4QNU4fqb_jFWw/exec';
   function srv(){ return !!(SKY_API && myToken()); }   // mode server hanya untuk akun bertoken; tamu = mode lokal
@@ -2934,17 +3079,25 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const tokenKey = uid => TOKEN_KEY + '_' + uid;   // satu token per akun
   const myToken = () => (myUid ? lsGet(tokenKey(myUid)) : null);
   let authFails = 0, netGen = 0;
-  const AVNAMES = ['bulan', 'bintang', 'awan', 'kupu-kupu', 'paus', 'lilin', 'bunga', 'daun', 'salju', 'api', 'matahari', 'sayap'];
-  function setAv(el, emoji){   // emoji tetap jadi cadangan; bila aset/skymeet/avatar/<nama> ada, diganti gambar
-    el.dataset.av = emoji; const i = AVATARS.indexOf(emoji), A = window.SkyAsset; if(i < 0 || !A) return;
-    const f = 'avatar/' + AVNAMES[i], put = u => { if(!u || el.dataset.av !== emoji) return; const t = [...el.childNodes].find(n => n.nodeType === 3); if(t) t.replaceWith(A.mkImg(u, 'av')); };
+  const AVATARS = ['wanita', 'pria'];   // kode lain (emoji lama dari server) otomatis jadi wanita
+  const AVSVG = {   // siluet minimalis, warna mengikuti tema (currentColor); bisa diganti gambar: aset/skymeet/avatar/wanita | pria
+    wanita:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path opacity=".5" d="M6.6 9.4a5.4 5.4 0 0 1 10.8 0v6.4c0 .9-.7 1.6-1.6 1.6H8.2c-.9 0-1.6-.7-1.6-1.6z"/><circle cx="12" cy="9" r="3.6"/><path d="M4.5 21c0-3.9 3.2-6.2 7.5-6.2s7.5 2.3 7.5 6.2z"/></svg>',
+    pria:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8.4" r="4"/><path d="M4.5 21c0-3.9 3.2-6.2 7.5-6.2s7.5 2.3 7.5 6.2z"/></svg>'
+  };
+  const AVLBL = { wanita:{ en:'Woman', id:'Wanita', es:'Mujer' }, pria:{ en:'Man', id:'Pria', es:'Hombre' } };
+  function setAv(el, key){
+    if(AVATARS.indexOf(key) < 0) key = AVATARS[0];
+    el.dataset.av = key;
+    [...el.childNodes].forEach(n => { if(n.nodeType === 3 || (n.classList && (n.classList.contains('avI') || n.classList.contains('av')))) n.remove(); });
+    const box = document.createElement('span'); box.className = 'avI'; box.innerHTML = AVSVG[key]; el.insertBefore(box, el.firstChild);
+    const A = window.SkyAsset; if(!A) return;
+    const f = 'avatar/' + key, put = u => { if(u && el.dataset.av === key && box.isConnected) box.replaceWith(A.mkImg(u, 'av')); };
     const u0 = A.peek(f); if(u0) put(u0); else A.resolve(f).then(put);
   }
-  const AVATARS = ['🌙', '⭐', '☁️', '🦋', '🐋', '🕯️', '🌸', '🍃', '❄️', '🔥', '☀️', '🪽'];
   const tzNow = () => -new Date().getTimezoneOffset();
   const profKey = uid => 'sky_prof_' + uid;
   const defProf = () => ({ avatar: AVATARS[0], status: '', vis: 'friends', mute: false, email: '' });
-  const readProf = uid => { try{ return Object.assign(defProf(), JSON.parse(lsGet(profKey(uid)) || '{}')); }catch(e){ return defProf(); } };
+  const readProf = uid => { try{ const o = Object.assign(defProf(), JSON.parse(lsGet(profKey(uid)) || '{}')); if(AVATARS.indexOf(o.avatar) < 0) o.avatar = AVATARS[0]; return o; }catch(e){ return defProf(); } };
   let prof = defProf(), meta = {}, typingMap = {}, since = 0, pollTimer = null, lastUnread = 0, lastType = 0, lastTypeSend = 0;
 
   async function api(action, data, uid, opt){   // uid opsional: pakai token akun itu (mis. saat simpan data tertunda)
@@ -2981,13 +3134,13 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   // ----- profil -----
   function saveProf(patch, push){
     Object.assign(prof, patch); lsSet(profKey(myUid), JSON.stringify(prof));
-    window.SkyMuted = !!prof.mute; paintProf();
+    window.SkyMuted = !!prof.mute; if(window.SkyMusic) window.SkyMusic.sync(); paintProf();
     if(push && SKY_API && myToken()){ const o = Object.assign({}, patch); delete o.mute; api('updateProfile', o); }
   }
   function paintProf(){
     if(!$('avBtn')) return;
     const v = vt(), acct = !!(mySession && mySession.type === 'account');
-    $('avBtn').textContent = prof.avatar; setAv($('avBtn'), prof.avatar);
+    setAv($('avBtn'), prof.avatar);
     $('profUser').textContent = acct ? '@' + myUid : '';
     if(document.activeElement !== $('stIn')) $('stIn').value = prof.status || '';
     $('visSel').value = prof.vis;
@@ -3007,9 +3160,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     $('upUser').placeholder = v.uname; $('upPw').placeholder = curL().rPass;
     paintProf(); updateChatSub();
   }
-  AVATARS.forEach(a => { const b = mkEl('button', '', a); b.type = 'button'; setAv(b, a); b.addEventListener('click', () => saveProf({ avatar:a }, true)); $('avGrid').appendChild(b); });
+  AVATARS.forEach(a => { const b = mkEl('button', '', ''); b.type = 'button'; b.setAttribute('aria-label', (AVLBL[a][window.SkyApp.getLang()] || AVLBL[a].en)); setAv(b, a); b.addEventListener('click', () => saveProf({ avatar:a }, true)); $('avGrid').appendChild(b); });
   const toggleSet = () => { const f = $('setFold'), o = f.classList.toggle('open'); $('setBtn').setAttribute('aria-expanded', String(o)); f.inert = !o; };
   $('setBtn').addEventListener('click', toggleSet); $('avBtn').addEventListener('click', toggleSet);
+  document.addEventListener('click', e => { const f = $('setFold'); if(f.classList.contains('open') && !f.contains(e.target) && !$('setBtn').contains(e.target) && !$('avBtn').contains(e.target)) toggleSet(); });   // klik di luar = tutup pengaturan
   $('stIn').addEventListener('change', () => saveProf({ status: $('stIn').value.trim().slice(0, 40) }, true));
   $('visSel').addEventListener('change', () => saveProf({ vis: $('visSel').value }, true));
   $('muteBtn').addEventListener('click', () => saveProf({ mute: !prof.mute }, false));
@@ -3063,7 +3217,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(srv()) return meta[code] || null;
     const uid = findLocalUid(code); if(!uid) return null;   // mode lokal: baca dari akun lain di perangkat ini
     const p = readProf(uid), seen = parseInt(lsGet('sky_seen_' + uid), 10) || 0;
-    return { avatar:p.avatar, status:p.status, tz: parseInt(lsGet('sky_tz_' + uid), 10) || 0, online: Date.now() - seen < 20000 };
+    return { avatar:p.avatar, status:p.status, tz: parseInt(lsGet('sky_tz_' + uid), 10) || 0, online: Date.now() - seen < 20000, seen };
   }
   function timeInfo(m){
     if(!m || m.tz === undefined) return '';
@@ -3102,8 +3256,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(srv()) api('typing', { to: f.code }); else lsSet('sky_typing_' + chatPid, JSON.stringify({ from: myCode, ts: Date.now() }));
   });
   function paintDots(n){ $('navDot').hidden = $('navDotItem').hidden = !n; }
-  function waveTo(f){   // lambaian ringan tanpa membuka chat
-    SFX.send(); toast('\ud83d\udd25 ' + vt().waveSent.replace('{n}', fLabel(f)));
+  function lightFlame(f){   // nyalakan api ringan tanpa membuka chat
+    SFX.send(); toast('\ud83d\udd25 ' + vt().flameSent.replace('{n}', fLabel(f)));
     if(srv()){ api('nudge', { to: f.code }); return; }
     const uid = findLocalUid(f.code); if(!uid) return;
     let l = []; try{ l = JSON.parse(lsGet('sky_nudge_' + uid) || '[]'); }catch(e){}
@@ -3124,6 +3278,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       authFails = 0; clockSkew = r.now - Date.now(); sigS = r.sig || '';
       if(typeof r.seq === 'number' && since > r.seq){ since = 0; lsSet('sky_since_' + myUid, '0'); }   // penghitung server lebih kecil dari yang diingat browser (server/sheet di-reset): ambil ulang dari awal
       meta = r.metas || {}; typingMap = r.typing || {};
+      if(curFriend) paintFCode();   // 'aktif X lalu' ikut segar
       if(Array.isArray(r.friends) && !friendOps && friendRev === rev0) applyServerFriends(r.friends);
       if(r.reads){   // status baca dari perangkat lain
         Object.keys(r.reads).forEach(c => { const n = Number(r.reads[c]) || 0; if(n > (readMap[c] || 0)) readMap[c] = n; if(n > (readPushed[c] || 0)) readPushed[c] = n; });
@@ -3143,7 +3298,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       typingMap = {};
       friendsCache.forEach(f => { try{ const t = JSON.parse(lsGet('sky_typing_' + pairId(myCode, f.code)) || 'null'); if(t && t.from !== myCode && Date.now() - t.ts < 5000) typingMap[f.code] = true; }catch(e){} });
     }
-    nudges.forEach(n => { const f = friendsCache.find(x => x.code === n.from); toast(vt().waved.replace('{n}', f ? fLabel(f) : n.from)); SFX.notify(); });
+    nudges.forEach(n => { const f = friendsCache.find(x => x.code === n.from); toast(vt().flamed.replace('{n}', f ? fLabel(f) : n.from)); SFX.notify(); });
     if(chatVisible()){
       if(incoming.some(m => m.pid === chatPid)) SFX.recv();   // pesan masuk di chat yang sedang dibuka: nada pendek, langsung terbaca
       renderChat(); markRead();
@@ -3167,7 +3322,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   function kickPoll(){ if(!myUid) return; try{ if(pollCtl) pollCtl.abort(); }catch(e){} clearTimeout(pollTimer); startLoop(); }   // ulangi poll sekarang juga
   function startNet(){
     stopNet();
-    prof = readProf(myUid); window.SkyMuted = !!prof.mute;
+    prof = readProf(myUid); window.SkyMuted = !!prof.mute; if(window.SkyMusic) window.SkyMusic.sync();
     try{ meta = JSON.parse(lsGet('sky_meta_' + myUid) || '{}'); }catch(e){ meta = {}; }
     since = parseInt(lsGet('sky_since_' + myUid), 10) || 0; sigS = ''; prevRd = {}; loadReads();
     Object.keys(meta).forEach(c => { prevRd[c] = meta[c].rd || 0; });
