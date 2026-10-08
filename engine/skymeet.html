@@ -30,7 +30,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     --star-opacity: 1;
     --ink: #f4f5fb;
     --ink-soft: rgba(244,245,251,0.62);
-    --warn:#ffd9a0; --warn-bg:rgba(255,200,120,0.1); --warn-bd:rgba(255,200,120,0.24); --err:#ff9b9b; --ok:#8fe3a8; --toast-bg:rgba(20,22,45,0.94); --toast-fg:#f4f5fb;
+    --logo-filter:none; --warn:#ffd9a0; --warn-bg:rgba(255,200,120,0.1); --warn-bd:rgba(255,200,120,0.24); --err:#ff9b9b; --ok:#8fe3a8; --toast-bg:rgba(20,22,45,0.94); --toast-fg:#f4f5fb;
     --panel: rgba(0,0,0,0.34);   /* latar menu dropdown: gelap saat malam, terang saat siang agar teks tetap terbaca */
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
@@ -876,7 +876,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #loginMain #createBtn:focus-visible, #loginMain #guestBtn:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
   #lgBrand{ display:flex; flex-direction:column; align-items:center; gap:6px; }
   #lgLogoBox:empty{ display:none; }
-  #lgLogoBox img.ai{ display:block; max-width:200px; max-height:72px; width:auto; height:auto; }
+  #lgLogoBox img.ai{ display:block; height:64px; width:auto; max-width:min(240px, 80vw); object-fit:contain; }   /* tinggi pasti: SVG tanpa width/height tidak jadi 0x0 */
   #lgBrand.hasLogo .brandTxt{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
   img.ai{ display:block; flex:none; object-fit:contain; -webkit-user-drag:none; user-select:none; animation:aiIn .35s ease both; }
   @keyframes aiIn{ from{ opacity:0; transform:scale(.85); } to{ opacity:1; transform:none; } }
@@ -919,6 +919,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @keyframes gPop{ from{ opacity:0; transform:translateY(10px) scale(.96); } to{ opacity:1; transform:none; } }
   @media (prefers-reduced-motion: reduce){ #guestOv, #guestBox{ animation:none !important; } }
   img.ai.av{ display:inline-block; width:1em; height:1em; vertical-align:middle; animation:none; }
+  /* aset berwarna dasar putih: malam tetap putih, siang jadi gelap mengikuti warna teks (var(--ink)) */
+  #lgLogoBox img.ai, #hdrLogo img.ai, #navBtn img.ai, .nav-item img.ai, #addOpen img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
 </style>
 </head>
 <body class="notranslate" translate="no">
@@ -1417,6 +1419,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       root.setProperty('--ink-soft', 'rgba(26,33,64,0.62)');
       root.setProperty('--panel', 'rgba(255,255,255,0.62)');
       root.setProperty('--warn', '#7a4300'); root.setProperty('--warn-bg', 'rgba(255,255,255,0.6)'); root.setProperty('--warn-bd', 'rgba(122,67,0,0.32)');
+      root.setProperty('--logo-filter', 'brightness(0)');
       root.setProperty('--err', '#b3261e'); root.setProperty('--ok', '#1d6f3a');
       root.setProperty('--toast-bg', 'rgba(255,255,255,0.97)'); root.setProperty('--toast-fg', '#1a2140');
     } else {
@@ -1424,6 +1427,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       root.setProperty('--ink-soft', 'rgba(244,245,251,0.62)');
       root.setProperty('--panel', 'rgba(0,0,0,0.34)');
       root.setProperty('--warn', '#ffd9a0'); root.setProperty('--warn-bg', 'rgba(255,200,120,0.1)'); root.setProperty('--warn-bd', 'rgba(255,200,120,0.24)');
+      root.setProperty('--logo-filter', 'none');
       root.setProperty('--err', '#ff9b9b'); root.setProperty('--ok', '#8fe3a8');
       root.setProperty('--toast-bg', 'rgba(20,22,45,0.94)'); root.setProperty('--toast-fg', '#f4f5fb');
     }
@@ -2261,12 +2265,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   //  2. Pilih: Log in (akun bawaan / akun buatan sendiri), Create account, atau Continue as guest.
   //  3. Menu -> Log out -> sesi dihapus -> kembali ke layar login.
   //  Akun tamu yang tidak aktif 7 hari berturut-turut dihapus otomatis (progres, teman, obrolan, ID).
-  const BUILTIN = { aii123:'aii123', hei123:'hei123' };   // id = username
   const SESSION_KEY = 'sky_session_v1', GUEST_KEY = 'sky_guest_id', GUEST_SEEN = 'sky_guest_seen', ACC_KEY = 'sky_accounts_v1';
   const GUEST_MS = 7 * 24 * 3600 * 1000;
   const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const FIXED_CODES = { aii123:'AII001', hei123:'HEI002' };   // ID tetap untuk akun bawaan
-  const FIXED_BY_CODE = { AII001:'aii123', HEI002:'hei123' };
   function genCode(){ let s=''; for(let i=0;i<6;i++) s += CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]; return s; }
   const $ = id => document.getElementById(id);
   const mkEl = (tag, cls, txt) => { const e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; return e; };
@@ -2411,7 +2412,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     window.SkyApp.setUser(dispName(myUid), myUid);   // muat data akun + nama untuk sapaan di beranda
     editingName = false; renderMyName();
     const codeKey = 'sky_code_' + myUid;
-    myCode = FIXED_CODES[myUid] || lsGet(codeKey);
+    myCode = lsGet(codeKey);
     if(!myCode) myCode = genCode();
     lsSet(codeKey, myCode);   // akun bawaan: menimpa ID acak lama
     $('myIdVal').textContent = myCode;
@@ -2462,8 +2463,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       return;
     }
     let ok = false;
-    if(Object.prototype.hasOwnProperty.call(BUILTIN, u)) ok = BUILTIN[u] === p;
-    else { const accs = readAccounts(); if(Object.prototype.hasOwnProperty.call(accs, u)) ok = await checkPw(u, p, accs[u]); }
+    { const accs = readAccounts(); if(Object.prototype.hasOwnProperty.call(accs, u)) ok = await checkPw(u, p, accs[u]); }
     if(ok){
       SFX.success();
       const session = { type:'account', id: u };
@@ -2486,7 +2486,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       return;
     }
     const accs = readAccounts();
-    if(Object.prototype.hasOwnProperty.call(BUILTIN, u) || Object.prototype.hasOwnProperty.call(accs, u)) return fail(L.eTaken);
+    if(Object.prototype.hasOwnProperty.call(accs, u)) return fail(L.eTaken);
     accs[u] = await hashPw(u, p); lsSet(ACC_KEY, JSON.stringify(accs));
     SFX.success();
     const session = { type:'account', id: u };
@@ -2573,6 +2573,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         b.append(av, tx); if(n) b.appendChild(mkEl('span', 'ub', n > 9 ? '9+' : String(n)));
         b.addEventListener('click', () => openFriend(f));
         const w = mkEl('button', 'waveBtn', '\ud83d\udc4b'); w.type = 'button'; w.title = v.wave; w.setAttribute('aria-label', v.wave);
+        { const A = window.SkyAsset; if(A){ const put = u => { if(!u) return; const t = [...w.childNodes].find(n => n.nodeType === 3); if(t) t.replaceWith(A.mkImg(u, 'av')); }; const u0 = A.peek('aksi/lambaian'); if(u0) put(u0); else A.resolve('aksi/lambaian').then(put); } }   // ikon tangan melambai: aset/skymeet/aksi/lambaian
         w.addEventListener('click', () => { w.classList.remove('wv'); void w.offsetWidth; w.classList.add('wv'); waveTo(f); });
         wrap.append(b, w); listEl.appendChild(wrap);
       });
@@ -2583,7 +2584,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   async function addFriendByCode(raw, nameRaw){
     const v = vt(), code = (raw || '').trim().toUpperCase(), name = (nameRaw || '').trim().slice(0, 20);
     const fail = m => { toast(m); SFX.error(); return false; };
-    if(!FIXED_BY_CODE[code] && !new RegExp('^[' + CODE_CHARS + ']{6}$').test(code)) return fail(v.bad);
+    if(!new RegExp('^[' + CODE_CHARS + ']{6}$').test(code)) return fail(v.bad);
     if(code === myCode) return fail(v.own);
     if(friendsCache.some(f => f.code === code)) return fail(v.dup);
     if(srv()){
@@ -2604,7 +2605,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   // ---------- profil teman + progres ----------
   function findLocalUid(code){
-    if(FIXED_BY_CODE[code]) return FIXED_BY_CODE[code];
     try{
       for(let i = 0; i < localStorage.length; i++){
         const k = localStorage.key(i);
@@ -2933,7 +2933,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   function paintProf(){
     if(!$('avBtn')) return;
-    const v = vt(), acct = !!(mySession && mySession.type === 'account' && !BUILTIN[myUid]);
+    const v = vt(), acct = !!(mySession && mySession.type === 'account');
     $('avBtn').textContent = prof.avatar; setAv($('avBtn'), prof.avatar);
     $('profUser').textContent = acct ? '@' + myUid : '';
     if(document.activeElement !== $('stIn')) $('stIn').value = prof.status || '';
@@ -2994,7 +2994,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       lsSet(tokenKey(u), r.token);
     } else {
       const accs = readAccounts();
-      if(BUILTIN[u] || Object.prototype.hasOwnProperty.call(accs, u)) return fail(L.eTaken);
+      if(Object.prototype.hasOwnProperty.call(accs, u)) return fail(L.eTaken);
       accs[u] = await hashPw(u, pw); lsSet(ACC_KEY, JSON.stringify(accs));
     }
     moveAccount(gid, u); lsDel(GUEST_KEY); lsDel(GUEST_SEEN);
