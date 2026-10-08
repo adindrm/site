@@ -954,9 +954,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @media (max-width:400px){
     #sysBlock{ max-width:calc(100% - 230px); } .pgBar{ max-width:calc(100% - 230px); }
     /* layar sempit: nama tetap di atas ikon winglight, masih dalam satu kartu */
-    .pgBar{ flex-direction:column; gap:2px; padding:4px 12px 6px; }
-    .pgName{ max-width:100%; font-size:13px; line-height:15px; text-align:center; }
-    .wl{ margin-bottom:6px; }
+    .pgBar{ flex-direction:column; gap:0; padding:4px 12px 6px; }
+    .pgName{ max-width:100%; font-size:13px; line-height:14px; text-align:center; }
+    .wl{ height:28px; margin:0 0 6px; }
     #navBtn{ width:auto; padding:0 12px; justify-content:center; gap:8px; }
     .ri{ width:26px; height:26px; } .ri svg, .ri img.ai{ width:17px; height:17px; }
   }
@@ -986,8 +986,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   /* ===== profil teman: nama + aktif, tombol ikon, deret mata uang, dropdown rasi ===== */
   .fTop{ display:flex; align-items:center; gap:10px; }
   .fWho{ flex:1; min-width:0; }
-  .fNmRow{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; min-width:0; }
-  #fNm{ font-size:17px; font-weight:500; min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .fNmRow{ display:flex; align-items:baseline; justify-content:flex-start; gap:8px; min-width:0; }
+  #fNm{ font-size:17px; font-weight:500; min-width:0; flex:0 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #fAct{ flex:none; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; } #fAct.on{ color:var(--ok); }
   .fWho .idLabel{ font-size:12px; color:var(--ink-soft); letter-spacing:0.02em; margin-top:2px; }
   .fIcoBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.14); background:rgba(255,255,255,0.06); color:var(--ink); display:grid; place-items:center; cursor:pointer; touch-action:manipulation; transition:background .2s ease, color .2s ease, transform .15s ease; }
@@ -1074,7 +1074,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
               <div class="profMain">
                 <div class="idLabel" id="nameLabelT">Your name</div>
                 <div class="idVal nameVal" id="myNameVal"></div>
-                <input type="text" id="myNameInput" maxlength="20" autocomplete="off" hidden>
+                <input type="text" id="myNameInput" maxlength="10" autocomplete="off" hidden>
                 <div class="profUser" id="profUser"></div>
               </div>
               <button type="button" id="myNameBtn">Edit</button>
@@ -1134,7 +1134,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       </div>
       <div class="fDrop" id="fEditPanel"><div>
         <div class="fNameRow">
-          <input type="text" id="fName" maxlength="20" placeholder="Name" autocomplete="off">
+          <input type="text" id="fName" maxlength="10" placeholder="Name" autocomplete="off">
           <button type="button" class="fBtn" id="fSave">Save</button>
         </div>
         <button type="button" class="fBtn danger" id="fRemove">Remove</button>
@@ -1162,7 +1162,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       <div class="aSep"></div>
       <div class="idLabel" id="addLabelT">Friend ID</div>
       <input type="text" id="addFriendInput" maxlength="8" placeholder="Friend ID" autocomplete="off" autocapitalize="characters" spellcheck="false">
-      <input type="text" id="addFriendName" maxlength="20" placeholder="Save as (name)" autocomplete="off">
+      <input type="text" id="addFriendName" maxlength="10" placeholder="Save as (name)" autocomplete="off">
       <button type="button" class="fBtn main" id="addFriendBtn">Add</button>
       <div class="fNote" id="addHint"></div>
     </div>
@@ -2756,7 +2756,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   // ID divalidasi server dalam SATU request (cek ada + simpan + tambahkan aku ke daftar temannya)
   async function addFriendByCode(raw, nameRaw){
-    const v = vt(), code = (raw || '').trim().toUpperCase(), name = (nameRaw || '').trim().slice(0, 20);
+    const v = vt(), code = (raw || '').trim().toUpperCase(), name = (nameRaw || '').trim().slice(0, 10);
     const fail = m => { toast(m); SFX.error(); return false; };
     if(!new RegExp('^[' + CODE_CHARS + ']{6}$').test(code)) return fail(v.bad);
     if(code === myCode) return fail(v.own);
@@ -2909,7 +2909,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   $('fBack').addEventListener('click', closeFriend);
   $('fSave').addEventListener('click', async () => {
     if(!curFriend) return;
-    const nm = ($('fName').value || '').trim().slice(0, 20), code = curFriend.code;
+    const nm = ($('fName').value || '').trim().slice(0, 10), code = curFriend.code;
     curFriend.name = nm; persistFriends(); renderFriends(true); $('fTitle').textContent = fLabel(curFriend); paintFCode(); setFDrop($('fEditPanel'), $('fEdit'), false);
     toast(vt().saved); SFX.success();
     if(srv()) friendOp('renameFriend', { code, name: nm });
@@ -3066,7 +3066,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   function saveMyName(){
     if(!myUid) return;
-    const n = ($('myNameInput').value || '').trim().slice(0, 20);
+    const n = ($('myNameInput').value || '').trim().slice(0, 10);
     if(n) lsSet('sky_myname_' + myUid, n); else lsDel('sky_myname_' + myUid);
     editingName = false; renderMyName();
     window.SkyApp.setUser(dispName(myUid), myUid);   // perbarui sapaan di beranda
