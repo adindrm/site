@@ -22,12 +22,12 @@
   var p = location.pathname;
   if(/\/$/.test(p) || /\.[A-Za-z0-9]{1,5}$/.test(p.split('/').pop())) return;
   try{
-    var x = new XMLHttpRequest(); x.open('GET', p + '/manifest.webmanifest', false); x.send();
+    var x = new XMLHttpRequest(); x.open('GET', p + '/skymeet.webmanifest', false); x.send();
     if(x.status === 200 && /^\s*\{/.test(x.responseText) && x.responseText.indexOf('"start_url"') > -1) document.write('<base href="' + p + '/">');
   }catch(e){}
 })();
 </script>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="skymeet.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="ikon/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="ikon/favicon-16.png">
 <link rel="shortcut icon" href="ikon/favicon.ico">
@@ -38,7 +38,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 <script>
-if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }   /* sw.js: lingkup hanya folder ini, tidak bentrok dengan situs utama */
+if('serviceWorker' in navigator){ window.addEventListener('load', function(){ navigator.serviceWorker.register('skymeet-sw.js', { scope: 'skymeet' }).catch(function(){}); }); }   /* sw.js: lingkup hanya folder ini, tidak bentrok dengan situs utama */
 </script>
 <script>
 /* bila skrip utama error saat layar loading masih tampil, tulis pesan errornya di layar agar mudah dilacak */
