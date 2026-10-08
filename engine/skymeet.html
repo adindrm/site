@@ -19,7 +19,7 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 <script>
 /* bila skrip utama error saat layar loading masih tampil, tulis pesan errornya di layar agar mudah dilacak */
-window.addEventListener('error', function(e){ var m = document.getElementById('loadMsg'), l = document.getElementById('loadingScreen'); if(m && l && !l.classList.contains('hidden')) m.textContent = 'Error: ' + (e.message || 'script'); });
+window.addEventListener('error', function(e){ var m = document.getElementById('loadMsg'), l = document.getElementById('loadingScreen'); if(m && l && !l.classList.contains('hidden')){ m.style.display = 'block'; m.textContent = 'Error: ' + (e.message || 'script'); } });
 </script>
 <style>
   :root{
@@ -98,30 +98,53 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
 
 
-  /* ===== loading screen ===== */
+  /* ===== loading screen (logo -> partikel bintang) ===== */
   #loadingScreen{
     position:fixed; inset:0; z-index:9999;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
-    background: linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%);
+    background:transparent;   /* latar = latar layar login di bawahnya, jadi tidak ada loncatan saat transisi */
+    --ld-accent:#ffe9a8; --ld-fg:#eaf1ff;
     transition: opacity 0.6s ease, visibility 0.6s ease;
   }
+  #loadingScreen.reveal{ pointer-events:none; }   /* login/aplikasi di bawahnya sudah boleh diklik */
   #loadingScreen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
-  #loadRing{
-    width:46px; height:46px; border-radius:50%;
-    border:2px solid rgba(244,245,251,0.18); border-top-color: var(--ink);
-    animation: loadspin 0.9s linear infinite;
-  }
-  @keyframes loadspin{ to{ transform:rotate(360deg); } }
-  #loadMsg{ font-size:13px; letter-spacing:0.02em; color:var(--ink-soft); }
+  #ldCanvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #ldHud{ position:absolute; left:0; right:0; bottom:calc(10vh + env(safe-area-inset-bottom,0px)); display:flex; justify-content:center; pointer-events:none; }
+  #ldRing{ position:relative; width:58px; height:58px; will-change:transform,opacity; }
+  #ldRing svg{ width:100%; height:100%; display:block; transform:rotate(-90deg); overflow:visible; }
+  #ldRing .ld-tr{ fill:none; stroke:rgba(255,255,255,calc(.12 + var(--hit,0) * .3)); stroke-width:3; }
+  #ldRing .ld-arc{ fill:none; stroke:var(--ld-accent); stroke-width:3; stroke-linecap:round; stroke-dasharray:213.63; stroke-dashoffset:213.63; filter:drop-shadow(0 0 calc(6px + var(--hit,0) * 14px) var(--ld-accent)); }
+  #ldPct{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--ld-fg); text-shadow:0 0 calc(var(--hit,0) * 12px) var(--ld-accent); font-variant-numeric:tabular-nums; transition:opacity .25s; }
+  #ldRing.ld-full #ldPct{ opacity:0; }
+  .ld-wh{ position:absolute; inset:0; opacity:0; transition:opacity .35s; pointer-events:none; }
+  #ldRing.ld-full .ld-wh{ opacity:1; }
+  .ld-wh i{ position:absolute; left:50%; top:50%; border-radius:50%; transform:translate(-50%,-50%); }
+  .ld-wh i:first-child{ width:11px; height:11px; background:radial-gradient(circle,#fff 30%,#fff7d6 100%); box-shadow:0 0 calc(8px + var(--hit,0) * 10px) 2px #fff, 0 0 calc(18px + var(--hit,0) * 18px) 6px rgba(255,233,168,.75); }
+  .ld-wh i:last-child{ width:26px; height:26px; border:1.5px solid rgba(255,255,255,.9); box-shadow:0 0 8px 1px rgba(255,255,255,.8), inset 0 0 8px 1px rgba(159,208,255,.7), 0 0 calc(14px + var(--hit,0) * 14px) rgba(255,233,168,.5); }
+
+  #loadMsg{ display:none; position:absolute; left:16px; right:16px; bottom:calc(4vh + env(safe-area-inset-bottom,0px)); text-align:center; font-size:13px; color:#ff9b9b; pointer-events:none; }   /* hanya tampil bila ada error skrip */
 
   /* ===== layar login (demo) ===== */
   #loginScreen{
     position:fixed; inset:0; z-index:9998; overflow-y:auto;
     display:flex; align-items:flex-start; justify-content:center; padding:24px;
-    background: linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%);
+    color:#f4f5fb;
+    --ink:#f4f5fb; --ink-soft:rgba(244,245,251,0.62); --panel:rgba(0,0,0,0.34); --logo-filter:none;   /* layar login selalu bertema malam, sama dengan loading */
+    --warn:#ffd9a0; --warn-bg:rgba(255,200,120,0.1); --warn-bd:rgba(255,200,120,0.24); --err:#ff9b9b; --ok:#8fe3a8;
+    background: radial-gradient(ellipse at 50% 40%, #0b1330, #03050d 75%);   /* sama dengan loading screen */
     transition: opacity 0.4s ease, visibility 0.4s ease;
   }
   #loginScreen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  /* latar login = latar loading screen (langit malam + bintang berkelip) */
+  #loginStars{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+  #loginStars i{ position:absolute; border-radius:50%; background:#cfe0ff; opacity:.25; animation: lgTw var(--d,4s) ease-in-out var(--dl,0s) infinite; }
+  @keyframes lgTw{ 0%,100%{ opacity:.25; } 50%{ opacity:.7; } }
+  #loginScreen.hidden #loginStars i{ animation-play-state:paused; }
+  #loginCard{ position:relative; z-index:1; }
+  #loginScreen:not(.ready) #loginCard{ opacity:0; visibility:hidden; pointer-events:none; }
+  /* kartu login muncul dari tengah, tepat saat titik-titik bintang pecah menyebar */
+  #loginScreen.ready #loginCard{ animation: lgPop 1.1s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes lgPop{ 0%{ opacity:0; transform:scale(.86) translateY(16px); filter:blur(8px); } 55%{ filter:blur(0); } 100%{ opacity:1; transform:none; filter:none; } }
+  @media (prefers-reduced-motion: reduce){ #loginScreen.ready #loginCard{ animation: lgFade .8s ease both; } @keyframes lgFade{ from{ opacity:0; } to{ opacity:1; } } }
   #loginCard{ width:100%; max-width:360px; margin:auto; display:flex; flex-direction:column; gap:14px; text-align:center; }
   #loginMain, #regPane{ display:flex; flex-direction:column; gap:12px; }
   #loginMain[hidden], #regPane[hidden]{ display:none; }
@@ -1086,11 +1109,17 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   </form>
 </div>
 <div id="toast"></div>
-<div id="loadingScreen">
-  <div id="loadRing"></div>
-  <div id="loadMsg">Connecting...</div>
+<div id="loadingScreen" role="status" aria-label="Loading">
+  <canvas id="ldCanvas"></canvas>
+  <div id="ldHud"><div id="ldRing">
+    <svg viewBox="0 0 84 84" aria-hidden="true"><circle class="ld-tr" cx="42" cy="42" r="34"/><circle class="ld-arc" id="ldArc" cx="42" cy="42" r="34"/></svg>
+    <div id="ldPct">0%</div>
+    <div class="ld-wh"><i id="ldW1"></i><i id="ldW2"></i></div>
+  </div></div>
+  <div id="loadMsg"></div>
 </div>
-<div id="loginScreen" class="hidden">
+<div id="loginScreen">
+  <div id="loginStars" aria-hidden="true"></div>
   <div id="loginCard">
     <h1 id="lgBrand"><span id="lgLogoBox"></span><span class="brandTxt">Sky Meet</span></h1>
     <p class="about" id="lgAbout"></p>
@@ -1698,8 +1727,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     userName = name ? String(name) : null;
     tick();
     return Store.setUser(userName ? (id !== undefined && id !== null ? id : name) : null).then(() => {
-      const l = Store.get('lang');
-      if(l && I18N[l] && l !== lang) setLang(l, false);
+      // bahasa = pengaturan per perangkat (tidak ikut data akun), jadi tidak diubah oleh data dari server/perangkat lain
       tick();
       window.dispatchEvent(new CustomEvent('sky:user', { detail:{ id: Store.user, name: userName } }));
     });
@@ -1780,7 +1808,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(!I18N[code]) return;
     langBtns.forEach(b => b.setAttribute('aria-selected', String(b.dataset.lang === code)));
     document.getElementById('langCurrentLabel').textContent = code.toUpperCase();
-    if(save) Store.set('lang', code);   // ikut tersimpan di akun yang login
+    if(save){ try{ localStorage.setItem('sky-lang', code); }catch(e){} }   // hanya di perangkat ini, tidak disinkronkan ke akun/server
 
     const apply = () => {
       lang = code;
@@ -2211,8 +2239,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const loadEl = document.getElementById('loadingScreen'), loadMsgEl = document.getElementById('loadMsg');
   let loadingDone = false;
   { const nl0 = (navigator.language || 'en').slice(0, 2); if(nl0 === 'id') loadMsgEl.textContent = 'Menghubungkan...'; else if(nl0 === 'es') loadMsgEl.textContent = 'Conectando...'; }
-  function hideLoading(){ loadEl.classList.add('hidden'); }
-  setTimeout(() => { if(!loadingDone) hideLoading(); }, 4500);   // jaring pengaman bila capability tidak tersedia
+  function hideLoading(){}   // loading screen ditutup oleh animasinya sendiri (event skymeetb:reveal / skymeetb:done), bukan timer
 
   // ---------- toast kecil ----------
   const toastEl = document.getElementById('toast');
@@ -2324,9 +2351,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       prog:'Progreso', load:'Cargando...', na:'El progreso de este amigo a\u00fan no est\u00e1 disponible. El progreso de cada cuenta se guarda en su propio dispositivo, as\u00ed que solo se podr\u00e1 mostrar aqu\u00ed cuando haya un servidor (backend).', loc:'Le\u00eddo de otra cuenta en este dispositivo.', rm:'\u00bfQuitar a {n} de tus amigos?' }
   };
   const VT2 = {
-    en:{ settings:'Settings', stPh:'Short status (e.g. flying around Prairie)', visT:'Who can see my progress', vPub:'Everyone', vFr:'Friends only', vPri:'Only me', mute:'Sound effects', muteOn:'Off', muteOff:'On', avT:'Choose avatar', uname:'Username', email:'Email', pwOld:'Current password', pwNew:'New password (optional)', accSave:'Save account', accT:'Account', noSrv:'Editing the account needs the server connection (SKY_API).', upT:'Upgrade to a full account (keeps your progress)', upBtn:'Create account', upDone:'Account created. Progress kept.', friendsT:'Friends', online:'Online', offline:'Offline', wave:'Wave', waved:'{n} waved at you', typing:'typing...', same:'same time', ahead:'{h} h ahead', behind:'{h} h behind', priv:'This friend keeps their progress private.', c100:'{n} reached 100%!', needPw:'Enter your current password.', bEmail:'Invalid email.', accOk:'Account updated.' },
-    id:{ settings:'Pengaturan', stPh:'Status singkat (mis. lagi terbang di Prairie)', visT:'Siapa yang bisa melihat progresku', vPub:'Semua orang', vFr:'Hanya teman', vPri:'Hanya aku', mute:'Efek suara', muteOn:'Mati', muteOff:'Nyala', avT:'Pilih avatar', uname:'Username', email:'Email', pwOld:'Kata sandi saat ini', pwNew:'Kata sandi baru (opsional)', accSave:'Simpan akun', accT:'Akun', noSrv:'Mengubah akun butuh koneksi server (SKY_API).', upT:'Ubah jadi akun penuh (progres tetap terbawa)', upBtn:'Buat akun', upDone:'Akun dibuat. Progres tetap terbawa.', friendsT:'Teman', online:'Online', offline:'Offline', wave:'Lambai', waved:'{n} melambai ke kamu', typing:'sedang mengetik...', same:'waktu sama', ahead:'{h} jam lebih cepat', behind:'{h} jam lebih lambat', priv:'Teman ini menyembunyikan progresnya.', c100:'{n} mencapai 100%!', needPw:'Masukkan kata sandi saat ini.', bEmail:'Email tidak valid.', accOk:'Akun diperbarui.' },
-    es:{ settings:'Ajustes', stPh:'Estado breve (p. ej. volando por Prairie)', visT:'Qui\u00e9n puede ver mi progreso', vPub:'Todos', vFr:'Solo amigos', vPri:'Solo yo', mute:'Efectos de sonido', muteOn:'Apagado', muteOff:'Activado', avT:'Elige un avatar', uname:'Usuario', email:'Correo', pwOld:'Contrase\u00f1a actual', pwNew:'Nueva contrase\u00f1a (opcional)', accSave:'Guardar cuenta', accT:'Cuenta', noSrv:'Editar la cuenta requiere conexi\u00f3n al servidor (SKY_API).', upT:'Convertir en cuenta completa (conserva tu progreso)', upBtn:'Crear cuenta', upDone:'Cuenta creada. Progreso conservado.', friendsT:'Amigos', online:'En l\u00ednea', offline:'Desconectados', wave:'Saludar', waved:'{n} te salud\u00f3', typing:'escribiendo...', same:'misma hora', ahead:'{h} h por delante', behind:'{h} h por detr\u00e1s', priv:'Este amigo mantiene su progreso privado.', c100:'\u00a1{n} lleg\u00f3 al 100%!', needPw:'Introduce tu contrase\u00f1a actual.', bEmail:'Correo no v\u00e1lido.', accOk:'Cuenta actualizada.' }
+    en:{ settings:'Settings', stPh:'Short status (e.g. flying around Prairie)', visT:'Who can see my progress', vPub:'Everyone', vFr:'Friends only', vPri:'Only me', mute:'Sound effects', muteOn:'Off', muteOff:'On', avT:'Choose avatar', uname:'Username', email:'Email', pwOld:'Current password', pwNew:'New password (optional)', accSave:'Save account', accT:'Account', noSrv:'Editing the account needs the server connection (SKY_API).', upT:'Upgrade to a full account (keeps your progress)', upBtn:'Create account', upDone:'Account created. Progress kept.', friendsT:'Friends', online:'Online', offline:'Offline', wave:'Light their flame', waved:'{n} lit your flame', waveSent:'You lit {n}\u2019s flame', typing:'typing...', same:'same time', ahead:'{h} h ahead', behind:'{h} h behind', priv:'This friend keeps their progress private.', c100:'{n} reached 100%!', needPw:'Enter your current password.', bEmail:'Invalid email.', accOk:'Account updated.' },
+    id:{ settings:'Pengaturan', stPh:'Status singkat (mis. lagi terbang di Prairie)', visT:'Siapa yang bisa melihat progresku', vPub:'Semua orang', vFr:'Hanya teman', vPri:'Hanya aku', mute:'Efek suara', muteOn:'Mati', muteOff:'Nyala', avT:'Pilih avatar', uname:'Username', email:'Email', pwOld:'Kata sandi saat ini', pwNew:'Kata sandi baru (opsional)', accSave:'Simpan akun', accT:'Akun', noSrv:'Mengubah akun butuh koneksi server (SKY_API).', upT:'Ubah jadi akun penuh (progres tetap terbawa)', upBtn:'Buat akun', upDone:'Akun dibuat. Progres tetap terbawa.', friendsT:'Teman', online:'Online', offline:'Offline', wave:'Nyalakan apinya', waved:'{n} menyalakan apimu', waveSent:'Kamu menyalakan api {n}', typing:'sedang mengetik...', same:'waktu sama', ahead:'{h} jam lebih cepat', behind:'{h} jam lebih lambat', priv:'Teman ini menyembunyikan progresnya.', c100:'{n} mencapai 100%!', needPw:'Masukkan kata sandi saat ini.', bEmail:'Email tidak valid.', accOk:'Akun diperbarui.' },
+    es:{ settings:'Ajustes', stPh:'Estado breve (p. ej. volando por Prairie)', visT:'Qui\u00e9n puede ver mi progreso', vPub:'Todos', vFr:'Solo amigos', vPri:'Solo yo', mute:'Efectos de sonido', muteOn:'Apagado', muteOff:'Activado', avT:'Elige un avatar', uname:'Usuario', email:'Correo', pwOld:'Contrase\u00f1a actual', pwNew:'Nueva contrase\u00f1a (opcional)', accSave:'Guardar cuenta', accT:'Cuenta', noSrv:'Editar la cuenta requiere conexi\u00f3n al servidor (SKY_API).', upT:'Convertir en cuenta completa (conserva tu progreso)', upBtn:'Crear cuenta', upDone:'Cuenta creada. Progreso conservado.', friendsT:'Amigos', online:'En l\u00ednea', offline:'Desconectados', wave:'Encender su llama', waved:'{n} encendi\u00f3 tu llama', waveSent:'Encendiste la llama de {n}', typing:'escribiendo...', same:'misma hora', ahead:'{h} h por delante', behind:'{h} h por detr\u00e1s', priv:'Este amigo mantiene su progreso privado.', c100:'\u00a1{n} lleg\u00f3 al 100%!', needPw:'Introduce tu contrase\u00f1a actual.', bEmail:'Correo no v\u00e1lido.', accOk:'Cuenta actualizada.' }
   };
   Object.keys(VT2).forEach(l => Object.assign(VT[l], VT2[l]));
   const VT3 = {
@@ -2405,6 +2432,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     $('regPane').hidden = true; $('loginMain').hidden = false;
     applyLoginLang();
     loginEl.classList.remove('hidden');
+    loginEl.classList.remove('ready'); void loginEl.offsetWidth; loginEl.classList.add('ready');   // putar ulang animasi kartu login
   }
   function enterApp(session){
     const firstEntry = !myUid;
@@ -2516,13 +2544,17 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     writeSession(session); enterApp(session);
   });
 
-  // layar loading singkat, lalu masuk otomatis bila sesi masih ada (setelah cek kedaluwarsa akun tamu)
-  setTimeout(() => {
+  // loading screen: login / masuk otomatis baru jalan saat animasi memberi sinyal (partikel habis terhisap -> titik-titik pecah di tengah)
+  let flowStarted = false;
+  function startFlow(){
+    if(flowStarted) return; flowStarted = true;
     checkGuestExpiry();
     const existing = readSession();
     if(existing && !(SKY_API && existing.type === 'account' && !lsGet(tokenKey(existing.id)))){ loadMsgEl.textContent = vt().ready; loadingDone = true; hideLoading(); enterApp(existing); }
     else showLogin();
-  }, 600);
+  }
+  window.addEventListener('skymeetb:reveal', startFlow);
+  setTimeout(startFlow, 45000);   // jaring pengaman bila animasi loading gagal berjalan
 
   // ---------- teman & chat ----------
   // Teman = { code, name }. name = nama panggilan (opsional); bila kosong dipakai nama profil teman (dari server) lalu ID.
@@ -2576,7 +2608,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         if(ti) tx.append(mkEl('div', 'friendHint', ti));
         b.append(av, tx); if(n) b.appendChild(mkEl('span', 'ub', n > 9 ? '9+' : String(n)));
         b.addEventListener('click', () => openFriend(f));
-        const w = mkEl('button', 'waveBtn', '\ud83d\udc4b'); w.type = 'button'; w.title = v.wave; w.setAttribute('aria-label', v.wave);
+        const w = mkEl('button', 'waveBtn', '\ud83d\udd25'); w.type = 'button'; w.title = v.wave; w.setAttribute('aria-label', v.wave);
         { const A = window.SkyAsset; if(A){ const put = u => { if(!u) return; const t = [...w.childNodes].find(n => n.nodeType === 3); if(t) t.replaceWith(A.mkImg(u, 'av')); }; const u0 = A.peek('aksi/lambaian'); if(u0) put(u0); else A.resolve('aksi/lambaian').then(put); } }   // ikon tangan melambai: aset/skymeet/aksi/lambaian
         w.addEventListener('click', () => { w.classList.remove('wv'); void w.offsetWidth; w.classList.add('wv'); waveTo(f); });
         wrap.append(b, w); listEl.appendChild(wrap);
@@ -3061,7 +3093,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   });
   function paintDots(n){ $('navDot').hidden = $('navDotItem').hidden = !n; }
   function waveTo(f){   // lambaian ringan tanpa membuka chat
-    SFX.send(); toast('\ud83d\udc4b ' + fLabel(f));
+    SFX.send(); toast('\ud83d\udd25 ' + vt().waveSent.replace('{n}', fLabel(f)));
     if(srv()){ api('nudge', { to: f.code }); return; }
     const uid = findLocalUid(f.code); if(!uid) return;
     let l = []; try{ l = JSON.parse(lsGet('sky_nudge_' + uid) || '[]'); }catch(e){}
@@ -3153,6 +3185,398 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   applyVisitLang();
   window.SkyVisit = { render: renderFriends };
+})();
+</script>
+<script>
+/* ===== Loading screen Sky Meet: logo pecah jadi partikel bintang, persen mengikuti proses memuat asli =====
+   - Persen minimal 5 detik. Jika semua sudah termuat, 100% tepat di 5 detik.
+     Jika belum, persen tertahan di 99% sampai benar-benar selesai (jaring pengaman 20 dtk).
+   - Event: 'skymeetb:reveal' (20% bintang sudah terserap -> tampilkan login / masuk app)
+            'skymeetb:done'   (bintang terakhir terserap -> loading screen ditutup)  */
+(function(){
+  const screenEl = document.getElementById('loadingScreen');
+
+  // bintang berkelip untuk latar login (dipakai juga sebagai latar loading)
+  (function(){
+    const box = document.getElementById('loginStars'); if(!box) return;
+    const n = Math.max(40, Math.min(160, Math.round(innerWidth * innerHeight / 9000)));
+    for(let i = 0; i < n; i++){
+      const s = document.createElement('i'), d = 0.8 + Math.random() * 1.8;
+      s.style.cssText = 'left:' + (Math.random() * 100).toFixed(2) + '%;top:' + (Math.random() * 100).toFixed(2) + '%;width:' + d.toFixed(2) + 'px;height:' + d.toFixed(2) + 'px;--d:' + (3 + Math.random() * 4).toFixed(2) + 's;--dl:-' + (Math.random() * 6).toFixed(2) + 's';
+      box.appendChild(s);
+    }
+  })();
+
+  function bail(){   // bila canvas/animasi gagal: jangan pernah mengunci pengguna di loading
+    screenEl.classList.add('reveal', 'hidden');
+    window.dispatchEvent(new Event('skymeetb:reveal'));
+    window.dispatchEvent(new Event('skymeetb:done'));
+  }
+  try{ init(); }catch(e){ console.error('loader', e); bail(); }
+
+  function init(){
+    const MIN_MS = 5000, SAFETY_MS = 20000, G = 2600;
+    const cvs = document.getElementById('ldCanvas'), ctx = cvs.getContext('2d');
+    if(!ctx) throw new Error('canvas');
+    const hud = document.getElementById('ldHud'), ringEl = document.getElementById('ldRing');
+    const arc = document.getElementById('ldArc'), pct = document.getElementById('ldPct');
+    const w1 = document.getElementById('ldW1'), w2 = document.getElementById('ldW2');
+    const COLORS = ['#ffffff', '#ffe9a8', '#9fd0ff'];
+    const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    let W, H_, dpr, parts = [], logoImg, logoBox, cx, cy, sc, sx;
+
+    // ---- progres memuat yang asli ----
+    const loaded = { dom: document.readyState !== 'loading', fonts: false, win: document.readyState === 'complete' };
+    if(document.fonts && document.fonts.ready){
+      Promise.all([document.fonts.ready, document.fonts.load('400 16px "Space Grotesk"').catch(() => {})]).then(() => { loaded.fonts = true; }, () => { loaded.fonts = true; });
+    } else loaded.fonts = true;
+    if(!loaded.win) addEventListener('load', () => { loaded.win = true; });
+    if(!loaded.dom) document.addEventListener('DOMContentLoaded', () => { loaded.dom = true; });
+
+    // ---- sprite bintang 4 sudut ----
+    const sprites = COLORS.map(col => {
+      const s = 64, c = document.createElement('canvas'); c.width = c.height = s;
+      const x = c.getContext('2d'), m = s / 2;
+      const g = x.createRadialGradient(m, m, 0, m, m, m);
+      g.addColorStop(0, col); g.addColorStop(.25, col + '88'); g.addColorStop(1, 'transparent');
+      x.fillStyle = g; x.globalAlpha = .5; x.fillRect(0, 0, s, s); x.globalAlpha = 1;
+      x.fillStyle = col; x.beginPath();
+      for(let i = 0; i < 8; i++){ const r = i % 2 ? 9 : 30, a = i * Math.PI / 4 - Math.PI / 2; x.lineTo(m + Math.cos(a) * r, m + Math.sin(a) * r); }
+      x.closePath(); x.fill();
+      return c;
+    });
+
+    // ---- logo: aset yang sama dengan layar login (aset/skymeet/logo.svg|webp). Tanpa aset / gagal dibaca -> tulisan "Sky Meet" ----
+    const loadImg = u => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = u; });
+    async function logoImage(){
+      const A = window.SkyAsset, u = A && await A.resolve('logo');
+      if(!u) return null;
+      let im = await loadImg(u);
+      if(!im.naturalWidth && /\.svg$/i.test(u)){   // SVG hanya ber-viewBox (tanpa width/height): beri ukuran supaya bisa digambar ke canvas
+        const txt = await (await fetch(u)).text(), vb = txt.match(/viewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/);
+        if(!vb) return null;
+        im = await loadImg(URL.createObjectURL(new Blob([txt.replace(/<svg\b/, `<svg width="${vb[1]}" height="${vb[2]}"`)], { type: 'image/svg+xml' })));
+      }
+      return im;
+    }
+    function crop(c){   // potong rapat ke bagian yang terisi, lalu jadikan siluet putih (hanya alfa gambar yang dipakai)
+      const w = c.width, h = c.height, d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data;
+      let x0 = w, y0 = h, x1 = -1, y1 = -1;
+      for(let y = 0; y < h; y++) for(let x = 0; x < w; x++) if(d[(y * w + x) * 4 + 3] > 16){ if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; }
+      if(x1 < 0) return null;
+      const o = document.createElement('canvas'); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
+      const ox = o.getContext('2d'); ox.drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+      ox.globalCompositeOperation = 'source-in'; ox.fillStyle = '#fff'; ox.fillRect(0, 0, o.width, o.height);
+      return o;
+    }
+    function fromImage(im){
+      const nw = im.naturalWidth || 300, nh = im.naturalHeight || 150, k = Math.min(1100 / nw, 1100 / nh);
+      const c = document.createElement('canvas'); c.width = Math.ceil(nw * k); c.height = Math.ceil(nh * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      return crop(c);
+    }
+    function textLogo(){
+      const c = document.createElement('canvas'); c.width = 1000; c.height = 300; const x = c.getContext('2d');
+      x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '600 200px "Space Grotesk", system-ui, sans-serif'; x.fillText('Sky Meet', 500, 150);
+      return crop(c);
+    }
+    async function getLogo(){
+      try{ const im = await Promise.race([logoImage(), new Promise(r => setTimeout(() => r(null), 3000))]); const c = im && fromImage(im); if(c) return c; }catch(e){}
+      return textLogo();
+    }
+
+    const TN = 7, TA = [.5, .3, .14], TW = [1.8, 1.3, .8];
+    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const outQuart = v => 1 - Math.pow(1 - v, 4);
+    const rk = { x: 0, y: 0, vx: 0, vy: 0, hit: 0 };   // reaksi lingkaran: bergoyang + berpendar
+    let ring = { x: -999, y: -999, r: 0 }, ring0 = { x: -999, y: -999 }, ringK = 1, ringU = 0, ringT = 0, ringV = 0, lastHit = -1;   // ringT: target progres (dari jumlah bintang terserap), ringU: progres yang sudah dihaluskan; ring0: posisi asal; ringU: progres menyusut/bergeser (0..1)
+    const PULL = 1400, DRAG = 1.0, DRAG_IN = 2.5, REST_WALL = .9;
+
+    function measure(){
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = innerWidth; H_ = innerHeight;
+      cvs.width = W * dpr; cvs.height = H_ * dpr;
+      const hb = hud.getBoundingClientRect();
+      ring = { x: hb.left + hb.width / 2, y: hb.top + hb.height / 2, r: ringEl.offsetWidth * .45 + 4 };
+      ring0 = { x: ring.x, y: ring.y };
+    }
+    function build(){
+      measure();
+      const lw = Math.min(W * .72, 520), lh = lw * logoImg.height / logoImg.width;
+      cx = W / 2; cy = H_ * .44;
+      logoBox = { x: cx - lw / 2, y: cy - lh / 2, w: lw, h: lh };
+      sc = document.createElement('canvas'); sc.width = Math.ceil(lw * dpr); sc.height = Math.ceil(lh * dpr); sx = sc.getContext('2d');
+      const off = document.createElement('canvas'); off.width = Math.ceil(lw); off.height = Math.ceil(lh);
+      const o = off.getContext('2d', { willReadFrequently: true });
+      o.drawImage(logoImg, 0, 0, lw, lh);
+      const data = o.getImageData(0, 0, off.width, off.height).data;
+      const step = Math.max(3, Math.round(lw / 150));
+      parts = [];
+      for(let y = 0; y < off.height; y += step) for(let x = 0; x < off.width; x += step){
+        if(data[(y * off.width + x) * 4 + 3] < 128) continue;
+        const tx = logoBox.x + x + rnd(0, step), ty = logoBox.y + y + rnd(0, step);
+        const ang = Math.random() * Math.PI * 2, rad = Math.max(W, H_) * rnd(.55, .9), ci = (Math.random() * 3) | 0;
+        parts.push({
+          tx, ty, sx: cx + Math.cos(ang) * rad, sy: cy + Math.sin(ang) * rad,
+          delay: Math.random() * .45, curve: rnd(-.6, .6),
+          size: rnd(step * 1.2, step * 2.8), ci, spr: sprites[ci], hx: new Float32Array(TN), hy: new Float32Array(TN), hn: 0,
+          rot: Math.random() * 6.28, spin: rnd(-1.5, 1.5), ph: Math.random() * 6.28,
+          ba: Math.atan2(ty - cy, tx - cx) + rnd(-.7, .7), bd: rnd(.35, 1) * Math.max(W, H_) * .5,
+          bdel: ((ty - logoBox.y) / lh) * 900 + Math.random() * 150, g: rnd(.8, 1.2)   // pecah menyapu dari atas ke bawah
+        });
+      }
+    }
+
+    // ---- fisika: menyebar, lalu ditarik ke lingkaran persen dan terserap ----
+    function step(p, dt){
+      if(p.done) return;
+      p.age += dt;
+      const dx = ring.x - p.x, dy = ring.y - p.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
+      p.d = d;
+      const k = clamp((p.age - .35) / .7);
+      const a = PULL * p.g * k * clamp(.6 + d / 800, .6, 1.5) * (1 + 3 / (d / 40 + 1));
+      p.vx += (nx * a - ny * a * .05) * dt;
+      p.vy += (ny * a + nx * a * .05) * dt;
+      const f = Math.exp(-(p.age > 1.5 ? DRAG_IN : DRAG) * dt); p.vx *= f; p.vy *= f;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if(p.x < 0){ p.x = -p.x; p.vx = Math.abs(p.vx) * REST_WALL; }
+      else if(p.x > W){ p.x = 2 * W - p.x; p.vx = -Math.abs(p.vx) * REST_WALL; }
+      if(d < ring.r * .8 * Math.max(ringK, .2)){ p.done = true; rk.hit = Math.min(1, rk.hit + .03); }
+    }
+
+    function whitehole(time, full, calm){   // di 100%: dua lingkaran bercahaya bergetar berlawanan arah
+      ringEl.classList.toggle('ld-full', full);
+      if(!full) return;
+      if(calm){
+        w1.style.transform = w2.style.transform = 'translate(-50%,-50%)';
+        w1.style.opacity = w2.style.opacity = (.65 + .35 * Math.sin(time * 3)).toFixed(2); return;
+      }
+      const jx = Math.sin(time * 47) * 1.4, jy = Math.cos(time * 53) * 1.4;
+      w1.style.opacity = w2.style.opacity = 1;
+      w1.style.transform = `translate(-50%,-50%) translate(${jx.toFixed(2)}px,${jy.toFixed(2)}px) scale(${(1 + .15 * Math.sin(time * 9)).toFixed(3)})`;
+      w2.style.transform = `translate(-50%,-50%) translate(${(-jx * 1.3).toFixed(2)}px,${(-jy * 1.3).toFixed(2)}px) scale(${(1 + .1 * Math.sin(time * 7 + 1)).toFixed(3)})`;
+    }
+
+    function drawShine(pr){   // pita cahaya menyapu logo dari atas ke bawah tepat sebelum pecah
+      const w = sc.width, h = sc.height, bh = h * .22, y = -bh + (h + 2 * bh) * pr;
+      sx.globalCompositeOperation = 'source-over'; sx.clearRect(0, 0, w, h);
+      const g = sx.createLinearGradient(0, y - bh, 0, y + bh);
+      g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,248,220,1)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+      sx.fillStyle = g; sx.fillRect(0, 0, w, h);
+      sx.globalCompositeOperation = 'destination-in'; sx.drawImage(logoImg, 0, 0, w, h);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1;
+      ctx.drawImage(sc, logoBox.x, logoBox.y, logoBox.w, logoBox.h);
+    }
+    function drawStar(spr, x, y, size, rot, a){
+      if(a <= .01) return;
+      const c = Math.cos(rot) * size / 64 * dpr, s = Math.sin(rot) * size / 64 * dpr;
+      ctx.globalAlpha = a; ctx.setTransform(c, s, -s, c, x * dpr, y * dpr); ctx.drawImage(spr, -32, -32);
+    }
+    function logoGlow(a){
+      if(a <= 0) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = a; ctx.shadowColor = '#ffe9a8'; ctx.shadowBlur = 24;
+      ctx.drawImage(logoImg, logoBox.x, logoBox.y, logoBox.w, logoBox.h); ctx.shadowBlur = 0;
+    }
+
+    // ---- letusan titik bulat kecil dari tengah layar: menyebar ke seluruh layar, pecah saat menyentuh tepi ----
+    const DOTS = COLORS.map(col => {
+      const sz = 16, c = document.createElement('canvas'); c.width = c.height = sz;
+      const x = c.getContext('2d'), m = sz / 2, g = x.createRadialGradient(m, m, 0, m, m, m);
+      g.addColorStop(0, '#fff'); g.addColorStop(.45, col); g.addColorStop(.62, col + '99'); g.addColorStop(1, 'transparent');
+      x.fillStyle = g; x.fillRect(0, 0, sz, sz); return c;
+    });
+    function spawnPop(){
+      popC = { x: W / 2, y: H_ / 2 };
+      const n = Math.max(450, Math.min(1100, Math.round(W * H_ / 450)));
+      dots = []; pops = []; frags = [];
+      for(let i = 0; i < n; i++){
+        const a = Math.random() * 6.283, sp = 380 + Math.pow(Math.random(), .8) * 900;
+        dots.push({ x: popC.x, y: popC.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, w: rnd(-.6, .6), r: rnd(.8, 1.7), ci: (Math.random() * 3) | 0, ph: Math.random() * 6.28, age: 0, dead: false });
+      }
+      popAlive = n;
+    }
+    function popAt_(d, x, y){   // titik pecah di tepi layar: kilatan kecil + serpihan mungil
+      pops.push({ x, y, age: 0, ci: d.ci, r: d.r });
+      const nx = x <= 0 ? 1 : x >= W ? -1 : 0, ny = y <= 0 ? 1 : y >= H_ ? -1 : 0, base = Math.atan2(ny || 0, nx || 0) + (nx || ny ? 0 : Math.random() * 6.283);
+      for(let k = 0; k < 3; k++){
+        const a = base + rnd(-1.2, 1.2), sp = rnd(80, 260);
+        frags.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: d.r * .7, ci: d.ci, age: 0, life: rnd(.25, .45) });
+      }
+    }
+    function drawPop(t, time, dt){
+      const pa = (t - popAt) / 1000, cx0 = popC.x, cy0 = popC.y;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter';
+      if(pa < .6){   // kilatan cahaya di pusat
+        const k = pa / .6, R = 40 + 140 * k, g = ctx.createRadialGradient(cx0, cy0, 0, cx0, cy0, R);
+        g.addColorStop(0, `rgba(255,255,255,${(.9 * (1 - k)).toFixed(3)})`); g.addColorStop(.4, `rgba(255,233,168,${(.35 * (1 - k)).toFixed(3)})`); g.addColorStop(1, 'rgba(255,233,168,0)');
+        ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx0, cy0, R, 0, 6.283); ctx.fill();
+      }
+      let alive = 0;
+      for(const d of dots){
+        if(d.dead) continue;
+        d.age += dt;
+        const ca = Math.cos(d.w * dt), sa = Math.sin(d.w * dt), vx = d.vx * ca - d.vy * sa, vy = d.vx * sa + d.vy * ca; d.vx = vx; d.vy = vy;   // lintasan sedikit melengkung
+        d.x += d.vx * dt; d.y += d.vy * dt;
+        if(d.x <= 0 || d.x >= W || d.y <= 0 || d.y >= H_ || d.age > 4.5){
+          d.dead = true; popAt_(d, Math.min(W, Math.max(0, d.x)), Math.min(H_, Math.max(0, d.y))); continue;
+        }
+        alive++;
+        const s = d.r * 4;
+        ctx.globalAlpha = .8 + .2 * Math.sin(time * 14 + d.ph); ctx.drawImage(DOTS[d.ci], d.x - s / 2, d.y - s / 2, s, s);
+      }
+      for(let i = pops.length - 1; i >= 0; i--){   // kilatan kecil di titik pecah
+        const q = pops[i]; q.age += dt;
+        if(q.age > .3){ pops.splice(i, 1); continue; }
+        const k = q.age / .3, s = q.r * (3 + 5 * k);   // kilatan pecah tetap kecil seperti titik
+        ctx.globalAlpha = .8 * (1 - k); ctx.drawImage(DOTS[q.ci], q.x - s / 2, q.y - s / 2, s, s);
+      }
+      const ff = Math.exp(-3 * dt);
+      for(let i = frags.length - 1; i >= 0; i--){   // serpihan mungil
+        const f = frags[i]; f.age += dt;
+        if(f.age >= f.life){ frags.splice(i, 1); continue; }
+        f.vx *= ff; f.vy *= ff; f.x += f.vx * dt; f.y += f.vy * dt;
+        const s = f.r * 3.2; ctx.globalAlpha = 1 - f.age / f.life; ctx.drawImage(DOTS[f.ci], f.x - s / 2, f.y - s / 2, s, s);
+      }
+      return alive + pops.length + frags.length;
+    }
+
+    // ---- alur utama ----
+    let t0 = performance.now();
+    let last = t0, raf = 0, bursting = false, BS = 0, tBurst = Infinity, realP = 0, shown = 0, realDoneAt = -1, revealed = false, finished = false, rmAt = 0, popAt = 0, popAlive = 1, dots = [], pops = [], frags = [], popC = { x: 0, y: 0 };
+    function reveal(){
+      if(revealed) return; revealed = true;
+      screenEl.classList.add('reveal');
+      window.dispatchEvent(new Event('skymeetb:reveal'));
+    }
+    function finish(){
+      if(finished) return; finished = true;
+      reveal();
+      screenEl.classList.add('hidden');
+      window.dispatchEvent(new Event('skymeetb:done'));
+      cancelAnimationFrame(raf); removeEventListener('resize', onResize);
+      setTimeout(() => { cvs.width = cvs.height = 1; }, 800);
+    }
+
+    function frame(now){
+      if(finished) return;
+      const t = now - t0, time = t / 1000;
+      const dt = Math.min(.033, Math.max(0, (now - last) / 1000)); last = now;
+
+      // persen = yang lebih lambat antara waktu (5 detik) dan proses memuat asli
+      const rt = (loaded.dom ? .3 : 0) + (loaded.fonts ? .35 : 0) + (loaded.win ? .35 : 0);
+      realP += (rt - realP) * (1 - Math.exp(-6 * dt));
+      const realDone = (loaded.dom && loaded.fonts && loaded.win) || t > SAFETY_MS;
+      if(realDone && realDoneAt < 0){ realDoneAt = t; tBurst = Math.max(MIN_MS, t + 900); }
+      const target = Math.min(t / MIN_MS, realDone ? 1 : Math.min(realP, .99));
+      shown += (target - shown) * (1 - Math.exp(-10 * dt));
+      if(target >= 1 && shown > .998) shown = 1;
+      if(!reduced && !bursting && t >= G && t >= tBurst && shown >= .995){ bursting = true; BS = t; }
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cvs.width, cvs.height);
+      ctx.globalCompositeOperation = 'lighter';
+      arc.style.strokeDashoffset = 213.63 * (1 - shown);
+      pct.textContent = Math.round(shown * 100) + '%';
+
+      if(reduced){   // mode tanpa gerak: logo diam, hanya berkelap-kelip
+        for(const p of parts){
+          const tw = Math.sin(time * 2.2 + p.ph) * .5 + .5;
+          drawStar(p.spr, p.tx, p.ty, p.size * (.7 + .4 * tw), p.rot, .3 + .7 * tw);
+        }
+        logoGlow(.3 + .15 * Math.sin(time * 1.6));
+        ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+        const full = shown >= .995;
+        whitehole(time, full, true);
+        if(full && t >= tBurst){
+          if(!rmAt) rmAt = t;
+          const k = t - rmAt;
+          ringEl.style.opacity = (1 - clamp((k - 800) / 900)).toFixed(3);
+          if(k > 800) reveal();
+          if(k > 1700){ finish(); return; }
+        }
+        raf = requestAnimationFrame(frame); return;
+      }
+
+      if(!bursting){ ringU = 0; ringV = 0; ringT = 0; }
+      else {   // target dari jumlah bintang terserap itu bergelombang -> dihaluskan dengan pegas teredam kritis supaya geraknya mulus
+        const RW = 6;
+        ringV += ((ringT - ringU) * RW * RW - 2 * RW * ringV) * dt; ringU = clamp(ringU + ringV * dt);
+        if(ringU <= 0 || ringU >= 1) ringV = 0;
+      }
+      { const e = ringU * ringU * (3 - 2 * ringU); ring.x = ring0.x + (W / 2 - ring0.x) * e; ring.y = ring0.y + (H_ / 2 - ring0.y) * e; ringK = 1 - ringU; }   // lingkaran bergeser ke tengah layar, bintang ikut mengejarnya
+      let pending = 0;
+      const tails = Array.from({ length: 9 }, () => new Path2D());
+      for(const p of parts){
+        let x, y, a = 1, sz = p.size, rot = p.rot + time * p.spin;
+        if(t < G){   // berkumpul membentuk logo
+          p.sim = false; p.done = false;
+          const g = clamp((t / G - p.delay) / .55), e = outQuart(g);
+          const dx = p.tx - p.sx, dy = p.ty - p.sy, k = (1 - e) * Math.sin(e * Math.PI) * p.curve;
+          x = p.sx + dx * e - dy * k; y = p.sy + dy * e + dx * k; a = clamp(g * 3);
+        } else if(!bursting){   // menunggu persen 100%: berkelip
+          const tw = Math.sin(time * 3 + p.ph) * .5 + .5;
+          x = p.tx; y = p.ty; a = .7 + .3 * tw; sz *= .85 + .35 * tw;
+        } else {   // pecah
+          if(p.done) continue;
+          pending++;
+          const tb = t - BS - p.bdel;
+          if(tb < 0){ x = p.tx; y = p.ty; }
+          else {
+            if(!p.sim){
+              p.sim = true; p.age = 0; p.x = p.tx; p.y = p.ty; p.hn = 0;
+              const v0 = p.bd * DRAG * 1.25;
+              p.vx = Math.cos(p.ba) * v0; p.vy = Math.sin(p.ba) * v0;
+            }
+            step(p, dt / 2); step(p, dt / 2);
+            x = p.x; y = p.y;
+            if(p.done || y > H_ + 200){ p.done = true; continue; }
+            sz *= .35 + .65 * clamp((p.d - 24 * Math.max(ringK, .2)) / 60);
+            for(let i = TN - 1; i > 0; i--){ p.hx[i] = p.hx[i - 1]; p.hy[i] = p.hy[i - 1]; }
+            p.hx[0] = x; p.hy[0] = y; if(p.hn < TN) p.hn++;
+            if(p.vx * p.vx + p.vy * p.vy > 400)
+              for(let i = 0; i < p.hn - 1; i++){ const tp = tails[p.ci * 3 + (i >> 1)]; tp.moveTo(p.hx[i], p.hy[i]); tp.lineTo(p.hx[i + 1], p.hy[i + 1]); }
+          }
+        }
+        drawStar(p.spr, x, y, sz, rot, a);
+      }
+
+      // lingkaran: bereaksi, mengecil setelah 20% bintang masuk, hilang bersama bintang terakhir
+      const om = 22;
+      rk.vx += (-om * om * rk.x - .36 * om * rk.vx) * dt; rk.vy += (-om * om * rk.y - .36 * om * rk.vy) * dt;
+      rk.x = clamp(rk.x + rk.vx * dt, -4, 4); rk.y = clamp(rk.y + rk.vy * dt, -4, 4); rk.hit *= Math.exp(-5 * dt);
+      let ro = t < G ? clamp(t / 700) : 1;
+      if(bursting){
+        ringT = clamp((1 - pending / Math.max(1, parts.length) - .2) / .8);
+        ro = 1 - clamp((ringU - .8) / .2);
+      }
+      const sh = 1 - ringU * .85;   // goyangan & denyut mereda saat lingkaran sedang bergerak ke tengah
+      ringEl.style.opacity = ro.toFixed(3);
+      whitehole(time, shown >= .995, false);
+      ringEl.style.transform = `translate3d(${(rk.x * sh + ring.x - ring0.x).toFixed(2)}px,${(rk.y * sh + ring.y - ring0.y).toFixed(2)}px,0) scale(${(ringK * (1 + rk.hit * .1 * sh)).toFixed(3)})`;
+      if(Math.abs(rk.hit - lastHit) > .015){ lastHit = rk.hit; ringEl.style.setProperty('--hit', rk.hit.toFixed(2)); }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.lineCap = 'round';
+      for(let i = 0; i < 9; i++){ ctx.globalAlpha = TA[i % 3]; ctx.lineWidth = TW[i % 3]; ctx.strokeStyle = COLORS[(i / 3) | 0]; ctx.stroke(tails[i]); }
+
+      if(isFinite(tBurst) && t > tBurst - 800 && t < tBurst + 150){ const k = (t - (tBurst - 800)) / 950; drawShine(k * k * (3 - 2 * k)); }
+      let la = 0;
+      if(!bursting){ if(t > G * .85) la = clamp((t - G * .85) / 1100) * .55; }
+      else if(t < BS + 350) la = .55 * (1 - (t - BS) / 350);
+      logoGlow(la);
+      if(popAt) popAlive = drawPop(t, time, dt);
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+
+      // semua partikel logo sudah terhisap & lingkaran tepat di tengah -> langsung pecah jadi titik bulat kecil, dan form login muncul
+      if(bursting && !popAt && t > BS + 300 && ((pending === 0 && ringU > .985) || t > BS + 15000)){ popAt = t; spawnPop(); reveal(); }
+      if(popAt && t > popAt + 900 && popAlive === 0){ finish(); return; }
+      raf = requestAnimationFrame(frame);
+    }
+
+    let rz = 0;
+    function onResize(){ clearTimeout(rz); rz = setTimeout(() => { if(bursting || finished) measure(); else build(); }, 150); }
+
+    getLogo().then(c => { logoImg = c; t0 = performance.now(); last = t0; build(); addEventListener('resize', onResize); raf = requestAnimationFrame(frame); }).catch(() => bail());
+  }
 })();
 </script>
 </body>
