@@ -1,6 +1,6 @@
 /* Sky Meet service worker: hanya mengurus berkas di folder ini (scope = folder tempat sw.js berada).
    Naikkan VERSI setiap kali kamu mengganti isi html/aset agar cache lama dibuang. */
-const VERSI = 'skymeet-v2';
+const VERSI = 'skymeet-v5';
 const SHELL = ['./', 'manifest.webmanifest'];
 
 self.addEventListener('install', e => {
