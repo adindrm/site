@@ -7,21 +7,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0b1026">
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
-<meta name="application-name" content="Sky Meet">
-<meta name="apple-mobile-web-app-title" content="Sky Meet">
+<meta name="application-name" content="Skymeet">
+<meta name="apple-mobile-web-app-title" content="Skymeet">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>
-/* hosting di subfolder (mis. /engine/skymeet) yang dibuka TANPA "/" di akhir membuat tautan relatif (manifest, ikon, aset, sw.js) salah folder -> tambahkan <base> */
-(function(){ var p = location.pathname; if(!/\/$/.test(p) && !/\.[A-Za-z0-9]{1,5}$/.test(p.split('/').pop())) document.write('<base href="' + p + '/">'); })();
+/* tautan relatif (manifest, ikon, aset, sw.js) harus dihitung dari folder tempat berkas ini berada.
+   URL tanpa "/" di akhir dan tanpa ekstensi (mis. /engine/skymeet) punya dua kemungkinan:
+     (a) FOLDER   : /engine/skymeet/index.html            -> perlu <base href="/engine/skymeet/">
+     (b) URL BERSIH: /engine/skymeet -> /engine/skymeet.html -> JANGAN pakai <base> (aset sejajar dengan berkas ini)
+   Jadi jangan menebak: cek apakah manifest.webmanifest benar-benar ada di dalam folder itu. */
+(function(){
+  var p = location.pathname;
+  if(/\/$/.test(p) || /\.[A-Za-z0-9]{1,5}$/.test(p.split('/').pop())) return;
+  try{
+    var x = new XMLHttpRequest(); x.open('GET', p + '/manifest.webmanifest', false); x.send();
+    if(x.status === 200 && /^\s*\{/.test(x.responseText) && x.responseText.indexOf('"start_url"') > -1) document.write('<base href="' + p + '/">');
+  }catch(e){}
+})();
 </script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="ikon/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="ikon/favicon-16.png">
 <link rel="shortcut icon" href="ikon/favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="ikon/apple-touch-icon.png">
-<title>Sky Meet</title>
+<title>Skymeet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -1180,7 +1191,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 <div id="loginScreen">
   <div id="loginStars" aria-hidden="true"></div>
   <div id="loginCard">
-    <h1 id="lgBrand"><span id="lgLogoBox"></span><span class="brandTxt">Sky Meet</span></h1>
+    <h1 id="lgBrand"><span id="lgLogoBox"></span><span class="brandTxt">Skymeet</span></h1>
     <p class="about" id="lgAbout"></p>
     <p class="about note" id="lgNote"></p>
 
@@ -1442,7 +1453,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const celestialEl = document.getElementById('celestial');
   const I18N = {
     en: {
-      title: 'Sky Meet',
+      title: 'Skymeet',
       days: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
       months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
       greet: { midnight:'Good night', predawn:'Good morning', morning:'Good morning', midday:'Good day', afternoon:'Good afternoon', dusk:'Good evening', night:'Good evening' },
@@ -1458,7 +1469,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       date: (d,dd,m,y) => `${d}, ${m} ${dd}, ${y}`
     },
     id: {
-      title: 'Sky Meet',
+      title: 'Skymeet',
       days: ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],
       months: ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],
       greet: { midnight:'Selamat malam', predawn:'Selamat dini hari', morning:'Selamat pagi', midday:'Selamat siang', afternoon:'Selamat sore', dusk:'Selamat petang', night:'Selamat malam' },
@@ -1474,7 +1485,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       date: (d,dd,m,y) => `${d}, ${dd} ${m} ${y}`
     },
     es: {
-      title: 'Sky Meet',
+      title: 'Skymeet',
       days: ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],
       months: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
       greet: { midnight:'Buenas noches', predawn:'Buenos días', morning:'Buenos días', midday:'Buen día', afternoon:'Buenas tardes', dusk:'Buenas tardes', night:'Buenas noches' },
@@ -3353,7 +3364,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 })();
 </script>
 <script>
-/* ===== Loading screen Sky Meet: logo pecah jadi partikel bintang, persen mengikuti proses memuat asli =====
+/* ===== Loading screen Skymeet: logo pecah jadi partikel bintang, persen mengikuti proses memuat asli =====
    - Persen minimal 5 detik. Jika semua sudah termuat, 100% tepat di 5 detik.
      Jika belum, persen tertahan di 99% sampai benar-benar selesai (jaring pengaman 20 dtk).
    - Event: 'skymeetb:reveal' (20% bintang sudah terserap -> tampilkan login / masuk app)
@@ -3411,7 +3422,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       return c;
     });
 
-    // ---- logo: aset yang sama dengan layar login (aset/skymeet/logo.svg|webp). Tanpa aset / gagal dibaca -> tulisan "Sky Meet" ----
+    // ---- logo: aset yang sama dengan layar login (aset/skymeet/logo.svg|webp). Tanpa aset / gagal dibaca -> tulisan "Skymeet" ----
     const loadImg = u => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = u; });
     async function logoImage(){
       const A = window.SkyAsset, u = A && await A.resolve('logo');
@@ -3442,7 +3453,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     }
     function textLogo(){
       const c = document.createElement('canvas'); c.width = 1000; c.height = 300; const x = c.getContext('2d');
-      x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '600 200px "Space Grotesk", system-ui, sans-serif'; x.fillText('Sky Meet', 500, 150);
+      x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '600 200px "Space Grotesk", system-ui, sans-serif'; x.fillText('Skymeet', 500, 150);
       return crop(c);
     }
     async function getLogo(){
