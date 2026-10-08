@@ -12,6 +12,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="ikon/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="ikon/favicon-16.png">
+<link rel="shortcut icon" href="ikon/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="ikon/apple-touch-icon.png">
 <title>Sky Meet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -181,6 +186,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .pgName{ font-size:14px; font-weight:500; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .wl{ display:inline-flex; align-items:center; gap:6px; flex:none; height:34px; padding:0 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.28); background:rgba(0,0,0,0.15); }
   .wl svg{ width:16px; height:16px; fill:#ffe9a8; }
+  .wl img.ai{ width:16px; height:16px; }   /* ikon dari aset (aset/skymeet/progres/winglight) */
   .wl input{ width:3.4ch; background:none; border:0; outline:none; color:var(--ink); font:500 15px 'Space Grotesk', sans-serif; text-align:center; padding:0; }
   /* halaman Visit: profil, teman, kehadiran */
   .profCard{ display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:16px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); }
@@ -997,7 +1003,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     <section class="page" id="p3" inert aria-hidden="true" tabindex="-1">
       <div class="page-in">
         <div class="p2wrap">
-          <header class="p2head" id="p3head"><div class="pgBar"><span class="pgName" id="pgName"></span><label class="wl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c5 1 11-1 14-7 1-2 3-4 5-5-.5 5-2 8-5 11-3 3-9 4-14 1Z"/></svg><input id="wlIn" type="text" inputmode="numeric" maxlength="3" placeholder="0" aria-label="Winged Light"></label></div></header>
+          <header class="p2head" id="p3head"><div class="pgBar"><span class="pgName" id="pgName"></span><label class="wl"><svg data-asset="progres/winglight.svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c5 1 11-1 14-7 1-2 3-4 5-5-.5 5-2 8-5 11-3 3-9 4-14 1Z"/></svg><input id="wlIn" type="text" inputmode="numeric" maxlength="3" placeholder="0" aria-label="Winged Light"></label></div></header>
           <div id="pgRoot"></div>
         </div>
       </div>
