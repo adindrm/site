@@ -212,14 +212,14 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .profMain{ flex:1; min-width:0; text-align:left; }
   .profCard .idLabel{ font-size:11px; color:var(--ink-soft); letter-spacing:0.04em; text-transform:uppercase; }
   .profCard .idVal{ font-size:18px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .profCard #myNameBtn{ flex:none; font-family:inherit; font-size:12px; color:var(--ink); background:rgba(255,255,255,0.1); border:none; border-radius:10px; padding:8px 12px; cursor:pointer; }
+  .profCard #setOpen{ flex:none; display:grid; place-items:center; width:40px; height:40px; padding:0; border:1px solid rgba(255,255,255,0.18); border-radius:50%; background:rgba(255,255,255,0.1); color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:transform .15s ease; }
+  #setOpen svg, #setOpen img.ai{ width:20px; height:20px; } #setOpen img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
+  #setOpen:active{ transform:scale(0.9); } #setOpen:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .profStatus{ font-size:12px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .profStatus:empty{ display:none; }
   .profUser{ font-size:12px; color:var(--ink-soft); }
   .avBig{ flex:none; width:56px; height:56px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.18); font-size:28px; cursor:pointer; display:grid; place-items:center; }
-  .profCard input[type=text], .profCard input[type=password], .profCard input[type=email], .profCard select{ width:100%; box-sizing:border-box; font-family:inherit; font-size:16px; color:var(--ink); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:9px 12px; outline:none; }
-  .profCard select option{ color:#1a2140; }
-  .setBtn{ display:flex; align-items:center; justify-content:space-between; width:100%; font-family:inherit; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); background:none; border:none; padding:6px 0 2px; cursor:pointer; }
-  .setBtn svg{ width:14px; height:14px; transition:transform 0.25s ease; }
-  .setBtn[aria-expanded="true"] svg{ transform:rotate(180deg); }
+  .profCard input[type=text], #setBox input[type=text], #setBox input[type=password], #setBox input[type=email], #setBox select{ width:100%; box-sizing:border-box; font-family:inherit; font-size:16px; color:var(--ink); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:9px 12px; outline:none; }
+  #setBox select option{ color:#1a2140; }
   .setPanel, .accF{ display:flex; flex-direction:column; gap:10px; text-align:left; }
   .setPanel{ gap:14px; padding-top:6px; }
   .setGrp{ display:flex; flex-direction:column; gap:8px; min-width:0; } .setGrp[hidden]{ display:none; }
@@ -241,9 +241,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .favBtn:active{ transform:scale(0.88); }
   .favBtn[aria-pressed="true"]{ color:#ffd27a; } .favBtn[aria-pressed="true"] svg{ fill:currentColor; }
   .favBtn:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; border-radius:50%; }
+  .friendRow .friendTxt{ flex:1; }
+  .fNmLine{ display:flex; align-items:center; gap:2px; min-width:0; }
+  .fNmLine .friendName{ min-width:0; }
+  .friendRow .favBtn{ width:32px; height:32px; margin:-6px 0 -6px -2px; border-radius:50%; }
+  .friendRow .favBtn svg, .favBtn img.ai{ width:16px; height:16px; }
+  .favBtn img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
+  .favBtn[aria-pressed="true"] img.ai{ filter:sepia(1) saturate(6) hue-rotate(-12deg) brightness(1.15); }
+  .friendRow:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
   .flameBtn.flm{ animation:flm .6s ease; }
   @keyframes flm{ 0%{ transform:none; } 25%{ transform:rotate(-22deg) scale(1.18); } 50%{ transform:rotate(18deg) scale(1.18); } 75%{ transform:rotate(-8deg); } 100%{ transform:none; } }
   .flameBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.14); background:rgba(255,255,255,0.06); font-size:20px; cursor:pointer; }
+  .ub[hidden]{ display:none; }
   .ub{ margin-left:auto; flex:none; min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:#ff5d5d; color:#fff; font-size:11px; display:grid; place-items:center; }
   #navBtn{ position:relative; }
   .udot{ position:absolute; top:6px; right:6px; width:9px; height:9px; border-radius:50%; background:#ff5d5d; }
@@ -290,8 +299,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .friendName{ font-size:14px; }
   .friendHint{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
   .idCard .nameVal{ letter-spacing:0.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  #myNameInput{ width:100%; box-sizing:border-box; font-family:inherit; font-size:16px; color:var(--ink); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); border-radius:10px; padding:7px 10px; outline:none; margin-top:2px; }
-  #myNameInput[hidden]{ display:none; }
   .idWho{ font-size:12px; color:var(--ink-soft); margin-top:3px; }
   .addFriendBox{ display:flex; flex-direction:column; gap:8px; }
   .addFriendBox > input{
@@ -321,15 +328,38 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #visitEmpty{ font-size:13px; color:var(--ink-soft); text-align:center; padding:20px 0; }
 
   /* overlay obrolan */
-  #chatOverlay, #friendOverlay, #addOverlay{
+  #chatOverlay, #friendOverlay{
     position:fixed; inset:0; z-index:60; display:flex; flex-direction:column;
     background: linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%);
     transform:translateX(100%); transition:transform 0.35s ease; visibility:hidden;
   }
-  #chatOverlay.open, #friendOverlay.open, #addOverlay.open{ transform:translateX(0); visibility:visible; }
+  #chatOverlay.open, #friendOverlay.open{ transform:translateX(0); visibility:visible; }
   #chatOverlay{ z-index:61; inset:auto; top:var(--vvt,0px); left:0; right:0; height:var(--vvh,100%); }
-  #addOverlay{ z-index:62; }
-  #chatHead, #fHead, #aHead{
+  /* overlay tambah teman: kartu di tengah dengan latar redup (bukan layar penuh lagi) */
+  #addOverlay{ position:fixed; inset:0; z-index:62; display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; padding:calc(env(safe-area-inset-top,0px) + 8vh) 16px 24px; background:rgba(0,0,0,0.5); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
+  #addOverlay.open{ opacity:1; visibility:visible; transition:opacity .25s ease, visibility 0s; }
+  #addBox{ width:100%; max-width:420px; flex:none; display:flex; flex-direction:column; border-radius:20px; background:linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%); border:1px solid rgba(255,255,255,0.18); box-shadow:0 12px 40px rgba(0,0,0,0.35); transform:translateY(12px) scale(.97); transition:transform .3s ease; }
+  #addOverlay.open #addBox{ transform:none; }
+  #aHead{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 12px 10px 18px; border-bottom:1px solid rgba(255,255,255,0.08); }
+  #addBox #aBody{ flex:none; overflow:visible; padding:14px 18px 18px; }
+  #addBox .mergedCard{ padding:0; background:none; border:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
+  /* overlay pengaturan (kartu di tengah) */
+  #setOv{ position:fixed; inset:0; z-index:63; display:flex; align-items:flex-start; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 20px); background:rgba(0,0,0,0.5); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
+  #setOv.open{ opacity:1; visibility:visible; transition:opacity .25s ease, visibility 0s; }
+  #setBox{ width:100%; max-width:420px; max-height:100%; display:flex; flex-direction:column; overflow:hidden; border-radius:20px; background:linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%); border:1px solid rgba(255,255,255,0.18); box-shadow:0 12px 40px rgba(0,0,0,0.35); color:var(--ink); transform:translateY(12px) scale(.97); transition:transform .3s ease; }
+  #setOv.open #setBox{ transform:none; }
+  .setHd{ flex:none; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 12px 10px 18px; border-bottom:1px solid rgba(255,255,255,0.08); }
+  .setHd h2{ margin:0; font-size:16px; font-weight:500; }
+  #setClose, #aBack{ flex:none; width:36px; height:36px; display:grid; place-items:center; padding:0; font-size:16px; border-radius:50%; }
+  #setClose{ background:none; border:none; color:var(--ink); cursor:pointer; }
+  #setClose:focus-visible, #aBack:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; }
+  .setScroll{ overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding:14px 16px 18px; display:flex; flex-direction:column; gap:14px; }
+  .setCard{ display:flex; flex-direction:column; gap:12px; padding:14px; border-radius:16px; background:rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.14); text-align:left; }
+  .setCard[hidden]{ display:none; }
+  .setField{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .setCard .fBtn{ width:100%; } .setCard #muteBtn[aria-pressed="true"]{ opacity:.8; }
+  @media (prefers-reduced-motion: reduce){ #setOv, #setBox, #addBox, #addOverlay{ transition-duration:0.01s !important; transition-delay:0s !important; } }
+  #chatHead, #fHead{
     display:flex; align-items:center; gap:10px; padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 14px;
     border-bottom:1px solid rgba(255,255,255,0.08);
   }
@@ -884,7 +914,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   body.ready #nav{ opacity:1; transform:none; pointer-events:none; }
   #navBtn, #langCurrent{ pointer-events:auto; }
-  /* pemutar musik mini di header (tengah, antara Menu dan bahasa): ketuk = buka kontrol, tekan lama = daftar lagu */
+  /* pemutar musik mini di header (tengah, antara Menu dan bahasa): ketuk = buka kontrol (jeda/lanjut + sebelumnya/berikutnya), tekan lama = daftar lagu */
   #musicBox{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 16px); left:50%; transform:translateX(-50%); z-index:10; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s; }
   body.ready.mz:not(.p2):not(.p3):not(.p4) #musicBox{   /* hanya di beranda */ opacity:1; visibility:visible; transition:opacity .5s ease .2s, visibility 0s; }
   /* saat hanya ikon musik: TANPA kartu. Kartu (latar + garis + blur) baru muncul saat jeda/lanjut terbuka atau daftar musik tampil */
@@ -899,17 +929,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .mzB .mi{ display:none; place-items:center; width:28px; height:28px; }
   .mzB .mi svg, .mzB .mi img.ai{ width:28px; height:28px; }
   #musicBox img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
-  .mzLst{ display:flex; align-items:center; gap:6px; flex:none; height:34px; max-width:0; padding:0; margin-left:0; border-radius:999px; background:rgba(255,255,255,0.1); overflow:hidden; visibility:hidden; opacity:0; white-space:nowrap; font-family:'Space Grotesk', sans-serif; font-size:13px; font-weight:500; letter-spacing:.1px; transition:max-width .32s ease, padding .28s ease, margin .28s ease, opacity .2s ease, visibility 0s linear .32s; }
-  #musicBox.open .mzLst{ max-width:190px; padding:0 13px 0 10px; margin-left:3px; opacity:1; visibility:visible; transition:max-width .32s ease, padding .28s ease, margin .28s ease, opacity .25s ease .08s, visibility 0s; }
-  .mzLst:active{ background:rgba(255,255,255,0.18); }
-  .mzLst .mzTx{ overflow:hidden; text-overflow:ellipsis; }
-  .mzPrev .mi, .mzNext .mi, .mzLst .mi{ display:grid; width:22px; height:22px; } .mzPrev .mi svg, .mzNext .mi svg, .mzPrev .mi img.ai, .mzNext .mi img.ai{ width:22px; height:22px; } .mzLst .mi{ width:18px; height:18px; } .mzLst .mi svg, .mzLst .mi img.ai{ width:18px; height:18px; }
-  #musicBox:not(.open) .mi-note{ display:grid; }
+  .mzPrev .mi, .mzNext .mi{ display:grid; width:22px; height:22px; } .mzPrev .mi svg, .mzNext .mi svg, .mzPrev .mi img.ai, .mzNext .mi img.ai{ width:22px; height:22px; }
+  #musicBox:not(.open):not(.listOpen) .mi-note{ display:grid; }
+  /* tekan lama: ikon musik digantikan sementara oleh teks "Daftar Musik" (ketuk teks = tutup daftar) */
+  .mzLbl{ display:none; padding:0 14px; font-family:'Space Grotesk', sans-serif; font-size:14px; font-weight:500; letter-spacing:.1px; line-height:50px; white-space:nowrap; }
+  #musicBox.listOpen .mzMain{ width:auto; min-width:50px; border-radius:999px; }
+  #musicBox.listOpen .mzMain .mi{ display:none !important; }
+  #musicBox.listOpen .mzMain .mzLbl{ display:block; }
   #musicBox.open:not(.paused) .mi-pause{ display:grid; }
   #musicBox.open.paused .mi-play{ display:grid; }
   @keyframes mzSway{ 0%, 100%{ transform:rotate(-7deg); } 50%{ transform:rotate(7deg); } }   /* bergoyang sangat pelan */
   #musicBox.playing:not(.open) .mi-note{ animation:mzSway 4.2s ease-in-out infinite; transform-origin:50% 85%; }
-  @media (prefers-reduced-motion: reduce){ #musicBox.playing:not(.open) .mi-note{ animation:none; } #musicBox, .mzPrev, .mzNext, .mzLst, #mzList, #mzBar, .bell{ transition:none !important; } }
+  @media (prefers-reduced-motion: reduce){ #musicBox.playing:not(.open) .mi-note{ animation:none; } #musicBox, .mzPrev, .mzNext, #mzList, #mzBar, .bell{ transition:none !important; } }
   #mzList{ position:absolute; z-index:11; top:calc(100% + 8px); left:50%; display:flex; flex-direction:column; min-width:200px; max-width:min(280px, calc(100vw - 32px)); max-height:min(50vh, 300px); overflow-y:auto; padding:6px; border-radius:18px; border:1px solid rgba(255,255,255,0.18); background:var(--panel); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); opacity:0; visibility:hidden; transform:translate(-50%, -6px) scale(0.97); transform-origin:top center; pointer-events:none; transition:opacity .25s ease, transform .25s ease, visibility 0s linear .25s; }
   #musicBox.listOpen #mzList{ opacity:1; visibility:visible; transform:translate(-50%, 0) scale(1); pointer-events:auto; transition:opacity .25s ease, transform .25s ease, visibility 0s; }
   .mzHd{ padding:8px 12px 6px; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); }
@@ -1141,40 +1172,11 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
               <div class="profMain">
                 <div class="idLabel" id="nameLabelT">Your name</div>
                 <div class="idVal nameVal" id="myNameVal"></div>
-                <input type="text" id="myNameInput" maxlength="10" autocomplete="off" hidden>
                 <div class="profUser" id="profUser"></div>
+                <div class="profStatus" id="profStatus"></div>
               </div>
-              <button type="button" id="myNameBtn">Edit</button>
+              <button type="button" id="setOpen" aria-haspopup="dialog" aria-label="Settings"><svg data-asset="aksi/pengaturan.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
-            <div class="fold" id="avFold" inert><div><div class="avPick"><div class="idLabel" id="avT"></div><div class="avGrid" id="avGrid"></div></div></div></div>
-            <input type="text" id="stIn" maxlength="40" autocomplete="off">
-            <button type="button" class="setBtn" id="setBtn" aria-expanded="false"><span id="setT">Settings</span><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button>
-            <div class="fold" id="setFold" inert><div><div class="setPanel">
-              <section class="setGrp"><div class="idLabel" id="visT"></div>
-                <select id="visSel"><option value="public"></option><option value="friends"></option><option value="private"></option></select></section>
-              <section class="setGrp"><div class="idLabel" id="lgT"></div>
-                <select id="lgSel"><option value="en">English</option><option value="id">Bahasa Indonesia</option><option value="es">Espa\u00f1ol</option></select></section>
-              <section class="setGrp"><button type="button" class="fBtn" id="muteBtn" aria-pressed="false"></button></section>
-              <section class="setGrp" id="accSec" hidden>
-                <div class="idLabel" id="accT"></div>
-                <div class="accF">
-                  <input type="text" id="accUser" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="16">
-                  <input type="email" id="accEmail" autocomplete="off" maxlength="80">
-                  <input type="password" id="accPwOld" autocomplete="current-password">
-                  <input type="password" id="accPwNew" autocomplete="new-password">
-                  <button type="button" class="fBtn main" id="accSave"></button>
-                  <div class="fNote" id="accNote" hidden></div>
-                </div>
-              </section>
-              <section class="setGrp" id="upSec" hidden>
-                <div class="idLabel" id="upT"></div>
-                <div class="accF">
-                  <input type="text" id="upUser" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="16">
-                  <input type="password" id="upPw" autocomplete="new-password">
-                  <button type="button" class="fBtn main" id="upBtn"></button>
-                </div>
-              </section>
-            </div></div></div>
           </div>
           <div class="fSecT" id="friendsT"></div>
           <div id="friendList"></div>
@@ -1183,6 +1185,50 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       </div>
     </section>
 
+  </div>
+</div>
+
+<div id="setOv" aria-hidden="true">
+  <div id="setBox" role="dialog" aria-modal="true" aria-labelledby="setT">
+    <div class="setHd"><h2 id="setT">Settings</h2><button type="button" id="setClose" aria-label="Close">&#10005;</button></div>
+    <div class="setScroll">
+      <!-- satu fungsi simpan: avatar, nama, status, visibilitas progres, bahasa -->
+      <section class="setCard" id="setProf">
+        <div class="setField"><div class="idLabel" id="avT"></div><div class="avGrid" id="avGrid"></div></div>
+        <div class="setField"><div class="idLabel" id="nmT">Name</div><input type="text" id="setName" maxlength="10" autocomplete="off"></div>
+        <div class="setField"><div class="idLabel" id="stT">Status</div><input type="text" id="stIn" maxlength="40" autocomplete="off"></div>
+        <div class="setField"><div class="idLabel" id="visT"></div>
+          <select id="visSel"><option value="public"></option><option value="friends"></option><option value="private"></option></select></div>
+        <div class="setField"><div class="idLabel" id="lgT"></div>
+          <select id="lgSel"><option value="en">English</option><option value="id">Bahasa Indonesia</option><option value="es">Espa&ntilde;ol</option></select></div>
+        <button type="button" class="fBtn main" id="setSave">Save</button>
+      </section>
+      <!-- berdiri sendiri: efek suara -->
+      <section class="setCard">
+        <div class="idLabel" id="sndT"></div>
+        <button type="button" class="fBtn" id="muteBtn" aria-pressed="false"></button>
+      </section>
+      <!-- berdiri sendiri: akun -->
+      <section class="setCard" id="accSec" hidden>
+        <div class="idLabel" id="accT"></div>
+        <div class="accF">
+          <input type="text" id="accUser" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="16">
+          <input type="email" id="accEmail" autocomplete="off" maxlength="80">
+          <input type="password" id="accPwOld" autocomplete="current-password">
+          <input type="password" id="accPwNew" autocomplete="new-password">
+          <button type="button" class="fBtn main" id="accSave"></button>
+          <div class="fNote" id="accNote" hidden></div>
+        </div>
+      </section>
+      <section class="setCard" id="upSec" hidden>
+        <div class="idLabel" id="upT"></div>
+        <div class="accF">
+          <input type="text" id="upUser" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="16">
+          <input type="password" id="upPw" autocomplete="new-password">
+          <button type="button" class="fBtn main" id="upBtn"></button>
+        </div>
+      </section>
+    </div>
   </div>
 </div>
 
@@ -1228,11 +1274,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 </div>
 
 <div id="addOverlay" aria-hidden="true">
-  <div id="aHead">
-    <button type="button" id="aBack" aria-label="Back">&#8592;</button>
-    <span id="aTitle">Add friend</span>
-  </div>
-  <div id="aBody">
+  <div id="addBox" role="dialog" aria-modal="true" aria-labelledby="aTitle">
+    <div id="aHead">
+      <span id="aTitle">Add friend</span>
+      <button type="button" id="aBack" aria-label="Close">&#10005;</button>
+    </div>
+    <div id="aBody">
     <div class="fCard mergedCard">
       <div class="idLabel" id="idLabelT">Your ID</div>
       <div class="idRow"><div class="idVal" id="myIdVal">------</div><button type="button" class="fBtn" id="copyIdBtn">Copy</button></div>
@@ -1244,6 +1291,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       <button type="button" class="fBtn main" id="addFriendBtn">Add</button>
       <div class="fNote" id="addHint"></div>
     </div>
+  </div>
   </div>
 </div>
 
@@ -1362,9 +1410,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       <span class="mi mi-note"><svg data-asset="header/musik.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2.2"/><circle cx="17" cy="16" r="2.2"/></svg></span>
       <span class="mi mi-pause"><svg data-asset="header/pause.svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5" width="3.8" height="14" rx="1.2"/><rect x="13.7" y="5" width="3.8" height="14" rx="1.2"/></svg></span>
       <span class="mi mi-play"><svg data-asset="header/putar.svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l11-6.5Z"/></svg></span>
+      <span class="mzLbl"></span>
     </button>
     <button type="button" class="mzB mzNext" aria-label="Next"><span class="mi"><svg data-asset="header/berikutnya.svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14" fill="none"/><path d="M5 6v12l10-6Z"/></svg></span></button>
-    <button type="button" class="mzB mzLst" aria-label="Music list"><span class="mi"><svg data-asset="header/daftar.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h12M4 12h12M4 17h8"/><circle cx="19" cy="17" r="1.6" fill="currentColor"/></svg></span><span class="mzTx">Music list</span></button>
   </div>
   <div id="mzList" role="listbox" aria-label="Songs" inert></div>
 </div>
@@ -1482,18 +1530,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     box.classList.toggle('playing', should() && !!au && !au.paused);
     box.classList.toggle('dim', !!window.SkyMuted);
     const L = mzT(), open = box.classList.contains('open');
-    main.setAttribute('aria-label', open ? (userPaused ? L.play : L.pause) : L.music + ' \u2014 ' + L.songs);
-    main.setAttribute('aria-expanded', String(open));
+    const lst = box.classList.contains('listOpen');
+    main.setAttribute('aria-label', lst ? L.songs : (open ? (userPaused ? L.play : L.pause) : L.music + ' \u2014 ' + L.songs));
+    main.setAttribute('aria-expanded', String(open || lst));
   }
   function paintLabels(){
     if(!box) return; const L = mzT();
     box.setAttribute('aria-label', L.music); listEl.setAttribute('aria-label', L.songs);
-    box.querySelector('.mzPrev').setAttribute('aria-label', L.prev); box.querySelector('.mzNext').setAttribute('aria-label', L.next); box.querySelector('.mzLst').setAttribute('aria-label', L.songs); box.querySelector('.mzTx').textContent = L.songs;
+    box.querySelector('.mzPrev').setAttribute('aria-label', L.prev); box.querySelector('.mzNext').setAttribute('aria-label', L.next); box.querySelector('.mzLbl').textContent = L.songs;
     paint(); paintList();
   }
   function paintList(){
     if(!listEl) return; listEl.textContent = '';
-    { const hd = document.createElement('div'); hd.className = 'mzHd'; hd.textContent = mzT().songs; listEl.appendChild(hd); }
     const shown = tracks.map((t, i) => [t, i]).filter(x => !x[0].bad);
     if(!shown.length){ const e = document.createElement('div'); e.className = 'mzEmpty'; e.textContent = mzT().none; listEl.appendChild(e); return; }
     shown.forEach(([t, i]) => {
@@ -1506,7 +1554,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const bump = () => { clearTimeout(idleT); idleT = setTimeout(closeBar, IDLE); };   // 5 detik tanpa sentuhan = kembali jadi ikon musik
   function openBar(){ if(!box) return; box.classList.add('open'); paint(); bump(); }
   function closeBar(){ if(!box) return; clearTimeout(idleT); box.classList.remove('open'); paint(); }
-  function setList(o){ if(!box) return; box.classList.toggle('listOpen', o); listEl.inert = !o; if(o){ closeBar(); } }
+  function setList(o){ if(!box) return; box.classList.toggle('listOpen', o); listEl.inert = !o; if(o){ closeBar(); } paint(); }
   function go(i, auto){   // pindah lagu (lompat yang rusak), langsung diputar
     if(!au) return;
     const n = tracks.length; let k = ((i % n) + n) % n, g = 0;
@@ -1535,7 +1583,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     main.addEventListener('keydown', e => { if(e.key === 'ArrowDown' || e.key === 'ContextMenu'){ e.preventDefault(); setList(true); } });
     box.querySelector('.mzPrev').addEventListener('click', () => go(cur - 1, false));
     box.querySelector('.mzNext').addEventListener('click', () => go(cur + 1, false));
-    box.querySelector('.mzLst').addEventListener('click', () => setList(!box.classList.contains('listOpen')));   // tombol daftar lagu (terlihat saat bar terbuka)
     const away = e => { if(!box.contains(e.target)){ setList(false); closeBar(); } };   // ketuk/fokus di luar = tutup
     document.addEventListener('pointerdown', away, true); document.addEventListener('focusin', away);
     document.addEventListener('keydown', e => { if(e.key === 'Escape'){ setList(false); closeBar(); } });
@@ -2298,7 +2345,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     else if(b.dataset.go === 'events') goEvents();
     else if(b.dataset.go === 'journey') goProgress();
     else if(b.dataset.go === 'visit') goVisit();
-    else if(b.dataset.go === 'logout' && window.SkyLogout) window.SkyLogout();
+    else if(b.dataset.go === 'logout' && (window.SkyLogoutAsk || window.SkyLogout)) (window.SkyLogoutAsk || window.SkyLogout)();
   });
   document.addEventListener('click', e => {
     if(!document.getElementById('nav').contains(e.target)) toggleNav(false);
@@ -2812,6 +2859,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   Object.assign(VT5.id, { outT:'Keluar dari akun?', outMsg:'Progres dan temanmu tetap tersimpan di akunmu. Kamu bisa masuk lagi kapan saja.', outMsgG:'Akun tamu yang tidak aktif 7 hari berturut-turut akan dihapus beserta progres, teman, dan obrolannya.', outOk:'Keluar', outNo:'Batal' });
   Object.assign(VT5.es, { outT:'\u00bfCerrar sesi?', outMsg:'Tu progreso y tus amigos siguen guardados en tu cuenta. Puedes volver a entrar cuando quieras.', outMsgG:'Las cuentas de invitado inactivas durante 7 d\u00edas seguidos se eliminan junto con su progreso, amigos y chats.', outOk:'Cerrar sesi\u00f3n', outNo:'Cancelar' });
   Object.keys(VT5).forEach(l => Object.assign(VT[l], VT5[l]));
+  const VT6 = {
+    en:{ nmT:'Name', stT:'Status', sndT:'Sound effects', lAv:'avatar', lName:'name', lSt:'status', lVis:'progress visibility', lLg:'language', noChg:'No changes to save.',
+      cfSaveT:'Save these changes?', cfSaveMsg:'This will update: {l}.', cfOk:'Yes, continue', cfMuteT:'Turn sound effects off?', cfUnmuteT:'Turn sound effects on?', cfSndMsg:'You can change this again anytime in Settings.',
+      cfAccT:'Save account changes?', cfAccMsg:'Your username, email or password will be updated.', cfUpT:'Create a full account?', cfUpMsg:'Your progress, friends and ID will be kept and moved to the new account.', closeB:'Close' },
+    id:{ nmT:'Nama', stT:'Status', sndT:'Efek suara', lAv:'avatar', lName:'nama', lSt:'status', lVis:'visibilitas progres', lLg:'bahasa', noChg:'Tidak ada perubahan untuk disimpan.',
+      cfSaveT:'Simpan perubahan ini?', cfSaveMsg:'Yang akan diperbarui: {l}.', cfOk:'Ya, lanjutkan', cfMuteT:'Matikan efek suara?', cfUnmuteT:'Nyalakan efek suara?', cfSndMsg:'Kamu bisa mengubahnya lagi kapan saja di Pengaturan.',
+      cfAccT:'Simpan perubahan akun?', cfAccMsg:'Username, email, atau kata sandi akunmu akan diperbarui.', cfUpT:'Buat akun penuh?', cfUpMsg:'Progres, teman, dan ID-mu tetap terbawa ke akun baru.', closeB:'Tutup' },
+    es:{ nmT:'Nombre', stT:'Estado', sndT:'Efectos de sonido', lAv:'avatar', lName:'nombre', lSt:'estado', lVis:'visibilidad del progreso', lLg:'idioma', noChg:'No hay cambios que guardar.',
+      cfSaveT:'\u00bfGuardar estos cambios?', cfSaveMsg:'Se actualizar\u00e1: {l}.', cfOk:'S\u00ed, continuar', cfMuteT:'\u00bfApagar los efectos de sonido?', cfUnmuteT:'\u00bfActivar los efectos de sonido?', cfSndMsg:'Puedes cambiarlo de nuevo cuando quieras en Ajustes.',
+      cfAccT:'\u00bfGuardar los cambios de la cuenta?', cfAccMsg:'Se actualizar\u00e1n tu usuario, correo o contrase\u00f1a.', cfUpT:'\u00bfCrear una cuenta completa?', cfUpMsg:'Tu progreso, amigos e ID se conservar\u00e1n y pasar\u00e1n a la nueva cuenta.', closeB:'Cerrar' }
+  };
+  Object.keys(VT6).forEach(l => Object.assign(VT[l], VT6[l]));
   const VT4 = {
     en:{ actOn:'Online', actNow:'Active just now', actAgo:'Active {t} ago', uM:'min', uH:'h', uD:'d' },
     id:{ actOn:'Online', actNow:'Baru saja aktif', actAgo:'Aktif {t} lalu', uM:'mnt', uH:'jam', uD:'hari' },
@@ -2829,7 +2888,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     setWho(); renderFriends();
     if(curFriend && progReady) renderProgress(lastProg);
     set('addOpenT', v.addF); set('aTitle', v.addF); set('addLabelT', v.fid); set('addHint', v.addHint);
-    $('addOpen').setAttribute('aria-label', v.addF); $('aBack').setAttribute('aria-label', v.back);
+    $('addOpen').setAttribute('aria-label', v.addF); $('aBack').setAttribute('aria-label', v.closeB);
     applyProfLang();
   }
   window.addEventListener('sky:lang', applyVisitLang);
@@ -2892,7 +2951,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     loginErrEl.textContent = ''; regErrEl.textContent = '';
     ['loginUser','loginPass','regUser','regPass','regPass2'].forEach(id => { $(id).value = ''; });
     window.SkyApp.setUser(dispName(myUid), myUid);   // muat data akun + nama untuk sapaan di beranda
-    editingName = false; renderMyName();
+    renderMyName();
     const codeKey = 'sky_code_' + myUid;
     myCode = lsGet(codeKey);
     if(!myCode) myCode = genCode();
@@ -2908,14 +2967,44 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     loadFriends(); startNet();
     if(window.SkyMusic) window.SkyMusic.start();   // musik mulai saat masuk
   }
+  // ----- dialog konfirmasi umum (dipakai logout & setiap perubahan pengaturan) -----
+  let cfRes = null, cfBack = null;
+  function askConfirm(o){
+    if(cfRes) closeConfirm(false);
+    const v = vt(), ov = $('outOv');
+    $('outT').textContent = o.title || ''; $('outMsg').textContent = o.msg || '';
+    $('outOk').textContent = o.ok || v.cfOk; $('outNo').textContent = o.no || v.outNo;
+    cfBack = document.activeElement; ov.hidden = false; SFX.open();
+    setTimeout(() => $('outOk').focus({ preventScroll:true }), 30);
+    return new Promise(res => { cfRes = res; });
+  }
+  function closeConfirm(val){
+    if(!cfRes) return;
+    const r = cfRes; cfRes = null; $('outOv').hidden = true;
+    if(cfBack && cfBack.isConnected && cfBack.focus){ try{ cfBack.focus({ preventScroll:true }); }catch(e){} }
+    cfBack = null; r(!!val);
+  }
+  $('outOk').addEventListener('click', () => closeConfirm(true));
+  $('outNo').addEventListener('click', () => closeConfirm(false));
+  $('outOv').addEventListener('click', e => { if(e.target === $('outOv')) closeConfirm(false); });
+  document.addEventListener('keydown', e => {
+    if($('outOv').hidden) return;
+    if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); closeConfirm(false); }
+    else if(e.key === 'Tab'){ const a = $('outOk'), b = $('outNo'), first = e.shiftKey ? a : b; if(document.activeElement === (e.shiftKey ? a : b)){ e.preventDefault(); (e.shiftKey ? b : a).focus(); } }
+  }, true);
+  window.SkyLogoutAsk = async () => {   // keluar selalu minta konfirmasi ulang
+    const v = vt(), guest = !!(mySession && mySession.type === 'guest');
+    if(await askConfirm({ title:v.outT, msg:guest ? v.outMsgG : v.outMsg, ok:v.outOk, no:v.outNo })) logout();
+  };
   function logout(){
+    closeConfirm(false); closeSettings();
     if(Object.keys(profQ).length) flushProf(9);   // kirim dulu perubahan profil yang tertunda (token akun ini)
     touchGuest(true);   // keluar juga dihitung sebagai aktivitas terakhir
     if(window.SkyMusic) window.SkyMusic.stop();
     lsDel(SESSION_KEY); stopNet(); meta = {}; typingMap = {};
     $('chatOverlay').classList.remove('open'); $('friendOverlay').classList.remove('open'); $('addOverlay').classList.remove('open'); chatEls.clear(); readMap = {}; readPushed = {}; friendOps = 0;
     chatPid = null; curFriend = null; myUid = null; myCode = null; mySession = null; friendsCache = [];
-    editingName = false; renderMyName();
+    renderMyName();
     $('myIdVal').textContent = '------'; $('whoAmI').textContent = '';
     $('friendList').textContent = '';
     window.SkyApp.setUser(null);   // hapus nama sapaan, kembali ke penyimpanan 'guest' kosong sampai login lagi
@@ -3054,18 +3143,22 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   };
   function buildFriendRow(code, fresh){
     const row = { code, f: null, sig: '', av: mkEl('span', 'friendAvatar'), nm: mkEl('div', 'friendName'), prev: mkEl('div', 'friendHint fPrev'), hint: mkEl('div', 'friendHint'), ub: mkEl('span', 'ub'), dot: mkEl('i', 'dotOn') };
-    row.wrap = mkEl('div', 'frWrap' + (fresh ? ' fresh' : '')); row.b = mkEl('button', 'friendRow'); row.b.type = 'button';
-    const tx = mkEl('span', 'friendTxt'); tx.append(row.nm, row.prev, row.hint);
+    row.wrap = mkEl('div', 'frWrap' + (fresh ? ' fresh' : '')); row.b = mkEl('div', 'friendRow'); row.b.setAttribute('role', 'button'); row.b.tabIndex = 0;
+    const tx = mkEl('span', 'friendTxt'), nl = mkEl('div', 'fNmLine');
     row.ub.hidden = true; row.dot.hidden = true; row.hint.hidden = true; row.av.appendChild(row.dot);
-    row.b.append(row.av, tx, row.ub);
-    row.b.addEventListener('click', () => openFriend(row.f));
     const w = mkEl('button', 'flameBtn', '\ud83d\udd25'); w.type = 'button';
     { const A = window.SkyAsset; if(A){ const put = u => { if(!u) return; const t = [...w.childNodes].find(n => n.nodeType === 3); if(t) t.replaceWith(A.mkImg(u, 'av')); }; const u0 = A.peek('aksi/nyalakan-api'); if(u0) put(u0); else A.resolve('aksi/nyalakan-api').then(put); } }   // ikon nyalakan api: aset/skymeet/aksi/nyalakan-api (dimuat sekali per baris)
     w.addEventListener('click', () => { w.classList.remove('flm'); void w.offsetWidth; w.classList.add('flm'); lightFlame(row.f); });
     row.flame = w;
-    const fb = mkEl('button', 'favBtn'); fb.type = 'button'; fb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8z"/></svg>';
-    fb.addEventListener('click', () => toggleFav(row.code));
-    row.fav = fb; row.wrap.append(row.b, fb, w);
+    // favorit: sekarang di samping nama di dalam kartu. Ikon bisa diganti: aset/skymeet/aksi/favorit.svg (atau .webp)
+    const fb = mkEl('button', 'favBtn'); fb.type = 'button'; fb.innerHTML = '<svg data-asset="aksi/favorit.svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8z"/></svg>';
+    { const A = window.SkyAsset; if(A){ const sv = fb.querySelector('svg'), put = u => { if(u && sv.isConnected) sv.replaceWith(A.mkImg(u)); }; const u0 = A.peek('aksi/favorit'); if(u0) put(u0); else A.resolve('aksi/favorit').then(put); } }
+    fb.addEventListener('click', e => { e.stopPropagation(); toggleFav(row.code); });
+    nl.append(row.nm, fb); tx.append(nl, row.prev, row.hint);
+    row.b.append(row.av, tx, row.ub);
+    row.b.addEventListener('click', e => { if(e.target.closest('.favBtn')) return; openFriend(row.f); });
+    row.b.addEventListener('keydown', e => { if(e.target === row.b && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); openFriend(row.f); } });
+    row.fav = fb; row.wrap.append(row.b, w);
     return row;
   }
   function paintFriendRow(row, d, v){
@@ -3390,10 +3483,11 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   // ---------- tambah teman (overlay baru) ----------
   const addOv = $('addOverlay');
-  function openAdd(){ addOv.classList.add('open'); addOv.setAttribute('aria-hidden', 'false'); SFX.open(); setTimeout(() => $('addFriendInput').focus(), 380); }
+  function openAdd(){ addOv.classList.add('open'); addOv.setAttribute('aria-hidden', 'false'); SFX.open(); setTimeout(() => $('addFriendInput').focus(), 300); }
   function closeAdd(){ addOv.classList.remove('open'); addOv.setAttribute('aria-hidden', 'true'); if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
   $('addOpen').addEventListener('click', openAdd);
   $('aBack').addEventListener('click', closeAdd);
+  addOv.addEventListener('click', e => { if(e.target === addOv) closeAdd(); });   // ketuk latar redup = tutup
   document.addEventListener('keydown', e => {
     if(e.key !== 'Escape') return;
     if($('chatOverlay').classList.contains('open')) closeChat();
@@ -3417,38 +3511,17 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   // ---------- nama sendiri ----------
   // Disimpan per akun ('sky_myname_<uid>'). Default: username akun, atau "Guest" untuk tamu. Dipakai juga di sapaan beranda.
-  let editingName = false;
   function dispName(uid){
     const c = uid ? lsGet('sky_myname_' + uid) : null;
     if(c) return c;
     return uid && uid.indexOf('guest_') === 0 ? vt().guestName : (uid || '');
   }
-  function renderMyName(){
-    const v = vt(), val = $('myNameVal'), inp = $('myNameInput'), btn = $('myNameBtn');
+  function renderMyName(){   // nama hanya tampil di kartu profil; mengubahnya lewat ikon pengaturan
+    const v = vt(), val = $('myNameVal'), btn = $('setOpen');
     if(!val) return;
     val.textContent = myUid ? dispName(myUid) : '';
-    val.hidden = editingName; inp.hidden = !editingName;
-    btn.textContent = editingName ? v.save : v.edit;
-    inp.placeholder = v.name;
+    btn.title = v.settings; btn.setAttribute('aria-label', v.settings);
   }
-  function saveMyName(){
-    if(!myUid) return;
-    const n = ($('myNameInput').value || '').trim().slice(0, 10);
-    if(n) lsSet('sky_myname_' + myUid, n); else lsDel('sky_myname_' + myUid);
-    editingName = false; renderMyName();
-    window.SkyApp.setUser(dispName(myUid), myUid);   // perbarui sapaan di beranda
-    pushProf({ name: n || myUid });
-    toast(vt().saved); SFX.success();
-  }
-  $('myNameBtn').addEventListener('click', () => {
-    if(!myUid) return;
-    if(editingName){ saveMyName(); return; }
-    editingName = true; $('myNameInput').value = lsGet('sky_myname_' + myUid) || ''; renderMyName(); $('myNameInput').focus();
-  });
-  $('myNameInput').addEventListener('keydown', e => {
-    if(e.key === 'Enter') saveMyName();
-    else if(e.key === 'Escape'){ editingName = false; renderMyName(); }
-  });
 
 
   // ===== profil, kehadiran, nyalakan api, notifikasi, upgrade tamu =====
@@ -3540,18 +3613,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const v = vt(), acct = !!(mySession && mySession.type === 'account');
     setAv($('avBtn'), prof.avatar); $('avBtn').setAttribute('aria-haspopup', 'true');
     $('profUser').textContent = acct ? '@' + myUid : '';
-    if(document.activeElement !== $('stIn')) $('stIn').value = prof.status || '';
-    $('visSel').value = prof.vis; $('lgSel').value = prof.lang || window.SkyApp.getLang();
+    $('profStatus').textContent = prof.status || '';
     $('muteBtn').textContent = v.mute + ': ' + (prof.mute ? v.muteOn : v.muteOff); $('muteBtn').setAttribute('aria-pressed', String(!!prof.mute));
-    document.querySelectorAll('#avGrid button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.av === prof.avatar)));
     $('accSec').hidden = !acct; $('upSec').hidden = !(mySession && mySession.type === 'guest');
     $('accNote').hidden = !!SKY_API; ['accUser', 'accEmail', 'accPwOld', 'accPwNew', 'accSave'].forEach(id => { $(id).disabled = !SKY_API; });
     if(document.activeElement !== $('accUser')) $('accUser').value = myUid || '';
     if(document.activeElement !== $('accEmail')) $('accEmail').value = prof.email || '';
+    if(!setIsOpen()) fillSettings();   // saat overlay terbuka, isian yang sedang diketik tidak ditimpa
   }
   function applyProfLang(){
     const v = vt(), set = (id, t) => { const e = $(id); if(e) e.textContent = t; };
     set('setT', v.settings); set('avT', v.avT); set('visT', v.visT); set('lgT', ({ en:'Account language', id:'Bahasa akun', es:'Idioma de la cuenta' })[window.SkyApp.getLang()] || 'Account language'); set('accT', v.accT); set('upT', v.upT); set('friendsT', v.friendsT);
+    set('nmT', v.nmT); set('stT', v.stT); set('sndT', v.sndT); set('setSave', v.save); $('setClose').setAttribute('aria-label', v.closeB); $('setName').placeholder = v.name; renderMyName();
     set('accSave', v.accSave); set('upBtn', v.upBtn); set('accNote', v.noSrv);
     const o = $('visSel').options; o[0].textContent = v.vPub; o[1].textContent = v.vFr; o[2].textContent = v.vPri;
     $('stIn').placeholder = v.stPh; $('accUser').placeholder = v.uname; $('accEmail').placeholder = v.email; $('accPwOld').placeholder = v.pwOld; $('accPwNew').placeholder = v.pwNew;
@@ -3559,21 +3632,67 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     document.querySelectorAll('#avGrid button').forEach(b => { const L = AVLBL[b.dataset.av]; if(L) b.setAttribute('aria-label', L[window.SkyApp.getLang()] || L.en); });
     paintProf(); updateChatSub();
   }
-  AVATARS.forEach(a => { const b = mkEl('button', '', ''); b.type = 'button'; b.setAttribute('aria-label', (AVLBL[a][window.SkyApp.getLang()] || AVLBL[a].en)); setAv(b, a); b.addEventListener('click', () => { if(prof.avatar !== a) saveProf({ avatar:a }, true); setPanelOpen($('avFold'), $('avBtn'), false); SFX.success && SFX.success(); }); $('avGrid').appendChild(b); });
-  // dua panel di kartu profil, hanya satu terbuka: pilihan avatar (klik avatar) atau pengaturan (klik Pengaturan)
-  function setPanelOpen(fold, btn, o){ fold.classList.toggle('open', o); fold.inert = !o; btn.setAttribute('aria-expanded', String(o)); }
-  const closePanels = () => { setPanelOpen($('setFold'), $('setBtn'), false); setPanelOpen($('avFold'), $('avBtn'), false); };
-  const toggleSet = () => { const o = !$('setFold').classList.contains('open'); closePanels(); setPanelOpen($('setFold'), $('setBtn'), o); };
-  const toggleAv = () => { const o = !$('avFold').classList.contains('open'); closePanels(); setPanelOpen($('avFold'), $('avBtn'), o); };
-  $('setBtn').addEventListener('click', toggleSet); $('avBtn').addEventListener('click', toggleAv);
-  document.addEventListener('click', e => { if(!e.target.closest('.profCard') && ($('setFold').classList.contains('open') || $('avFold').classList.contains('open'))) closePanels(); });   // klik di luar kartu profil = tutup pengaturan (edit nama/status tidak menutupnya)
-  window.addEventListener('sky:page', closePanels);
-  $('stIn').addEventListener('change', () => { const st = $('stIn').value.trim().slice(0, 40); if(st !== (prof.status || '')) saveProf({ status: st }, true); });
-  $('stIn').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('stIn').blur(); } });   // Enter = simpan (di HP tanpa harus ketuk di luar)
-  $('visSel').addEventListener('change', () => { if($('visSel').value !== prof.vis) saveProf({ vis: $('visSel').value }, true); });
-  $('lgSel').addEventListener('change', () => { const c = $('lgSel').value; saveProf({ lang: c }, true); window.SkyApp.applyLang(c); });   // bahasa tersimpan per akun (server + lokal)
+  // ----- overlay pengaturan -----
+  // Profil (avatar, nama, status, visibilitas progres, bahasa) = SATU tombol simpan. Efek suara & akun berdiri sendiri di kartu yang sama.
+  // Setiap perubahan meminta konfirmasi ulang lewat askConfirm().
+  var draftAv = null;
+  function paintDraftAv(){ document.querySelectorAll('#avGrid button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.av === draftAv))); }
+  AVATARS.forEach(a => { const b = mkEl('button', '', ''); b.type = 'button'; b.setAttribute('aria-label', (AVLBL[a][window.SkyApp.getLang()] || AVLBL[a].en)); setAv(b, a); b.addEventListener('click', () => { draftAv = a; paintDraftAv(); SFX.nav && SFX.nav(); }); $('avGrid').appendChild(b); });
+  let setFrom = null;
+  function setIsOpen(){ return $('setOv').classList.contains('open'); }
+  function fillSettings(){
+    draftAv = prof.avatar; paintDraftAv();
+    $('setName').value = myUid ? (lsGet('sky_myname_' + myUid) || '') : '';
+    $('stIn').value = prof.status || '';
+    $('visSel').value = prof.vis; $('lgSel').value = prof.lang || window.SkyApp.getLang();
+  }
+  function openSettings(){
+    if(!myUid) return;
+    fillSettings(); setFrom = document.activeElement;
+    $('setOv').classList.add('open'); $('setOv').setAttribute('aria-hidden', 'false'); SFX.open();
+    setTimeout(() => $('setClose').focus({ preventScroll:true }), 60);
+  }
+  function closeSettings(){
+    if(!setIsOpen()) return;
+    $('setOv').classList.remove('open'); $('setOv').setAttribute('aria-hidden', 'true');
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    if(setFrom && setFrom.isConnected && setFrom.focus) setFrom.focus({ preventScroll:true });
+    setFrom = null;
+  }
+  async function saveSettingsProfile(){
+    if(!myUid) return;
+    const v = vt(), n = ($('setName').value || '').trim().slice(0, 10), curN = lsGet('sky_myname_' + myUid) || '';
+    const st = $('stIn').value.trim().slice(0, 40), vis = $('visSel').value, lg = $('lgSel').value, curLg = prof.lang || window.SkyApp.getLang();
+    const patch = {}, ch = [];
+    if(draftAv && draftAv !== prof.avatar){ patch.avatar = draftAv; ch.push(v.lAv); }
+    if(n !== curN) ch.push(v.lName);
+    if(st !== (prof.status || '')){ patch.status = st; ch.push(v.lSt); }
+    if(vis !== prof.vis){ patch.vis = vis; ch.push(v.lVis); }
+    if(lg !== curLg){ patch.lang = lg; ch.push(v.lLg); }
+    if(!ch.length){ toast(v.noChg); return; }
+    if(!(await askConfirm({ title:v.cfSaveT, msg:v.cfSaveMsg.replace('{l}', ch.join(', ')), ok:v.cfOk, no:v.outNo }))) return;
+    if(n !== curN){
+      if(n) lsSet('sky_myname_' + myUid, n); else lsDel('sky_myname_' + myUid);
+      window.SkyApp.setUser(dispName(myUid), myUid);   // perbarui sapaan di beranda
+      renderMyName(); pushProf({ name: n || myUid });
+    }
+    if(Object.keys(patch).length) saveProf(patch, true);   // bahasa tersimpan per akun (server + lokal)
+    if(patch.lang) window.SkyApp.applyLang(patch.lang);
+    toast(v.saved); SFX.success();
+  }
+  $('setOpen').addEventListener('click', openSettings); $('avBtn').addEventListener('click', openSettings);
+  $('setClose').addEventListener('click', closeSettings);
+  $('setOv').addEventListener('click', e => { if(e.target === $('setOv')) closeSettings(); });   // ketuk latar redup = tutup
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && setIsOpen() && $('outOv').hidden) closeSettings(); });
+  window.addEventListener('sky:page', closeSettings);
+  $('setSave').addEventListener('click', () => withBusy($('setSave'), saveSettingsProfile));
+  ['setName', 'stIn'].forEach(id => $(id).addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('setSave').click(); } }));
   window.addEventListener('sky:lang', e => { if(myUid && e.detail && e.detail.lang && prof.lang !== e.detail.lang){ saveProf({ lang: e.detail.lang }, true); } });   // ganti bahasa lewat menu atas juga ikut tersimpan ke akun
-  $('muteBtn').addEventListener('click', () => saveProf({ mute: !prof.mute }, false));
+  $('muteBtn').addEventListener('click', async () => {   // efek suara: berdiri sendiri, tetap minta konfirmasi
+    const v = vt();
+    if(!(await askConfirm({ title: prof.mute ? v.cfUnmuteT : v.cfMuteT, msg:v.cfSndMsg, ok:v.cfOk, no:v.outNo }))) return;
+    saveProf({ mute: !prof.mute }, false); SFX.success();
+  });
 
   async function withBusy(btn, fn){   // cegah klik ganda: tombol dikunci + spinner selama proses
     if(btn.classList.contains('busy')) return;
@@ -3590,6 +3709,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(rename && (!/^[a-z0-9_]{3,16}$/.test(nu) || nu.indexOf('guest') === 0)) return fail(L.eName);
     const mailChanged = em !== (prof.email || '');
     if(!mailChanged && !pn && !rename) return;   // tidak ada yang berubah
+    if(!(await askConfirm({ title:v.cfAccT, msg:v.cfAccMsg, ok:v.cfOk, no:v.outNo }))) return;
     if(mailChanged){ const r = await api('updateProfile', { email: em }); if(!(r && r.ok)) return fail(vt().netErr); saveProf({ email: em }, false); }
     if(pn){ const r = await api('changePassword', { oldPw: po, newPw: pn }); if(!(r && r.ok)) return fail(L.eBad); }
     if(rename){
@@ -3608,6 +3728,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const u = ($('upUser').value || '').trim().toLowerCase(), pw = $('upPw').value || '', gid = myUid;
     if(!/^[a-z0-9_]{3,16}$/.test(u) || u.indexOf('guest') === 0) return fail(L.eName);
     if(pw.length < 6) return fail(L.ePw);
+    if(!(await askConfirm({ title:v.cfUpT, msg:v.cfUpMsg, ok:v.cfOk, no:v.outNo }))) return;
     if(srv()){
       let data = {}; try{ data = JSON.parse(lsGet('sky:v1:u:' + gid) || '{}'); }catch(e){}
       const r = await api('register', { username:u, password:pw, code:myCode, friends:friendsCache, data });
