@@ -209,8 +209,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .profMain{ flex:1; min-width:0; text-align:left; }
   .profCard .idLabel{ font-size:11px; color:var(--ink-soft); letter-spacing:0.04em; text-transform:uppercase; }
   .profCard .idVal{ font-size:18px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .profCard #setOpen{ flex:none; display:grid; place-items:center; width:40px; height:40px; padding:0; border:0; border-radius:50%; background:none; color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:transform .15s ease; }
-  #setOpen svg, #setOpen img.ai{ width:24px; height:24px; } #setOpen img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
+  .profCard #setOpen{ flex:none; display:grid; place-items:center; width:46px; height:46px; padding:0; border:0; border-radius:50%; background:none; color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:transform .15s ease; }
+  #setOpen svg, #setOpen img.ai{ width:29px; height:29px; } #setOpen img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
   #setOpen:active{ transform:scale(0.9); } #setOpen:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
   .profStatus{ font-size:12px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .profStatus:empty{ display:none; }
   .profUser{ font-size:12px; color:var(--ink-soft); }
@@ -341,21 +341,22 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #addBox #aBody{ flex:none; overflow:visible; padding:14px 18px 18px; }
   #addBox .mergedCard{ padding:0; background:none; border:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
   /* overlay pengaturan (kartu di tengah) */
-  #setOv{ position:fixed; inset:0; z-index:63; display:flex; align-items:flex-start; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 20px); background:rgba(0,0,0,0.5); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
-  #setOv.open{ opacity:1; visibility:visible; transition:opacity .25s ease, visibility 0s; }
-  #setBox{ width:100%; max-width:420px; max-height:100%; display:flex; flex-direction:column; overflow:hidden; border-radius:20px; background:linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%); border:1px solid rgba(255,255,255,0.18); box-shadow:0 12px 40px rgba(0,0,0,0.35); color:var(--ink); transform:translateY(12px) scale(.97); transition:transform .3s ease; }
-  #setOv.open #setBox{ transform:none; }
+  #setOv, #rsOv, #avOv{ position:fixed; inset:0; z-index:63; display:flex; align-items:flex-start; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 20px); background:rgba(0,0,0,0.5); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
+  #setOv.open, #rsOv.open, #avOv.open{ opacity:1; visibility:visible; transition:opacity .25s ease, visibility 0s; }
+  #setBox, #rsBox, #avBox{ width:100%; max-width:420px; max-height:100%; display:flex; flex-direction:column; overflow:hidden; border-radius:20px; background:linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%); border:1px solid rgba(255,255,255,0.18); box-shadow:0 12px 40px rgba(0,0,0,0.35); color:var(--ink); transform:translateY(12px) scale(.97); transition:transform .3s ease; }
+  #setOv.open #setBox, #rsOv.open #rsBox, #avOv.open #avBox{ transform:none; }
+  #avBox{ max-width:340px; } #avBox .avGrid{ justify-content:center; }
   .setHd{ flex:none; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 12px 10px 18px; border-bottom:1px solid rgba(255,255,255,0.08); }
   .setHd h2{ margin:0; font-size:16px; font-weight:500; }
-  #setClose, #aBack{ flex:none; width:36px; height:36px; display:grid; place-items:center; padding:0; font-size:16px; border-radius:50%; }
-  #setClose{ background:none; border:none; color:var(--ink); cursor:pointer; }
-  #setClose:focus-visible, #aBack:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; }
+  #setClose, #aBack, #rsClose, #avClose{ flex:none; width:36px; height:36px; display:grid; place-items:center; padding:0; font-size:16px; border-radius:50%; }
+  #setClose, #rsClose, #avClose{ background:none; border:none; color:var(--ink); cursor:pointer; }
+  #setClose:focus-visible, #aBack:focus-visible, #rsClose:focus-visible, #avClose:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; }
   .setScroll{ overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding:14px 16px 18px; display:flex; flex-direction:column; gap:14px; }
   .setCard{ display:flex; flex-direction:column; gap:12px; padding:14px; border-radius:16px; background:rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.14); text-align:left; }
   .setCard[hidden]{ display:none; }
   .setField{ display:flex; flex-direction:column; gap:6px; min-width:0; }
   .setCard .fBtn{ width:100%; } .setCard #muteBtn[aria-pressed="true"]{ opacity:.8; }
-  @media (prefers-reduced-motion: reduce){ #setOv, #setBox, #addBox, #addOverlay{ transition-duration:0.01s !important; transition-delay:0s !important; } }
+  @media (prefers-reduced-motion: reduce){ #setOv, #setBox, #rsOv, #rsBox, #avOv, #avBox, #addBox, #addOverlay{ transition-duration:0.01s !important; transition-delay:0s !important; } }
   #chatHead, #fHead{
     display:flex; align-items:center; gap:10px; padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 14px;
     border-bottom:1px solid rgba(255,255,255,0.08);
@@ -770,6 +771,15 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   .chd{ display:flex; align-items:center; }
   .chd .cbtn{ flex:1; min-width:0; }
+  /* rasi: baris realm membuka overlay (bukan dropdown lagi) */
+  .cbtn.go svg{ transform:rotate(-90deg); }
+  .pcv{ flex:none; font-size:13px; color:var(--ink-soft); font-variant-numeric:tabular-nums; } .pcv:empty{ display:none; }
+  .rsHd{ justify-content:flex-start; gap:12px; } .rsHd .rsTx{ flex:1; min-width:0; }
+  .rsHd h2{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rsSum{ margin-top:2px; font-size:12px; color:var(--ink-soft); }
+  .rsChips{ display:flex; flex-wrap:wrap; gap:8px; }
+  #rsBody .idLabel{ font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
+  #rsBody .pc{ padding-right:0; } #rsExtra:empty{ display:none; }
   .pc{ display:flex; align-items:center; gap:4px; padding-right:16px; font-size:13px; color:var(--ink-soft); }
   .pc input, .ms input{ height:40px; text-align:center; border-radius:12px; border:1px solid rgba(255,255,255,0.28); background:rgba(0,0,0,0.15); color:var(--ink); font:500 16px 'Space Grotesk', sans-serif; font-variant-numeric:tabular-nums; }
   .pc input{ width:56px; }
@@ -915,22 +925,22 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #musicBox{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 16px); left:50%; transform:translateX(-50%); z-index:10; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s; }
   body.ready.mz:not(.p2):not(.p3):not(.p4) #musicBox{   /* hanya di beranda */ opacity:1; visibility:visible; transition:opacity .5s ease .2s, visibility 0s; }
   /* saat hanya ikon musik: TANPA kartu. Kartu (latar + garis + blur) baru muncul saat jeda/lanjut terbuka atau daftar musik tampil */
-  #mzBar{ display:flex; align-items:center; gap:2px; height:52px; padding:0 1px; border-radius:999px; border:1px solid transparent; background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; pointer-events:auto; max-width:calc(100vw - 24px); transition:opacity .3s ease, background-color .3s ease, border-color .3s ease, padding .28s ease; }
+  #mzBar{ display:flex; align-items:center; gap:2px; height:56px; padding:0 1px; border-radius:999px; border:1px solid transparent; background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; pointer-events:auto; max-width:calc(100vw - 24px); transition:opacity .3s ease, background-color .3s ease, border-color .3s ease, padding .28s ease; }
   #musicBox.open #mzBar, #musicBox.listOpen #mzBar{ padding:0 5px; border-color:rgba(255,255,255,0.18); background:rgba(0,0,0,0.15); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
   #musicBox.dim #mzBar{ opacity:.55; }
   .mzB{ display:grid; place-items:center; flex:none; padding:0; border:0; border-radius:50%; background:none; color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
   .mzB:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
-  .mzMain{ width:50px; height:50px; }
-  .mzPrev, .mzNext{ width:0; height:40px; opacity:0; overflow:hidden; visibility:hidden; transition:width .28s ease, opacity .2s ease, visibility 0s linear .28s; }
-  #musicBox.open .mzPrev, #musicBox.open .mzNext{ width:40px; opacity:1; visibility:visible; transition:width .28s ease, opacity .25s ease .05s, visibility 0s; }
-  .mzB .mi{ display:none; place-items:center; width:28px; height:28px; }
-  .mzB .mi svg, .mzB .mi img.ai{ width:28px; height:28px; }
+  .mzMain{ width:54px; height:54px; }
+  .mzPrev, .mzNext{ width:0; height:44px; opacity:0; overflow:hidden; visibility:hidden; transition:width .28s ease, opacity .2s ease, visibility 0s linear .28s; }
+  #musicBox.open .mzPrev, #musicBox.open .mzNext{ width:38px; opacity:1; visibility:visible; transition:width .28s ease, opacity .25s ease .05s, visibility 0s; }
+  .mzB .mi{ display:none; place-items:center; width:33px; height:33px; }
+  .mzB .mi svg, .mzB .mi img.ai{ width:33px; height:33px; }
   #musicBox img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
-  .mzPrev .mi, .mzNext .mi{ display:grid; width:22px; height:22px; } .mzPrev .mi svg, .mzNext .mi svg, .mzPrev .mi img.ai, .mzNext .mi img.ai{ width:22px; height:22px; }
+  .mzPrev .mi, .mzNext .mi{ display:grid; width:25px; height:25px; } .mzPrev .mi svg, .mzNext .mi svg, .mzPrev .mi img.ai, .mzNext .mi img.ai{ width:25px; height:25px; }
   #musicBox:not(.open):not(.listOpen) .mi-note{ display:grid; }
   /* tekan lama: ikon musik digantikan sementara oleh teks "Daftar Musik" (ketuk teks = tutup daftar) */
-  .mzLbl{ display:none; padding:0 14px; font-family:'Space Grotesk', sans-serif; font-size:14px; font-weight:500; letter-spacing:.1px; line-height:50px; white-space:nowrap; }
-  #musicBox.listOpen .mzMain{ width:auto; min-width:50px; border-radius:999px; }
+  .mzLbl{ display:none; padding:0 14px; font-family:'Space Grotesk', sans-serif; font-size:14px; font-weight:500; letter-spacing:.1px; line-height:54px; white-space:nowrap; }
+  #musicBox.listOpen .mzMain{ width:auto; min-width:54px; border-radius:999px; }
   #musicBox.listOpen .mzMain .mi{ display:none !important; }
   #musicBox.listOpen .mzMain .mzLbl{ display:block; }
   #musicBox.open:not(.paused) .mi-pause{ display:grid; }
@@ -1085,9 +1095,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fNm{ font-size:17px; font-weight:500; min-width:0; flex:0 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #fAct{ flex:none; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; } #fAct.on{ color:var(--ok); }
   .fWho .idLabel{ font-size:12px; color:var(--ink-soft); letter-spacing:0.02em; margin-top:2px; }
-  .fIcoBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:0; background:none; color:var(--ink); display:grid; place-items:center; cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:opacity .2s ease, transform .15s ease; }
+  .fIcoBtn{ flex:none; width:48px; height:48px; padding:0; border-radius:50%; border:0; background:none; color:var(--ink); display:grid; place-items:center; cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:opacity .2s ease, transform .15s ease; }
   .fIcoBtn:active{ transform:scale(.92); }
-  .fIcoBtn svg, .fIcoBtn img.ai{ width:24px; height:24px; }
+  .fIcoBtn svg, .fIcoBtn img.ai{ width:29px; height:29px; }
   .fIcoBtn:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; }
   .fIcoBtn img.ai{ filter:var(--logo-filter); }
   .fIcoBtn[aria-expanded="true"]{ opacity:.55; }   /* tanpa kartu bulat: tanda terbuka = ikon meredup */
@@ -1192,7 +1202,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     <div class="setScroll">
       <!-- satu fungsi simpan: avatar, nama, status, visibilitas progres, bahasa -->
       <section class="setCard" id="setProf">
-        <div class="setField"><div class="idLabel" id="avT"></div><div class="avGrid" id="avGrid"></div></div>
         <div class="setField"><div class="idLabel" id="nmT">Name</div><input type="text" id="setName" maxlength="10" autocomplete="off"></div>
         <div class="setField"><div class="idLabel" id="stT">Status</div><input type="text" id="stIn" maxlength="40" autocomplete="off"></div>
         <div class="setField"><div class="idLabel" id="visT"></div>
@@ -1226,6 +1235,16 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
           <button type="button" class="fBtn main" id="upBtn"></button>
         </div>
       </section>
+    </div>
+  </div>
+</div>
+
+<!-- overlay avatar: ketuk avatar di kartu profil = hanya avatar yang diedit -->
+<div id="avOv" aria-hidden="true">
+  <div id="avBox" role="dialog" aria-modal="true" aria-labelledby="avT">
+    <div class="setHd"><h2 id="avT">Choose avatar</h2><button type="button" id="avClose" aria-label="Close">&#10005;</button></div>
+    <div class="setScroll">
+      <section class="setCard"><div class="avGrid" id="avGrid"></div><button type="button" class="fBtn main" id="avSave">Save</button></section>
     </div>
   </div>
 </div>
@@ -1728,7 +1747,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Fairy ring', sunset:'Sunset', rainbow:'Forest Brook rainbow', daily:'Daily reset', weekly:'Weekly reset', ts:'Traveling Spirit', seats:'Take your seats', concert:'Concert starts', shardRed:'Red shard', shardBlack:'Black shard' },
       tips:['Don\'t lose track of time, your candles are waiting.', 'Got a spare candle? Light one for someone today.', 'Even a tiny light can help someone find their way.', 'No rush, the sky isn\'t going anywhere.', 'Did you grab your daily candles yet?', 'Take a break, Sky kid. Tomorrow\'s flight will still be here.', 'Hold someone\'s hand and share your light.', 'Drink some water and stretch a bit between flights.', 'Some spirits are still waiting for you to remember them.', 'Sunsets are worth slowing down for.', 'Go to bed on time, the stars will be back tomorrow.', 'Keep shining, wherever you fly.'],
       reward:{ ascended:'Ascended Candle', wax:'Wax' },
-      pg:{ cur:'Currency', cons:'Constellations', main:'Main', seas:'Seasons', trk:'Trackers', run:'Candle run', runS:'Resets daily', eden:'Eden', edenS:'Resets weekly', done:'Done this week', sp:'spirits', nm:'Season name', all:'Complete all areas', cap:'Gray / 20', capL:'Candles turned gray or reached 20 today', add:'Add season', hist:'History', nohist:'No history yet', ar:'areas', wk:'Week of', del:'Remove', n:{ candles:'Candles', hearts:'Hearts', sheart:'Season Hearts', asc:'Ascended Candles', season:'Season Candles', event:'Event Tickets', gift:'Hearts Gifted' } },
+      pg:{ pct:'Manual progress', cls:'Close', cur:'Currency', cons:'Constellations', main:'Main', seas:'Seasons', trk:'Trackers', run:'Candle run', runS:'Resets daily', eden:'Eden', edenS:'Resets weekly', done:'Done this week', sp:'spirits', nm:'Season name', all:'Complete all areas', cap:'Gray / 20', capL:'Candles turned gray or reached 20 today', add:'Add season', hist:'History', nohist:'No history yet', ar:'areas', wk:'Week of', del:'Remove', n:{ candles:'Candles', hearts:'Hearts', sheart:'Season Hearts', asc:'Ascended Candles', season:'Season Candles', event:'Event Tickets', gift:'Hearts Gifted' } },
       cat:{ candles:'Candles', shards:'Shards', environment:'Environment', reset:'Reset', spirits:'Spirits', aurora:'AURORA concert' },
       act:{ title:'Active now', none:'No active events right now', next:'Next', endsIn:'ends in', live:'Active' },
       menu:{ label:'Menu', home:'Home', events:'Events', journey:'Progress', visit:'Visit', soon:'Soon', logout:'Log out' },
@@ -1744,7 +1763,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Cincin peri', sunset:'Matahari terbenam', rainbow:'Pelangi Sungai Hutan', daily:'Reset harian', weekly:'Reset mingguan', ts:'Roh pengembara', seats:'Ambil kursi', concert:'Konser dimulai', shardRed:'Shard merah', shardBlack:'Shard hitam' },
       tips:['Jangan lupa waktu ya, lilinmu sudah menunggu.', 'Ada lilin cadangan? Nyalakan satu buat seseorang hari ini.', 'Cahaya sekecil apa pun bisa bantu orang lain menemukan jalan.', 'Santai aja, langitnya nggak ke mana-mana.', 'Sudah ambil lilin harianmu belum?', 'Istirahat dulu, Sky kid. Besok masih bisa terbang lagi.', 'Gandeng tangan temanmu, bagikan cahayamu.', 'Jangan lupa minum air dan regangkan badan di sela-sela terbang.', 'Ada roh yang masih menunggu untuk kamu ingat.', 'Pemandangan sunset layak buat berhenti sebentar.', 'Jangan begadang ya, bintangnya masih ada besok.', 'Terus bersinar, ke mana pun kamu terbang.'],
       reward:{ ascended:'Ascended Candle', wax:'Wax' },
-      pg:{ cur:'Mata uang', cons:'Rasi bintang', main:'Utama', seas:'Season', trk:'Pelacak', run:'Candle run', runS:'Reset harian', eden:'Eden', edenS:'Reset mingguan', done:'Selesai minggu ini', sp:'roh', nm:'Nama season', all:'Selesaikan semua area', cap:'Abu-abu / 20', capL:'Lilin sudah abu-abu atau mencapai 20 hari ini', add:'Tambah season', hist:'Riwayat', nohist:'Belum ada riwayat', ar:'area', wk:'Minggu', del:'Hapus', n:{ candles:'Lilin', hearts:'Hati', sheart:'Hati Season', asc:'Lilin Ascended', season:'Lilin Season', event:'Tiket Event', gift:'Hati Dihadiahkan' } },
+      pg:{ pct:'Progres manual', cls:'Tutup', cur:'Mata uang', cons:'Rasi bintang', main:'Utama', seas:'Season', trk:'Pelacak', run:'Candle run', runS:'Reset harian', eden:'Eden', edenS:'Reset mingguan', done:'Selesai minggu ini', sp:'roh', nm:'Nama season', all:'Selesaikan semua area', cap:'Abu-abu / 20', capL:'Lilin sudah abu-abu atau mencapai 20 hari ini', add:'Tambah season', hist:'Riwayat', nohist:'Belum ada riwayat', ar:'area', wk:'Minggu', del:'Hapus', n:{ candles:'Lilin', hearts:'Hati', sheart:'Hati Season', asc:'Lilin Ascended', season:'Lilin Season', event:'Tiket Event', gift:'Hati Dihadiahkan' } },
       cat:{ candles:'Lilin', shards:'Shard', environment:'Lingkungan', reset:'Reset', spirits:'Roh', aurora:'Konser Aurora' },
       act:{ title:'Aktif sekarang', none:'Tidak ada event aktif saat ini', next:'Berikutnya', endsIn:'berakhir dalam', live:'Aktif' },
       menu:{ label:'Menu', home:'Beranda', events:'Event', journey:'Progres', visit:'Visit', soon:'Segera', logout:'Keluar' },
@@ -1760,7 +1779,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       ev:{ geyser:'Géiser', grandma:'Abuela', turtle:'Tortuga', eden:'Edén', fairy:'Círculo de hadas', sunset:'Atardecer', rainbow:'Arcoíris del Arroyo del Bosque', daily:'Reinicio diario', weekly:'Reinicio semanal', ts:'Espíritu viajero', seats:'Toma asiento', concert:'Empieza el concierto', shardRed:'Fragmento rojo', shardBlack:'Fragmento negro' },
       tips:['No pierdas la noción del tiempo, tus velas te esperan.', '¿Tienes una vela de sobra? Enciende una por alguien hoy.', 'Hasta una lucecita puede ayudar a alguien a encontrar su camino.', 'Sin prisa, el cielo no se va a ir a ningún lado.', '¿Ya recogiste tus velas de hoy?', 'Tómate un descanso, Sky kid. El vuelo de mañana seguirá ahí.', 'Dale la mano a alguien y comparte tu luz.', 'Toma un poco de agua y estírate entre vuelos.', 'Hay espíritus que todavía esperan que los recuerdes.', 'Un atardecer vale la pena para ir más despacio.', 'Duerme a tu hora, las estrellas vuelven mañana.', 'Sigue brillando, vueles donde vueles.'],
       reward:{ ascended:'Vela ascendida', wax:'Cera' },
-      pg:{ cur:'Moneda', cons:'Constelaciones', main:'Principales', seas:'Temporadas', trk:'Seguimiento', run:'Candle run', runS:'Se reinicia a diario', eden:'Edén', edenS:'Se reinicia cada semana', done:'Hecho esta semana', sp:'espíritus', nm:'Nombre de la temporada', all:'Completar todas las zonas', cap:'Gris / 20', capL:'Las velas están grises o llegaste a 20 hoy', add:'Añadir temporada', hist:'Historial', nohist:'Aún no hay historial', ar:'zonas', wk:'Semana del', del:'Quitar', n:{ candles:'Velas', hearts:'Corazones', sheart:'Corazones de temporada', asc:'Velas ascendidas', season:'Velas de temporada', event:'Entradas de evento', gift:'Corazones regalados' } },
+      pg:{ pct:'Progreso manual', cls:'Cerrar', cur:'Moneda', cons:'Constelaciones', main:'Principales', seas:'Temporadas', trk:'Seguimiento', run:'Candle run', runS:'Se reinicia a diario', eden:'Edén', edenS:'Se reinicia cada semana', done:'Hecho esta semana', sp:'espíritus', nm:'Nombre de la temporada', all:'Completar todas las zonas', cap:'Gris / 20', capL:'Las velas están grises o llegaste a 20 hoy', add:'Añadir temporada', hist:'Historial', nohist:'Aún no hay historial', ar:'zonas', wk:'Semana del', del:'Quitar', n:{ candles:'Velas', hearts:'Corazones', sheart:'Corazones de temporada', asc:'Velas ascendidas', season:'Velas de temporada', event:'Entradas de evento', gift:'Corazones regalados' } },
       cat:{ candles:'Velas', shards:'Fragmentos', environment:'Entorno', reset:'Reinicio', spirits:'Espíritus', aurora:'Concierto de AURORA' },
       act:{ title:'Activos ahora', none:'No hay eventos activos ahora', next:'Siguiente', endsIn:'termina en', live:'Activo' },
       menu:{ label:'Menú', home:'Inicio', events:'Eventos', journey:'Progreso', visit:'Visit', soon:'Pronto', logout:'Cerrar sesión' },
@@ -2486,7 +2505,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const COINI = '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 9.4c0 1.7 3.1 3 7 3s7-1.3 7-3v3c0 1.7-3.1 3-7 3s-7-1.3-7-3Z"/><path d="M5 15.9c0 1.7 3.1 3 7 3s7-1.3 7-3v2.6c0 1.7-3.1 3-7 3s-7-1.3-7-3Z"/>';   // simbol umum (tumpukan koin)
   const CONI = '<path d="M5 18l5-8 5 5 4-10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="18" r="2"/><circle cx="10" cy="10" r="2"/><circle cx="15" cy="15" r="2"/><circle cx="19" cy="5" r="2"/>';
   const folds = [];
-  const foldAway = e => { const t = e.target; if(!(t && t.closest) || t.closest('#pgRoot .fold, #pgRoot .sec-h') || !document.querySelector('#pgRoot .fold.open')) return; folds.forEach(f => f(false)); };   // fokus/ketuk elemen lain = tutup dropdown (mata uang, rasi, dll.)
+  const foldAway = e => { const t = e.target; if(!(t && t.closest) || t.closest('#pgRoot .fold, #pgRoot .sec-h, #rsOv') || !document.querySelector('#pgRoot .fold.open')) return; folds.forEach(f => f(false)); };   // fokus/ketuk elemen lain = tutup dropdown (mata uang, rasi, dll.)
   document.addEventListener('pointerdown', foldAway, true); document.addEventListener('focusin', foldAway);
   const topSec = mk('div', 'sec col'), hrow = mk('div', 'hrow'), fcol = mk('div', 'fcol');
   topSec.append(hrow, fcol); pgRoot.appendChild(topSec);
@@ -2556,16 +2575,49 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   // kartu 2: rasi bintang utama (dropdown roh + persen manual) dan season (nama & persen manual)
   const cardCon = pgSection(CONI, '#cfd6ff', 'progres/rasi-bintang'), gtMain = mk('div', 'gt'), gtSeas = mk('div', 'gt');
   cardCon.appendChild(gtMain);
+  // ----- rasi per realm: ketuk kartu realm -> overlay (daftar roh + persen manual). Satu overlay dipakai bersama; isinya ditukar per realm. -----
+  const rsOv = mk('div', '', '<div id="rsBox" role="dialog" aria-modal="true" aria-labelledby="rsT"><div class="setHd rsHd"><span id="rsIcon"></span><div class="rsTx"><h2 id="rsT"></h2><div class="rsSum" id="rsSum"></div></div><button type="button" id="rsClose">&#10005;</button></div><div class="setScroll" id="rsBody"></div></div>');
+  rsOv.id = 'rsOv'; rsOv.setAttribute('aria-hidden', 'true'); document.body.appendChild(rsOv);
+  const rsT = rsOv.querySelector('#rsT'), rsSum = rsOv.querySelector('#rsSum'), rsIcon = rsOv.querySelector('#rsIcon'), rsBody = rsOv.querySelector('#rsBody'), rsClose = rsOv.querySelector('#rsClose');
+  let rsCur = null, rsBtn = null;
+  function openRealm(c, btn){
+    rsCur = c; rsBtn = btn; rsT.textContent = c.name; rsSum.textContent = c.el.textContent;
+    rsIcon.replaceChildren(realmIcon(c.name)); rsBody.replaceChildren(c.card);
+    rsOv.classList.add('open'); rsOv.setAttribute('aria-hidden', 'false'); btn.setAttribute('aria-expanded', 'true');
+    setTimeout(() => rsClose.focus({ preventScroll:true }), 60);
+  }
+  function closeRealm(){
+    if(!rsCur) return;
+    rsOv.classList.remove('open'); rsOv.setAttribute('aria-hidden', 'true');
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    if(rsBtn && rsBtn.isConnected){ rsBtn.setAttribute('aria-expanded', 'false'); rsBtn.focus({ preventScroll:true }); }
+    rsCur = null; rsBtn = null;
+  }
+  rsClose.onclick = closeRealm;
+  rsOv.addEventListener('click', e => { if(e.target === rsOv) closeRealm(); });   // ketuk latar redup = tutup
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && rsCur) closeRealm(); });
+  window.addEventListener('sky:page', closeRealm);
   REALMS.forEach(([name, cnt]) => {
-    const id = 'main:' + name, dd = mkDrop(name, true, false, true), chips = [];
+    const id = 'main:' + name, chips = [];
+    const wrap = mk('div', 'cn', '<div class="chd"><button type="button" class="cbtn go" aria-haspopup="dialog" aria-expanded="false"><span class="evl"><span class="en"></span><span class="el"></span></span><span class="pcv"></span>' + CHEV + '</button></div>');
+    const btn = wrap.querySelector('.cbtn'), en = wrap.querySelector('.en'), el = wrap.querySelector('.el'), pcv = wrap.querySelector('.pcv');
+    en.textContent = name; btn.insertBefore(realmIcon(name), btn.firstChild);
+    // isi overlay: persen manual + daftar roh (+ slot kosong #rsExtra untuk pengoptimalan rasi berikutnya)
+    const card = mk('div', 'setCard'), pf = mk('div', 'setField', '<div class="idLabel"></div><label class="pc"><input type="text" inputmode="numeric" maxlength="3" placeholder="0">%</label>');
+    const cf = mk('div', 'setField', '<div class="idLabel"></div><div class="rsChips"></div>'), box = cf.querySelector('.rsChips'), extra = mk('div', 'setField'); extra.id = 'rsExtra';
     for(let i = 0; i < cnt; i++){
       const c = mk('button', 'chip', String(i + 1)); c.type = 'button';
       c.onclick = () => pgWrite(d => { d.c = d.c || {}; d.c[id] = (d.c[id] || 0) ^ (1 << i); });
-      chips.push(c); dd.box.appendChild(c);
+      chips.push(c); box.appendChild(c);
     }
-    dd.pin.onfocus = () => dd.pin.select();
-    dd.pin.onchange = () => pgWrite(d => { (d.p = d.p || {})[id] = pct(dd.pin.value); });
-    pgRefs.cn.push({ id, cnt, chips, el: dd.el, pin: dd.pin }); cardCon.appendChild(dd.wrap);
+    const pin = pf.querySelector('input');
+    pin.onfocus = () => pin.select();
+    pin.onchange = () => pgWrite(d => { (d.p = d.p || {})[id] = pct(pin.value); });
+    pin.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); pin.blur(); } });
+    card.append(pf, cf, extra);
+    const ref = { id, cnt, name, chips, el, pin, pcv, card, lbPct: pf.querySelector('.idLabel'), lbSp: cf.querySelector('.idLabel') };
+    btn.onclick = () => openRealm(ref, btn);
+    pgRefs.cn.push(ref); cardCon.appendChild(wrap);
   });
   cardCon.appendChild(gtSeas);
   const msList = mk('div', 'mslist'), addWrap = mk('div', 'cadd'), addBtn = mk('button', 'pill'); addBtn.type = 'button';
@@ -2626,6 +2678,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const t = I18N[lang].pg;
     [t.cur, t.cons, t.trk].forEach((x, i) => { (pgRefs.titles[i].querySelector('.tx') || pgRefs.titles[i]).textContent = x; });
     NUMS.forEach(k => { pgRefs.n[k].en.textContent = t.n[k]; });
+    pgRefs.cn.forEach(c => { c.lbPct.textContent = t.pct; c.lbSp.textContent = t.sp; }); rsClose.setAttribute('aria-label', t.cls);
     gtMain.textContent = t.main; gtSeas.textContent = t.seas; addBtn.textContent = '+ ' + t.add;
     runBox.querySelector('.en').textContent = t.run; edenBox.querySelector('.en').textContent = t.eden;
     runHist.en.textContent = t.run + ' · ' + t.hist; edenHist.en.textContent = t.eden + ' · ' + t.hist;
@@ -2641,6 +2694,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       c.chips.forEach((b, i) => { const on = !!(m >> i & 1); n += on; b.setAttribute('aria-pressed', String(on)); });
       c.el.textContent = n + '/' + c.cnt + ' ' + t.sp;
       const pv = (d.p || {})[c.id]; if(document.activeElement !== c.pin) c.pin.value = pv ? pv : '';
+      c.pcv.textContent = pv ? pv + '%' : '';
+      if(rsCur === c) rsSum.textContent = c.el.textContent;
     });
     paintMs(d, t);
     const runs = d.runs || {}, today = runs[dayK()] || [];
@@ -3030,7 +3085,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(await askConfirm({ title:v.outT, msg:guest ? v.outMsgG : v.outMsg, ok:v.outOk, no:v.outNo })) logout();
   };
   function logout(){
-    closeConfirm(false); closeSettings();
+    closeConfirm(false); closeSettings(); closeAvatar();
     if(Object.keys(profQ).length) flushProf(9);   // kirim dulu perubahan profil yang tertunda (token akun ini)
     touchGuest(true);   // keluar juga dihitung sebagai aktivitas terakhir
     if(window.SkyMusic) window.SkyMusic.stop();
@@ -3657,7 +3712,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   function applyProfLang(){
     const v = vt(), set = (id, t) => { const e = $(id); if(e) e.textContent = t; };
     set('setT', v.settings); set('avT', v.avT); set('visT', v.visT); set('lgT', ({ en:'Account language', id:'Bahasa akun', es:'Idioma de la cuenta' })[window.SkyApp.getLang()] || 'Account language'); set('accT', v.accT); set('upT', v.upT); set('friendsT', v.friendsT);
-    set('nmT', v.nmT); set('stT', v.stT); set('sndT', v.sndT); set('setSave', v.save); $('setClose').setAttribute('aria-label', v.closeB); $('setName').placeholder = v.name; renderMyName();
+    set('nmT', v.nmT); set('stT', v.stT); set('sndT', v.sndT); set('setSave', v.save); set('avSave', v.save); $('setClose').setAttribute('aria-label', v.closeB); $('avClose').setAttribute('aria-label', v.closeB); $('setName').placeholder = v.name; renderMyName();
     set('accSave', v.accSave); set('upBtn', v.upBtn); set('accNote', v.noSrv);
     const o = $('visSel').options; o[0].textContent = v.vPub; o[1].textContent = v.vFr; o[2].textContent = v.vPri;
     $('stIn').placeholder = v.stPh; $('accUser').placeholder = v.uname; $('accEmail').placeholder = v.email; $('accPwOld').placeholder = v.pwOld; $('accPwNew').placeholder = v.pwNew;
@@ -3674,7 +3729,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   let setFrom = null;
   function setIsOpen(){ return $('setOv').classList.contains('open'); }
   function fillSettings(){
-    draftAv = prof.avatar; paintDraftAv();
     $('setName').value = myUid ? (lsGet('sky_myname_' + myUid) || '') : '';
     $('stIn').value = prof.status || '';
     $('visSel').value = prof.vis; $('lgSel').value = prof.lang || window.SkyApp.getLang();
@@ -3697,7 +3751,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const v = vt(), n = ($('setName').value || '').trim().slice(0, 10), curN = lsGet('sky_myname_' + myUid) || '';
     const st = $('stIn').value.trim().slice(0, 40), vis = $('visSel').value, lg = $('lgSel').value, curLg = prof.lang || window.SkyApp.getLang();
     const patch = {}, ch = [];
-    if(draftAv && draftAv !== prof.avatar){ patch.avatar = draftAv; ch.push(v.lAv); }
     if(n !== curN) ch.push(v.lName);
     if(st !== (prof.status || '')){ patch.status = st; ch.push(v.lSt); }
     if(vis !== prof.vis){ patch.vis = vis; ch.push(v.lVis); }
@@ -3713,7 +3766,34 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(patch.lang) window.SkyApp.applyLang(patch.lang);
     toast(v.saved); SFX.success();
   }
-  $('setOpen').addEventListener('click', openSettings); $('avBtn').addEventListener('click', openSettings);
+  // ----- overlay avatar (terpisah dari pengaturan) -----
+  let avFrom = null;
+  function avIsOpen(){ return $('avOv').classList.contains('open'); }
+  function openAvatar(){
+    if(!myUid) return;
+    draftAv = prof.avatar; paintDraftAv(); avFrom = document.activeElement;
+    $('avOv').classList.add('open'); $('avOv').setAttribute('aria-hidden', 'false'); SFX.open();
+    setTimeout(() => $('avClose').focus({ preventScroll:true }), 60);
+  }
+  function closeAvatar(){
+    if(!avIsOpen()) return;
+    $('avOv').classList.remove('open'); $('avOv').setAttribute('aria-hidden', 'true');
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    if(avFrom && avFrom.isConnected && avFrom.focus) avFrom.focus({ preventScroll:true });
+    avFrom = null;
+  }
+  async function saveAvatar(){
+    const v = vt();
+    if(!draftAv || draftAv === prof.avatar){ toast(v.noChg); return; }
+    if(!(await askConfirm({ title:v.cfSaveT, msg:v.cfSaveMsg.replace('{l}', v.lAv), ok:v.cfOk, no:v.outNo }))) return;
+    saveProf({ avatar: draftAv }, true); toast(v.saved); SFX.success(); closeAvatar();
+  }
+  $('avBtn').addEventListener('click', openAvatar); $('avClose').addEventListener('click', closeAvatar);
+  $('avOv').addEventListener('click', e => { if(e.target === $('avOv')) closeAvatar(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && avIsOpen() && $('outOv').hidden) closeAvatar(); });
+  window.addEventListener('sky:page', closeAvatar);
+  $('avSave').addEventListener('click', () => withBusy($('avSave'), saveAvatar));
+  $('setOpen').addEventListener('click', openSettings);
   $('setClose').addEventListener('click', closeSettings);
   $('setOv').addEventListener('click', e => { if(e.target === $('setOv')) closeSettings(); });   // ketuk latar redup = tutup
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && setIsOpen() && $('outOv').hidden) closeSettings(); });
