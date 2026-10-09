@@ -1,1 +1,6 @@
-{ "isle": ["Nama 1", "Nama 2"], "prairie": ["…"], "forest": [], "valley": [], "wasteland": [], "vault": [] }
+{ "isle": ["Pointing Candlemaker", "Elder of the Isle", "Rejecting Voyager", "Ushering Stargazer"]
+  , "prairie": ["Waving Bellmaker","Slumbering Shipwright","Ceremonial Worshiper","Butterfly Charmer","Laughing Light Catcher","Exhausted Dock Worker","Applauding Bellmaker","Bird Call","Elder of the Prairie"]
+  , "forest": ["…","…","…","…","…","…","…","…","…"]
+  , "valley": ["…","…","…","…","…","…","…","…"]
+  , "wasteland": ["…","…","…","…","…","…","…"]
+  , "vault": ["…","…","…","…","…","…"] }
