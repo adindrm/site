@@ -221,9 +221,14 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .setBtn svg{ width:14px; height:14px; transition:transform 0.25s ease; }
   .setBtn[aria-expanded="true"] svg{ transform:rotate(180deg); }
   .setPanel, .accF{ display:flex; flex-direction:column; gap:10px; text-align:left; }
+  .setPanel{ gap:14px; padding-top:6px; }
+  .setGrp{ display:flex; flex-direction:column; gap:8px; min-width:0; } .setGrp[hidden]{ display:none; }
+  .setGrp + .setGrp{ padding-top:14px; border-top:1px solid rgba(255,255,255,0.1); }
   .accF{ gap:8px; }
   .setPanel .fBtn{ width:100%; }
-  .avGrid{ display:grid; grid-template-columns:repeat(2, 72px); gap:12px; }
+  .avGrid{ display:flex; flex-wrap:wrap; gap:12px; }
+  .avPick{ display:flex; flex-direction:column; gap:8px; text-align:left; padding:2px 0 4px; }
+  .avBig[aria-expanded="true"]{ border-color:var(--ink); }
   .avGrid button{ width:72px; height:72px; padding:0; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:transparent; font-size:42px; cursor:pointer; display:grid; place-items:center; }
   .avGrid button[aria-pressed="true"]{ background:var(--ink); }
   .fgt{ font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); padding:8px 4px 0; text-align:left; }
@@ -231,6 +236,11 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .frWrap .friendRow{ flex:1; min-width:0; }
   .friendAvatar{ position:relative; font-size:18px; }
   .dotOn{ position:absolute; right:-1px; bottom:-1px; width:10px; height:10px; border-radius:50%; background:#5ee08a; border:2px solid var(--bottom, #0b1026); }
+  .favBtn{ flex:none; display:grid; place-items:center; width:36px; height:44px; margin-right:-4px; padding:0; border:0; background:none; color:var(--ink-soft); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:color .2s ease, transform .15s ease; }
+  .favBtn svg{ width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linejoin:round; transition:fill .2s ease; }
+  .favBtn:active{ transform:scale(0.88); }
+  .favBtn[aria-pressed="true"]{ color:#ffd27a; } .favBtn[aria-pressed="true"] svg{ fill:currentColor; }
+  .favBtn:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; border-radius:50%; }
   .flameBtn.flm{ animation:flm .6s ease; }
   @keyframes flm{ 0%{ transform:none; } 25%{ transform:rotate(-22deg) scale(1.18); } 50%{ transform:rotate(18deg) scale(1.18); } 75%{ transform:rotate(-8deg); } 100%{ transform:none; } }
   .flameBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.14); background:rgba(255,255,255,0.06); font-size:20px; cursor:pointer; }
@@ -474,6 +484,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   #p1 .page-in{ gap:clamp(12px, 2.2vh, 20px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
   #p2 .page-in{ justify-content:flex-start; padding-top:0; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); }
+  #p4 .page-in{ justify-content:flex-start; padding-top:0; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); }   /* Visit: profil tepat di bawah header, daftar teman mengalir ke bawah */
   .p2wrap{ width:100%; max-width:520px; display:flex; flex-direction:column; gap:22px; }
 
   /* elemen halaman 1 muncul saat halaman siap */
@@ -750,6 +761,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .cap img.ai{ width:16px; height:16px; margin-right:6px; }
   /* lilin abu-abu = harian sudah selesai (penanda cap hari ini); kembali normal otomatis saat reset harian */
   .gc{ fill:#9aa0b4; color:#9aa0b4; }
+  img.ai.gcf{ filter:grayscale(1) brightness(.75); }
   .cap[aria-pressed="true"] > svg:not(.gc), .cap[aria-pressed="true"] > img.ai:not(.gc){ display:none; }
   .cap:not([aria-pressed="true"]) > .gc{ display:none; }
   .gray > :not(.gc){ display:none !important; }
@@ -875,25 +887,33 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   /* pemutar musik mini di header (tengah, antara Menu dan bahasa): ketuk = buka kontrol, tekan lama = daftar lagu */
   #musicBox{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 16px); left:50%; transform:translateX(-50%); z-index:10; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s; }
   body.ready.mz:not(.p2):not(.p3):not(.p4) #musicBox{   /* hanya di beranda */ opacity:1; visibility:visible; transition:opacity .5s ease .2s, visibility 0s; }
-  #mzBar{ display:flex; align-items:center; gap:2px; height:44px; padding:0 1px; border-radius:999px; border:1px solid rgba(255,255,255,0.18); background:rgba(0,0,0,0.15); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); pointer-events:auto; transition:opacity .3s ease; }
+  /* saat hanya ikon musik: TANPA kartu. Kartu (latar + garis + blur) baru muncul saat jeda/lanjut terbuka atau daftar musik tampil */
+  #mzBar{ display:flex; align-items:center; gap:2px; height:52px; padding:0 1px; border-radius:999px; border:1px solid transparent; background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; pointer-events:auto; max-width:calc(100vw - 24px); transition:opacity .3s ease, background-color .3s ease, border-color .3s ease, padding .28s ease; }
+  #musicBox.open #mzBar, #musicBox.listOpen #mzBar{ padding:0 5px; border-color:rgba(255,255,255,0.18); background:rgba(0,0,0,0.15); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
   #musicBox.dim #mzBar{ opacity:.55; }
   .mzB{ display:grid; place-items:center; flex:none; padding:0; border:0; border-radius:50%; background:none; color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
   .mzB:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
-  .mzMain{ width:42px; height:42px; }
-  .mzPrev, .mzNext{ width:0; height:34px; opacity:0; overflow:hidden; visibility:hidden; transition:width .28s ease, opacity .2s ease, visibility 0s linear .28s; }
-  #musicBox.open .mzPrev, #musicBox.open .mzNext{ width:34px; opacity:1; visibility:visible; transition:width .28s ease, opacity .25s ease .05s, visibility 0s; }
-  .mzB .mi{ display:none; place-items:center; width:20px; height:20px; }
-  .mzB .mi svg, .mzB .mi img.ai{ width:20px; height:20px; }
-  .mzPrev .mi, .mzNext .mi{ display:grid; } .mzPrev .mi svg, .mzNext .mi svg, .mzPrev .mi img.ai, .mzNext .mi img.ai{ width:17px; height:17px; }
+  .mzMain{ width:50px; height:50px; }
+  .mzPrev, .mzNext{ width:0; height:40px; opacity:0; overflow:hidden; visibility:hidden; transition:width .28s ease, opacity .2s ease, visibility 0s linear .28s; }
+  #musicBox.open .mzPrev, #musicBox.open .mzNext{ width:40px; opacity:1; visibility:visible; transition:width .28s ease, opacity .25s ease .05s, visibility 0s; }
+  .mzB .mi{ display:none; place-items:center; width:28px; height:28px; }
+  .mzB .mi svg, .mzB .mi img.ai{ width:28px; height:28px; }
+  #musicBox img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
+  .mzLst{ display:flex; align-items:center; gap:6px; flex:none; height:34px; max-width:0; padding:0; margin-left:0; border-radius:999px; background:rgba(255,255,255,0.1); overflow:hidden; visibility:hidden; opacity:0; white-space:nowrap; font-family:'Space Grotesk', sans-serif; font-size:13px; font-weight:500; letter-spacing:.1px; transition:max-width .32s ease, padding .28s ease, margin .28s ease, opacity .2s ease, visibility 0s linear .32s; }
+  #musicBox.open .mzLst{ max-width:190px; padding:0 13px 0 10px; margin-left:3px; opacity:1; visibility:visible; transition:max-width .32s ease, padding .28s ease, margin .28s ease, opacity .25s ease .08s, visibility 0s; }
+  .mzLst:active{ background:rgba(255,255,255,0.18); }
+  .mzLst .mzTx{ overflow:hidden; text-overflow:ellipsis; }
+  .mzPrev .mi, .mzNext .mi, .mzLst .mi{ display:grid; width:22px; height:22px; } .mzPrev .mi svg, .mzNext .mi svg, .mzPrev .mi img.ai, .mzNext .mi img.ai{ width:22px; height:22px; } .mzLst .mi{ width:18px; height:18px; } .mzLst .mi svg, .mzLst .mi img.ai{ width:18px; height:18px; }
   #musicBox:not(.open) .mi-note{ display:grid; }
   #musicBox.open:not(.paused) .mi-pause{ display:grid; }
   #musicBox.open.paused .mi-play{ display:grid; }
   @keyframes mzSway{ 0%, 100%{ transform:rotate(-7deg); } 50%{ transform:rotate(7deg); } }   /* bergoyang sangat pelan */
   #musicBox.playing:not(.open) .mi-note{ animation:mzSway 4.2s ease-in-out infinite; transform-origin:50% 85%; }
-  @media (prefers-reduced-motion: reduce){ #musicBox.playing:not(.open) .mi-note{ animation:none; } #musicBox, .mzPrev, .mzNext, #mzList, #mzBar, .bell{ transition:none !important; } }
-  #mzList{ position:absolute; top:calc(100% + 8px); left:50%; display:flex; flex-direction:column; min-width:200px; max-width:min(280px, calc(100vw - 32px)); max-height:min(50vh, 300px); overflow-y:auto; padding:6px; border-radius:18px; border:1px solid rgba(255,255,255,0.18); background:var(--panel); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); opacity:0; visibility:hidden; transform:translate(-50%, -6px) scale(0.97); transform-origin:top center; pointer-events:none; transition:opacity .25s ease, transform .25s ease, visibility 0s linear .25s; }
+  @media (prefers-reduced-motion: reduce){ #musicBox.playing:not(.open) .mi-note{ animation:none; } #musicBox, .mzPrev, .mzNext, .mzLst, #mzList, #mzBar, .bell{ transition:none !important; } }
+  #mzList{ position:absolute; z-index:11; top:calc(100% + 8px); left:50%; display:flex; flex-direction:column; min-width:200px; max-width:min(280px, calc(100vw - 32px)); max-height:min(50vh, 300px); overflow-y:auto; padding:6px; border-radius:18px; border:1px solid rgba(255,255,255,0.18); background:var(--panel); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); opacity:0; visibility:hidden; transform:translate(-50%, -6px) scale(0.97); transform-origin:top center; pointer-events:none; transition:opacity .25s ease, transform .25s ease, visibility 0s linear .25s; }
   #musicBox.listOpen #mzList{ opacity:1; visibility:visible; transform:translate(-50%, 0) scale(1); pointer-events:auto; transition:opacity .25s ease, transform .25s ease, visibility 0s; }
-  .mzItem{ display:flex; align-items:center; gap:10px; width:100%; min-height:44px; padding:0 12px; border:0; border-radius:12px; background:transparent; font-family:'Space Grotesk', sans-serif; font-size:14px; font-weight:500; color:var(--ink-soft); text-align:left; cursor:pointer; touch-action:manipulation; }
+  .mzHd{ padding:8px 12px 6px; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); }
+  .mzItem{ display:flex; align-items:center; gap:10px; width:100%; min-height:48px; padding:0 12px; border:0; border-radius:12px; background:transparent; font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:500; color:var(--ink-soft); text-align:left; cursor:pointer; touch-action:manipulation; }
   .mzItem::before{ content:''; flex:none; width:12px; }
   .mzItem.on{ color:var(--ink); background:rgba(255,255,255,0.1); } .mzItem.on::before{ content:'\266A'; font-size:12px; }
   .mzItem span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -1002,6 +1022,16 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #loginCard p.about, .lgInfo{ text-align:center; }
   #guestOv{ position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); animation:gFade .25s ease both; }
   #guestOv[hidden]{ display:none; }
+  /* dialog konfirmasi keluar (di atas menu & semua halaman) */
+  #outOv{ position:fixed; inset:0; z-index:10040; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); animation:gFade .25s ease both; }
+  #outOv[hidden]{ display:none; }
+  #outBox{ width:100%; max-width:320px; display:flex; flex-direction:column; gap:10px; text-align:center; padding:22px 20px 14px; border-radius:20px; background:var(--toast-bg); color:var(--toast-fg); box-shadow:0 12px 40px rgba(0,0,0,0.35); animation:gPop .3s ease both; }
+  #outBox h2{ font-size:16px; font-weight:500; }
+  #outMsg{ margin:0 0 6px; font-size:13px; line-height:1.55; opacity:.85; }
+  #outOk{ font-family:inherit; font-size:14px; font-weight:500; border:0; border-radius:12px; padding:12px; cursor:pointer; background:var(--toast-fg); color:var(--toast-bg); }
+  #outNo{ font-family:inherit; font-size:12.5px; border:0; background:none; padding:8px; cursor:pointer; color:var(--toast-fg); opacity:.65; text-decoration:underline; text-underline-offset:3px; }
+  #outOk:focus-visible, #outNo:focus-visible{ outline:2px solid var(--toast-fg); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){ #outOv, #outBox{ animation:none !important; } }
   #guestBox{ width:100%; max-width:320px; display:flex; flex-direction:column; gap:10px; text-align:center; padding:22px 20px 14px; border-radius:20px; background:var(--toast-bg); color:var(--toast-fg); box-shadow:0 12px 40px rgba(0,0,0,0.35); animation:gPop .3s ease both; }
   #guestBox h2{ font-size:16px; font-weight:500; }
   #guestBox .lgWarn{ background:none; border:0; padding:0; margin:0 0 6px; text-align:center; font-size:13px; line-height:1.55; color:var(--toast-fg); opacity:.85; }
@@ -1116,16 +1146,16 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
               </div>
               <button type="button" id="myNameBtn">Edit</button>
             </div>
+            <div class="fold" id="avFold" inert><div><div class="avPick"><div class="idLabel" id="avT"></div><div class="avGrid" id="avGrid"></div></div></div></div>
             <input type="text" id="stIn" maxlength="40" autocomplete="off">
             <button type="button" class="setBtn" id="setBtn" aria-expanded="false"><span id="setT">Settings</span><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg></button>
             <div class="fold" id="setFold" inert><div><div class="setPanel">
-              <div class="idLabel" id="avT"></div><div class="avGrid" id="avGrid"></div>
-              <div class="idLabel" id="visT"></div>
-              <select id="visSel"><option value="public"></option><option value="friends"></option><option value="private"></option></select>
-              <div class="idLabel" id="lgT"></div>
-              <select id="lgSel"><option value="en">English</option><option value="id">Bahasa Indonesia</option><option value="es">Espa\u00f1ol</option></select>
-              <button type="button" class="fBtn" id="muteBtn" aria-pressed="false"></button>
-              <div id="accSec" hidden>
+              <section class="setGrp"><div class="idLabel" id="visT"></div>
+                <select id="visSel"><option value="public"></option><option value="friends"></option><option value="private"></option></select></section>
+              <section class="setGrp"><div class="idLabel" id="lgT"></div>
+                <select id="lgSel"><option value="en">English</option><option value="id">Bahasa Indonesia</option><option value="es">Espa\u00f1ol</option></select></section>
+              <section class="setGrp"><button type="button" class="fBtn" id="muteBtn" aria-pressed="false"></button></section>
+              <section class="setGrp" id="accSec" hidden>
                 <div class="idLabel" id="accT"></div>
                 <div class="accF">
                   <input type="text" id="accUser" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="16">
@@ -1135,15 +1165,15 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
                   <button type="button" class="fBtn main" id="accSave"></button>
                   <div class="fNote" id="accNote" hidden></div>
                 </div>
-              </div>
-              <div id="upSec" hidden>
+              </section>
+              <section class="setGrp" id="upSec" hidden>
                 <div class="idLabel" id="upT"></div>
                 <div class="accF">
                   <input type="text" id="upUser" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="16">
                   <input type="password" id="upPw" autocomplete="new-password">
                   <button type="button" class="fBtn main" id="upBtn"></button>
                 </div>
-              </div>
+              </section>
             </div></div></div>
           </div>
           <div class="fSecT" id="friendsT"></div>
@@ -1153,6 +1183,15 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       </div>
     </section>
 
+  </div>
+</div>
+
+<div id="outOv" hidden>
+  <div id="outBox" role="alertdialog" aria-modal="true" aria-labelledby="outT" aria-describedby="outMsg">
+    <h2 id="outT"></h2>
+    <p id="outMsg"></p>
+    <button type="button" id="outOk"></button>
+    <button type="button" id="outNo"></button>
   </div>
 </div>
 
@@ -1325,6 +1364,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       <span class="mi mi-play"><svg data-asset="header/putar.svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l11-6.5Z"/></svg></span>
     </button>
     <button type="button" class="mzB mzNext" aria-label="Next"><span class="mi"><svg data-asset="header/berikutnya.svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14" fill="none"/><path d="M5 6v12l10-6Z"/></svg></span></button>
+    <button type="button" class="mzB mzLst" aria-label="Music list"><span class="mi"><svg data-asset="header/daftar.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h12M4 12h12M4 17h8"/><circle cx="19" cy="17" r="1.6" fill="currentColor"/></svg></span><span class="mzTx">Music list</span></button>
   </div>
   <div id="mzList" role="listbox" aria-label="Songs" inert></div>
 </div>
@@ -1341,9 +1381,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   let tracks = [{ file:'lagu', title:'' }], cur = 0, tried = 0, loadedFile = '', initP = null;
   const $m = id => document.getElementById(id);
   const MZ = {
-    en:{ music:'Music', pause:'Pause', play:'Play', prev:'Previous song', next:'Next song', songs:'Songs', song:'Song', none:'No songs found' },
-    id:{ music:'Musik', pause:'Jeda', play:'Putar', prev:'Lagu sebelumnya', next:'Lagu berikutnya', songs:'Daftar lagu', song:'Lagu', none:'Lagu tidak ditemukan' },
-    es:{ music:'M\u00fasica', pause:'Pausa', play:'Reproducir', prev:'Canci\u00f3n anterior', next:'Siguiente canci\u00f3n', songs:'Canciones', song:'Canci\u00f3n', none:'No hay canciones' }
+    en:{ music:'Music', pause:'Pause', play:'Play', prev:'Previous song', next:'Next song', songs:'Music list', song:'Song', none:'No songs found' },
+    id:{ music:'Musik', pause:'Jeda', play:'Putar', prev:'Lagu sebelumnya', next:'Lagu berikutnya', songs:'Daftar musik', song:'Lagu', none:'Lagu tidak ditemukan' },
+    es:{ music:'M\u00fasica', pause:'Pausa', play:'Reproducir', prev:'Canci\u00f3n anterior', next:'Siguiente canci\u00f3n', songs:'Lista de m\u00fasica', song:'Canci\u00f3n', none:'No hay canciones' }
   };
   const mzT = () => MZ[(window.SkyApp && window.SkyApp.getLang && window.SkyApp.getLang()) || document.documentElement.lang] || MZ.en;
   const trackUrl = (t, k) => DIR + t.file + (/\.(mp3|ogg|m4a|webm|wav)$/i.test(t.file) ? '' : '.' + FMT[k]);
@@ -1448,11 +1488,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   function paintLabels(){
     if(!box) return; const L = mzT();
     box.setAttribute('aria-label', L.music); listEl.setAttribute('aria-label', L.songs);
-    box.querySelector('.mzPrev').setAttribute('aria-label', L.prev); box.querySelector('.mzNext').setAttribute('aria-label', L.next);
+    box.querySelector('.mzPrev').setAttribute('aria-label', L.prev); box.querySelector('.mzNext').setAttribute('aria-label', L.next); box.querySelector('.mzLst').setAttribute('aria-label', L.songs); box.querySelector('.mzTx').textContent = L.songs;
     paint(); paintList();
   }
   function paintList(){
     if(!listEl) return; listEl.textContent = '';
+    { const hd = document.createElement('div'); hd.className = 'mzHd'; hd.textContent = mzT().songs; listEl.appendChild(hd); }
     const shown = tracks.map((t, i) => [t, i]).filter(x => !x[0].bad);
     if(!shown.length){ const e = document.createElement('div'); e.className = 'mzEmpty'; e.textContent = mzT().none; listEl.appendChild(e); return; }
     shown.forEach(([t, i]) => {
@@ -1481,7 +1522,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       holdT = setTimeout(() => { held = true; setList(!box.classList.contains('listOpen')); }, HOLD);   // tekan lama = daftar lagu
     });
     ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => main.addEventListener(ev, () => clearTimeout(holdT)));
-    main.addEventListener('contextmenu', e => e.preventDefault());
+    main.addEventListener('contextmenu', e => {   // di Android tekan-lama memicu contextmenu (pointer sering di-cancel): jadikan pemicu daftar juga
+      e.preventDefault(); clearTimeout(holdT);
+      if(!box.classList.contains('open')){ held = true; setList(!box.classList.contains('listOpen')); }
+    });
     main.addEventListener('click', () => {
       if(held){ held = false; return; }
       if(box.classList.contains('listOpen')){ setList(false); return; }
@@ -1491,6 +1535,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     main.addEventListener('keydown', e => { if(e.key === 'ArrowDown' || e.key === 'ContextMenu'){ e.preventDefault(); setList(true); } });
     box.querySelector('.mzPrev').addEventListener('click', () => go(cur - 1, false));
     box.querySelector('.mzNext').addEventListener('click', () => go(cur + 1, false));
+    box.querySelector('.mzLst').addEventListener('click', () => setList(!box.classList.contains('listOpen')));   // tombol daftar lagu (terlihat saat bar terbuka)
     const away = e => { if(!box.contains(e.target)){ setList(false); closeBar(); } };   // ketuk/fokus di luar = tutup
     document.addEventListener('pointerdown', away, true); document.addEventListener('focusin', away);
     document.addEventListener('keydown', e => { if(e.key === 'Escape'){ setList(false); closeBar(); } });
@@ -2146,6 +2191,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(n === 2) rvTimer = setTimeout(() => document.body.classList.add('rvdone'), 2200);
     if(n === 3) paintPg();
     if(n === 4 && window.SkyVisit) window.SkyVisit.render();
+    window.dispatchEvent(new CustomEvent('sky:page', { detail:{ page:n } }));
     (n === 1 ? hintEl : pgEls[n - 1]).focus({ preventScroll:true });
     setTimeout(() => { if(page !== 2) p2El.scrollTop = 0; if(page !== 3) p3El.scrollTop = 0; if(page !== 4) p4El.scrollTop = 0; }, 950);   // halaman yang ditinggalkan kembali ke atas
   }
@@ -2384,7 +2430,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   function addGrayCandle(host){
     const w = document.createElement('span'); w.innerHTML = '<svg class="gc" viewBox="0 0 24 24" aria-hidden="true">' + FL + '</svg>';
     const g = w.firstChild; host.appendChild(g);
-    const A = window.SkyAsset; if(A) A.resolve(GREY_ASSET).then(u => { if(u && g.isConnected) g.replaceWith(A.mkImg(u, 'gc')); });
+    const A = window.SkyAsset; if(A) A.resolve(GREY_ASSET).then(u => { if(u){ if(g.isConnected) g.replaceWith(A.mkImg(u, 'gc')); return null; } return A.resolve('matauang/candles'); }).then(u => { if(u && g.isConnected) g.replaceWith(A.mkImg(u, 'gc gcf')); });
     return g;
   }
   // kartu 1: mata uang
@@ -2468,7 +2514,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   // kartu 3: candle run (6 realm, tiap realm dropdown berisi area; reset harian) & Eden (reset mingguan). Riwayat tidak pernah dihapus.
   const cardTrk = pgSection();
   const runBox = mk('div', 'trk', '<div class="thd"><div class="evl"><span class="en"></span><span class="el"></span></div><button type="button" class="pill cap"><svg viewBox="0 0 24 24" aria-hidden="true">' + FL + '</svg><span></span></button></div>');
-  const capBtn = runBox.querySelector('.cap'); addGrayCandle(capBtn);
+  const capBtn = runBox.querySelector('.cap');
+  if(window.SkyAsset){ const sv = capBtn.querySelector('svg'); if(sv) window.SkyAsset.swap(sv, 'matauang/candles'); }   // sebelumnya lilin bawaan tidak pernah diganti aset
+  addGrayCandle(capBtn);
   capBtn.onclick = () => pgWrite(d => { const k = dayK(); d.cap = d.cap || {}; if(d.cap[k]) delete d.cap[k]; else d.cap[k] = 1; });
   cardTrk.appendChild(runBox);
   const runDrops = AREAS.map(([realm, list], ri) => {
@@ -2755,6 +2803,15 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       na:'Este amigo a\u00fan no ha sincronizado su progreso.' }
   };
   Object.keys(VT3).forEach(l => Object.assign(VT[l], VT3[l]));
+  const VT5 = {
+    en:{ fav:'Favorites', favAdd:'Pin to top', favDel:'Unpin' },
+    id:{ fav:'Favorit', favAdd:'Sematkan di atas', favDel:'Lepas sematan' },
+    es:{ fav:'Favoritos', favAdd:'Fijar arriba', favDel:'Quitar de fijados' }
+  };
+  Object.assign(VT5.en, { outT:'Log out?', outMsg:'Your progress and friends stay saved in your account. You can log back in anytime.', outMsgG:'Guest accounts that stay inactive for 7 days in a row are deleted together with their progress, friends and chats.', outOk:'Log out', outNo:'Cancel' });
+  Object.assign(VT5.id, { outT:'Keluar dari akun?', outMsg:'Progres dan temanmu tetap tersimpan di akunmu. Kamu bisa masuk lagi kapan saja.', outMsgG:'Akun tamu yang tidak aktif 7 hari berturut-turut akan dihapus beserta progres, teman, dan obrolannya.', outOk:'Keluar', outNo:'Batal' });
+  Object.assign(VT5.es, { outT:'\u00bfCerrar sesi?', outMsg:'Tu progreso y tus amigos siguen guardados en tu cuenta. Puedes volver a entrar cuando quieras.', outMsgG:'Las cuentas de invitado inactivas durante 7 d\u00edas seguidos se eliminan junto con su progreso, amigos y chats.', outOk:'Cerrar sesi\u00f3n', outNo:'Cancelar' });
+  Object.keys(VT5).forEach(l => Object.assign(VT[l], VT5[l]));
   const VT4 = {
     en:{ actOn:'Online', actNow:'Active just now', actAgo:'Active {t} ago', uM:'min', uH:'h', uD:'d' },
     id:{ actOn:'Online', actNow:'Baru saja aktif', actAgo:'Aktif {t} lalu', uM:'mnt', uH:'jam', uD:'hari' },
@@ -2852,6 +2909,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(window.SkyMusic) window.SkyMusic.start();   // musik mulai saat masuk
   }
   function logout(){
+    if(Object.keys(profQ).length) flushProf(9);   // kirim dulu perubahan profil yang tertunda (token akun ini)
     touchGuest(true);   // keluar juga dihitung sebagai aktivitas terakhir
     if(window.SkyMusic) window.SkyMusic.stop();
     lsDel(SESSION_KEY); stopNet(); meta = {}; typingMap = {};
@@ -2957,12 +3015,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   function friendsKey(){ return 'sky_friends_' + myUid; }
   const fMeta = f => metaFor(f.code) || {};
   const fLabel = f => f.name || fMeta(f).name || f.code;
-  let friendOps = 0, friendRev = 0, frSig = '', frSeen = new Set(), readMap = {}, readPushed = {};
+  let friendOps = 0, friendRev = 0, frSeen = new Set(), readMap = {}, readPushed = {};
   function persistFriends(){ try{ localStorage.setItem(friendsKey(), JSON.stringify(friendsCache)); }catch(e){} }
   function loadFriends(){
     try{ friendsCache = JSON.parse(localStorage.getItem(friendsKey()) || '[]'); }catch(e){ friendsCache = []; }
     if(!Array.isArray(friendsCache)) friendsCache = [];
-    frSig = ''; frSeen = new Set(friendsCache.map(f => f.code)); renderFriends(true);
+    loadFavs(); frRows.clear(); frSeen = new Set(friendsCache.map(f => f.code)); renderFriends(true);
   }
   function applyServerFriends(list){   // daftar dari server menang (sinkron lintas perangkat); true bila berubah
     const cl = list.map(f => ({ code:f.code, name:f.name || '' }));
@@ -2978,37 +3036,86 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     finally{ friendOps--; }
   }
   const tickInfo = (m, rd) => m.st === 'failed' ? ['!', 'fl'] : m.st === 'sending' ? ['\u2026', ''] : (m.id && rd && m.id <= rd) ? ['\u2713\u2713', 'rd'] : ['\u2713', ''];
-  const lastMsgOf = f => { const l = readMsgs(pairId(myCode, f.code)); return l.length ? l[l.length - 1] : null; };
-  function renderFriends(force){   // dikelompokkan Online / Offline; hanya digambar ulang bila ada yang berubah (tidak berkedip saat polling)
+  // Daftar teman: tiap teman = 1 baris yang dipakai ulang (tidak dibangun ulang tiap polling -> tidak berkedip, ikon tidak dimuat ulang).
+  // Urutan: Online / Offline; di tiap kelompok yang belum dibaca dulu, lalu yang terbaru chat-nya, lalu nama.
+  // Favorit = teman yang disematkan di atas daftar chat. Disimpan di perangkat per akun ('sky_fav_<uid>').
+  const favKey = () => 'sky_fav_' + myUid;
+  let favSet = new Set();
+  function loadFavs(){ try{ const a = JSON.parse(lsGet(favKey()) || '[]'); favSet = new Set(Array.isArray(a) ? a : []); }catch(e){ favSet = new Set(); } }
+  function toggleFav(code){
+    if(favSet.has(code)) favSet.delete(code); else favSet.add(code);
+    lsSet(favKey(), JSON.stringify([...favSet])); SFX.nav && SFX.nav(); renderFriends();
+  }
+  const frRows = new Map(), frHdr = { fav: mkEl('div', 'fgt'), on: mkEl('div', 'fgt'), off: mkEl('div', 'fgt') };
+  const chatStat = f => {   // 1x baca penyimpanan per teman: pesan terakhir + jumlah belum dibaca
+    const l = readMsgs(pairId(myCode, f.code)), rd = readMap[f.code] || 0; let n = 0;
+    for(let i = l.length - 1; i >= 0; i--){ const m = l[i]; if(m.id && m.id <= rd) break; if(m.from !== myCode && m.id > rd) n++; }
+    return { last: l.length ? l[l.length - 1] : null, n };
+  };
+  function buildFriendRow(code, fresh){
+    const row = { code, f: null, sig: '', av: mkEl('span', 'friendAvatar'), nm: mkEl('div', 'friendName'), prev: mkEl('div', 'friendHint fPrev'), hint: mkEl('div', 'friendHint'), ub: mkEl('span', 'ub'), dot: mkEl('i', 'dotOn') };
+    row.wrap = mkEl('div', 'frWrap' + (fresh ? ' fresh' : '')); row.b = mkEl('button', 'friendRow'); row.b.type = 'button';
+    const tx = mkEl('span', 'friendTxt'); tx.append(row.nm, row.prev, row.hint);
+    row.ub.hidden = true; row.dot.hidden = true; row.hint.hidden = true; row.av.appendChild(row.dot);
+    row.b.append(row.av, tx, row.ub);
+    row.b.addEventListener('click', () => openFriend(row.f));
+    const w = mkEl('button', 'flameBtn', '\ud83d\udd25'); w.type = 'button';
+    { const A = window.SkyAsset; if(A){ const put = u => { if(!u) return; const t = [...w.childNodes].find(n => n.nodeType === 3); if(t) t.replaceWith(A.mkImg(u, 'av')); }; const u0 = A.peek('aksi/nyalakan-api'); if(u0) put(u0); else A.resolve('aksi/nyalakan-api').then(put); } }   // ikon nyalakan api: aset/skymeet/aksi/nyalakan-api (dimuat sekali per baris)
+    w.addEventListener('click', () => { w.classList.remove('flm'); void w.offsetWidth; w.classList.add('flm'); lightFlame(row.f); });
+    row.flame = w;
+    const fb = mkEl('button', 'favBtn'); fb.type = 'button'; fb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8z"/></svg>';
+    fb.addEventListener('click', () => toggleFav(row.code));
+    row.fav = fb; row.wrap.append(row.b, fb, w);
+    return row;
+  }
+  function paintFriendRow(row, d, v){
+    const { f, m, n, l, ty, fav } = d, ti = timeInfo(m), lbl = fLabel(f);
+    const sig = [window.SkyApp.getLang(), fav, lbl, f.name, m.online, m.avatar, m.status, ti, m.rd, n, ty, l && l.id, l && l.st, l && l.text, l && l.from].join('\u0001');
+    row.f = f; if(row.sig === sig) return; row.sig = sig;
+    if(m.avatar){ if(row.av.dataset.av !== m.avatar) setAv(row.av, m.avatar); }
+    else { row.av.dataset.av = ''; [...row.av.childNodes].forEach(c => { if(c !== row.dot) c.remove(); }); row.av.insertBefore(document.createTextNode(lbl[0].toUpperCase()), row.dot); }   // tanpa avatar: huruf pertama nama
+    row.dot.hidden = !m.online;
+    row.nm.textContent = lbl;
+    row.prev.textContent = '';
+    if(ty) row.prev.textContent = v.typing;
+    else if(l){ if(l.from === myCode){ const t = tickInfo(l, m.rd); row.prev.appendChild(mkEl('span', 'tk ' + t[1], t[0])); } row.prev.appendChild(mkEl('span', '', l.text)); }
+    else row.prev.textContent = m.status || ((f.name ? f.code + ' \u00b7 ' : '') + v.tap);
+    row.hint.hidden = !ti; row.hint.textContent = ti || '';
+    row.ub.hidden = !n; row.ub.textContent = n > 9 ? '9+' : String(n);
+    row.b.classList.toggle('typing', !!ty);
+    row.b.setAttribute('aria-label', lbl + (n ? ' (' + n + ')' : ''));
+    row.flame.title = v.flame; row.flame.setAttribute('aria-label', v.flame);
+    row.fav.setAttribute('aria-pressed', String(!!fav)); row.fav.title = fav ? v.favDel : v.favAdd; row.fav.setAttribute('aria-label', row.fav.title);
+  }
+  function renderFriends(force){
     const listEl = $('friendList'), emptyEl = $('visitEmpty'), v = vt();
     if(!listEl) return;
-    const data = friendsCache.map(f => ({ f, m: metaFor(f.code) || {}, n: unreadOf(f), l: lastMsgOf(f), ty: !!typingMap[f.code] }));
-    const sig = JSON.stringify([window.SkyApp.getLang(), Math.floor(srvNow() / 60000), data.map(r => [r.f.code, r.f.name, r.m.online, r.m.avatar, r.m.status, r.m.tz, r.m.name, r.m.rd, r.n, r.ty, r.l && [r.l.id, r.l.st, r.l.text]])]);
-    if(!force && sig === frSig) return;
-    frSig = sig; listEl.textContent = '';
-    if(!friendsCache.length){ emptyEl.textContent = v.empty; emptyEl.style.display = 'block'; return; }
+    const live = new Set(friendsCache.map(f => f.code));
+    frRows.forEach((r, c) => { if(!live.has(c)) frRows.delete(c); });
+    if(!friendsCache.length){
+      frRows.clear(); listEl.textContent = ''; frSeen.clear();
+      emptyEl.textContent = v.empty; emptyEl.style.display = 'block'; return;
+    }
     emptyEl.style.display = 'none';
-    [[true, v.online], [false, v.offline]].forEach(([on, title]) => {
-      const grp = data.filter(r => !!r.m.online === on);
+    const data = friendsCache.map(f => { const st = chatStat(f); return { f, m: metaFor(f.code) || {}, n: st.n, l: st.last, ty: !!typingMap[f.code], lbl: fLabel(f), fav: favSet.has(f.code) }; });
+    const order = (x, y) => (y.n > 0) - (x.n > 0) || ((y.l && y.l.ts) || 0) - ((x.l && x.l.ts) || 0) || x.lbl.localeCompare(y.lbl);
+    const nodes = [];
+    [[null, '\u2605 ' + v.fav, frHdr.fav], [true, v.online, frHdr.on], [false, v.offline, frHdr.off]].forEach(([on, title, hd]) => {
+      const grp = data.filter(r => on === null ? r.fav : (!r.fav && !!r.m.online === on)).sort(order);
       if(!grp.length) return;
-      listEl.appendChild(mkEl('div', 'fgt', title + ' \u00b7 ' + grp.length));
-      grp.forEach(({ f, m, n, l, ty }) => {
-        const wrap = mkEl('div', 'frWrap' + (frSeen.has(f.code) ? '' : ' fresh')), b = mkEl('button', 'friendRow' + (ty ? ' typing' : '')); b.type = 'button'; frSeen.add(f.code);
-        const av = mkEl('span', 'friendAvatar', m.avatar || fLabel(f)[0].toUpperCase()); if(m.avatar) setAv(av, m.avatar); if(m.online) av.appendChild(mkEl('i', 'dotOn'));
-        const tx = mkEl('span', 'friendTxt'), ti = timeInfo(m), prev = mkEl('div', 'friendHint fPrev');
-        if(ty) prev.textContent = v.typing;
-        else if(l){ if(l.from === myCode){ const t = tickInfo(l, m.rd); prev.appendChild(mkEl('span', 'tk ' + t[1], t[0])); } prev.appendChild(mkEl('span', '', l.text)); }
-        else prev.textContent = m.status || ((f.name ? f.code + ' \u00b7 ' : '') + v.tap);
-        tx.append(mkEl('div', 'friendName', fLabel(f)), prev);
-        if(ti) tx.append(mkEl('div', 'friendHint', ti));
-        b.append(av, tx); if(n) b.appendChild(mkEl('span', 'ub', n > 9 ? '9+' : String(n)));
-        b.addEventListener('click', () => openFriend(f));
-        const w = mkEl('button', 'flameBtn', '\ud83d\udd25'); w.type = 'button'; w.title = v.flame; w.setAttribute('aria-label', v.flame);
-        { const A = window.SkyAsset; if(A){ const put = u => { if(!u) return; const t = [...w.childNodes].find(n => n.nodeType === 3); if(t) t.replaceWith(A.mkImg(u, 'av')); }; const u0 = A.peek('aksi/nyalakan-api'); if(u0) put(u0); else A.resolve('aksi/nyalakan-api').then(put); } }   // ikon nyalakan api: aset/skymeet/aksi/nyalakan-api
-        w.addEventListener('click', () => { w.classList.remove('flm'); void w.offsetWidth; w.classList.add('flm'); lightFlame(f); });
-        wrap.append(b, w); listEl.appendChild(wrap);
+      const ht = title + ' \u00b7 ' + grp.length; if(hd.textContent !== ht) hd.textContent = ht;
+      nodes.push(hd);
+      grp.forEach(d => {
+        let row = frRows.get(d.f.code);
+        if(!row){ row = buildFriendRow(d.f.code, !frSeen.has(d.f.code)); frRows.set(d.f.code, row); frSeen.add(d.f.code); }
+        if(force) row.sig = '';
+        paintFriendRow(row, d, v);
+        nodes.push(row.wrap);
       });
     });
+    let cur = listEl.firstChild;   // sinkronkan urutan DOM seminimal mungkin
+    nodes.forEach(n => { if(n === cur) cur = cur.nextSibling; else listEl.insertBefore(n, cur); });
+    while(cur){ const nx = cur.nextSibling; listEl.removeChild(cur); cur = nx; }
   }
 
   // ID divalidasi server dalam SATU request (cek ada + simpan + tambahkan aku ke daftar temannya)
@@ -3330,7 +3437,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(n) lsSet('sky_myname_' + myUid, n); else lsDel('sky_myname_' + myUid);
     editingName = false; renderMyName();
     window.SkyApp.setUser(dispName(myUid), myUid);   // perbarui sapaan di beranda
-    if(srv() && myToken()) api('updateProfile', { name: n || myUid });
+    pushProf({ name: n || myUid });
     toast(vt().saved); SFX.success();
   }
   $('myNameBtn').addEventListener('click', () => {
@@ -3401,19 +3508,37 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(r.profile && r.profile.name) lsSet('sky_myname_' + u, r.profile.name);
   }
   function moveAccount(from, to){
-    ['sky:v1:u:', 'sky_friends_', 'sky_myname_', 'sky_prof_', 'sky_code_', 'sky_token_', 'sky_reads_'].forEach(pfx => { const v = lsGet(pfx + from); if(v !== null){ lsSet(pfx + to, v); lsDel(pfx + from); } });
+    ['sky:v1:u:', 'sky_friends_', 'sky_fav_', 'sky_myname_', 'sky_prof_', 'sky_code_', 'sky_token_', 'sky_reads_'].forEach(pfx => { const v = lsGet(pfx + from); if(v !== null){ lsSet(pfx + to, v); lsDel(pfx + from); } });
   }
 
   // ----- profil -----
+  // Perubahan profil ke server digabung (debounce 0,5 dtk) jadi 1 request, dikirim berurutan (tidak saling timpa / 'busy'), dan diulang bila gagal.
+  let profQ = {}, profT = null, profBusy = false;
+  function pushProf(patch){
+    if(!(SKY_API && myToken())) return;
+    const o = Object.assign({}, patch); delete o.mute; Object.assign(profQ, o);
+    clearTimeout(profT); profT = setTimeout(() => flushProf(0), 500);
+  }
+  async function flushProf(n){
+    clearTimeout(profT);
+    if(profBusy){ profT = setTimeout(() => flushProf(n), 400); return; }
+    const uid = myUid, send = profQ; if(!uid || !Object.keys(send).length) return;
+    profQ = {}; profBusy = true;
+    const r = await api('updateProfile', send, uid); profBusy = false;
+    if(r && r.ok) return;
+    if(uid !== myUid) return;   // sudah ganti akun / keluar: jangan kirim ke akun lain
+    profQ = Object.assign({}, send, profQ);   // gagal: simpan lagi (nilai yang lebih baru tetap menang)
+    if(n < 3) profT = setTimeout(() => flushProf(n + 1), 2000 * (n + 1)); else { profQ = {}; toast(vt().netErr); }
+  }
   function saveProf(patch, push){
     Object.assign(prof, patch); lsSet(profKey(myUid), JSON.stringify(prof));
     window.SkyMuted = !!prof.mute; if(window.SkyMusic) window.SkyMusic.sync(); paintProf();
-    if(push && SKY_API && myToken()){ const o = Object.assign({}, patch); delete o.mute; api('updateProfile', o); }
+    if(push) pushProf(patch);
   }
   function paintProf(){
     if(!$('avBtn')) return;
     const v = vt(), acct = !!(mySession && mySession.type === 'account');
-    setAv($('avBtn'), prof.avatar);
+    setAv($('avBtn'), prof.avatar); $('avBtn').setAttribute('aria-haspopup', 'true');
     $('profUser').textContent = acct ? '@' + myUid : '';
     if(document.activeElement !== $('stIn')) $('stIn').value = prof.status || '';
     $('visSel').value = prof.vis; $('lgSel').value = prof.lang || window.SkyApp.getLang();
@@ -3431,18 +3556,30 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const o = $('visSel').options; o[0].textContent = v.vPub; o[1].textContent = v.vFr; o[2].textContent = v.vPri;
     $('stIn').placeholder = v.stPh; $('accUser').placeholder = v.uname; $('accEmail').placeholder = v.email; $('accPwOld').placeholder = v.pwOld; $('accPwNew').placeholder = v.pwNew;
     $('upUser').placeholder = v.uname; $('upPw').placeholder = curL().rPass;
+    document.querySelectorAll('#avGrid button').forEach(b => { const L = AVLBL[b.dataset.av]; if(L) b.setAttribute('aria-label', L[window.SkyApp.getLang()] || L.en); });
     paintProf(); updateChatSub();
   }
-  AVATARS.forEach(a => { const b = mkEl('button', '', ''); b.type = 'button'; b.setAttribute('aria-label', (AVLBL[a][window.SkyApp.getLang()] || AVLBL[a].en)); setAv(b, a); b.addEventListener('click', () => saveProf({ avatar:a }, true)); $('avGrid').appendChild(b); });
-  const toggleSet = () => { const f = $('setFold'), o = f.classList.toggle('open'); $('setBtn').setAttribute('aria-expanded', String(o)); f.inert = !o; };
-  $('setBtn').addEventListener('click', toggleSet); $('avBtn').addEventListener('click', toggleSet);
-  document.addEventListener('click', e => { const f = $('setFold'); if(f.classList.contains('open') && !f.contains(e.target) && !$('setBtn').contains(e.target) && !$('avBtn').contains(e.target)) toggleSet(); });   // klik di luar = tutup pengaturan
-  $('stIn').addEventListener('change', () => saveProf({ status: $('stIn').value.trim().slice(0, 40) }, true));
-  $('visSel').addEventListener('change', () => saveProf({ vis: $('visSel').value }, true));
+  AVATARS.forEach(a => { const b = mkEl('button', '', ''); b.type = 'button'; b.setAttribute('aria-label', (AVLBL[a][window.SkyApp.getLang()] || AVLBL[a].en)); setAv(b, a); b.addEventListener('click', () => { if(prof.avatar !== a) saveProf({ avatar:a }, true); setPanelOpen($('avFold'), $('avBtn'), false); SFX.success && SFX.success(); }); $('avGrid').appendChild(b); });
+  // dua panel di kartu profil, hanya satu terbuka: pilihan avatar (klik avatar) atau pengaturan (klik Pengaturan)
+  function setPanelOpen(fold, btn, o){ fold.classList.toggle('open', o); fold.inert = !o; btn.setAttribute('aria-expanded', String(o)); }
+  const closePanels = () => { setPanelOpen($('setFold'), $('setBtn'), false); setPanelOpen($('avFold'), $('avBtn'), false); };
+  const toggleSet = () => { const o = !$('setFold').classList.contains('open'); closePanels(); setPanelOpen($('setFold'), $('setBtn'), o); };
+  const toggleAv = () => { const o = !$('avFold').classList.contains('open'); closePanels(); setPanelOpen($('avFold'), $('avBtn'), o); };
+  $('setBtn').addEventListener('click', toggleSet); $('avBtn').addEventListener('click', toggleAv);
+  document.addEventListener('click', e => { if(!e.target.closest('.profCard') && ($('setFold').classList.contains('open') || $('avFold').classList.contains('open'))) closePanels(); });   // klik di luar kartu profil = tutup pengaturan (edit nama/status tidak menutupnya)
+  window.addEventListener('sky:page', closePanels);
+  $('stIn').addEventListener('change', () => { const st = $('stIn').value.trim().slice(0, 40); if(st !== (prof.status || '')) saveProf({ status: st }, true); });
+  $('stIn').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('stIn').blur(); } });   // Enter = simpan (di HP tanpa harus ketuk di luar)
+  $('visSel').addEventListener('change', () => { if($('visSel').value !== prof.vis) saveProf({ vis: $('visSel').value }, true); });
   $('lgSel').addEventListener('change', () => { const c = $('lgSel').value; saveProf({ lang: c }, true); window.SkyApp.applyLang(c); });   // bahasa tersimpan per akun (server + lokal)
   window.addEventListener('sky:lang', e => { if(myUid && e.detail && e.detail.lang && prof.lang !== e.detail.lang){ saveProf({ lang: e.detail.lang }, true); } });   // ganti bahasa lewat menu atas juga ikut tersimpan ke akun
   $('muteBtn').addEventListener('click', () => saveProf({ mute: !prof.mute }, false));
 
+  async function withBusy(btn, fn){   // cegah klik ganda: tombol dikunci + spinner selama proses
+    if(btn.classList.contains('busy')) return;
+    btn.classList.add('busy'); btn.disabled = true;
+    try{ await fn(); } finally{ btn.classList.remove('busy'); btn.disabled = false; }
+  }
   async function saveAccount(){   // username / email / sandi (butuh server)
     const v = vt(), L = curL(), fail = m => { toast(m); SFX.error(); };
     if(!SKY_API) return fail(v.noSrv);
@@ -3451,8 +3588,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(pn && pn.length < 6) return fail(L.ePw);
     if((pn || rename) && !po) return fail(v.needPw);
     if(rename && (!/^[a-z0-9_]{3,16}$/.test(nu) || nu.indexOf('guest') === 0)) return fail(L.eName);
-    if(em !== (prof.email || '')){ await api('updateProfile', { email: em }); saveProf({ email: em }, false); }
-    if(pn){ const r = await api('changePassword', { oldPw: po, newPw: pn }); if(!r.ok) return fail(L.eBad); }
+    const mailChanged = em !== (prof.email || '');
+    if(!mailChanged && !pn && !rename) return;   // tidak ada yang berubah
+    if(mailChanged){ const r = await api('updateProfile', { email: em }); if(!(r && r.ok)) return fail(vt().netErr); saveProf({ email: em }, false); }
+    if(pn){ const r = await api('changePassword', { oldPw: po, newPw: pn }); if(!(r && r.ok)) return fail(L.eBad); }
     if(rename){
       const r = await api('changeUser', { newUser: nu, pw: pn || po });
       if(!r.ok) return fail(r.error === 'taken' ? L.eTaken : L.eBad);
@@ -3461,7 +3600,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     $('accPwOld').value = ''; $('accPwNew').value = '';
     toast(v.accOk); SFX.success();
   }
-  $('accSave').addEventListener('click', saveAccount);
+  $('accSave').addEventListener('click', () => withBusy($('accSave'), saveAccount));
 
   async function upgradeGuest(){   // tamu -> akun asli, progres/teman/ID ikut terbawa
     const v = vt(), L = curL(), fail = m => { toast(m); SFX.error(); };
@@ -3483,7 +3622,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const session = { type:'account', id:u }; writeSession(session); enterApp(session);
     toast(v.upDone); SFX.success();
   }
-  $('upBtn').addEventListener('click', upgradeGuest);
+  $('upBtn').addEventListener('click', () => withBusy($('upBtn'), upgradeGuest));
 
   // ----- kehadiran, jam teman, status baca, polling -----
   let clockSkew = 0, sigS = '', pollSeq = 0, pollCtl = null, lastPollMs = 0, prevRd = {};
