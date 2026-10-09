@@ -1,7 +1,7 @@
 /* Skymeet service worker. Didaftarkan dengan scope 'skymeet' (mencakup /engine/skymeet dan /engine/skymeet.html),
    jadi TIDAK menyentuh halaman lain di situs utama.
    Naikkan VERSI setiap kali kamu mengganti isi html/aset agar cache lama dibuang. */
-const VERSI = 'skymeet-v5';
+const VERSI = 'skymeet-v6';
 const SHELL = ['skymeet', 'skymeet.html', 'skymeet.webmanifest'];
 
 self.addEventListener('install', e => {
