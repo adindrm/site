@@ -85,19 +85,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     transition: opacity 3s linear;
     pointer-events:none;
   }
-  .star{
-    position:absolute;
-    width:2px; height:2px;
-    background:#fff;
-    border-radius:50%;
-    opacity: var(--hi, 0.9);
-    animation: twinkle var(--dur, 5s) ease-in-out var(--delay, 0s) infinite;
-  }
-  /* kelap-kelip halus: rentang opasitas sempit, durasi & jeda berbeda tiap bintang */
-  @keyframes twinkle{
-    0%,100%{ opacity: var(--lo, 0.55); transform: scale(0.9); }
-    50%{ opacity: var(--hi, 0.95); transform: scale(1); }
-  }
+  /* latar malam (gaya rasi_bintang_bercahaya): canvas bintang berpendar + kabut tipis + debu cahaya melayang.
+     Semuanya di dalam #stars, jadi ikut memudar saat siang lewat --star-opacity. */
+  #stars canvas, #loginStars canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #stars .nebula, #loginStars .nebula{ position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse at 50% 48%, rgba(20,34,69,.50) 0%, rgba(7,13,32,.30) 40%, transparent 72%),
+      radial-gradient(ellipse at 25% 30%, rgba(54,77,132,.16), transparent 42%),
+      radial-gradient(ellipse at 75% 70%, rgba(45,72,130,.14), transparent 40%); }
+  #stars .motes, #loginStars .motes{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+  #stars .mote, #loginStars .mote{ position:absolute; width:2px; height:2px; border-radius:50%; background:rgba(226,239,255,.8); box-shadow:0 0 7px 2px rgba(173,207,255,.24);
+    animation: moteDrift var(--duration) ease-in-out infinite alternate; animation-delay: var(--delay); will-change:transform, opacity; }
+  @keyframes moteDrift{ from{ transform:translate3d(0,18px,0); opacity:.22; } to{ transform:translate3d(var(--drift),-35px,0); opacity:.85; } }
 
   /* matahari / bulan */
   #celestial{
@@ -153,15 +152,13 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     color:#f4f5fb;
     --ink:#f4f5fb; --ink-soft:rgba(244,245,251,0.62); --panel:rgba(0,0,0,0.34); --logo-filter:none;   /* layar login selalu bertema malam, sama dengan loading */
     --warn:#ffd9a0; --warn-bg:rgba(255,200,120,0.1); --warn-bd:rgba(255,200,120,0.24); --err:#ff9b9b; --ok:#8fe3a8;
-    background: radial-gradient(ellipse at 50% 40%, #0b1330, #03050d 75%);   /* sama dengan loading screen */
+    background: linear-gradient(180deg, #030611 0%, #070d20 55%, #02040c 100%);   /* langit malam yang sama dengan beranda; kabut + bintang digambar di #loginStars */
     transition: opacity 0.4s ease, visibility 0.4s ease;
   }
   #loginScreen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  #loginScreen.hidden #loginStars .mote{ animation-play-state:paused; }
   /* latar login = latar loading screen (langit malam + bintang berkelip) */
   #loginStars{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
-  #loginStars i{ position:absolute; border-radius:50%; background:#cfe0ff; opacity:.25; animation: lgTw var(--d,4s) ease-in-out var(--dl,0s) infinite; }
-  @keyframes lgTw{ 0%,100%{ opacity:.25; } 50%{ opacity:.7; } }
-  #loginScreen.hidden #loginStars i{ animation-play-state:paused; }
   #loginCard{ position:relative; z-index:1; }
   #loginScreen:not(.ready) #loginCard{ opacity:0; visibility:hidden; pointer-events:none; }
   /* kartu login muncul dari tengah, tepat saat titik-titik bintang pecah menyebar */
@@ -212,8 +209,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .profMain{ flex:1; min-width:0; text-align:left; }
   .profCard .idLabel{ font-size:11px; color:var(--ink-soft); letter-spacing:0.04em; text-transform:uppercase; }
   .profCard .idVal{ font-size:18px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .profCard #setOpen{ flex:none; display:grid; place-items:center; width:40px; height:40px; padding:0; border:1px solid rgba(255,255,255,0.18); border-radius:50%; background:rgba(255,255,255,0.1); color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:transform .15s ease; }
-  #setOpen svg, #setOpen img.ai{ width:20px; height:20px; } #setOpen img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
+  .profCard #setOpen{ flex:none; display:grid; place-items:center; width:40px; height:40px; padding:0; border:0; border-radius:50%; background:none; color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:transform .15s ease; }
+  #setOpen svg, #setOpen img.ai{ width:24px; height:24px; } #setOpen img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
   #setOpen:active{ transform:scale(0.9); } #setOpen:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
   .profStatus{ font-size:12px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .profStatus:empty{ display:none; }
   .profUser{ font-size:12px; color:var(--ink-soft); }
@@ -996,7 +993,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
 
   @media (prefers-reduced-motion: reduce){
-    .star, #horizon, #stars, #celestial, #clock{ animation:none; }
+    #stars .mote, #loginStars .mote, #horizon, #stars, #celestial, #clock{ animation:none; }
     #langMenu, #navMenu, #nav, #langCurrent svg, .cat-card, .row{ transition:none; }
     #hint, #hint svg, .row .lv::before, #clock .digit.settled{ animation:none; }
     #track, .rv, .rv3, .in, .act, #skyClock .sd, #skyClock .sc{ transition-duration:0.01s !important; transition-delay:0s !important; }
@@ -1088,11 +1085,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fNm{ font-size:17px; font-weight:500; min-width:0; flex:0 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #fAct{ flex:none; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; } #fAct.on{ color:var(--ok); }
   .fWho .idLabel{ font-size:12px; color:var(--ink-soft); letter-spacing:0.02em; margin-top:2px; }
-  .fIcoBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.14); background:rgba(255,255,255,0.06); color:var(--ink); display:grid; place-items:center; cursor:pointer; touch-action:manipulation; transition:background .2s ease, color .2s ease, transform .15s ease; }
+  .fIcoBtn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:0; background:none; color:var(--ink); display:grid; place-items:center; cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:opacity .2s ease, transform .15s ease; }
   .fIcoBtn:active{ transform:scale(.92); }
-  .fIcoBtn svg, .fIcoBtn img.ai{ width:20px; height:20px; }
+  .fIcoBtn svg, .fIcoBtn img.ai{ width:24px; height:24px; }
+  .fIcoBtn:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; }
   .fIcoBtn img.ai{ filter:var(--logo-filter); }
-  .fIcoBtn[aria-expanded="true"]{ background:var(--ink); color:var(--top); }
+  .fIcoBtn[aria-expanded="true"]{ opacity:.55; }   /* tanpa kartu bulat: tanda terbuka = ikon meredup */
   .fSep{ border:0; height:1px; background:rgba(255,255,255,0.12); margin:2px 0 4px; }
   .fCurRow{ display:flex; justify-content:space-between; gap:2px; }
   .fCu{ position:relative; flex:1 1 0; min-width:0; max-width:50px; height:46px; display:grid; place-items:center; padding:0; border:0; background:none; border-radius:12px; font:inherit; color:inherit; }
@@ -1627,8 +1625,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 (function(){
   // --- palet langit sepanjang hari (jam desimal, warna atas, warna bawah, warna benda langit, warna cahaya, opasitas bintang) ---
   const stops = [
-    { h: 0,    top:'#070a1c', bottom:'#141a3d', body:'#d8dcf5', glow:'rgba(216,220,245,0.32)', stars:1 },
-    { h: 4,    top:'#0a0f26', bottom:'#1a2148', body:'#dfe2f7', glow:'rgba(223,226,247,0.34)', stars:1 },
+    { h: 0,    top:'#030611', bottom:'#0a1330', body:'#d8dcf5', glow:'rgba(216,220,245,0.32)', stars:1 },
+    { h: 4,    top:'#050918', bottom:'#101a3d', body:'#dfe2f7', glow:'rgba(223,226,247,0.34)', stars:1 },
     { h: 5.5,  top:'#232a5e', bottom:'#5c4f8f', body:'#e7d9c9', glow:'rgba(255,214,170,0.35)', stars:0.5 },
     { h: 6.75, top:'#e07a4f', bottom:'#ffcf9b', body:'#ffd782', glow:'rgba(255,200,120,0.55)', stars:0 },
     { h: 9,    top:'#4fa3e0', bottom:'#bfe4fb', body:'#ffe066', glow:'rgba(255,224,110,0.55)', stars:0 },
@@ -1637,8 +1635,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     { h: 17,   top:'#e78a4e', bottom:'#ffd28a', body:'#ffcf6b', glow:'rgba(255,190,100,0.55)', stars:0 },
     { h: 18.5, top:'#c1502f', bottom:'#3a2f66', body:'#ffb26b', glow:'rgba(255,150,90,0.5)', stars:0.25 },
     { h: 20,   top:'#221d4c', bottom:'#0d1130', body:'#e2e4f7', glow:'rgba(226,228,247,0.35)', stars:0.75 },
-    { h: 22,   top:'#0e1230', bottom:'#141a3d', body:'#d8dcf5', glow:'rgba(216,220,245,0.32)', stars:0.95 },
-    { h: 24,   top:'#070a1c', bottom:'#141a3d', body:'#d8dcf5', glow:'rgba(216,220,245,0.32)', stars:1 },
+    { h: 22,   top:'#060b1d', bottom:'#0c1534', body:'#d8dcf5', glow:'rgba(216,220,245,0.32)', stars:0.95 },
+    { h: 24,   top:'#030611', bottom:'#0a1330', body:'#d8dcf5', glow:'rgba(216,220,245,0.32)', stars:1 },
   ];
 
   function hexToRgb(hex){
@@ -1837,6 +1835,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     root.setProperty('--body-color', f.body);
     root.setProperty('--glow', f.glow);
     root.setProperty('--star-opacity', f.stars.toFixed(2));
+    { const was = starsOn; starsOn = f.stars > 0.02; if(starsOn && !was) window.dispatchEvent(new Event('sky:starsvis')); }
 
     const lum = (luminance(f.top) + luminance(f.bottom)) / 2;
     if(lum > 0.62){
@@ -2357,25 +2356,59 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   });
   updateNavCurrent();
 
-  function makeStars(n){
-    const container = document.getElementById('stars');
-    const frag = document.createDocumentFragment();
-    for(let i=0;i<n;i++){
-      const s = document.createElement('div');
-      s.className = 'star';
-      s.style.left = Math.random()*100 + '%';
-      s.style.top = Math.random()*70 + '%';
-      const size = Math.random() < 0.15 ? 3 : (Math.random() < 0.5 ? 2 : 1.5);
-      s.style.width = s.style.height = size + 'px';
-      if(size === 3) s.style.boxShadow = '0 0 4px rgba(255,255,255,0.6)';
-      s.style.setProperty('--dur', (4 + Math.random()*4).toFixed(1) + 's');   // 4–8 dtk
-      s.style.setProperty('--delay', (-Math.random()*8).toFixed(1) + 's');    // mulai di fase berbeda
-      s.style.setProperty('--lo', (0.4 + Math.random()*0.25).toFixed(2));     // 0.40–0.65
-      s.style.setProperty('--hi', (0.8 + Math.random()*0.2).toFixed(2));      // 0.80–1.00
-      frag.appendChild(s);
+  // latar malam: bintang digambar di canvas (berpendar, ada kilau silang di bintang besar), plus kabut & debu cahaya.
+  // Digambar hanya saat bintang terlihat (malam/senja) dan tab aktif, supaya hemat baterai di siang hari.
+  var starsOn = true;   // var: applySky bisa dipanggil sebelum baris ini dijalankan
+  // dipakai beranda (#stars) dan layar login (#loginStars). o.on() = apakah perlu digambar; o.yMax = batas tinggi bintang; o.watch = elemen yang perubahan class-nya memicu gambar ulang
+  function buildNight(container, n, o){
+    o = o || {}; const yMax = o.yMax || 1, isOn = o.on || (() => true);
+    const nb = document.createElement('div'); nb.className = 'nebula'; nb.setAttribute('aria-hidden', 'true'); container.appendChild(nb);
+    const mt = document.createElement('div'); mt.className = 'motes'; mt.setAttribute('aria-hidden', 'true');
+    for(let i = 0; i < (n < 70 ? 24 : 34); i++){
+      const m = document.createElement('span'); m.className = 'mote';
+      m.style.left = (Math.random() * 100) + '%'; m.style.top = (Math.random() * 100) + '%';
+      m.style.setProperty('--duration', (5 + Math.random() * 9).toFixed(1) + 's');
+      m.style.setProperty('--delay', (-Math.random() * 12).toFixed(1) + 's');
+      m.style.setProperty('--drift', ((Math.random() - .5) * 70).toFixed(0) + 'px');
+      mt.appendChild(m);
     }
-    container.appendChild(frag);
+    container.appendChild(mt);
+    const cv = document.createElement('canvas'); cv.setAttribute('aria-hidden', 'true'); container.insertBefore(cv, nb);
+    const ctx = cv.getContext('2d'), still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let W = 0, H = 0, stars = [], raf = 0, t0 = 0;
+    function resize(){
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = container.clientWidth || window.innerWidth; H = container.clientHeight || window.innerHeight;
+      cv.width = Math.floor(W * dpr); cv.height = Math.floor(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const cnt = Math.max(n, Math.floor(W * H / 4300));
+      stars = Array.from({ length: cnt }, () => ({ x: Math.random() * W, y: Math.random() * H * yMax, r: Math.random() * 1.35 + .25,
+        ph: Math.random() * 6.283, sp: Math.random() * .9 + .25, al: Math.random() * .55 + .25 }));
+      draw(t0);
+    }
+    function draw(t){
+      t0 = t; ctx.clearRect(0, 0, W, H);
+      for(const s of stars){
+        const tw = still ? .85 : (Math.sin(t * .001 * s.sp + s.ph) + 1) / 2, a = s.al * (.35 + tw * .65);
+        ctx.beginPath(); ctx.fillStyle = 'rgba(235,243,255,' + a.toFixed(3) + ')';
+        ctx.shadowColor = 'rgba(185,214,255,.65)'; ctx.shadowBlur = s.r > 1.1 ? 5 : 2;
+        ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+        if(s.r > 1.35 && tw > .82){
+          ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(235,243,255,' + (a * .6).toFixed(3) + ')'; ctx.lineWidth = .5;
+          ctx.beginPath(); ctx.moveTo(s.x - 3, s.y); ctx.lineTo(s.x + 3, s.y); ctx.moveTo(s.x, s.y - 3); ctx.lineTo(s.x, s.y + 3); ctx.stroke();
+        }
+      }
+      ctx.shadowBlur = 0;
+    }
+    function loop(t){ raf = 0; if(!isOn() || document.hidden) return; draw(t); if(!still) raf = requestAnimationFrame(loop); }   // siang/tab tersembunyi: berhenti total
+    function kick(){ if(!raf && !still && isOn() && !document.hidden) raf = requestAnimationFrame(loop); }
+    window.addEventListener('resize', () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
+    document.addEventListener('visibilitychange', kick);
+    window.addEventListener('sky:starsvis', kick);
+    if(o.watch) new MutationObserver(kick).observe(o.watch, { attributes:true, attributeFilter:['class'] });
+    resize(); kick();
   }
+  window.SkyNight = { build: buildNight };
+  function makeStars(n){ buildNight(document.getElementById('stars'), n, { on: () => starsOn, yMax: .78 }); }
 
   // animasi masuk: jam menghitung MAJU mulai dari 12 jam sebelum waktu sekarang,
   // melaju cepat di awal lalu melambat dan mendarat tepat di waktu asli.
@@ -3898,15 +3931,11 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 (function(){
   const screenEl = document.getElementById('loadingScreen');
 
-  // bintang berkelip untuk latar login (dipakai juga sebagai latar loading)
+  // latar login = langit malam yang sama dengan beranda (dibuat oleh SkyNight di skrip utama); dipakai juga sebagai latar loading
   (function(){
-    const box = document.getElementById('loginStars'); if(!box) return;
-    const n = Math.max(40, Math.min(160, Math.round(innerWidth * innerHeight / 9000)));
-    for(let i = 0; i < n; i++){
-      const s = document.createElement('i'), d = 0.8 + Math.random() * 1.8;
-      s.style.cssText = 'left:' + (Math.random() * 100).toFixed(2) + '%;top:' + (Math.random() * 100).toFixed(2) + '%;width:' + d.toFixed(2) + 'px;height:' + d.toFixed(2) + 'px;--d:' + (3 + Math.random() * 4).toFixed(2) + 's;--dl:-' + (Math.random() * 6).toFixed(2) + 's';
-      box.appendChild(s);
-    }
+    const box = document.getElementById('loginStars'), scr = document.getElementById('loginScreen');
+    if(!box || !scr || !window.SkyNight) return;
+    window.SkyNight.build(box, innerWidth < 600 ? 55 : 90, { on: () => !scr.classList.contains('hidden'), yMax: 1, watch: scr });
   })();
 
   function bail(){   // bila canvas/animasi gagal: jangan pernah mengunci pengguna di loading
