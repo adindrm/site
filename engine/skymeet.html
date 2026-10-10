@@ -442,7 +442,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #imgLb .lbC{ position:absolute; bottom:calc(env(safe-area-inset-bottom,0px) + 14px); color:#fff; font-size:13px; opacity:.8; }
   /* ajakan main bareng + Momen Hari Ini */
   #chatHead .chTx{ flex:1; min-width:0; }
-  #chatHead .hb{ flex:none; position:relative; width:38px; height:38px; padding:0; display:grid; place-items:center; border:none; border-radius:12px; background:rgba(255,255,255,0.07); color:var(--ink); cursor:pointer; touch-action:manipulation; }
+  #chatHead .hb{ flex:none; position:relative; width:38px; height:38px; padding:0; display:grid; place-items:center; border:none; border-radius:0; background:none; box-shadow:none; color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+  #chatHead .hb:active{ opacity:.6; }
   #chatHead .hb svg, #chatHead .hb img.ai{ width:22px; height:22px; }
   #chatHead .hb.dot::after{ content:''; position:absolute; top:5px; right:5px; width:8px; height:8px; border-radius:50%; background:#ffcf5c; box-shadow:0 0 6px #ffcf5c; }
   .inv{ min-width:min(250px,64vw); display:flex; flex-direction:column; gap:5px; }
@@ -1004,10 +1005,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fab .flame{ position:relative; z-index:2; }
   #fab .fabDeco{ position:absolute; inset:0; pointer-events:none; }
   #fab .fAura{ position:absolute; inset:-14px; z-index:0; border-radius:50%; background:radial-gradient(closest-side, rgba(255,214,130,0.42), rgba(255,170,80,0.14) 55%, transparent 72%); opacity:.5; animation:fabAura 3.6s ease-in-out infinite; }
-  #fab .fOrb{ position:absolute; inset:2px; z-index:0; border-radius:50%; background:radial-gradient(circle at 30% 24%, rgba(255,255,255,0.34), rgba(255,255,255,0.08) 38%, rgba(30,36,72,0.62) 78%, rgba(14,18,40,0.8)); border:1px solid rgba(255,236,190,0.28); box-shadow:inset 0 1px 1px rgba(255,255,255,0.45), inset 0 -8px 14px rgba(0,0,0,0.35), inset 0 0 12px rgba(255,200,110,0.16); transition:border-color 1.2s ease, box-shadow 1.2s ease; }
-  #fab .fRing{ position:absolute; inset:0; z-index:1; width:100%; height:100%; overflow:visible; transform:rotate(-90deg); }
-  #fab .fRt{ fill:none; stroke:rgba(255,255,255,0.14); stroke-width:2.2; }
-  #fab .fRp{ fill:none; stroke:url(#fabGrad); stroke-width:2.6; stroke-linecap:round; stroke-dasharray:100 100; stroke-dashoffset:calc(100 - var(--p,0) * 100); opacity:clamp(0, calc(var(--p,0) * 60), 1); transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1), opacity .4s ease; filter:drop-shadow(0 0 3px rgba(255,190,100,0.85)); }
   #fab .fOrbit{ position:absolute; inset:-4px; z-index:3; animation:fabSpin 9s linear infinite; }
   #fab .fOrbit i{ position:absolute; top:0; left:50%; width:4px; height:4px; margin-left:-2px; border-radius:50%; background:#fff4cc; box-shadow:0 0 6px 1px rgba(255,214,130,0.95); opacity:.7; animation:fabTw 2.4s ease-in-out infinite; }
   #fab .fOrbit.o2{ inset:3px; animation-duration:14s; animation-direction:reverse; }
@@ -1020,7 +1017,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fab.drag{ scale:1.12; animation-play-state:running, paused; }
   #fab.mag{ transition:left 2.4s cubic-bezier(.45,.05,.2,1), scale .22s ease; }   /* magnet: pelan di awal, makin cepat, lalu menempel */
   #fab.lit .fAura{ opacity:1; animation-duration:1.8s; }
-  #fab.lit .fOrb{ border-color:rgba(255,232,170,0.6); box-shadow:inset 0 1px 1px rgba(255,255,255,0.55), inset 0 -8px 14px rgba(0,0,0,0.3), inset 0 0 16px rgba(255,205,110,0.5), 0 0 16px rgba(255,200,100,0.55); }
   #fab.lit .fOrbit i{ opacity:1; }
   @media (prefers-reduced-motion: reduce){ body.ready.fabOn #fab{ animation:none; } #fab .fAura, #fab .fOrbit, #fab .fOrbit i{ animation:none; } #fab.mag, #fab{ transition:none; } }
   /* panel ikon melayang v2: kaca gelap berpendar hangat, handle, bilah progres, baris berkartu */
@@ -1403,6 +1399,39 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #chatForm{ align-items:flex-end; }
   #chatInput{ display:block; resize:none; line-height:1.4; height:44px; max-height:132px; overflow-y:auto; overflow-wrap:anywhere; white-space:pre-wrap; scrollbar-width:thin; }
   #chatEmoji, #chatAttach, #chatSend{ height:44px; align-self:flex-end; }
+
+  /* ===== reaksi emoji di chat ===== */
+  .msg .rxs{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
+  .msg .rxs[hidden]{ display:none; }
+  .msg.me .rxs{ justify-content:flex-end; }
+  .msg.hasImg .rxs{ margin:6px 8px 0; }
+  .msg .rx{ font:inherit; font-size:12px; line-height:1; padding:3px 7px; border-radius:999px; border:1px solid rgba(128,128,128,0.35); background:rgba(128,128,128,0.2); color:inherit; cursor:pointer; touch-action:manipulation; }
+  .msg .rx.me{ border-color:rgba(255,200,90,0.95); background:rgba(255,200,90,0.28); }
+  #msgSheet .rxRow{ display:flex; gap:4px; justify-content:space-between; padding:0 0 8px; }
+  #msgSheet .rxRow[hidden]{ display:none; }
+  #msgSheet .rxRow button{ flex:1; padding:7px 0; font-size:24px; line-height:1; text-align:center; border-radius:12px; background:rgba(128,128,128,0.18); }
+  #msgSheet .rxRow button.on{ background:rgba(255,200,90,0.35); box-shadow:0 0 0 1.5px rgba(255,200,90,0.9); }
+  /* ===== ikon melayang v3: terbang ke atas panel & kembali ===== */
+  #fab.fly{ transition:left .85s cubic-bezier(.45,.05,.2,1), top .85s cubic-bezier(.45,.05,.2,1), scale .22s ease; }
+  #fab.up{ z-index:205; }
+  /* ===== panel progres harian v3 ===== */
+  #fabOv .fp{ padding:42px 16px calc(env(safe-area-inset-bottom,0px) + 16px); border-radius:28px 28px 0 0; border-bottom:0; border-color:rgba(255,226,160,0.28);
+    background:radial-gradient(120% 60% at 50% 0%, rgba(255,205,120,0.22), transparent 62%), radial-gradient(60% 40% at 90% 100%, rgba(120,140,255,0.12), transparent 70%), linear-gradient(180deg, rgba(40,48,98,0.98), rgba(14,18,42,0.99));
+    box-shadow:0 -18px 50px rgba(0,0,0,0.55), 0 -2px 34px rgba(255,200,110,0.22); }
+  #fabOv .fp::before{ display:none; }
+  #fabOv .fh{ justify-content:center; font-size:17px; }
+  #fabOv .fx{ position:absolute; right:0; top:50%; translate:0 -50%; }
+  #fabOv .fs{ text-align:center; font-size:12px; letter-spacing:.05em; padding:6px 0 12px; margin-bottom:10px; }
+  #fabOv .fl{ margin:0 -4px; padding:0 4px 4px; }
+  #fabOv .fdd{ margin-top:8px; padding:0 14px; border-radius:16px; background:linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.03)); border:1px solid rgba(255,255,255,0.1); }
+  #fabOv .fdd.done{ border-color:rgba(255,210,122,0.5); background:linear-gradient(180deg, rgba(255,210,122,0.16), rgba(255,210,122,0.05)); }
+  #fabOv .fdd.open{ border-color:rgba(255,210,122,0.35); }
+  #fabOv .fddB{ min-height:52px; font-size:14px; }
+  #fabOv .fmb{ display:block; position:relative; height:3px; margin:0 0 2px; border-radius:3px; background:rgba(255,255,255,0.1); overflow:hidden; }
+  #fabOv .fmb::after{ content:''; position:absolute; inset:0; width:calc(var(--q,0) * 100%); border-radius:3px; background:linear-gradient(90deg,#ffb04a,#ffe08a); transition:width .5s ease; }
+  #fabOv .pill{ min-height:36px; padding:0 12px; border-radius:12px; border-color:rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#f4f5fb; }
+  #fabOv .pill[aria-pressed="true"]{ background:linear-gradient(135deg,#ffe9a8,#ffc86a); color:#2a2140; border-color:transparent; box-shadow:0 0 12px rgba(255,200,100,0.45); }
+  @media (prefers-reduced-motion: reduce){ #fab.fly{ transition-duration:.01s !important; } }
 </style>
 </head>
 <body class="notranslate" translate="no">
@@ -1620,7 +1649,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     <textarea id="chatInput" rows="1" placeholder="Message" autocomplete="off" enterkeyhint="send"></textarea>
     <button type="submit" id="chatSend">Send</button>
   </form>
-  <div id="msgSheet" hidden><div class="sh" role="dialog" aria-modal="true"><div class="shT" id="shPrev"></div><button type="button" id="shReply"></button><button type="button" id="shCopy"></button><button type="button" id="shDelMe"></button><button type="button" id="shRetract" class="warn"></button><button type="button" id="shCancel"></button></div></div>
+  <div id="msgSheet" hidden><div class="sh" role="dialog" aria-modal="true"><div class="shT" id="shPrev"></div><div class="rxRow" id="shRx"></div><button type="button" id="shReply"></button><button type="button" id="shCopy"></button><button type="button" id="shDelMe"></button><button type="button" id="shRetract" class="warn"></button><button type="button" id="shCancel"></button></div></div>
 </div>
 <div id="toast"></div>
 <div id="loadingScreen" role="status" aria-label="Loading">
@@ -3265,7 +3294,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const mkTx = (tag, cls, txt) => { const e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; return e; };
   const fabBtn = mkTx('button'); fabBtn.id = 'fab'; fabBtn.type = 'button'; flameInto(fabBtn);
   { const dc = mkTx('span', 'fabDeco'); dc.setAttribute('aria-hidden', 'true');   // dekorasi: aura, bola kaca, cincin progres, percikan mengorbit
-    dc.innerHTML = '<i class="fAura"></i><i class="fOrb"></i><svg class="fRing" viewBox="0 0 52 52"><defs><linearGradient id="fabGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0c0"/><stop offset="1" stop-color="#ff9f4a"/></linearGradient></defs><circle class="fRt" cx="26" cy="26" r="24"/><circle class="fRp" cx="26" cy="26" r="24" pathLength="100"/></svg><span class="fOrbit"><i></i></span><span class="fOrbit o2"><i></i></span>';
+    dc.innerHTML = '<i class="fAura"></i><span class="fOrbit"><i></i></span><span class="fOrbit o2"><i></i></span>';
     fabBtn.insertBefore(dc, fabBtn.firstChild); }
   const fabOv = mkTx('div'); fabOv.id = 'fabOv'; fabOv.hidden = true; fabOv.innerHTML = '<div class="fp" role="dialog" aria-modal="true"><div class="fh"><b></b><button type="button" class="fx">\u2715</button></div><div class="fs"></div><div class="fl"></div></div>';
   document.body.append(fabBtn, fabOv);
@@ -3274,7 +3303,25 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   fabSwitch._onFlame = swSync;
   { const hb = mkTx('div', 'hbtns'); capBtn.parentNode.insertBefore(hb, capBtn); hb.append(fabSwitch, capBtn); }   // keduanya ikon saja (kartu bulat dihilangkan lewat CSS)
   fabSwitch.onclick = () => Store.set('fab', Store.get('fab', 0) ? 0 : 1);
-  const openFab = () => { fabMagDisarm(); fabOpen = -1; fabOv.classList.add('first'); setTimeout(() => fabOv.classList.remove('first'), 1100); fabOv.hidden = false; paintFab(); }, closeFab = () => { fabOv.hidden = true; fabMagArm(); };
+  let fabHome = null, flyT = null;
+  const fabFly = up => {   // ikon pindah pelan ke tepi atas panel; saat panel ditutup kembali ke tempat semula
+    const fp = fabOv.querySelector('.fp');
+    clearTimeout(flyT); fabBtn.classList.add('fly');
+    if(up){
+      fabBtn.classList.add('up');
+      fabBtn.style.left = Math.round(innerWidth / 2 - FAB_SZ / 2) + 'px';
+      fabBtn.style.top = Math.max(6, Math.round(innerHeight - fp.offsetHeight - FAB_SZ / 2 - 4)) + 'px';
+    } else if(fabHome){
+      fabBtn.style.left = fabHome.l + 'px'; fabBtn.style.top = fabHome.t + 'px';
+      flyT = setTimeout(() => { fabBtn.classList.remove('fly', 'up'); fabHome = null; fabMagArm(); }, 950);
+    }
+  };
+  const openFab = () => {
+    fabMagDisarm(); clearTimeout(magEnd); fabBtn.classList.remove('mag');
+    if(!fabHome) fabHome = { l: fabBtn.offsetLeft, t: fabBtn.offsetTop };
+    fabOpen = -1; fabOv.classList.add('first'); setTimeout(() => fabOv.classList.remove('first'), 1100); fabOv.hidden = false; paintFab();
+    requestAnimationFrame(() => { if(!fabOv.hidden) fabFly(true); });
+  }, closeFab = () => { if(fabOv.hidden) return; fabOv.hidden = true; fabFly(false); };
   fabOv.querySelector('.fx').onclick = closeFab; fabOv.addEventListener('click', e => { if(e.target === fabOv) closeFab(); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !fabOv.hidden) closeFab(); });
   window.addEventListener('sky:page', closeFab);
@@ -3286,7 +3333,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(fabPos && fabPos.s === 'l') x = FAB_EDGE; else if(fabPos && fabPos.s === 'r') x = w - FAB_SZ - FAB_EDGE;   // sudah menempel ke tepi: tetap menempel walau ukuran layar berubah
     fabBtn.style.left = Math.max(6, Math.min(w - 58, x)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(h - 58, y)) + 'px';
   };
-  fabPlace(); window.addEventListener('resize', () => { fabPlace(); fabMagArm(); });
+  fabPlace(); window.addEventListener('resize', () => { if(!fabOv.hidden){ fabFly(true); return; } if(fabHome) return; fabPlace(); fabMagArm(); });
   // magnet: kalau ikon dibiarkan bebas 10 detik (tidak disentuh, panel tertutup, tab terlihat), ia meluncur PELAN ke tepi kiri/kanan yang lebih dekat
   let magT = null, magEnd = null;
   function fabMagDisarm(){ clearTimeout(magT); magT = null; }
@@ -3307,15 +3354,15 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(fabBtn.classList.contains('mag')){ fabBtn.style.left = fabBtn.offsetLeft + 'px'; fabBtn.classList.remove('mag'); }   // sedang meluncur: tahan di posisi sekarang
     fabDrag = { x:e.clientX, y:e.clientY, l:fabBtn.offsetLeft, t:fabBtn.offsetTop, m:false }; try{ fabBtn.setPointerCapture(e.pointerId); }catch(x){}
   });
-  fabBtn.addEventListener('pointermove', e => { if(!fabDrag) return; const dx = e.clientX - fabDrag.x, dy = e.clientY - fabDrag.y; if(!fabDrag.m && Math.hypot(dx, dy) > 6){ fabDrag.m = true; fabBtn.classList.add('drag'); } if(fabDrag.m){ fabBtn.style.left = Math.max(6, Math.min(innerWidth - 58, fabDrag.l + dx)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(innerHeight - 58, fabDrag.t + dy)) + 'px'; } });
-  fabBtn.addEventListener('pointerup', () => { if(!fabDrag) return; const m = fabDrag.m; fabDrag = null; fabBtn.classList.remove('drag'); if(m){ fabPos = { x: fabBtn.offsetLeft / innerWidth, y: fabBtn.offsetTop / innerHeight }; fabSave(); fabMagArm(); } else openFab(); });
+  fabBtn.addEventListener('pointermove', e => { if(!fabDrag || !fabOv.hidden) return; const dx = e.clientX - fabDrag.x, dy = e.clientY - fabDrag.y; if(!fabDrag.m && Math.hypot(dx, dy) > 6){ fabDrag.m = true; fabBtn.classList.add('drag'); } if(fabDrag.m){ fabBtn.style.left = Math.max(6, Math.min(innerWidth - 58, fabDrag.l + dx)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(innerHeight - 58, fabDrag.t + dy)) + 'px'; } });
+  fabBtn.addEventListener('pointerup', () => { if(!fabDrag) return; const m = fabDrag.m; fabDrag = null; fabBtn.classList.remove('drag'); if(m){ fabPos = { x: fabBtn.offsetLeft / innerWidth, y: fabBtn.offsetTop / innerHeight }; fabSave(); fabMagArm(); } else (fabOv.hidden ? openFab() : closeFab()); });
   fabBtn.addEventListener('pointercancel', () => { fabDrag = null; fabBtn.classList.remove('drag'); fabMagArm(); });
-  fabBtn.addEventListener('click', e => { if(e.detail === 0) openFab(); });
+  fabBtn.addEventListener('click', e => { if(e.detail === 0) (fabOv.hidden ? openFab() : closeFab()); });
   const flipArea = (ri, ai) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0); r[ri] ^= 1 << ai; if(r.every(x => !x)) delete d.runs[k]; });
   const flipRealm = (ri, len) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0), full = (1 << len) - 1; r[ri] = r[ri] === full ? 0 : full; if(r.every(x => !x)) delete d.runs[k]; });
   let fabOpen = -1;   // indeks dropdown area yang terbuka (-1 = semua tertutup); hanya satu yang boleh terbuka
   function fabToggle(ri){
-    const fl = fabOv.querySelector('.fl'); fabOpen = fabOpen === ri ? -1 : ri;   // buka yang lain = yang sebelumnya otomatis menutup
+    const fl = fabOv.querySelector('.fl'); fabOpen = fabOpen === ri ? -1 : ri; setTimeout(() => { if(!fabOv.hidden) fabFly(true); }, 360);   // buka yang lain = yang sebelumnya otomatis menutup
     [...fl.querySelectorAll('.fdd')].forEach((d, i) => { const o = i === fabOpen; d.classList.toggle('open', o); d.querySelector('.fddB').setAttribute('aria-expanded', String(o)); d.querySelector('.fddP').inert = !o; });
     if(fabOpen >= 0){ const d = fl.querySelectorAll('.fdd')[fabOpen]; setTimeout(() => { if(d.isConnected && d.classList.contains('open')) d.scrollIntoView({ block:'nearest', behavior:'smooth' }); }, 320); }
   }
@@ -3340,7 +3387,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       pn.inert = !open; dd.style.setProperty('--i', ri);
       al.type = 'button'; al.setAttribute('aria-pressed', String(n === list.length)); al.onclick = () => flipRealm(ri, list.length); allRow.appendChild(al);
       list.forEach((a, ai) => { const b = mkTx('button', 'pill', a), w = areaWax(realm, list.length); b.type = 'button'; if(w) b.appendChild(mkTx('small', 'wx', '\u2248' + w)); b.setAttribute('aria-pressed', String(!!((today[ri] || 0) >> ai & 1))); b.onclick = () => flipArea(ri, ai); box.appendChild(b); });
-      inner.append(allRow, box); pn.appendChild(inner); dd.append(btn, pn); fl.append(dd);
+      inner.append(allRow, box); pn.appendChild(inner); const mb = mkTx('i', 'fmb'); mb.style.setProperty('--q', list.length ? n / list.length : 0); dd.classList.toggle('done', n === list.length); dd.append(btn, mb, pn); fl.append(dd);
     });
     const cb = mkTx('button', 'pill', t.cap); cb.type = 'button'; cb.style.marginTop = '14px'; cb.setAttribute('aria-pressed', String(cap));
     cb.onclick = () => pgWrite(x => { const k = dayK(); x.cap = x.cap || {}; if(x.cap[k]) delete x.cap[k]; else x.cap[k] = 1; });
@@ -3628,6 +3675,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       momOpen:'Momento desbloqueado: a\u00f1ade fotos de la sesi\u00f3n de hoy', momBtn:'Momento de hoy', momT:'Momento de hoy', momLock:'Se abre cuando se acepta una invitaci\u00f3n a jugar hoy.', momAdd:'A\u00f1adir fotos', momBy:'Creado por {n}', momPh:'de {n}', momNone:'A\u00fan no hay fotos', momMax:'M\u00e1ximo 6 fotos por momento', momUp:'Subiendo {a}/{b}\u2026', momShare:'Compartir con todos mis amigos', momDel:'Eliminar momento', momDelQ:'\u00bfEliminar este momento y todas sus fotos?', momDelPhQ:'\u00bfEliminar esta foto?', momArch:'Archivo', momArchNone:'Nada archivado todav\u00eda', momNew:'{n} a\u00f1adi\u00f3 fotos a tu momento', momFail:'No se pudieron a\u00f1adir las fotos', uMin:'min', uHr:'h' }
   };
   Object.keys(VT7).forEach(l => Object.assign(VT[l], VT7[l], VT8[l], VT9[l]));
+  const VT10 = { en:{ react:'React' }, id:{ react:'Beri reaksi' }, es:{ react:'Reaccionar' } };
+  Object.keys(VT10).forEach(l => Object.assign(VT[l], VT10[l]));
   const vt = () => VT[window.SkyApp.getLang()] || VT.en;
   function setWho(){ if(mySession) $('whoAmI').textContent = mySession.type === 'guest' ? vt().guestWho : vt().who + mySession.id; }
   function applyVisitLang(){
@@ -4514,11 +4563,11 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       const key = m.cid || (m.id ? 'i' + m.id : 't' + m.ts + m.from), mine = m.from === myCode;
       let el = chatEls.get(key);
       if(!el){
-        el = mkEl('div', 'msg ' + (mine ? 'me' : 'them') + (first ? '' : ' in')); el.append(mkEl('span', 'mt'), mkEl('div', 'mm'));
+        el = mkEl('div', 'msg ' + (mine ? 'me' : 'them') + (first ? '' : ' in')); el.append(mkEl('span', 'mt'), mkEl('div', 'rxs'), mkEl('div', 'mm'));
         el.querySelector('.mm').append(mkEl('span', 'tm'), mkEl('span', 'tk')); chatEls.set(key, el); if(mine) mineNew = true;
-        const ma = mkEl('div', 'ma'), br = mkEl('button', 'mrp'), bc = mkEl('button', 'mcp'), bm = mkEl('button', 'mmo'); br.type = bc.type = bm.type = 'button'; br.innerHTML = ICO_REPLY; bc.innerHTML = ICO_COPY; bm.innerHTML = ICO_MORE; ma.append(br, bc, bm); el.append(ma);
+        const ma = mkEl('div', 'ma'), br = mkEl('button', 'mrp'), bx = mkEl('button', 'mrx'), bc = mkEl('button', 'mcp'), bm = mkEl('button', 'mmo'); br.type = bx.type = bc.type = bm.type = 'button'; br.innerHTML = ICO_REPLY; bx.innerHTML = ICO_RX; bc.innerHTML = ICO_COPY; bm.innerHTML = ICO_MORE; ma.append(br, bx, bc, bm); el.append(ma);
       }
-      fillMsg(el.querySelector('.mt'), m, v); paintQuote(el, m, v, list); el.querySelector('.tm').textContent = clockHM(m.ts); el._m = m; el.classList.toggle('gone', !!m.del);
+      fillMsg(el.querySelector('.mt'), m, v); paintQuote(el, m, v, list); paintRx(el, m); { const bx = el.querySelector('.mrx'); bx.hidden = !!(m.del || !m.id || m.st); bx.title = v.react; bx.setAttribute('aria-label', v.react); } el.querySelector('.tm').textContent = clockHM(m.ts); el._m = m; el.classList.toggle('gone', !!m.del);
       { const bc = el.querySelector('.mcp'), bm = el.querySelector('.mmo'); bc.hidden = !!(m.del || m.st || imgInfo(m) || invInfo(m)); bc.title = v.copyMsg; bc.setAttribute('aria-label', v.copyMsg); bm.title = v.moreMsg; bm.setAttribute('aria-label', v.moreMsg); const br = el.querySelector('.mrp'); br.hidden = !!(m.del || m.st === 'failed'); br.title = v.rpl; br.setAttribute('aria-label', v.rpl); }
       el.classList.toggle('pending', mine && m.st === 'sending'); el.classList.toggle('failed', mine && m.st === 'failed');
       const tk = el.querySelector('.tk');
@@ -4565,11 +4614,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     Object.keys(by).forEach(pid => {
       const loc = readMsgs(pid);
       by[pid].forEach(m => {
+        if(m.ctl === 'rx'){ const j = loc.findIndex(x => x.id === m.target); if(j > -1){ if(m.rx && Object.keys(m.rx).length) loc[j].rx = m.rx; else delete loc[j].rx; } return; }
         if(m.ctl === 'del'){ const j = loc.findIndex(x => x.id === m.target); if(j > -1){ loc[j].del = 1; loc[j].text = ''; } return; }   // pesan ditarik oleh pengirim
         let i = loc.findIndex(x => x.id === m.id);
         if(i < 0 && m.cid) i = loc.findIndex(x => x.cid === m.cid && x.from === m.from);   // pesan "mengirim" milikku -> versi server
         if(i < 0) i = loc.findIndex(x => !x.id && !x.st && x.from === m.from && x.text === m.text);   // pesan lokal lama
-        const rec = { id:m.id, cid:m.cid, from:m.from, text:m.text, ts:m.ts }; if(m.del) rec.del = 1;
+        const rec = { id:m.id, cid:m.cid, from:m.from, text:m.text, ts:m.ts }; if(m.del) rec.del = 1; if(m.rx) rec.rx = m.rx;
         if(i > -1) loc[i] = rec; else loc.push(rec);
       });
       writeMsgs(pid, loc);
@@ -4633,6 +4683,25 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const ICO_COPY = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
   const ICO_REPLY = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v3"/></svg>';
   const ICO_MORE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
+  const ICO_RX = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2M9 9.5h.01M15 9.5h.01"/></svg>';
+  const RX_SET = ['\ud83d\udc4d', '\u2764\ufe0f', '\ud83d\ude02', '\ud83d\ude2e', '\ud83d\ude22', '\ud83d\ude4f', '\ud83d\udd25', '\u2728'];
+  function paintRx(el, m){   // deretan reaksi di bawah isi pesan; ketuk = tambah / cabut reaksiku
+    const box = el.querySelector('.rxs'), rx = m.del ? {} : (m.rx || {}), g = {};
+    Object.keys(rx).forEach(c => { (g[rx[c]] = g[rx[c]] || []).push(c); });
+    const sig = JSON.stringify(g); if(box._sig === sig) return; box._sig = sig; box.textContent = '';
+    Object.keys(g).forEach(e => { const b = mkEl('button', 'rx' + (g[e].indexOf(myCode) > -1 ? ' me' : ''), e + (g[e].length > 1 ? ' ' + g[e].length : '')); b.type = 'button'; b.addEventListener('click', ev => { ev.stopPropagation(); if(el._m) setRx(el._m, e); }); box.appendChild(b); });
+    box.hidden = !Object.keys(g).length;
+  }
+  async function setRx(m, emoji){
+    const v = vt(), pid = chatPid; if(!pid || !m || !m.id || m.del) return;
+    const prev = Object.assign({}, m.rx || {}), nw = prev[myCode] === emoji ? '' : emoji, nx = Object.assign({}, prev);
+    if(nw) nx[myCode] = nw; else delete nx[myCode];
+    const apply = rx => { const l = readMsgs(pid), x = l.find(q => q.id === m.id); if(!x) return; if(rx && Object.keys(rx).length) x.rx = rx; else delete x.rx; writeMsgs(pid, l); renderChat(); };
+    apply(nx); SFX.nav && SFX.nav();
+    if(!srv()) return;
+    const r = await api('react', { id: m.id, emoji: nw });
+    if(!r.ok){ apply(prev); toast(v.netErr); SFX.error(); } else if(r.rx) apply(r.rx);
+  }
   function copyText(t){
     const done = () => { toast(vt().copiedMsg); SFX.success(); };
     const fb = () => { try{ const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); if(ok) done(); else SFX.error(); }catch(e){ SFX.error(); } };
@@ -4643,6 +4712,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const v = vt(); sheetMsg = m;
     { const dt = dispText(m, v); $('shPrev').textContent = dt.length > 80 ? dt.slice(0, 80) + '\u2026' : dt; }
     $('shReply').hidden = !!(m.del || m.st === 'failed'); $('shReply').textContent = v.rpl;
+    { const row = $('shRx'), ok = !!(m.id && !m.del && !m.st), cur = (m.rx || {})[myCode]; row.textContent = ''; row.hidden = !ok;
+      if(ok) RX_SET.forEach(em => { const b = mkEl('button', cur === em ? 'on' : '', em); b.type = 'button'; b.addEventListener('click', () => { closeSheet(); setRx(m, em); }); row.appendChild(b); }); }
     $('shCopy').hidden = !!(m.del || m.st || imgInfo(m)); $('shCopy').textContent = v.copyMsg;
     $('shDelMe').textContent = v.delMe;
     $('shRetract').hidden = !canRetract(m); $('shRetract').textContent = v.retract;
@@ -4670,6 +4741,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const m = el._m;
     { const q = e.target.closest('.mq'); if(q && q._re){ jumpTo(q._re); return; } }
     if(e.target.closest('.mrp')){ setReply(m); return; }
+    if(e.target.closest('.mrx')){ openMsgSheet(m); return; }
     if(e.target.closest('.mcp')){ copyText(bodyOf(m)); return; }
     if(e.target.closest('.mmo')){ openMsgSheet(m); return; }
     if(m.from === myCode && m.st === 'failed'){ patchMsg(chatPid, m.cid, { st:'sending', ts:srvNow() }); renderChat(); flushOutbox(); return; }
