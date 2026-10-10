@@ -999,6 +999,47 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .fxp{ position:absolute; border-radius:50%; will-change:transform,opacity; }
   @media (prefers-reduced-motion: reduce){ .flame.fanim img.fr{ transition:none; } #fab.fin .flame{ animation:none; } body.ready.fabOn #fab, #fab.out, #fab.fin{ animation:none; } #fab .flame, .fabTog .flame{ transition:none; } }
   #fab.gray{ color:#9aa0b4; }
+  /* ===== ikon melayang v2: bola kaca + aura berdenyut + cincin progres + percikan mengorbit + melayang halus + magnet ke tepi ===== */
+  #fab{ isolation:isolate; transition:scale .22s ease; }
+  #fab .flame{ position:relative; z-index:2; }
+  #fab .fabDeco{ position:absolute; inset:0; pointer-events:none; }
+  #fab .fAura{ position:absolute; inset:-14px; z-index:0; border-radius:50%; background:radial-gradient(closest-side, rgba(255,214,130,0.42), rgba(255,170,80,0.14) 55%, transparent 72%); opacity:.5; animation:fabAura 3.6s ease-in-out infinite; }
+  #fab .fOrb{ position:absolute; inset:2px; z-index:0; border-radius:50%; background:radial-gradient(circle at 30% 24%, rgba(255,255,255,0.34), rgba(255,255,255,0.08) 38%, rgba(30,36,72,0.62) 78%, rgba(14,18,40,0.8)); border:1px solid rgba(255,236,190,0.28); box-shadow:inset 0 1px 1px rgba(255,255,255,0.45), inset 0 -8px 14px rgba(0,0,0,0.35), inset 0 0 12px rgba(255,200,110,0.16); transition:border-color 1.2s ease, box-shadow 1.2s ease; }
+  #fab .fRing{ position:absolute; inset:0; z-index:1; width:100%; height:100%; overflow:visible; transform:rotate(-90deg); }
+  #fab .fRt{ fill:none; stroke:rgba(255,255,255,0.14); stroke-width:2.2; }
+  #fab .fRp{ fill:none; stroke:url(#fabGrad); stroke-width:2.6; stroke-linecap:round; stroke-dasharray:100 100; stroke-dashoffset:calc(100 - var(--p,0) * 100); opacity:clamp(0, calc(var(--p,0) * 60), 1); transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1), opacity .4s ease; filter:drop-shadow(0 0 3px rgba(255,190,100,0.85)); }
+  #fab .fOrbit{ position:absolute; inset:-4px; z-index:3; animation:fabSpin 9s linear infinite; }
+  #fab .fOrbit i{ position:absolute; top:0; left:50%; width:4px; height:4px; margin-left:-2px; border-radius:50%; background:#fff4cc; box-shadow:0 0 6px 1px rgba(255,214,130,0.95); opacity:.7; animation:fabTw 2.4s ease-in-out infinite; }
+  #fab .fOrbit.o2{ inset:3px; animation-duration:14s; animation-direction:reverse; }
+  #fab .fOrbit.o2 i{ top:auto; bottom:0; width:3px; height:3px; margin-left:-1.5px; animation-delay:-1.1s; }
+  @keyframes fabSpin{ to{ transform:rotate(360deg); } }
+  @keyframes fabTw{ 0%,100%{ opacity:.25; transform:scale(.7); } 50%{ opacity:1; transform:scale(1.15); } }
+  @keyframes fabAura{ 0%,100%{ transform:scale(.92); opacity:.4; } 50%{ transform:scale(1.08); opacity:.8; } }
+  @keyframes fabBob{ 0%,100%{ translate:0 0; } 50%{ translate:0 -3px; } }
+  body.ready.fabOn #fab{ animation:fabIn .45s cubic-bezier(.2,.9,.3,1) both, fabBob 5.5s ease-in-out .6s infinite; }   /* masuk + melayang naik-turun halus (properti translate terpisah dari transform) */
+  #fab.drag{ scale:1.12; animation-play-state:running, paused; }
+  #fab.mag{ transition:left 2.4s cubic-bezier(.45,.05,.2,1), scale .22s ease; }   /* magnet: pelan di awal, makin cepat, lalu menempel */
+  #fab.lit .fAura{ opacity:1; animation-duration:1.8s; }
+  #fab.lit .fOrb{ border-color:rgba(255,232,170,0.6); box-shadow:inset 0 1px 1px rgba(255,255,255,0.55), inset 0 -8px 14px rgba(0,0,0,0.3), inset 0 0 16px rgba(255,205,110,0.5), 0 0 16px rgba(255,200,100,0.55); }
+  #fab.lit .fOrbit i{ opacity:1; }
+  @media (prefers-reduced-motion: reduce){ body.ready.fabOn #fab{ animation:none; } #fab .fAura, #fab .fOrbit, #fab .fOrbit i{ animation:none; } #fab.mag, #fab{ transition:none; } }
+  /* panel ikon melayang v2: kaca gelap berpendar hangat, handle, bilah progres, baris berkartu */
+  #fabOv{ backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+  #fabOv .fp{ position:relative; overflow:hidden; background:linear-gradient(180deg, rgba(42,50,98,0.97), rgba(18,22,48,0.985) 62%); border-color:rgba(255,226,160,0.22); box-shadow:0 -14px 40px rgba(0,0,0,0.5), 0 -1px 26px rgba(255,200,110,0.14); }
+  #fabOv .fp::before{ content:''; position:absolute; top:7px; left:50%; width:38px; height:4px; margin-left:-19px; border-radius:4px; background:rgba(255,255,255,0.22); z-index:2; }
+  #fabOv .fp::after{ content:''; position:absolute; top:-46%; left:-20%; right:-20%; height:70%; background:radial-gradient(closest-side, rgba(255,205,120,0.17), transparent 72%); pointer-events:none; }
+  #fabOv .fh, #fabOv .fs, #fabOv .fl{ position:relative; z-index:1; }
+  #fabOv .fh{ padding-top:8px; }
+  #fabOv .fh b{ font-weight:600; letter-spacing:.02em; background:linear-gradient(90deg,#fff2c9,#ffd27a); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #fabOv .fs{ padding-bottom:10px; margin-bottom:8px; }
+  #fabOv .fs::before, #fabOv .fs::after{ content:''; position:absolute; left:0; bottom:0; height:4px; border-radius:4px; }
+  #fabOv .fs::after{ right:0; background:rgba(255,255,255,0.1); }
+  #fabOv .fs::before{ z-index:1; width:calc(var(--p,0) * 100%); background:linear-gradient(90deg,#ffb04a,#ffe08a); box-shadow:0 0 10px rgba(255,200,100,0.6); transition:width .6s cubic-bezier(.2,.8,.2,1); }
+  #fabOv .fdd{ margin-top:7px; padding:0 12px; border:1px solid rgba(255,255,255,0.08); border-radius:14px; background:rgba(255,255,255,0.04); transition:background .25s ease, border-color .25s ease; }
+  #fabOv .fdd.open{ background:rgba(255,210,122,0.07); border-color:rgba(255,210,122,0.26); }
+  #fabOv.first .fdd{ animation:fabRow .42s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i,0) * 55ms); }
+  @keyframes fabRow{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){ #fabOv.first .fdd{ animation:none; } #fabOv .fs::before{ transition:none; } }
   #fabOv{ position:fixed; inset:0; z-index:200; display:grid; place-items:end center; background:rgba(5,8,20,0.55); }
   #fabOv[hidden]{ display:none; }
   #fabOv .fp{ width:min(440px,100%); max-height:82vh; display:flex; flex-direction:column; color:var(--ink); background:rgba(22,28,58,0.97); border:1px solid rgba(255,255,255,0.14); border-radius:20px 20px 0 0; padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 14px); animation:fabUp .28s ease; }
@@ -1346,6 +1387,22 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .fDrop > div{ padding-top:8px; display:flex; flex-direction:column; gap:9px; }
   #fRasi > div{ gap:7px; }
   @media (prefers-reduced-motion: reduce){ .fDrop, .fIcoBtn, button.fCu{ transition:none; } }
+  /* ===== kontras di semua mode langit: siang (--ink gelap) & malam (--ink terang). Permukaan ikut tema atau punya warna sendiri yang konsisten ===== */
+  #invSheet, #momOv, #fabOv{ --top:#0b1026; --bottom:#1a2044; }   /* dialog yang selalu gelap: teks pil aktif (color:var(--top)) tidak boleh ikut langit siang yang terang */
+  #chatReply{ background:var(--panel); border-top-color:rgba(128,128,128,0.3); }   /* bar balasan: ikut tema (dulu selalu gelap sementara teksnya gelap saat siang = tak terbaca) */
+  #chatReply .rpc, .msg .ma button, #chatEmoji, .reqBtn{ background:rgba(128,128,128,0.2); border:1px solid rgba(128,128,128,0.32); }
+  .msg .ma button:hover{ background:rgba(128,128,128,0.34); }
+  #chatEmoji[aria-expanded="true"]{ background:rgba(128,128,128,0.36); }
+  #msgSheet .sh, #emojiPanel{ background:linear-gradient(180deg, var(--top), var(--bottom)); border-color:rgba(128,128,128,0.34); box-shadow:0 10px 30px rgba(0,0,0,0.28); }
+  #msgSheet .sh{ border-top:1px solid rgba(128,128,128,0.34); }
+  #msgSheet button{ background:rgba(128,128,128,0.18); }
+  #msgSheet button.warn{ color:var(--err); } #msgSheet button#shCancel{ background:none; color:var(--ink-soft); }
+  #emoTabs{ border-bottom-color:rgba(128,128,128,0.28); } #emoTabs button.on{ background:rgba(128,128,128,0.3); } #emoGrid button:hover{ background:rgba(128,128,128,0.22); }
+  .reqRow{ background:rgba(128,128,128,0.14); border-color:rgba(128,128,128,0.3); }
+  /* kolom ketik: teks panjang turun ke baris baru (bukan memanjang ke samping), tinggi tumbuh otomatis sampai ~5 baris lalu bisa digulir */
+  #chatForm{ align-items:flex-end; }
+  #chatInput{ display:block; resize:none; line-height:1.4; height:44px; max-height:132px; overflow-y:auto; overflow-wrap:anywhere; white-space:pre-wrap; scrollbar-width:thin; }
+  #chatEmoji, #chatAttach, #chatSend{ height:44px; align-self:flex-end; }
 </style>
 </head>
 <body class="notranslate" translate="no">
@@ -1560,7 +1617,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     <input type="file" id="chatFile" accept="image/*" multiple hidden>
     <button type="button" id="chatAttach" aria-label="Photo"><svg data-asset="chat/lampiran.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-9 9"/></svg></button>
     <button type="button" id="chatEmoji" aria-haspopup="true" aria-expanded="false" aria-label="Emoji">&#128522;</button>
-    <input type="text" id="chatInput" placeholder="Message" autocomplete="off">
+    <textarea id="chatInput" rows="1" placeholder="Message" autocomplete="off" enterkeyhint="send"></textarea>
     <button type="submit" id="chatSend">Send</button>
   </form>
   <div id="msgSheet" hidden><div class="sh" role="dialog" aria-modal="true"><div class="shT" id="shPrev"></div><button type="button" id="shReply"></button><button type="button" id="shCopy"></button><button type="button" id="shDelMe"></button><button type="button" id="shRetract" class="warn"></button><button type="button" id="shCancel"></button></div></div>
@@ -3155,7 +3212,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(fabWas === vis) return;
     const first = fabWas === null; fabWas = vis;
     const b = document.body.classList;
-    if(vis){ fabBtn.classList.remove('out', 'fin'); b.add('fabOn'); return; }
+    if(!vis) fabMagDisarm();
+    if(vis){ fabBtn.classList.remove('out', 'fin'); b.add('fabOn'); fabMagArm(); return; }
     if(first || reduceFlame.matches || getComputedStyle(fabBtn).display === 'none'){ fabBtn.classList.remove('out', 'fin'); b.remove('fabOn'); return; }
     const fin = kind === 'finish';
     fabBtn.classList.add('out'); if(fin) fabBtn.classList.add('fin'); b.remove('fabOn');
@@ -3206,6 +3264,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   };
   const mkTx = (tag, cls, txt) => { const e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; return e; };
   const fabBtn = mkTx('button'); fabBtn.id = 'fab'; fabBtn.type = 'button'; flameInto(fabBtn);
+  { const dc = mkTx('span', 'fabDeco'); dc.setAttribute('aria-hidden', 'true');   // dekorasi: aura, bola kaca, cincin progres, percikan mengorbit
+    dc.innerHTML = '<i class="fAura"></i><i class="fOrb"></i><svg class="fRing" viewBox="0 0 52 52"><defs><linearGradient id="fabGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0c0"/><stop offset="1" stop-color="#ff9f4a"/></linearGradient></defs><circle class="fRt" cx="26" cy="26" r="24"/><circle class="fRp" cx="26" cy="26" r="24" pathLength="100"/></svg><span class="fOrbit"><i></i></span><span class="fOrbit o2"><i></i></span>';
+    fabBtn.insertBefore(dc, fabBtn.firstChild); }
   const fabOv = mkTx('div'); fabOv.id = 'fabOv'; fabOv.hidden = true; fabOv.innerHTML = '<div class="fp" role="dialog" aria-modal="true"><div class="fh"><b></b><button type="button" class="fx">\u2715</button></div><div class="fs"></div><div class="fl"></div></div>';
   document.body.append(fabBtn, fabOv);
   const fabSwitch = mkTx('button', 'pill fabTog'); fabSwitch.type = 'button';
@@ -3213,18 +3274,42 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   fabSwitch._onFlame = swSync;
   { const hb = mkTx('div', 'hbtns'); capBtn.parentNode.insertBefore(hb, capBtn); hb.append(fabSwitch, capBtn); }   // keduanya ikon saja (kartu bulat dihilangkan lewat CSS)
   fabSwitch.onclick = () => Store.set('fab', Store.get('fab', 0) ? 0 : 1);
-  const openFab = () => { fabOpen = -1; fabOv.hidden = false; paintFab(); }, closeFab = () => { fabOv.hidden = true; };
+  const openFab = () => { fabMagDisarm(); fabOpen = -1; fabOv.classList.add('first'); setTimeout(() => fabOv.classList.remove('first'), 1100); fabOv.hidden = false; paintFab(); }, closeFab = () => { fabOv.hidden = true; fabMagArm(); };
   fabOv.querySelector('.fx').onclick = closeFab; fabOv.addEventListener('click', e => { if(e.target === fabOv) closeFab(); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !fabOv.hidden) closeFab(); });
   window.addEventListener('sky:page', closeFab);
   let fabPos = null; try{ fabPos = JSON.parse(localStorage.getItem('sky_fab_pos') || 'null'); }catch(e){}
-  const fabPlace = () => { const w = innerWidth, h = innerHeight; let x = fabPos ? fabPos.x * w : w - 66, y = fabPos ? fabPos.y * h : h - 170; fabBtn.style.left = Math.max(6, Math.min(w - 58, x)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(h - 58, y)) + 'px'; };
-  fabPlace(); window.addEventListener('resize', fabPlace);
+  const FAB_SZ = 52, FAB_EDGE = 8, FAB_MAG_WAIT = 10000;
+  const fabSave = () => { try{ localStorage.setItem('sky_fab_pos', JSON.stringify(fabPos)); }catch(e){} };
+  const fabPlace = () => {
+    const w = innerWidth, h = innerHeight; let x = fabPos ? fabPos.x * w : w - 66, y = fabPos ? fabPos.y * h : h - 170;
+    if(fabPos && fabPos.s === 'l') x = FAB_EDGE; else if(fabPos && fabPos.s === 'r') x = w - FAB_SZ - FAB_EDGE;   // sudah menempel ke tepi: tetap menempel walau ukuran layar berubah
+    fabBtn.style.left = Math.max(6, Math.min(w - 58, x)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(h - 58, y)) + 'px';
+  };
+  fabPlace(); window.addEventListener('resize', () => { fabPlace(); fabMagArm(); });
+  // magnet: kalau ikon dibiarkan bebas 10 detik (tidak disentuh, panel tertutup, tab terlihat), ia meluncur PELAN ke tepi kiri/kanan yang lebih dekat
+  let magT = null, magEnd = null;
+  function fabMagDisarm(){ clearTimeout(magT); magT = null; }
+  function fabMagArm(){ fabMagDisarm(); magT = setTimeout(fabMagnet, FAB_MAG_WAIT); }
+  function fabMagnet(){
+    magT = null;
+    const on = document.body.classList.contains('fabOn');
+    if(!on) return;
+    if(fabBtn.classList.contains('out') || fabDrag || !fabOv.hidden || document.hidden){ fabMagArm(); return; }   // belum "bebas": tunggu 10 detik lagi
+    const w = innerWidth, l = fabBtn.offsetLeft, side = l + FAB_SZ / 2 < w / 2 ? 'l' : 'r', tx = side === 'l' ? FAB_EDGE : w - FAB_SZ - FAB_EDGE;
+    if(Math.abs(l - tx) < 3){ fabPos = { x: l / w, y: fabBtn.offsetTop / innerHeight, s: side }; fabSave(); return; }   // sudah menempel
+    fabBtn.classList.add('mag'); fabBtn.style.left = tx + 'px';
+    clearTimeout(magEnd); magEnd = setTimeout(() => { fabBtn.classList.remove('mag'); fabPos = { x: tx / innerWidth, y: fabBtn.offsetTop / innerHeight, s: side }; fabSave(); }, 2500);
+  }
   let fabDrag = null;
-  fabBtn.addEventListener('pointerdown', e => { fabDrag = { x:e.clientX, y:e.clientY, l:fabBtn.offsetLeft, t:fabBtn.offsetTop, m:false }; try{ fabBtn.setPointerCapture(e.pointerId); }catch(x){} });
-  fabBtn.addEventListener('pointermove', e => { if(!fabDrag) return; const dx = e.clientX - fabDrag.x, dy = e.clientY - fabDrag.y; if(!fabDrag.m && Math.hypot(dx, dy) > 6) fabDrag.m = true; if(fabDrag.m){ fabBtn.style.left = Math.max(6, Math.min(innerWidth - 58, fabDrag.l + dx)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(innerHeight - 58, fabDrag.t + dy)) + 'px'; } });
-  fabBtn.addEventListener('pointerup', () => { if(!fabDrag) return; const m = fabDrag.m; fabDrag = null; if(m){ fabPos = { x: fabBtn.offsetLeft / innerWidth, y: fabBtn.offsetTop / innerHeight }; try{ localStorage.setItem('sky_fab_pos', JSON.stringify(fabPos)); }catch(e){} } else openFab(); });
-  fabBtn.addEventListener('pointercancel', () => { fabDrag = null; });
+  fabBtn.addEventListener('pointerdown', e => {
+    fabMagDisarm(); clearTimeout(magEnd);
+    if(fabBtn.classList.contains('mag')){ fabBtn.style.left = fabBtn.offsetLeft + 'px'; fabBtn.classList.remove('mag'); }   // sedang meluncur: tahan di posisi sekarang
+    fabDrag = { x:e.clientX, y:e.clientY, l:fabBtn.offsetLeft, t:fabBtn.offsetTop, m:false }; try{ fabBtn.setPointerCapture(e.pointerId); }catch(x){}
+  });
+  fabBtn.addEventListener('pointermove', e => { if(!fabDrag) return; const dx = e.clientX - fabDrag.x, dy = e.clientY - fabDrag.y; if(!fabDrag.m && Math.hypot(dx, dy) > 6){ fabDrag.m = true; fabBtn.classList.add('drag'); } if(fabDrag.m){ fabBtn.style.left = Math.max(6, Math.min(innerWidth - 58, fabDrag.l + dx)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(innerHeight - 58, fabDrag.t + dy)) + 'px'; } });
+  fabBtn.addEventListener('pointerup', () => { if(!fabDrag) return; const m = fabDrag.m; fabDrag = null; fabBtn.classList.remove('drag'); if(m){ fabPos = { x: fabBtn.offsetLeft / innerWidth, y: fabBtn.offsetTop / innerHeight }; fabSave(); fabMagArm(); } else openFab(); });
+  fabBtn.addEventListener('pointercancel', () => { fabDrag = null; fabBtn.classList.remove('drag'); fabMagArm(); });
   fabBtn.addEventListener('click', e => { if(e.detail === 0) openFab(); });
   const flipArea = (ri, ai) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0); r[ri] ^= 1 << ai; if(r.every(x => !x)) delete d.runs[k]; });
   const flipRealm = (ri, len) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0), full = (1 << len) - 1; r[ri] = r[ri] === full ? 0 : full; if(r.every(x => !x)) delete d.runs[k]; });
@@ -3242,6 +3327,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     let tot = 0, all = 0; AREAS.forEach(([r, l], ri) => { tot += pop(today[ri] || 0); all += l.length; });
     if(prevTot !== null && tot > prevTot && on && performance.now() - lastAct < 1500) fabCelebrate(tot - prevTot); prevTot = tot;
     fabBtn.classList.toggle('gray', cap); fabBtn.setAttribute('aria-label', t.ttl + ' ' + tot + '/' + all); fabBtn.title = t.ttl;
+    fabBtn.style.setProperty('--p', all ? tot / all : 0); fabOv.style.setProperty('--p', all ? tot / all : 0);   // cincin progres di ikon + bilah di panel
     if(fabOv.hidden) return;
     fabOv.querySelector('b').textContent = t.ttl; fabOv.querySelector('.fx').setAttribute('aria-label', t.close);
     fabOv.querySelector('.fs').textContent = tot + '/' + all + ' ' + I18N[lang].pg.ar;
@@ -3251,7 +3337,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       const dd = mkTx('div', 'fdd' + (open ? ' open' : '')), btn = mkTx('button', 'fddB'), nm = mkTx('span'), pn = mkTx('div', 'fddP'), inner = mkTx('div'), allRow = mkTx('div', 'fddAll'), al = mkTx('button', 'pill', t.all), box = mkTx('div', 'fpills');
       nm.append(mkTx('b', '', realm), mkTx('small', '', '  ' + n + '/' + list.length + (rw ? ' \u00b7 \u2248' + rw + ' ' + wu : '')));
       btn.type = 'button'; btn.setAttribute('aria-expanded', String(open)); btn.append(nm); btn.insertAdjacentHTML('beforeend', CHEV); btn.onclick = () => fabToggle(ri);
-      pn.inert = !open;
+      pn.inert = !open; dd.style.setProperty('--i', ri);
       al.type = 'button'; al.setAttribute('aria-pressed', String(n === list.length)); al.onclick = () => flipRealm(ri, list.length); allRow.appendChild(al);
       list.forEach((a, ai) => { const b = mkTx('button', 'pill', a), w = areaWax(realm, list.length); b.type = 'button'; if(w) b.appendChild(mkTx('small', 'wx', '\u2248' + w)); b.setAttribute('aria-pressed', String(!!((today[ri] || 0) >> ai & 1))); b.onclick = () => flipArea(ri, ai); box.appendChild(b); });
       inner.append(allRow, box); pn.appendChild(inner); dd.append(btn, pn); fl.append(dd);
@@ -4183,13 +4269,26 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   $('chatAttach').addEventListener('pointerdown', e => e.preventDefault());
   $('chatAttach').addEventListener('click', () => { if(!srv()){ toast(vt().imgOff); return; } if(att.length >= 4){ toast(vt().imgMax); return; } $('chatFile').click(); });
-  $('chatFile').addEventListener('change', async e => {
-    const files = [...e.target.files]; e.target.value = ''; let bad = false;
+  async function addImgFiles(files){   // dipakai tombol lampiran DAN tempel (paste)
+    if(!srv()){ toast(vt().imgOff); return; }
+    let bad = false;
     for(const f of files){
       if(att.length >= 4){ toast(vt().imgMax); break; }
       try{ att.push(await compressImg(f)); renderAtt(); }catch(x){ bad = true; }
     }
     if(bad) toast(vt().imgBad);
+  }
+  $('chatFile').addEventListener('change', e => { const files = [...e.target.files]; e.target.value = ''; addImgFiles(files); });
+  // tempel gambar (Ctrl/Cmd+V atau tempel dari keyboard HP) di kolom chat: gambar masuk ke lampiran; teks biasa tetap ditempel seperti biasa
+  document.addEventListener('paste', e => {
+    if(!chatPid || !$('chatOverlay').classList.contains('open')) return;
+    const t = e.target, tag = t && t.tagName;
+    if(t !== $('chatInput') && (tag === 'INPUT' || tag === 'TEXTAREA' || (t && t.isContentEditable))) return;   // kolom lain (mis. catatan momen) mengurus tempelnya sendiri
+    const cd = e.clipboardData; if(!cd) return;
+    const files = [...(cd.files || [])].filter(f => /^image\//i.test(f.type));
+    if(!files.length) for(const it of (cd.items || [])){ if(it.kind === 'file' && /^image\//i.test(it.type)){ const f = it.getAsFile(); if(f) files.push(f); } }
+    if(!files.length) return;
+    e.preventDefault(); addImgFiles(files);
   });
   // ---------- ajakan main bareng ----------
   // pesan ajakan: '[inv]{"i":id ajakan}'. Statusnya (menunggu/diterima/...) diambil dari invList yang dikirim server tiap poll
@@ -4404,7 +4503,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     $('chatOverlay').classList.add('open');
     renderChat(true); markRead(); updateChatSub();
     kickPoll();   // mulai long-poll: pesan masuk tiba hampir seketika selama chat terbuka
-    setTimeout(() => $('chatInput').focus(), 380);
+    chatGrow(); setTimeout(() => $('chatInput').focus(), 380);
   }
   function renderChat(){
     if(!chatPid) return;
@@ -4517,7 +4616,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     e.preventDefault();
     const input = $('chatInput'); let text = input.value.trim(); const f = chatFriend();
     if((!text && !att.length) || !chatPid || !f) return;
-    input.value = ''; SFX.send(); lastType = 0;
+    input.value = ''; chatGrow(); SFX.send(); lastType = 0;
     const cid = myCode + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     if(att.length){ const ids = att.map((a, k) => { const id = 'p:' + cid + ':' + k; pendImgs.set(id, a); return id; }); text = IMG_P + JSON.stringify({ i: ids, c: text.slice(0, 180) }); att = []; renderAtt(); }
     else if(text.indexOf(IMG_P) === 0 || text.indexOf(RE_P) === 0 || text.indexOf(INV_P) === 0) text = '\u200b' + text;
@@ -4984,6 +5083,13 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     } finally { syncing = false; }
   }
   function updateChatSub(){ const f = chatFriend(); const m = f ? metaFor(f.code) : null; $('chatSub').textContent = f ? (typingMap[f.code] ? vt().typing : [actText(m), timeInfo(m)].filter(Boolean).join(' \u00b7 ')) : ''; $('chatTitle').textContent = f ? fLabel(f) + (m && m.status ? ' (' + m.status + ')' : '') : ''; $('chatTitle').classList.toggle('on', !!(m && m.online)); paintFCode(); }
+  const chatGrow = () => { const ta = $('chatInput'); ta.style.height = 'auto'; ta.style.height = Math.max(44, Math.min(ta.scrollHeight + 2, 132)) + 'px'; ta.style.overflowY = ta.scrollHeight + 2 > 132 ? 'auto' : 'hidden'; };
+  $('chatInput').addEventListener('input', chatGrow);
+  $('chatInput').addEventListener('keydown', e => {   // desktop: Enter = kirim, Shift+Enter = baris baru. HP (layar sentuh): Enter = baris baru, kirim lewat tombol
+    if(e.key !== 'Enter' || e.shiftKey || e.isComposing || !matchMedia('(pointer:fine)').matches) return;
+    e.preventDefault(); if($('chatForm').requestSubmit) $('chatForm').requestSubmit(); else $('chatForm').dispatchEvent(new Event('submit', { cancelable:true }));
+  });
+  window.addEventListener('resize', () => { if(chatPid) chatGrow(); });
   $('chatInput').addEventListener('input', () => {   // indikator "sedang mengetik" (ringan: 1 request kecil, tanpa poll penuh)
     lastType = Date.now();
     const f = chatFriend();
