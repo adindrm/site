@@ -397,6 +397,24 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #msgSheet button.warn{ color:#ff9aa8; } #msgSheet button#shCancel{ text-align:center; background:none; color:var(--ink-soft); }
   #chatEmoji{ flex:none; width:44px; padding:0; font-size:20px; line-height:1; color:var(--ink); background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); border-radius:14px; cursor:pointer; touch-action:manipulation; }
   #chatEmoji[aria-expanded="true"]{ background:rgba(255,255,255,0.16); }
+  #chatAttach{ flex:none; width:44px; padding:0; display:grid; place-items:center; color:var(--ink); background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); border-radius:14px; cursor:pointer; touch-action:manipulation; }
+  #chatAttach svg, #chatAttach .ai{ width:22px; height:22px; }
+  #chatAtt{ position:absolute; left:0; right:0; bottom:100%; display:flex; gap:8px; padding:8px 16px; overflow-x:auto; background:rgba(10,14,30,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  #chatAtt[hidden]{ display:none; }
+  #chatAtt .at{ position:relative; flex:none; width:56px; height:56px; border-radius:10px; overflow:hidden; }
+  #chatAtt .at img{ width:100%; height:100%; object-fit:cover; display:block; }
+  #chatAtt .at button{ position:absolute; top:2px; right:2px; width:20px; height:20px; padding:0; border:none; border-radius:50%; background:rgba(0,0,0,.65); color:#fff; font-size:12px; line-height:20px; cursor:pointer; }
+  .imgG{ display:grid; grid-template-columns:1fr 1fr; gap:3px; width:min(240px,62vw); }
+  .imgG.n1{ grid-template-columns:1fr; } .imgG.n3 img:first-child{ grid-column:1 / -1; }
+  .imgG img{ width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; cursor:zoom-in; background:rgba(255,255,255,0.08); display:block; }
+  .imgG.n1 img{ aspect-ratio:4/3; } .imgG.n3 img:first-child{ aspect-ratio:2/1; }
+  .imgC{ margin-top:5px; white-space:pre-wrap; word-break:break-word; }
+  #imgLb{ position:fixed; inset:0; z-index:99999; display:grid; place-items:center; background:rgba(5,8,20,0.92); }
+  #imgLb[hidden]{ display:none; }
+  #imgLb img{ max-width:96vw; max-height:88vh; object-fit:contain; border-radius:8px; }
+  #imgLb button{ position:absolute; border:none; background:rgba(255,255,255,0.14); color:#fff; border-radius:50%; width:44px; height:44px; font-size:22px; cursor:pointer; }
+  #imgLb .lbX{ top:calc(env(safe-area-inset-top,0px) + 12px); right:12px; } #imgLb .lbP{ left:10px; top:50%; } #imgLb .lbN{ right:10px; top:50%; }
+  #imgLb .lbC{ position:absolute; bottom:calc(env(safe-area-inset-bottom,0px) + 14px); color:#fff; font-size:13px; opacity:.8; }
   #emojiPanel{ position:absolute; left:12px; right:12px; bottom:calc(100% + 6px); z-index:4; display:flex; flex-direction:column; max-height:min(300px,45vh); overflow:hidden; background:rgba(14,18,34,0.98); border:1px solid rgba(255,255,255,0.14); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
   #emojiPanel[hidden]{ display:none; }
   #emoTabs{ display:flex; gap:2px; padding:6px; overflow-x:auto; border-bottom:1px solid rgba(255,255,255,0.08); flex:none; }
@@ -860,6 +878,38 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   img.ai.gcf{ filter:grayscale(1) brightness(.75); }
   .cap[aria-pressed="true"] > svg:not(.gc), .cap[aria-pressed="true"] > img.ai:not(.gc){ display:none; }
   .cap:not([aria-pressed="true"]) > .gc{ display:none; }
+  /* tombol lilin abu-abu: hanya ikon 20px (lilin normal / lilin abu-abu); teks tetap ada untuk pembaca layar */
+  .cap, .fabTog{ position:relative; justify-content:center; min-width:40px; padding:0 10px; }
+  .cap svg, .cap img.ai, .fabTog svg, .fabTog img.ai{ width:20px; height:20px; margin-right:0; }
+  .cap span{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .hbtns{ display:flex; align-items:center; gap:8px; flex:none; }
+  .fabTog svg{ fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .fabTog[aria-pressed="true"]{ background:var(--ink); color:var(--top); border-color:transparent; }
+  .pill small.wx{ opacity:.6; font-size:11px; margin-left:5px; font-weight:400; }
+  /* ikon melayang progres harian */
+  #fab{ display:none; position:fixed; z-index:30; width:52px; height:52px; padding:0; border:none; background:none; place-items:center; color:#ffd27a; cursor:pointer; touch-action:none; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.45)); -webkit-tap-highlight-color:transparent; }
+  body.ready.fabOn:not(.p3) #fab{ display:grid; animation:fabIn .35s ease; }
+  @keyframes fabIn{ from{ opacity:0; transform:scale(.6); } to{ opacity:1; transform:none; } }
+  #fab svg, #fab img.ai{ width:34px; height:34px; fill:currentColor; margin-top:-8px; pointer-events:none; transform-origin:50% 90%; animation:fabSway 3.2s ease-in-out infinite; }
+  @keyframes fabSway{ 0%,100%{ transform:rotate(-7deg) translateY(0); } 50%{ transform:rotate(7deg) translateY(-3px); } }
+  @media (prefers-reduced-motion: reduce){ #fab svg, #fab img.ai{ animation:none; } }
+  #fab:active svg, #fab:active img.ai{ animation-play-state:paused; }
+  #fab.gray{ color:#9aa0b4; }
+  #fab .fb{ text-shadow:0 1px 4px rgba(0,0,0,0.8); position:absolute; bottom:5px; left:0; right:0; font-size:10px; line-height:1; color:var(--ink); text-align:center; pointer-events:none; }
+  #fabOv{ position:fixed; inset:0; z-index:200; display:grid; place-items:end center; background:rgba(5,8,20,0.55); }
+  #fabOv[hidden]{ display:none; }
+  #fabOv .fp{ width:min(440px,100%); max-height:82vh; display:flex; flex-direction:column; color:var(--ink); background:rgba(22,28,58,0.97); border:1px solid rgba(255,255,255,0.14); border-radius:20px 20px 0 0; padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 14px); animation:fabUp .28s ease; }
+  @keyframes fabUp{ from{ transform:translateY(24px); opacity:0; } to{ transform:none; opacity:1; } }
+  #fabOv .fh{ display:flex; justify-content:space-between; align-items:center; font-size:15px; }
+  #fabOv .fx{ width:34px; height:34px; border:none; border-radius:50%; background:rgba(255,255,255,0.1); color:var(--ink); cursor:pointer; }
+  #fabOv .fs{ font-size:12px; color:var(--ink-soft); margin:2px 0 6px; }
+  #fabOv .fl{ overflow-y:auto; overscroll-behavior:contain; }
+  #fabOv .frh{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:13px; margin-top:12px; }
+  #fabOv .frh small{ color:var(--ink-soft); }
+  #fabOv .fpills{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  #fabOv .pill{ min-height:34px; padding:0 10px; font-size:12px; }
+  #chatTitle::after{ content:''; display:inline-block; width:8px; height:8px; margin-left:6px; border-radius:50%; background:#8a8fa3; vertical-align:middle; }
+  #chatTitle.on::after{ background:#4cd98a; box-shadow:0 0 6px #4cd98a; }
   .gray > :not(.gc){ display:none !important; }
   .ic:not(.gray) > .gc, .fIc:not(.gray) > .gc{ display:none; }
   .all{ flex:none; width:40px; height:40px; margin-right:12px; display:grid; place-items:center; border-radius:50%; border:1px solid rgba(255,255,255,0.3); background:transparent; color:var(--ink); cursor:pointer; touch-action:manipulation; }
@@ -1381,6 +1431,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   <div id="chatMsgs"></div>
   <form id="chatForm">
     <div id="emojiPanel" hidden><div id="emoTabs" role="tablist"></div><div id="emoGrid"></div></div>
+    <div id="chatAtt" hidden></div>
+    <input type="file" id="chatFile" accept="image/*" multiple hidden>
+    <button type="button" id="chatAttach" aria-label="Photo"><svg data-asset="chat/lampiran.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-9 9"/></svg></button>
     <button type="button" id="chatEmoji" aria-haspopup="true" aria-expanded="false" aria-label="Emoji">&#128522;</button>
     <input type="text" id="chatInput" placeholder="Message" autocomplete="off">
     <button type="submit" id="chatSend">Send</button>
@@ -2003,12 +2056,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   // place  = detail tempat (realm · area), opsional: isi / tambahkan sendiri bila ingin menampilkannya di kartu.
   // reward = keterangan hadiah singkat (opsional).  type 'shard' dihitung otomatis (lihat bagian Shard di bawah).
   const EVENTS = [
-    { k:'geyser',  c:'candles',     type:'cycle', period:7200,  o:300,   d:600,  place:'Daylight Prairie · Sanctuary Islands' },   // :05, tiap 2 jam
-    { k:'grandma', c:'candles',     type:'cycle', period:7200,  o:2100,  d:600,  place:'Hidden Forest · Elevated Clearing' },      // :35, tiap 2 jam
-    { k:'turtle',  c:'candles',     type:'cycle', period:7200,  o:3000,  d:600,  place:'Daylight Prairie · Sanctuary Islands' },   // :50, tiap 2 jam
+    { k:'geyser',  c:'candles',     type:'cycle', period:7200,  o:300,   d:600,  wax:1000, pool:1,  place:'Daylight Prairie · Sanctuary Islands' },   // :05, tiap 2 jam
+    { k:'grandma', c:'candles',     type:'cycle', period:7200,  o:2100,  d:600,  wax:1000, pool:1,  place:'Hidden Forest · Elevated Clearing' },      // :35, tiap 2 jam
+    { k:'turtle',  c:'candles',     type:'cycle', period:7200,  o:3000,  d:600,  wax:150,  place:'Daylight Prairie · Sanctuary Islands' },   // :50, tiap 2 jam
     { k:'eden',    c:'candles',     type:'weekly' },                                                                              // Minggu 00:00
     { k:'shardRed',   c:'shards',   type:'shard', red:true,  reward:'ascended' },
-    { k:'shardBlack', c:'shards',   type:'shard', red:false, reward:'wax' },
+    { k:'shardBlack', c:'shards',   type:'shard', red:false, reward:'wax', wax:200 },
     { k:'fairy',   c:'environment', type:'cycle', period:3600,  o:3000,  d:600,  place:'Daylight Prairie' },                       // :50, tiap jam
     { k:'sunset',  c:'environment', type:'cycle', period:7200,  o:3000,  d:600,  place:'Daylight Prairie · Sanctuary Islands' },   // Sunset Sanctuary, :50 (satu jendela dengan Turtle)
     { k:'rainbow', c:'environment', type:'cycle', period:43200, o:18000, d:1800, place:'Hidden Forest · Forest Brook' },           // 05:00 & 17:00, 30 menit
@@ -2019,6 +2072,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     { k:'concert', c:'aurora',      type:'cycle', period:7200,  o:600,   d:2400 },   // konser mulai :10, tiap 2 jam
   ];
   const CATS = ['candles', 'shards', 'environment', 'reset', 'spirits', 'aurora'];
+  // perkiraan wax (wiki Sky): pool = batas harian bersama (maks), bukan per kejadian; ubah angka di EVENTS bila di game berbeda
+  const WXU = { en:{ u:'wax', max:'up to', day:'/day' }, id:{ u:'wax', max:'hingga', day:'/hari' }, es:{ u:'cera', max:'hasta', day:'/d\u00eda' } };
+  const wxText = ev => { if(!ev.wax) return ''; const w = WXU[lang] || WXU.en; return (ev.pool ? w.max + ' ' : '') + '\u2248' + ev.wax + ' ' + w.u + (ev.pool ? w.day : ''); };
   // Roh pengembara: datang Kamis 00:00 Pacific, tiap 14 hari, selama 4 hari. anchor = [tahun, bulan, tanggal] jendela yang diketahui.
   // names = nama roh per tanggal mulai (YYYY-MM-DD, Pacific); isi seperlunya.
   const TS = { anchor:[2026, 9, 10], every:14, days:4, names:{ '2026-10-08':'Talented Builder' } };
@@ -2227,7 +2283,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       row.lv.textContent = t.act.live;
       row.pl.textContent = place;
       row.ec.textContent = fmtCD(left);
-      row.el.textContent = (r.name ? r.name + ' · ' : '') + fmtLocal(r.nextTs, far ? 1e9 : left) + (ev.reward ? ' · ' + t.reward[ev.reward] : '');
+      row.el.textContent = (r.name ? r.name + ' · ' : '') + fmtLocal(r.nextTs, far ? 1e9 : left) + (ev.reward ? ' · ' + t.reward[ev.reward] : '') + (wxText(ev) ? ' · ' + wxText(ev) : '');
       row.root.classList.toggle('live', !!r.live);
       if(r.live) liveCats[ev.c] = true;
       if(ev.type !== 'daily' && ev.type !== 'weekly' && left < nextLeft){ nextLeft = left; nextKey = ev.k; }
@@ -2238,7 +2294,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         anyLive = true;
         const rem = Math.max(0, Math.ceil((r.endTs - nowTs) / 1000));
         act.querySelector('.en').textContent = t.ev[ev.k] + (r.name ? ' · ' + r.name : '');
-        act.querySelector('.pl').textContent = place;
+        act.querySelector('.pl').textContent = place + (wxText(ev) ? (place ? ' · ' : '') + wxText(ev) : '');
         act.querySelector('.ec').textContent = fmtCD(rem);
         act.querySelector('.bar i').style.width = Math.min(100, (nowTs - r.startTs) / (r.endTs - r.startTs) * 100).toFixed(1) + '%';
         act.querySelector('.el').textContent = fmtLocal(r.startTs, far ? 1e9 : 0) + ' – ' + fmtLocal(r.endTs, far ? 1e9 : 0);
@@ -2748,11 +2804,14 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   addGrayCandle(capBtn);
   capBtn.onclick = () => pgWrite(d => { const k = dayK(); d.cap = d.cap || {}; if(d.cap[k]) delete d.cap[k]; else d.cap[k] = 1; });
   cardTrk.appendChild(runBox);
+  // perkiraan wax per realm (wiki Sky, total Pieces of Light); per area = total realm dibagi rata. Realm tanpa data -> tidak ditampilkan.
+  const REALM_WAX = { 'Daylight Prairie':691, 'Valley of Triumph':907, 'Golden Wasteland':710, 'Vault of Knowledge':745 };
+  const areaWax = (realm, n) => REALM_WAX[realm] ? Math.round(REALM_WAX[realm] / n / 5) * 5 : 0;
   const runDrops = AREAS.map(([realm, list], ri) => {
     const dd = mkDrop(realm, false, true, true);
     dd.all.onclick = () => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0), full = (1 << list.length) - 1; r[ri] = r[ri] === full ? 0 : full; if(r.every(x => !x)) delete d.runs[k]; });
     dd.pills = list.map((a, ai) => {
-      const b = mk('button', 'pill', a); b.type = 'button';
+      const b = mk('button', 'pill', a); b.type = 'button'; { const w = areaWax(realm, list.length); if(w) b.appendChild(mk('small', 'wx', '\u2248' + w)); }
       b.onclick = () => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0); r[ri] ^= 1 << ai; if(r.every(x => !x)) delete d.runs[k]; });
       dd.box.appendChild(b); return b;
     });
@@ -2799,7 +2858,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     runDrops.forEach((dd, ri) => {
       const n = pop(today[ri] || 0); tot += n; all += dd.pills.length;
       dd.pills.forEach((b, ai) => b.setAttribute('aria-pressed', String(!!((today[ri] || 0) >> ai & 1))));
-      dd.el.textContent = n + '/' + dd.pills.length + ' ' + t.ar;
+      dd.el.textContent = n + '/' + dd.pills.length + ' ' + t.ar + (REALM_WAX[AREAS[ri][0]] ? ' \u00b7 \u2248' + REALM_WAX[AREAS[ri][0]] + ' ' + (lang === 'es' ? 'cera' : 'wax') : '');
       const full = n === dd.pills.length;
       dd.wrap.classList.toggle('done', full); dd.all.setAttribute('aria-pressed', String(full)); dd.all.setAttribute('aria-label', t.all); dd.all.title = t.all;
     });
@@ -2813,8 +2872,66 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     edenPill.setAttribute('aria-pressed', String(!!ew[weekK()]));
     edenBox.querySelector('.el').textContent = t.edenS;
     paintHist(edenHist, ek, k => t.wk + ' ' + kLabel(k), t);
+    paintFab();
   }
-  Store.onChange(k => { if(k === '*' || k === 'pg') paintPg(); });
+  Store.onChange(k => { if(k === '*' || k === 'pg' || k === 'fab') paintPg(); });
+  // ---------- ikon melayang progres harian: aktif/nonaktif di sebelah kiri tombol lilin abu-abu; ketuk = mini overlay ----------
+  var fabReady = false;
+  const FABT = {
+    en:{ tog:'Floating daily-progress icon', ttl:'Daily progress', all:'Select all', cap:'Grey candle (~20/day)', close:'Close' },
+    id:{ tog:'Ikon melayang progres harian', ttl:'Progres harian', all:'Pilih semua', cap:'Lilin abu-abu (\u00b120/hari)', close:'Tutup' },
+    es:{ tog:'Icono flotante del progreso diario', ttl:'Progreso diario', all:'Seleccionar todo', cap:'Vela gris (~20/d\u00eda)', close:'Cerrar' }
+  };
+  const hh = (tag, cls, txt) => { const e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; return e; };
+  const fab = hh('button'); fab.id = 'fab'; fab.type = 'button'; fab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + FL + '</svg><span class="fb"></span>';
+  const fov = hh('div'); fov.id = 'fabOv'; fov.hidden = true; fov.innerHTML = '<div class="fp" role="dialog" aria-modal="true"><div class="fh"><b></b><button type="button" class="fx">\u2715</button></div><div class="fs"></div><div class="fl"></div></div>';
+  document.body.append(fab, fov);
+  if(window.SkyAsset){ const sv = fab.querySelector('svg'); if(sv) window.SkyAsset.swap(sv, 'progres/ikon-melayang'); }   // aset/skymeet/progres/ikon-melayang.svg|webp
+  const fabTog = hh('button', 'pill fabTog'); fabTog.type = 'button';
+  fabTog.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7c1.2 1.8 2 2.8 2 4.2a2 2 0 0 1-4 0C10 9.8 10.8 8.8 12 7Z"/></svg>';
+  if(window.SkyAsset){ const sv = fabTog.querySelector('svg'); if(sv) window.SkyAsset.swap(sv, 'progres/ikon-melayang-tombol'); }
+  { const hb = hh('div', 'hbtns'); capBtn.parentNode.insertBefore(hb, capBtn); hb.append(fabTog, capBtn); }
+  fabTog.onclick = () => Store.set('fab', Store.get('fab', 0) ? 0 : 1);
+  const openFab = () => { fov.hidden = false; paintFab(); }, closeFab = () => { fov.hidden = true; };
+  fov.querySelector('.fx').onclick = closeFab; fov.addEventListener('click', e => { if(e.target === fov) closeFab(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && !fov.hidden) closeFab(); });
+  window.addEventListener('sky:page', closeFab);
+  let fpos = null; try{ fpos = JSON.parse(localStorage.getItem('sky_fab_pos') || 'null'); }catch(e){}
+  const fabPlace = () => { const w = innerWidth, h = innerHeight; let x = fpos ? fpos.x * w : w - 66, y = fpos ? fpos.y * h : h - 170; fab.style.left = Math.max(6, Math.min(w - 58, x)) + 'px'; fab.style.top = Math.max(6, Math.min(h - 58, y)) + 'px'; };
+  fabPlace(); window.addEventListener('resize', fabPlace);
+  let fdr = null;
+  fab.addEventListener('pointerdown', e => { fdr = { x:e.clientX, y:e.clientY, l:fab.offsetLeft, t:fab.offsetTop, m:false }; try{ fab.setPointerCapture(e.pointerId); }catch(x){} });
+  fab.addEventListener('pointermove', e => { if(!fdr) return; const dx = e.clientX - fdr.x, dy = e.clientY - fdr.y; if(!fdr.m && Math.hypot(dx, dy) > 6) fdr.m = true; if(fdr.m){ fab.style.left = Math.max(6, Math.min(innerWidth - 58, fdr.l + dx)) + 'px'; fab.style.top = Math.max(6, Math.min(innerHeight - 58, fdr.t + dy)) + 'px'; } });
+  fab.addEventListener('pointerup', () => { if(!fdr) return; const m = fdr.m; fdr = null; if(m){ fpos = { x: fab.offsetLeft / innerWidth, y: fab.offsetTop / innerHeight }; try{ localStorage.setItem('sky_fab_pos', JSON.stringify(fpos)); }catch(e){} } else openFab(); });
+  fab.addEventListener('pointercancel', () => { fdr = null; });
+  fab.addEventListener('click', e => { if(e.detail === 0) openFab(); });   // keyboard
+  const toggleArea = (ri, ai) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0); r[ri] ^= 1 << ai; if(r.every(x => !x)) delete d.runs[k]; });
+  const toggleRealm = (ri, len) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0), full = (1 << len) - 1; r[ri] = r[ri] === full ? 0 : full; if(r.every(x => !x)) delete d.runs[k]; });
+  function paintFab(){
+    if(!fabReady) return;
+    const on = !!Store.get('fab', 0), d = pgData(), t = FABT[lang] || FABT.en, today = (d.runs || {})[dayK()] || [], cap = !!(d.cap || {})[dayK()], wu = lang === 'es' ? 'cera' : 'wax';
+    document.body.classList.toggle('fabOn', on);
+    fabTog.setAttribute('aria-pressed', String(on)); fabTog.title = t.tog; fabTog.setAttribute('aria-label', t.tog);
+    let tot = 0, all = 0; AREAS.forEach(([r, l], ri) => { tot += pop(today[ri] || 0); all += l.length; });
+    fab.querySelector('.fb').textContent = tot + '/' + all; fab.classList.toggle('gray', cap); fab.setAttribute('aria-label', t.ttl + ' ' + tot + '/' + all); fab.title = t.ttl;
+    if(fov.hidden) return;
+    fov.querySelector('b').textContent = t.ttl; fov.querySelector('.fx').setAttribute('aria-label', t.close);
+    fov.querySelector('.fs').textContent = tot + '/' + all + ' ' + I18N[lang].pg.ar;
+    const fl = fov.querySelector('.fl'), sc = fl.scrollTop; fl.textContent = '';
+    AREAS.forEach(([realm, list], ri) => {
+      const n = pop(today[ri] || 0), rw = REALM_WAX[realm], head = hh('div', 'frh'), al = hh('button', 'pill', t.all);
+      const nm = hh('span'); nm.append(hh('b', '', realm), hh('small', '', '  ' + n + '/' + list.length + (rw ? ' \u00b7 \u2248' + rw + ' ' + wu : '')));
+      al.type = 'button'; al.setAttribute('aria-pressed', String(n === list.length)); al.onclick = () => toggleRealm(ri, list.length); head.append(nm, al);
+      const box = hh('div', 'fpills');
+      list.forEach((a, ai) => { const b = hh('button', 'pill', a), w = areaWax(realm, list.length); b.type = 'button'; if(w) b.appendChild(hh('small', 'wx', '\u2248' + w)); b.setAttribute('aria-pressed', String(!!((today[ri] || 0) >> ai & 1))); b.onclick = () => toggleArea(ri, ai); box.appendChild(b); });
+      fl.append(head, box);
+    });
+    const cb = hh('button', 'pill', t.cap); cb.type = 'button'; cb.style.marginTop = '14px'; cb.setAttribute('aria-pressed', String(cap));
+    cb.onclick = () => pgWrite(x => { const k = dayK(); x.cap = x.cap || {}; if(x.cap[k]) delete x.cap[k]; else x.cap[k] = 1; });
+    fl.appendChild(cb); fl.scrollTop = sc;
+  }
+  fabReady = true;
+
   // header halaman Progres: nama + jumlah Winged Light
   const wlIn = document.getElementById('wlIn'), pgNameEl = document.getElementById('pgName');
   const paintWl = () => { if(document.activeElement !== wlIn) wlIn.value = Store.get('wl', 0) || ''; pgNameEl.textContent = userName || ''; };
@@ -3069,7 +3186,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     es:{ reqT:'Solicitudes de amistad', reqIn:'quiere ser tu amigo', reqOutT:'Esperando aprobaci\u00f3n', accept:'Aceptar', decline:'Rechazar', cancel:'Cancelar solicitud', reqSent:'Solicitud enviada. Podr\u00e9is chatear cuando la acepte.', pend:'Ya enviaste una solicitud. Esperando aprobaci\u00f3n.', reqNew:'{n} te envi\u00f3 una solicitud de amistad', reqOk:'T\u00fa y {n} ahora sois amigos', reqNo:'Solicitud rechazada', reqCan:'Solicitud cancelada', reqGone:'Esta solicitud ya no existe.', notFriend:'Ya no sois amigos, as\u00ed que no se pudo enviar el mensaje.',
       copyMsg:'Copiar texto', copiedMsg:'Mensaje copiado', moreMsg:'M\u00e1s opciones', retract:'Eliminar para todos', retQ:'\u00bfEliminar este mensaje?', retMsg:'Se eliminar\u00e1 para todos en este chat. Solo funciona dentro de las 24 horas posteriores al env\u00edo.', retOk2:'Eliminar', retDone:'Mensaje eliminado', retracted:'Este mensaje fue eliminado', retLate:'Los mensajes solo se pueden eliminar dentro de 24 horas.', delMe:'Eliminar para m\u00ed', cancelB:'Cancelar', emoji:'Emoji', emoNone:'A\u00fan no hay emojis recientes' }
   };
-  Object.keys(VT7).forEach(l => Object.assign(VT[l], VT7[l]));
+  const VT8 = {
+    en:{ photo:'Photo', attach:'Send photo', imgOff:'Photos need an online account', imgFail:'Photo could not be sent', imgMax:'Up to 4 photos per message', imgBad:'That file is not a usable image', close:'Close' },
+    id:{ photo:'Foto', attach:'Kirim foto', imgOff:'Foto butuh akun online', imgFail:'Foto gagal dikirim', imgMax:'Maksimal 4 foto per pesan', imgBad:'Berkas itu bukan gambar yang bisa dipakai', close:'Tutup' },
+    es:{ photo:'Foto', attach:'Enviar foto', imgOff:'Las fotos requieren una cuenta en línea', imgFail:'No se pudo enviar la foto', imgMax:'Máximo 4 fotos por mensaje', imgBad:'Ese archivo no es una imagen válida', close:'Cerrar' }
+  };
+  Object.keys(VT7).forEach(l => Object.assign(VT[l], VT7[l], VT8[l]));
   const vt = () => VT[window.SkyApp.getLang()] || VT.en;
   function setWho(){ if(mySession) $('whoAmI').textContent = mySession.type === 'guest' ? vt().guestWho : vt().who + mySession.id; }
   function applyVisitLang(){
@@ -3366,7 +3488,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     row.nm.textContent = lbl;
     row.prev.textContent = '';
     if(ty) row.prev.textContent = v.typing;
-    else if(l){ if(l.from === myCode){ const t = tickInfo(l, m.rd); row.prev.appendChild(mkEl('span', 'tk ' + t[1], t[0])); } row.prev.appendChild(mkEl('span', '', l.del ? v.retracted : l.text)); }
+    else if(l){ if(l.from === myCode){ const t = tickInfo(l, m.rd); row.prev.appendChild(mkEl('span', 'tk ' + t[1], t[0])); } row.prev.appendChild(mkEl('span', '', dispText(l, v))); }
     else row.prev.textContent = m.status || ((f.name ? f.code + ' \u00b7 ' : '') + v.tap);
     row.hint.hidden = !ti; row.hint.textContent = ti || '';
     row.ub.hidden = !n; row.ub.textContent = n > 9 ? '9+' : String(n);
@@ -3644,6 +3766,55 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const chatFriend = () => chatPid ? friendsCache.find(f => pairId(myCode, f.code) === chatPid) : null;
   const clockHM = ts => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
   const chatVisible = () => !!chatPid && !document.hidden && $('chatOverlay').classList.contains('open');
+  // ---------- gambar di chat: teks pesan '[img]{"i":[fileId|p:cid:n],"c":"caption"}'; 'p:' = masih diunggah (hanya di memori) ----------
+  const IMG_P = '[img]', pendImgs = new Map(); let att = [];
+  const imgInfo = m => { if(!m || typeof m.text !== 'string' || m.text.indexOf(IMG_P) !== 0) return null; try{ const o = JSON.parse(m.text.slice(5)); return { i: Array.isArray(o.i) ? o.i.map(String) : [], c: String(o.c || '') }; }catch(e){ return null; } };
+  const imgUrl = (id, w) => id.indexOf('p:') === 0 ? ((pendImgs.get(id) || {}).url || '') : 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w' + w;
+  const dispText = (m, v) => m.del ? v.retracted : (imgInfo(m) ? '\ud83d\uddbc ' + (imgInfo(m).c || v.photo) : m.text);
+  function fillMsg(sp, m, v){
+    const inf = m.del ? null : imgInfo(m), sig = m.del ? 'd' : m.text;
+    if(sp._sig === sig) return; sp._sig = sig;
+    if(!inf){ sp.textContent = m.del ? v.retracted : m.text; return; }
+    sp.textContent = ''; const g = mkEl('div', 'imgG n' + Math.min(inf.i.length, 4) );
+    inf.i.forEach((id, k) => { const im = new Image(); im.src = imgUrl(id, 600); im.alt = ''; im.loading = 'lazy'; im.draggable = false; im.addEventListener('click', e => { e.stopPropagation(); openLightbox(inf.i, k); }); g.appendChild(im); });
+    sp.appendChild(g); if(inf.c) sp.appendChild(mkEl('div', 'imgC', inf.c));
+  }
+  function openLightbox(ids, k){
+    let ov = $('imgLb');
+    if(!ov){
+      ov = mkEl('div'); ov.id = 'imgLb'; ov.hidden = true; ov.innerHTML = '<img alt=""><button type="button" class="lbX">\u2715</button><button type="button" class="lbP">\u2039</button><button type="button" class="lbN">\u203a</button><span class="lbC"></span>';
+      document.body.appendChild(ov);
+      const go = d => { const n = ov._ids.length; ov._k = (ov._k + d + n) % n; paint(); }, paint = () => { ov.querySelector('img').src = imgUrl(ov._ids[ov._k], 1600); ov.querySelector('.lbC').textContent = ov._ids.length > 1 ? (ov._k + 1) + ' / ' + ov._ids.length : ''; ov.querySelector('.lbP').hidden = ov.querySelector('.lbN').hidden = ov._ids.length < 2; };
+      ov.paint = paint; ov.close = () => { ov.hidden = true; };
+      ov.querySelector('.lbX').addEventListener('click', ov.close); ov.querySelector('.lbP').addEventListener('click', () => go(-1)); ov.querySelector('.lbN').addEventListener('click', () => go(1));
+      ov.addEventListener('click', e => { if(e.target === ov) ov.close(); });
+      document.addEventListener('keydown', e => { if(ov.hidden) return; if(e.key === 'Escape') ov.close(); else if(e.key === 'ArrowLeft') go(-1); else if(e.key === 'ArrowRight') go(1); });
+      let x0 = null; ov.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive:true });
+      ov.addEventListener('touchend', e => { if(x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if(Math.abs(dx) > 50) go(dx > 0 ? -1 : 1); });
+    }
+    ov._ids = ids.slice(); ov._k = k || 0; ov.paint(); ov.hidden = false;
+  }
+  function fileToImg(file){ return new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); res(im); }; im.onerror = () => { URL.revokeObjectURL(u); rej(new Error('img')); }; im.src = u; }); }
+  async function compressImg(file){   // maks sisi 1280px, JPEG; kualitas turun sampai <= ~1,4 MB
+    const im = await fileToImg(file), sc = Math.min(1, 1280 / Math.max(im.naturalWidth, im.naturalHeight)), w = Math.max(1, Math.round(im.naturalWidth * sc)), h = Math.max(1, Math.round(im.naturalHeight * sc));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+    let q = 0.82, url = c.toDataURL('image/jpeg', q); while(url.length > 1.9e6 && q > 0.45){ q -= 0.1; url = c.toDataURL('image/jpeg', q); }
+    return { url, b64: url.split(',')[1], mime: 'image/jpeg' };
+  }
+  function renderAtt(){
+    const box = $('chatAtt'); box.textContent = ''; box.hidden = !att.length;
+    att.forEach((a, k) => { const d = mkEl('div', 'at'), im = new Image(), b = mkEl('button', '', '\u2715'); im.src = a.url; im.alt = ''; b.type = 'button'; b.setAttribute('aria-label', vt().close); b.addEventListener('click', () => { att.splice(k, 1); renderAtt(); }); d.append(im, b); box.appendChild(d); });
+  }
+  $('chatAttach').addEventListener('pointerdown', e => e.preventDefault());
+  $('chatAttach').addEventListener('click', () => { if(!srv()){ toast(vt().imgOff); return; } if(att.length >= 4){ toast(vt().imgMax); return; } $('chatFile').click(); });
+  $('chatFile').addEventListener('change', async e => {
+    const files = [...e.target.files]; e.target.value = ''; let bad = false;
+    for(const f of files){
+      if(att.length >= 4){ toast(vt().imgMax); break; }
+      try{ att.push(await compressImg(f)); renderAtt(); }catch(x){ bad = true; }
+    }
+    if(bad) toast(vt().imgBad);
+  });
   function openChat(friend){
     $('chatTitle').textContent = fLabel(friend); applyChatLang();
     chatPid = pairId(myCode, friend.code); chatEls.clear(); $('chatMsgs').textContent = '';
@@ -3665,8 +3836,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         el.querySelector('.mm').append(mkEl('span', 'tm'), mkEl('span', 'tk')); chatEls.set(key, el); if(mine) mineNew = true;
         const ma = mkEl('div', 'ma'), bc = mkEl('button', 'mcp'), bm = mkEl('button', 'mmo'); bc.type = bm.type = 'button'; bc.innerHTML = ICO_COPY; bm.innerHTML = ICO_MORE; ma.append(bc, bm); el.append(ma);
       }
-      el.firstChild.textContent = m.del ? v.retracted : m.text; el.querySelector('.tm').textContent = clockHM(m.ts); el._m = m; el.classList.toggle('gone', !!m.del);
-      { const bc = el.querySelector('.mcp'), bm = el.querySelector('.mmo'); bc.hidden = !!(m.del || m.st); bc.title = v.copyMsg; bc.setAttribute('aria-label', v.copyMsg); bm.title = v.moreMsg; bm.setAttribute('aria-label', v.moreMsg); }
+      fillMsg(el.firstChild, m, v); el.querySelector('.tm').textContent = clockHM(m.ts); el._m = m; el.classList.toggle('gone', !!m.del);
+      { const bc = el.querySelector('.mcp'), bm = el.querySelector('.mmo'); bc.hidden = !!(m.del || m.st || imgInfo(m)); bc.title = v.copyMsg; bc.setAttribute('aria-label', v.copyMsg); bm.title = v.moreMsg; bm.setAttribute('aria-label', v.moreMsg); }
       el.classList.toggle('pending', mine && m.st === 'sending'); el.classList.toggle('failed', mine && m.st === 'failed');
       const tk = el.querySelector('.tk');
       if(mine){ const t = tickInfo(m, rd); tk.textContent = m.st === 'failed' ? vt().failed : t[0]; tk.className = 'tk ' + t[1]; } else tk.textContent = '';
@@ -3705,9 +3876,23 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         const pid = pairId(myCode, f.code);
         for(const m of readMsgs(pid).filter(x => x.st === 'sending')){
           if(myUid !== me) return;
-          if(srvNow() - m.ts > 120000){ patchMsg(pid, m.cid, { st:'failed' }); continue; }
-          const r = await api('send', { to: f.code, text: m.text, cid: m.cid });
-          if(r.ok && r.id) patchMsg(pid, m.cid, { id:r.id, ts:r.ts, st:undefined });
+          const inf = imgInfo(m);
+          if(srvNow() - m.ts > (inf ? 300000 : 120000)){ patchMsg(pid, m.cid, { st:'failed' }); continue; }
+          let text = m.text;
+          if(inf && inf.i.some(x => x.indexOf('p:') === 0)){   // unggah gambar ke Drive dulu, lalu kirim pesan berisi id file
+            const ids = []; let stop = '';
+            for(const x of inf.i){
+              if(x.indexOf('p:') !== 0){ ids.push(x); continue; }
+              const pi = pendImgs.get(x); if(!pi){ stop = 'failed'; break; }
+              if(!pi.fid){ const u = await api('uploadImage', { data: pi.b64, mime: pi.mime }, undefined, { timeout: 60000 }); if(u.ok && u.id) pi.fid = u.id; else { stop = (u.error === 'net' || u.error === 'busy' || u.error === 'server') ? 'retry' : 'failed'; break; } }
+              ids.push(pi.fid);
+            }
+            if(stop === 'failed'){ patchMsg(pid, m.cid, { st:'failed' }); toast(vt().imgFail); continue; }
+            if(stop === 'retry') break;
+            text = IMG_P + JSON.stringify({ i: ids, c: inf.c });
+          }
+          const r = await api('send', { to: f.code, text, cid: m.cid });
+          if(r.ok && r.id) patchMsg(pid, m.cid, { id:r.id, ts:r.ts, st:undefined, text });
           else if(r.ok){ patchMsg(pid, m.cid, { st:'failed' }); toast('Backend belum versi v3: deploy ulang (New version)'); }
           else if(r.error === 'bad' || r.error === 'notfriend'){ patchMsg(pid, m.cid, { st:'failed' }); if(r.error === 'notfriend') toast(vt().notFriend); }
           else break;   // jaringan/server sibuk: coba lagi di putaran berikutnya
@@ -3716,15 +3901,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     } finally { flushing = false; if(myUid === me){ renderChat(); renderFriends(); } }
   }
   window.addEventListener('storage', e => { if(chatPid && e.key === chatKey(chatPid)) renderChat(); });   // mode lokal: tab/akun lain
-  function closeChat(){ emoOpen(false); closeSheet(); $('chatOverlay').classList.remove('open'); chatPid = null; chatEls.clear(); renderFriends(true); updateChatSub(); kickPoll(); }
+  function closeChat(){ att = []; renderAtt(); emoOpen(false); closeSheet(); $('chatOverlay').classList.remove('open'); chatPid = null; chatEls.clear(); renderFriends(true); updateChatSub(); kickPoll(); }
   $('chatBack').addEventListener('click', closeChat);
   $('chatSend').addEventListener('pointerdown', e => e.preventDefault());   // tombol kirim tidak mencuri fokus: keyboard HP tetap terbuka
   $('chatForm').addEventListener('submit', e => {
     e.preventDefault();
-    const input = $('chatInput'), text = input.value.trim(), f = chatFriend();
-    if(!text || !chatPid || !f) return;
+    const input = $('chatInput'); let text = input.value.trim(); const f = chatFriend();
+    if((!text && !att.length) || !chatPid || !f) return;
     input.value = ''; SFX.send(); lastType = 0;
-    const msg = { cid: myCode + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), from: myCode, text, ts: srvNow() };
+    const cid = myCode + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    if(att.length){ const ids = att.map((a, k) => { const id = 'p:' + cid + ':' + k; pendImgs.set(id, a); return id; }); text = IMG_P + JSON.stringify({ i: ids, c: text.slice(0, 180) }); att = []; renderAtt(); }
+    else if(text.indexOf(IMG_P) === 0) text = '\u200b' + text;
+    const msg = { cid, from: myCode, text, ts: srvNow() };
     if(srv()) msg.st = 'sending'; else msg.id = msg.ts;
     const l = readMsgs(chatPid); l.push(msg); writeMsgs(chatPid, l);
     renderChat(); renderFriends();
@@ -3743,8 +3931,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   let sheetMsg = null;
   function openMsgSheet(m){
     const v = vt(); sheetMsg = m;
-    $('shPrev').textContent = m.del ? v.retracted : (m.text.length > 80 ? m.text.slice(0, 80) + '\u2026' : m.text);
-    $('shCopy').hidden = !!(m.del || m.st); $('shCopy').textContent = v.copyMsg;
+    { const dt = dispText(m, v); $('shPrev').textContent = dt.length > 80 ? dt.slice(0, 80) + '\u2026' : dt; }
+    $('shCopy').hidden = !!(m.del || m.st || imgInfo(m)); $('shCopy').textContent = v.copyMsg;
     $('shDelMe').textContent = v.delMe;
     $('shRetract').hidden = !canRetract(m); $('shRetract').textContent = v.retract;
     $('shCancel').textContent = v.cancelB;
@@ -3826,7 +4014,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(on){ if(emoCat === 0 && !emoRecent.length) emoCat = 1; emoPaint(); }
   }
   function applyChatLang(){
-    const v = vt(); $('chatEmoji').title = v.emoji; $('chatEmoji').setAttribute('aria-label', v.emoji);
+    const v = vt(); $('chatAttach').title = v.attach; $('chatAttach').setAttribute('aria-label', v.attach); $('chatEmoji').title = v.emoji; $('chatEmoji').setAttribute('aria-label', v.emoji);
     if(!$('emojiPanel').hidden) emoPaint();
   }
   window.addEventListener('sky:lang', applyChatLang);
@@ -4163,7 +4351,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       }
     } finally { syncing = false; }
   }
-  function updateChatSub(){ const f = chatFriend(); $('chatSub').textContent = f ? (typingMap[f.code] ? vt().typing : timeInfo(metaFor(f.code))) : ''; paintFCode(); }
+  function updateChatSub(){ const f = chatFriend(); const m = f ? metaFor(f.code) : null; $('chatSub').textContent = f ? (typingMap[f.code] ? vt().typing : [actText(m), timeInfo(m)].filter(Boolean).join(' \u00b7 ')) : ''; $('chatTitle').classList.toggle('on', !!(m && m.online)); paintFCode(); }
   $('chatInput').addEventListener('input', () => {   // indikator "sedang mengetik" (ringan: 1 request kecil, tanpa poll penuh)
     lastType = Date.now();
     const f = chatFriend();
