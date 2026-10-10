@@ -420,12 +420,72 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .imgG img{ width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; cursor:zoom-in; background:rgba(255,255,255,0.08); display:block; }
   .imgG.n1 img{ aspect-ratio:4/3; } .imgG.n3 img:first-child{ aspect-ratio:2/1; }
   .imgC{ margin-top:5px; white-space:pre-wrap; word-break:break-word; }
+  .msg .mt.blk{ display:block; }
+  .msg.hasImg{ width:min(248px,68vw); padding:4px 4px 6px; }
+  .msg.hasImg .imgG{ width:100%; }
+  .msg.hasImg .imgC{ margin:6px 8px 0; font-size:14px; line-height:1.4; text-align:left; }
+  .msg.hasImg .mm{ padding:0 8px; margin-top:4px; }
+  .msg.hasImg .mq{ width:auto; margin:4px 4px 6px; }
+  .imgG img.bad{ opacity:.35; }
   #imgLb{ position:fixed; inset:0; z-index:99999; display:grid; place-items:center; background:rgba(5,8,20,0.92); }
   #imgLb[hidden]{ display:none; }
   #imgLb img{ max-width:96vw; max-height:88vh; object-fit:contain; border-radius:8px; }
   #imgLb button{ position:absolute; border:none; background:rgba(255,255,255,0.14); color:#fff; border-radius:50%; width:44px; height:44px; font-size:22px; cursor:pointer; }
   #imgLb .lbX{ top:calc(env(safe-area-inset-top,0px) + 12px); right:12px; } #imgLb .lbP{ left:10px; top:50%; } #imgLb .lbN{ right:10px; top:50%; }
   #imgLb .lbC{ position:absolute; bottom:calc(env(safe-area-inset-bottom,0px) + 14px); color:#fff; font-size:13px; opacity:.8; }
+  /* ajakan main bareng + Momen Hari Ini */
+  #chatHead .chTx{ flex:1; min-width:0; }
+  #chatHead .hb{ flex:none; position:relative; width:38px; height:38px; padding:0; display:grid; place-items:center; border:none; border-radius:12px; background:rgba(255,255,255,0.07); color:var(--ink); cursor:pointer; touch-action:manipulation; }
+  #chatHead .hb svg, #chatHead .hb img.ai{ width:22px; height:22px; }
+  #chatHead .hb.dot::after{ content:''; position:absolute; top:5px; right:5px; width:8px; height:8px; border-radius:50%; background:#ffcf5c; box-shadow:0 0 6px #ffcf5c; }
+  .inv{ min-width:min(250px,64vw); display:flex; flex-direction:column; gap:5px; }
+  .inv .ivH{ font-weight:600; } .inv .ivA{ font-size:13px; }
+  .inv .ivN{ font-size:13px; opacity:.85; white-space:pre-wrap; word-break:break-word; }
+  .inv .ivS{ font-size:12px; opacity:.8; } .inv .ivS.ok{ color:#7ee2a8; opacity:1; } .inv .ivS.no{ color:#ff9b9b; opacity:1; }
+  .inv .ivB{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+  .inv .ivB button, .mBtn, #invSheet .row2 button{ font:inherit; font-size:14px; padding:9px 14px; border:none; border-radius:11px; cursor:pointer; color:var(--ink); background:rgba(255,255,255,0.14); touch-action:manipulation; }
+  .inv .ivB button.pri, .mBtn.pri, #invSheet .row2 button.pri{ background:rgba(255,200,90,0.92); color:#1a1630; font-weight:600; }
+  .mBtn.dan{ color:#ff9b9b; } .inv .ivB button:disabled, .mBtn:disabled, #invSheet .row2 button:disabled{ opacity:.5; }
+  #invSheet{ position:absolute; inset:0; z-index:7; display:flex; align-items:flex-end; justify-content:center; background:rgba(0,0,0,0.45); }
+  #invSheet[hidden]{ display:none; }
+  #invSheet .sh{ width:min(440px,100%); max-height:90%; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 16px); background:rgba(14,18,34,0.98); border-top:1px solid rgba(255,255,255,0.14); border-radius:20px 20px 0 0; }
+  #invSheet h3{ margin:0; font-size:16px; } #invSheet label{ font-size:12px; color:var(--ink-soft); margin-top:4px; } #invSheet .hint{ font-size:12px; color:var(--ink-soft); }
+  #invSheet input{ font:inherit; font-size:15px; color:var(--ink); background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px 12px; }
+  #invSheet .row2{ display:flex; gap:8px; margin-top:6px; } #invSheet .row2 button{ flex:1; padding:12px; font-size:15px; }
+  .chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .chips button{ font:inherit; font-size:13px; padding:8px 12px; border:1px solid rgba(255,255,255,0.14); border-radius:999px; background:rgba(255,255,255,0.06); color:var(--ink); cursor:pointer; }
+  .chips button[aria-pressed="true"]{ background:rgba(255,200,90,0.92); color:#1a1630; border-color:transparent; font-weight:600; }
+  #momOv{ position:fixed; inset:0; z-index:75; display:flex; flex-direction:column; color:var(--ink); background:rgba(8,11,26,0.97); }
+  #momOv[hidden]{ display:none; }
+  #momOv .mh{ display:flex; align-items:center; gap:10px; padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 12px; border-bottom:1px solid rgba(255,255,255,0.08); }
+  #momOv .mh button{ background:none; border:none; color:var(--ink); font-size:20px; cursor:pointer; padding:4px 8px; }
+  #momOv .mh div{ display:flex; flex-direction:column; font-size:15px; } #momOv .mh small{ font-size:12px; color:var(--ink-soft); }
+  #momOv .mb{ flex:1; overflow-y:auto; padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 24px); display:flex; flex-direction:column; gap:12px; }
+  .momInfo{ font-size:13px; color:var(--ink-soft); } .momH{ font-size:13px; font-weight:600; margin-top:8px; }
+  .momLock{ text-align:center; padding:28px 10px; color:var(--ink-soft); display:flex; flex-direction:column; align-items:center; gap:12px; } .momLock b{ font-size:36px; }
+  .momGrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .momTile{ position:relative; padding:6px 6px 22px; background:#f7f2e8; border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.4); transform:rotate(var(--r,0deg)); }
+  .momTile img{ width:100%; aspect-ratio:1; object-fit:cover; display:block; cursor:zoom-in; background:#ddd; }
+  .momTile span{ position:absolute; left:8px; right:8px; bottom:4px; font-size:11px; text-align:center; color:#4a4460; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .momTile .x{ position:absolute; top:2px; right:2px; width:24px; height:24px; border:none; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; font-size:12px; cursor:pointer; }
+  .momChk{ display:flex; align-items:center; gap:8px; font-size:14px; }
+  .arch{ display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px; background:rgba(255,255,255,0.05); cursor:pointer; }
+  .arch img{ width:44px; height:44px; border-radius:8px; object-fit:cover; } .arch .at{ flex:1; font-size:13px; }
+  .arch button{ background:none; border:none; color:#ff9b9b; cursor:pointer; font-size:16px; }
+  #momW{ display:none; position:fixed; right:16px; bottom:calc(env(safe-area-inset-bottom,0px) + 20px); width:116px; height:136px; z-index:20; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  body.ready:not(.p2):not(.p3):not(.p4) #momW.has{ display:block; animation:momIn .6s cubic-bezier(.2,.9,.3,1) both; }
+  @keyframes momIn{ from{ opacity:0; transform:translateY(30px) scale(.8) rotate(8deg); } to{ opacity:1; transform:none; } }
+  #momW .pol{ position:absolute; left:8px; top:8px; width:96px; padding:5px 5px 18px; background:#f7f2e8; border-radius:4px; box-shadow:0 6px 16px rgba(0,0,0,0.45); transition:transform .7s cubic-bezier(.3,.8,.3,1), opacity .5s; transform-origin:50% 100%; }
+  #momW .pol img{ width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#ddd; opacity:0; transition:opacity .4s; } #momW .pol img.ld{ opacity:1; }
+  #momW .pol i{ position:absolute; left:6px; right:6px; bottom:3px; font-style:normal; font-size:9px; text-align:center; color:#4a4460; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #momW .q0{ transform:rotate(-3deg); z-index:3; } #momW .q1{ transform:translate(7px,5px) rotate(5deg); z-index:2; } #momW .q2{ transform:translate(-6px,8px) rotate(-8deg); z-index:1; opacity:.85; }
+  #momW[data-n="1"] .q1, #momW[data-n="1"] .q2, #momW[data-n="2"] .q2{ display:none; }
+  #momW .pol.drop{ animation:polDrop .9s cubic-bezier(.3,1.2,.4,1) both; }
+  @keyframes polDrop{ 0%{ transform:translateY(-70px) rotate(-18deg) scale(1.15); opacity:0; } 55%{ opacity:1; transform:translateY(4px) rotate(2deg) scale(1); } 75%{ transform:translateY(-3px) rotate(-5deg); } 100%{ transform:rotate(-3deg); } }
+  #momW .sp{ position:absolute; z-index:4; width:12px; height:12px; pointer-events:none; background:#fff3b0; clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); animation:spk 2.6s ease-in-out infinite; opacity:0; }
+  #momW .s1{ left:0; top:14px; } #momW .s2{ right:2px; top:0; animation-delay:.9s; } #momW .s3{ right:0; bottom:10px; animation-delay:1.7s; }
+  @keyframes spk{ 0%,100%{ opacity:0; transform:scale(.3) rotate(0); } 50%{ opacity:1; transform:scale(1) rotate(45deg); } }
+  @media (prefers-reduced-motion: reduce){ #momW .pol.drop, #momW .sp{ animation:none; } }
   #emojiPanel{ position:absolute; left:12px; right:12px; bottom:calc(100% + 6px); z-index:4; display:flex; flex-direction:column; max-height:min(300px,45vh); overflow:hidden; background:rgba(14,18,34,0.98); border:1px solid rgba(255,255,255,0.14); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
   #emojiPanel[hidden]{ display:none; }
   #emoTabs{ display:flex; gap:2px; padding:6px; overflow-x:auto; border-bottom:1px solid rgba(255,255,255,0.08); flex:none; }
@@ -1482,6 +1542,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   <div id="chatHead">
     <button type="button" id="chatBack" aria-label="Back">&#8592;</button>
     <div class="chTx"><span id="chatTitle"></span><span id="chatSub"></span></div>
+    <button type="button" class="hb" id="chatInv"><svg data-asset="ajakan/ajakan.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12a3 3 0 0 1 3 3v2.5a3 3 0 0 1-5.2 2L14.5 14h-5l-1.3 1.5A3 3 0 0 1 3 13.5V11a3 3 0 0 1 3-3Z"/><path d="M8 10.5v2.5M6.8 11.7h2.4M16 11.5h.01M18 12.8h.01"/></svg></button>
+    <button type="button" class="hb" id="chatMom"><svg data-asset="momen/momen.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"/><circle cx="9" cy="9.5" r="1.6"/><path d="m4 16 4.5-4.5L13 16l3-3 4 4"/></svg></button>
   </div>
   <div id="chatMsgs"></div>
   <form id="chatForm">
@@ -3450,11 +3512,28 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       copyMsg:'Copiar texto', rpl:'Responder', rplTo:'Respondiendo a {n}', rplYou:'T\u00fa', rplGone:'Mensaje original no disponible', copiedMsg:'Mensaje copiado', moreMsg:'M\u00e1s opciones', retract:'Eliminar para todos', retQ:'\u00bfEliminar este mensaje?', retMsg:'Se eliminar\u00e1 para todos en este chat. Solo funciona dentro de las 24 horas posteriores al env\u00edo.', retOk2:'Eliminar', retDone:'Mensaje eliminado', retracted:'Este mensaje fue eliminado', retLate:'Los mensajes solo se pueden eliminar dentro de 24 horas.', delMe:'Eliminar para m\u00ed', cancelB:'Cancelar', emoji:'Emoji', emoNone:'A\u00fan no hay emojis recientes' }
   };
   const VT8 = {
-    en:{ photo:'Photo', attach:'Send photo', imgOff:'Photos need an online account', imgFail:'Photo could not be sent', imgMax:'Up to 4 photos per message', imgBad:'That file is not a usable image', close:'Close' },
-    id:{ photo:'Foto', attach:'Kirim foto', imgOff:'Foto butuh akun online', imgFail:'Foto gagal dikirim', imgMax:'Maksimal 4 foto per pesan', imgBad:'Berkas itu bukan gambar yang bisa dipakai', close:'Tutup' },
-    es:{ photo:'Foto', attach:'Enviar foto', imgOff:'Las fotos requieren una cuenta en línea', imgFail:'No se pudo enviar la foto', imgMax:'Máximo 4 fotos por mensaje', imgBad:'Ese archivo no es una imagen válida', close:'Cerrar' }
+    en:{ photo:'Photo', attach:'Send photo', imgOff:'Photos need an online account', imgFail:'Photo could not be sent', imgSrv:'Upload failed on the server. The owner must authorize Drive (run authorizeDrive in Apps Script) and redeploy', imgMax:'Up to 4 photos per message', imgBad:'That file is not a usable image', close:'Close' },
+    id:{ photo:'Foto', attach:'Kirim foto', imgOff:'Foto butuh akun online', imgFail:'Foto gagal dikirim', imgSrv:'Unggah gagal di server. Pemilik perlu menyetujui izin Drive (jalankan authorizeDrive di Apps Script) lalu deploy ulang', imgMax:'Maksimal 4 foto per pesan', imgBad:'Berkas itu bukan gambar yang bisa dipakai', close:'Tutup' },
+    es:{ photo:'Foto', attach:'Enviar foto', imgOff:'Las fotos requieren una cuenta en línea', imgFail:'No se pudo enviar la foto', imgSrv:'La subida fall\u00f3 en el servidor. El propietario debe autorizar Drive (ejecutar authorizeDrive) y volver a implementar', imgMax:'Máximo 4 fotos por mensaje', imgBad:'Ese archivo no es una imagen válida', close:'Cerrar' }
   };
-  Object.keys(VT7).forEach(l => Object.assign(VT[l], VT7[l], VT8[l]));
+  const VT9 = {
+    en:{ onl:'This needs an online account', you:'You', invBtn:'Invite to play', invT:'Play together', invWhat:'Activity', invWhen:'Time', invNow:'Now', invPick:'Pick a time', invNote:'Note (optional)', invHint:'Valid for 30 min after the play time, and never past the daily reset.', invSend:'Send invite', invSent:'Invite sent', invLater:'Not now',
+      a_daily:'Daily quests', a_run:'Candle run', a_wax:'Wax farming', a_spirit:'Spirits & seasons', a_chill:'Just hanging out', a_other:'Something else',
+      invCard:'Play together', invAt:'Play at {t}', invNowT:'Right now', invWait:'Waiting \u00b7 valid until {t} ({r})', invLeft:'{t} left', invReset:'ends at daily reset', invOk:'Accepted', invNo:'Declined', invCan:'Cancelled', invEnd:'Ended ({t})', invAcc:'Accept', invDec:'Decline', invCancel:'Cancel invite', invMomB:"Open today's moment",
+      invGot:'{n} invited you to play', invAccd:'{n} accepted your invite', invDecd:'{n} declined your invite', invActive:'There is already an active invite with this friend', invTimeBad:'Pick a time later today, before the daily reset', invLate:'Too close to the daily reset', invExpired:'This invite has already ended', invStale:'This invite was already answered', invFail:'Could not do that, try again',
+      momOpen:"Moment unlocked: add photos from today's session", momBtn:"Today's moment", momT:"Today's moment", momLock:'Opens once a play invite is accepted today.', momAdd:'Add photos', momBy:'Created by {n}', momPh:'by {n}', momNone:'No photos yet', momMax:'Up to 6 photos per moment', momUp:'Uploading {a}/{b}\u2026', momShare:'Share with all my friends', momDel:'Delete moment', momDelQ:'Delete this moment and all its photos?', momDelPhQ:'Delete this photo?', momArch:'Archive', momArchNone:'Nothing archived yet', momNew:'{n} added photos to your moment', momFail:'Photos could not be added', uMin:'min', uHr:'h' },
+    id:{ onl:'Ini butuh akun online', you:'Kamu', invBtn:'Ajak main', invT:'Main bareng', invWhat:'Aktivitas', invWhen:'Waktu', invNow:'Sekarang', invPick:'Pilih jam', invNote:'Catatan (opsional)', invHint:'Berlaku 30 menit setelah waktu main, dan tidak pernah melewati reset harian.', invSend:'Kirim ajakan', invSent:'Ajakan terkirim', invLater:'Nanti saja',
+      a_daily:'Daily quest', a_run:'Candle run', a_wax:'Farming wax', a_spirit:'Spirit & season', a_chill:'Santai saja', a_other:'Lainnya',
+      invCard:'Main bareng', invAt:'Main jam {t}', invNowT:'Sekarang juga', invWait:'Menunggu \u00b7 berlaku sampai {t} ({r})', invLeft:'tersisa {t}', invReset:'berakhir di reset harian', invOk:'Diterima', invNo:'Ditolak', invCan:'Dibatalkan', invEnd:'Sudah berakhir ({t})', invAcc:'Terima', invDec:'Tolak', invCancel:'Batalkan ajakan', invMomB:'Buka momen hari ini',
+      invGot:'{n} mengajak kamu main', invAccd:'{n} menerima ajakanmu', invDecd:'{n} menolak ajakanmu', invActive:'Masih ada ajakan aktif dengan teman ini', invTimeBad:'Pilih jam nanti hari ini, sebelum reset harian', invLate:'Terlalu dekat dengan reset harian', invExpired:'Ajakan ini sudah berakhir', invStale:'Ajakan ini sudah dijawab', invFail:'Gagal, coba lagi',
+      momOpen:'Momen terbuka: tambahkan foto dari sesi hari ini', momBtn:'Momen hari ini', momT:'Momen hari ini', momLock:'Terbuka setelah ajakan main diterima hari ini.', momAdd:'Tambah foto', momBy:'Dibuat oleh {n}', momPh:'oleh {n}', momNone:'Belum ada foto', momMax:'Maksimal 6 foto per momen', momUp:'Mengunggah {a}/{b}\u2026', momShare:'Bagikan ke semua temanku', momDel:'Hapus momen', momDelQ:'Hapus momen ini beserta semua fotonya?', momDelPhQ:'Hapus foto ini?', momArch:'Arsip', momArchNone:'Belum ada arsip', momNew:'{n} menambah foto ke momenmu', momFail:'Foto gagal ditambahkan', uMin:'mnt', uHr:'j' },
+    es:{ onl:'Esto requiere una cuenta en l\u00ednea', you:'T\u00fa', invBtn:'Invitar a jugar', invT:'Jugar juntos', invWhat:'Actividad', invWhen:'Hora', invNow:'Ahora', invPick:'Elegir hora', invNote:'Nota (opcional)', invHint:'V\u00e1lida 30 min despu\u00e9s de la hora de juego y nunca m\u00e1s all\u00e1 del reinicio diario.', invSend:'Enviar invitaci\u00f3n', invSent:'Invitaci\u00f3n enviada', invLater:'Ahora no',
+      a_daily:'Misiones diarias', a_run:'Carrera de velas', a_wax:'Cultivo de cera', a_spirit:'Esp\u00edritus y temporadas', a_chill:'Solo pasar el rato', a_other:'Otra cosa',
+      invCard:'Jugar juntos', invAt:'Jugar a las {t}', invNowT:'Ahora mismo', invWait:'En espera \u00b7 v\u00e1lida hasta las {t} ({r})', invLeft:'quedan {t}', invReset:'termina en el reinicio diario', invOk:'Aceptada', invNo:'Rechazada', invCan:'Cancelada', invEnd:'Terminada ({t})', invAcc:'Aceptar', invDec:'Rechazar', invCancel:'Cancelar invitaci\u00f3n', invMomB:'Abrir el momento de hoy',
+      invGot:'{n} te invit\u00f3 a jugar', invAccd:'{n} acept\u00f3 tu invitaci\u00f3n', invDecd:'{n} rechaz\u00f3 tu invitaci\u00f3n', invActive:'Ya hay una invitaci\u00f3n activa con este amigo', invTimeBad:'Elige una hora m\u00e1s tarde hoy, antes del reinicio diario', invLate:'Demasiado cerca del reinicio diario', invExpired:'Esta invitaci\u00f3n ya termin\u00f3', invStale:'Esta invitaci\u00f3n ya fue respondida', invFail:'No se pudo, int\u00e9ntalo de nuevo',
+      momOpen:'Momento desbloqueado: a\u00f1ade fotos de la sesi\u00f3n de hoy', momBtn:'Momento de hoy', momT:'Momento de hoy', momLock:'Se abre cuando se acepta una invitaci\u00f3n a jugar hoy.', momAdd:'A\u00f1adir fotos', momBy:'Creado por {n}', momPh:'de {n}', momNone:'A\u00fan no hay fotos', momMax:'M\u00e1ximo 6 fotos por momento', momUp:'Subiendo {a}/{b}\u2026', momShare:'Compartir con todos mis amigos', momDel:'Eliminar momento', momDelQ:'\u00bfEliminar este momento y todas sus fotos?', momDelPhQ:'\u00bfEliminar esta foto?', momArch:'Archivo', momArchNone:'Nada archivado todav\u00eda', momNew:'{n} a\u00f1adi\u00f3 fotos a tu momento', momFail:'No se pudieron a\u00f1adir las fotos', uMin:'min', uHr:'h' }
+  };
+  Object.keys(VT7).forEach(l => Object.assign(VT[l], VT7[l], VT8[l], VT9[l]));
   const vt = () => VT[window.SkyApp.getLang()] || VT.en;
   function setWho(){ if(mySession) $('whoAmI').textContent = mySession.type === 'guest' ? vt().guestWho : vt().who + mySession.id; }
   function applyVisitLang(){
@@ -4025,7 +4104,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const isHidden = m => { const h = hidSet(); return h.has(mkey(m)) || !!(m.cid && h.has('c' + m.cid)); };
   const visMsgs = pid => readMsgs(pid).filter(m => !isHidden(m));
   const RETRACT_MS = 24 * 3600 * 1000;
-  const canRetract = m => m.from === myCode && !m.del && !m.st && !!m.id && srvNow() - m.ts < RETRACT_MS;
+  const canRetract = m => m.from === myCode && !m.del && !m.st && !!m.id && !invInfo(m) && srvNow() - m.ts < RETRACT_MS;
   const chatFriend = () => chatPid ? friendsCache.find(f => pairId(myCode, f.code) === chatPid) : null;
   const clockHM = ts => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
   const chatVisible = () => !!chatPid && !document.hidden && $('chatOverlay').classList.contains('open');
@@ -4043,14 +4122,29 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const bodyOf = m => reSplit(m.text).body;
   const snip = (t, n) => { t = String(t || '').replace(/\s+/g, ' ').trim(); n = n || 80; return t.length > n ? t.slice(0, n) + '\u2026' : t; };
   const imgInfo = m => { if(!m || typeof m.text !== 'string') return null; const bd = reSplit(m.text).body; if(bd.indexOf(IMG_P) !== 0) return null; try{ const o = JSON.parse(bd.slice(5)); return { i: Array.isArray(o.i) ? o.i.map(String) : [], c: String(o.c || '') }; }catch(e){ return null; } };
-  const imgUrl = (id, w) => id.indexOf('p:') === 0 ? ((pendImgs.get(id) || {}).url || '') : 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w' + w;
-  const dispText = (m, v) => m.del ? v.retracted : (imgInfo(m) ? '\ud83d\uddbc ' + (imgInfo(m).c || v.photo) : bodyOf(m));
+  const localImg = new Map();   // id file Drive -> salinan lokal (foto yang baru kamu kirim tampil seketika dan tidak bergantung URL Drive)
+  const imgUrl = (id, w) => id.indexOf('p:') === 0 ? ((pendImgs.get(id) || {}).url || '') : localImg.get(id) || 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w' + w;
+  const dispText = (m, v) => m.del ? v.retracted : (invInfo(m) ? '\ud83c\udfae ' + v.invCard : imgInfo(m) ? '\ud83d\uddbc ' + (imgInfo(m).c || v.photo) : bodyOf(m));
+  function imgLoad(im, id, w){   // coba lh3, lalu thumbnail Drive, lalu ulangi sekali; terakhir tandai gagal
+    im._fb = 0; im.classList.remove('bad');
+    im.onerror = () => {
+      if(id.indexOf('p:') === 0 || localImg.has(id)) return;
+      if(im._fb === 0){ im._fb = 1; im.src = 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w' + w; }
+      else if(im._fb === 1){ im._fb = 2; setTimeout(() => { im.src = imgUrl(id, w); }, 2500); }
+      else im.classList.add('bad');
+    };
+    im.src = imgUrl(id, w);
+  }
   function fillMsg(sp, m, v){
+    const iv = m.del ? null : invInfo(m);
+    const bub = sp.parentNode, kind = iv ? 'inv' : (!m.del && imgInfo(m) ? 'img' : '');
+    sp.classList.toggle('blk', !!kind); if(bub) bub.classList.toggle('hasImg', kind === 'img');
+    if(iv){ const st = invState(invById(iv.i)), sg = m.text + '|' + st + '|' + (st === 'p' ? Math.floor(srvNow() / 20000) : 0) + '|' + window.SkyApp.getLang(); if(sp._sig === sg) return; sp._sig = sg; fillInv(sp, m, iv, v); return; }
     const inf = m.del ? null : imgInfo(m), sig = m.del ? 'd' : m.text;
     if(sp._sig === sig) return; sp._sig = sig;
     if(!inf){ sp.textContent = m.del ? v.retracted : bodyOf(m); return; }
     sp.textContent = ''; const g = mkEl('div', 'imgG n' + Math.min(inf.i.length, 4) );
-    inf.i.forEach((id, k) => { const im = new Image(); im.src = imgUrl(id, 600); im.alt = ''; im.loading = 'lazy'; im.draggable = false; im.addEventListener('click', e => { e.stopPropagation(); openLightbox(inf.i, k); }); g.appendChild(im); });
+    inf.i.forEach((id, k) => { const im = new Image(); imgLoad(im, id, 600); im.alt = ''; im.loading = 'lazy'; im.draggable = false; im.addEventListener('click', e => { e.stopPropagation(); openLightbox(inf.i, k); }); g.appendChild(im); });
     sp.appendChild(g); if(inf.c) sp.appendChild(mkEl('div', 'imgC', inf.c));
   }
   function openLightbox(ids, k){
@@ -4058,7 +4152,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(!ov){
       ov = mkEl('div'); ov.id = 'imgLb'; ov.hidden = true; ov.innerHTML = '<img alt=""><button type="button" class="lbX">\u2715</button><button type="button" class="lbP">\u2039</button><button type="button" class="lbN">\u203a</button><span class="lbC"></span>';
       document.body.appendChild(ov);
-      const go = d => { const n = ov._ids.length; ov._k = (ov._k + d + n) % n; paint(); }, paint = () => { ov.querySelector('img').src = imgUrl(ov._ids[ov._k], 1600); ov.querySelector('.lbC').textContent = ov._ids.length > 1 ? (ov._k + 1) + ' / ' + ov._ids.length : ''; ov.querySelector('.lbP').hidden = ov.querySelector('.lbN').hidden = ov._ids.length < 2; };
+      const go = d => { const n = ov._ids.length; ov._k = (ov._k + d + n) % n; paint(); }, paint = () => { imgLoad(ov.querySelector('img'), ov._ids[ov._k], 1600); ov.querySelector('.lbC').textContent = ov._ids.length > 1 ? (ov._k + 1) + ' / ' + ov._ids.length : ''; ov.querySelector('.lbP').hidden = ov.querySelector('.lbN').hidden = ov._ids.length < 2; };
       ov.paint = paint; ov.close = () => { ov.hidden = true; };
       ov.querySelector('.lbX').addEventListener('click', ov.close); ov.querySelector('.lbP').addEventListener('click', () => go(-1)); ov.querySelector('.lbN').addEventListener('click', () => go(1));
       ov.addEventListener('click', e => { if(e.target === ov) ov.close(); });
@@ -4089,6 +4183,212 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     }
     if(bad) toast(vt().imgBad);
   });
+  // ---------- ajakan main bareng ----------
+  // pesan ajakan: '[inv]{"i":id ajakan}'. Statusnya (menunggu/diterima/...) diambil dari invList yang dikirim server tiap poll
+  const INV_P = '[inv]', INV_ACTS = ['daily', 'run', 'wax', 'spirit', 'chill', 'other'], MOM_MAX = 6;
+  let invList = [], momList = [], invPrev = null, momPrev = null;
+  const invById = id => invList.find(x => x.id === id) || null;
+  const invState = i => !i ? 'x' : i.st === 'p' ? (srvNow() > i.exp ? 'x' : 'p') : i.st;   // p menunggu, a diterima, d ditolak, c dibatalkan, x berakhir
+  const invInfo = m => {
+    if(!m || typeof m.text !== 'string') return null;
+    const bd = reSplit(m.text).body; if(bd.indexOf(INV_P) !== 0) return null;
+    try{ const o = JSON.parse(bd.slice(INV_P.length)); return o && o.i ? { i: String(o.i) } : null; }catch(e){ return null; }
+  };
+  const dayNow = () => window.SkyApp.dayKey();
+  const otherOf = i => i.from === myCode ? i.to : i.from;
+  const nameOf = c => { if(c === myCode) return vt().you; const f = friendsCache.find(x => x.code === c); return f ? fLabel(f) : ((metaFor(c) || {}).name || c); };
+  const leftTxt = (ms, v) => { const m = Math.max(1, Math.ceil(ms / 60000)); return m < 60 ? m + ' ' + v.uMin : Math.floor(m / 60) + ' ' + v.uHr + ' ' + (m % 60) + ' ' + v.uMin; };
+  const invErr = c => { const v = vt(); return ({ active:v.invActive, time:v.invTimeBad, late:v.invLate, expired:v.invExpired, state:v.invStale })[c] || v.invFail; };
+  function setInv(x){ const k = invList.findIndex(y => y.id === x.id); if(k < 0) invList.push(x); else invList[k] = x; }
+  function fillInv(sp, m, iv, v){
+    const i = invById(iv.i), st = invState(i), box = mkEl('div', 'inv'), mine = i ? i.from === myCode : m.from === myCode;
+    sp.textContent = ''; box.append(mkEl('div', 'ivH', '\ud83c\udfae ' + v.invCard));
+    if(i){
+      const later = i.at - i.ts > 120000;
+      box.append(mkEl('div', 'ivA', (v['a_' + i.act] || v.a_other) + ' \u00b7 ' + (later ? v.invAt.replace('{t}', clockHM(i.at)) : v.invNowT)));
+      if(i.note) box.append(mkEl('div', 'ivN', i.note));
+    }
+    let txt = '', cls = '';
+    if(st === 'p') txt = v.invWait.replace('{t}', clockHM(i.exp)).replace('{r}', v.invLeft.replace('{t}', leftTxt(i.exp - srvNow(), v))) + (i.exp >= i.rs ? ' \u00b7 ' + v.invReset : '');
+    else if(st === 'a'){ txt = '\u2713 ' + v.invOk; cls = 'ok'; }
+    else if(st === 'd'){ txt = v.invNo; cls = 'no'; }
+    else if(st === 'c') txt = v.invCan;
+    else txt = v.invEnd.replace('{t}', i ? clockHM(i.exp) : '--:--');
+    box.append(mkEl('div', 'ivS ' + cls, txt));
+    const bar = mkEl('div', 'ivB'), add = (label, pri, fn) => { const b = mkEl('button', pri ? 'pri' : '', label); b.type = 'button'; b.addEventListener('click', e => { e.stopPropagation(); b.disabled = true; fn(); }); bar.append(b); };
+    if(i && st === 'p'){ if(mine) add(v.invCancel, false, () => answerInv('cancelInvite', i)); else { add(v.invAcc, true, () => answerInv('respondInvite', i, 1)); add(v.invDec, false, () => answerInv('respondInvite', i, 0)); } }
+    if(i && st === 'a' && i.day === dayNow()) add(v.invMomB, true, () => openMoment(otherOf(i)));
+    if(bar.children.length) box.append(bar);
+    sp.append(box);
+  }
+  async function answerInv(action, i, accept){
+    if(!srv()){ toast(vt().onl); return; }
+    const r = await api(action, { id: i.id, accept: accept }, undefined, { timeout: 20000 });
+    if(r.inv) setInv(r.inv);
+    if(!r.ok) toast(invErr(r.error)); else if(r.inv && r.inv.st === 'a'){ SFX.success(); toast(vt().momOpen); }
+    renderChat(); updateHeadBtns(); kickPoll();
+  }
+  function applyInvMom(inv, mom){   // dipanggil tiap poll: simpan daftar ajakan & momen, beri tahu perubahan penting
+    const v = vt();
+    if(Array.isArray(inv)){
+      if(invPrev) inv.forEach(i => {
+        const o = invPrev[i.id], nm = nameOf(otherOf(i));
+        if(!o && i.to === myCode && i.st === 'p') toast(v.invGot.replace('{n}', nm));
+        else if(o && o.st === 'p' && i.from === myCode && (i.st === 'a' || i.st === 'd')){ toast((i.st === 'a' ? v.invAccd : v.invDecd).replace('{n}', nm)); SFX.notify(); }
+        else if(o && o.st === 'p' && i.to === myCode && i.st === 'c') toast(v.invCan);
+      });
+      invPrev = {}; inv.forEach(i => { invPrev[i.id] = i; }); invList = inv;
+    }
+    if(Array.isArray(mom)){
+      if(momPrev) mom.forEach(x => {
+        const o = momPrev[x.id], had = new Set(o ? o.photos.map(p => p.f) : []), fresh = x.photos.filter(p => !had.has(p.f) && p.by !== myCode)[0];
+        if(fresh) toast(v.momNew.replace('{n}', nameOf(fresh.by)));
+      });
+      momPrev = {}; mom.forEach(x => { momPrev[x.id] = x; }); momList = mom;
+    }
+    paintMomW(); updateHeadBtns(); if(!$('momOv').hidden) paintMom();
+    chatEls.forEach(el => { if(el._m && invInfo(el._m)) fillMsg(el.querySelector('.mt'), el._m, v); });
+  }
+  setInterval(() => { if(chatVisible()) chatEls.forEach(el => { if(el._m && invInfo(el._m)) fillMsg(el.querySelector('.mt'), el._m, vt()); }); }, 20000);   // hitung mundur "tersisa ..."
+
+  // sheet buat ajakan
+  const invSheet = mkEl('div'); invSheet.id = 'invSheet'; invSheet.hidden = true; invSheet.innerHTML = '<div class="sh" role="dialog" aria-modal="true"></div>'; $('chatOverlay').appendChild(invSheet);
+  invSheet.addEventListener('click', e => { if(e.target === invSheet) invSheet.hidden = true; });
+  function chipRow(list, cur, label, pick){
+    const row = mkEl('div', 'chips'); list.forEach(k => { const b = mkEl('button', '', label(k)); b.type = 'button'; b.setAttribute('aria-pressed', String(k === cur)); b.addEventListener('click', () => { pick(k); [...row.children].forEach((x, n) => x.setAttribute('aria-pressed', String(list[n] === k))); }); row.append(b); }); return row;
+  }
+  function openInvSheet(){
+    const f = chatFriend(); if(!f) return;
+    if(!srv()){ toast(vt().onl); return; }
+    const v = vt(), box = invSheet.querySelector('.sh'); let act = 'daily', when = 'now';
+    box.textContent = ''; box.append(mkEl('h3', '', v.invT + ' \u00b7 ' + fLabel(f)), mkEl('label', '', v.invWhat), chipRow(INV_ACTS, act, k => v['a_' + k], k => { act = k; }));
+    const tm = mkEl('input'); tm.type = 'time'; { const d = new Date(Date.now() + 30 * 60000); tm.value = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); } tm.hidden = true;
+    box.append(mkEl('label', '', v.invWhen), chipRow(['now', 'time'], when, k => k === 'now' ? v.invNow : v.invPick, k => { when = k; tm.hidden = k === 'now'; }), tm);
+    const note = mkEl('input'); note.type = 'text'; note.maxLength = 60; note.autocomplete = 'off'; note.placeholder = v.invNote;
+    const send = mkEl('button', 'pri', v.invSend), no = mkEl('button', '', v.invLater), row = mkEl('div', 'row2'); send.type = no.type = 'button'; row.append(no, send);
+    box.append(note, mkEl('div', 'hint', v.invHint), row);
+    no.onclick = () => { invSheet.hidden = true; };
+    send.onclick = async () => {
+      let at = 0;
+      if(when === 'time'){ const p = tm.value.split(':').map(Number); if(p.length < 2 || isNaN(p[0])){ toast(v.invTimeBad); return; } const d = new Date(); d.setHours(p[0], p[1], 0, 0); at = srvNow() + (d.getTime() - Date.now()); }
+      send.disabled = true;
+      const r = await api('invite', { to: f.code, act, at, note: note.value.trim() }, undefined, { timeout: 20000 });
+      send.disabled = false;
+      if(!r.ok){ toast(invErr(r.error)); return; }
+      invSheet.hidden = true; SFX.send(); toast(v.invSent); kickPoll();
+    };
+    invSheet.hidden = false;
+  }
+  $('chatInv').addEventListener('click', openInvSheet);
+
+  // ---------- Momen Hari Ini ----------
+  const pairHas = (x, a, b) => (x.a === a && x.b === b) || (x.a === b && x.b === a);
+  const todayInv = c => invList.filter(i => i.st === 'a' && i.day === dayNow() && pairHas({ a: i.from, b: i.to }, myCode, c)).sort((x, y) => y.ts - x.ts)[0] || null;
+  const todayMom = c => momList.find(x => x.day === dayNow() && pairHas(x, myCode, c)) || null;
+  function updateHeadBtns(){ const f = chatFriend(); $('chatMom').classList.toggle('dot', !!f && !!(todayInv(f.code) || todayMom(f.code))); }
+  const momOv = mkEl('div'); momOv.id = 'momOv'; momOv.hidden = true;
+  momOv.innerHTML = '<div class="mh"><button type="button" class="mBk">\u2190</button><div><span class="mT"></span><small class="mS"></small></div></div><div class="mb"></div><input type="file" accept="image/*" multiple hidden>';
+  document.body.appendChild(momOv);
+  let momFor = '', momBusy = '';
+  const momFile = momOv.querySelector('input');
+  const closeMom = () => { momOv.hidden = true; };
+  momOv.querySelector('.mBk').addEventListener('click', closeMom);
+  document.addEventListener('keydown', e => { if(e.key === 'Escape'){ if(!momOv.hidden && (!$('imgLb') || $('imgLb').hidden)) closeMom(); if(!invSheet.hidden) invSheet.hidden = true; } });
+  function openMoment(code){
+    if(!srv()){ toast(vt().onl); return; }
+    momFor = code; momOv.hidden = false; paintMom();
+  }
+  $('chatMom').addEventListener('click', () => { const f = chatFriend(); if(f) openMoment(f.code); });
+  function paintMom(){
+    if(momOv.hidden) return;
+    const v = vt(), code = momFor, b = momOv.querySelector('.mb'), sc = b.scrollTop, inv = todayInv(code), m = todayMom(code);
+    momOv.querySelector('.mT').textContent = v.momT; momOv.querySelector('.mS').textContent = nameOf(code); b.textContent = '';
+    if(!inv && !m){
+      const lk = mkEl('div', 'momLock'); lk.append(mkEl('b', '', '\ud83d\udd12'), mkEl('div', '', v.momLock));
+      const go = mkEl('button', 'mBtn pri', v.invBtn); go.type = 'button'; go.onclick = () => { closeMom(); if(chatFriend() && chatFriend().code === code) openInvSheet(); };
+      lk.append(go); b.append(lk);
+    } else {
+      const n = m ? m.photos.length : 0;
+      b.append(mkEl('div', 'momInfo', (m ? v.momBy.replace('{n}', nameOf(m.by)) : v.momNone) + (m ? ' \u00b7 ' + n + '/' + MOM_MAX : '')));
+      if(m && n){
+        const g = mkEl('div', 'momGrid'), ids = m.photos.map(p => p.f);
+        m.photos.forEach((p, k) => {
+          const t = mkEl('div', 'momTile'), im = new Image(); t.style.setProperty('--r', ((k % 3) - 1) * 1.6 + 'deg');
+          imgLoad(im, p.f, 400); im.alt = ''; im.loading = 'lazy'; im.addEventListener('click', () => openLightbox(ids, k)); t.append(im, mkEl('span', '', v.momPh.replace('{n}', nameOf(p.by))));
+          if(p.by === myCode){ const x = mkEl('button', 'x', '\u2715'); x.type = 'button'; x.onclick = async () => { if(!confirm(v.momDelPhQ)) return; const r = await api('delPhoto', { id: m.id, f: p.f }); if(!r.ok) toast(v.invFail); kickPoll(); }; t.append(x); }
+          g.append(t);
+        });
+        b.append(g);
+      }
+      const add = mkEl('button', 'mBtn pri', momBusy || v.momAdd); add.type = 'button'; add.disabled = !!momBusy || n >= MOM_MAX; add.onclick = () => momFile.click(); b.append(add);
+      if(m && m.by === myCode){
+        const lab = mkEl('label', 'momChk'), ck = mkEl('input'); ck.type = 'checkbox'; ck.checked = m.vis === 'friends'; lab.append(ck, document.createTextNode(v.momShare));
+        ck.onchange = async () => { const r = await api('setMomentVis', { id: m.id, vis: ck.checked ? 'friends' : 'pair' }); if(!r.ok) toast(v.invFail); kickPoll(); };
+        const del = mkEl('button', 'mBtn dan', v.momDel); del.type = 'button'; del.onclick = () => delMoment(m);
+        b.append(lab, del);
+      }
+    }
+    b.append(mkEl('div', 'momH', v.momArch));
+    const past = momList.filter(x => x.day !== dayNow() && pairHas(x, myCode, code)).sort((x, y) => y.day < x.day ? -1 : 1);
+    if(!past.length) b.append(mkEl('div', 'momInfo', v.momArchNone));
+    past.forEach(x => {
+      const r = mkEl('div', 'arch'), im = new Image(); im.src = imgUrl(x.photos[0].f, 120); im.alt = '';
+      r.append(im, mkEl('div', 'at', x.day + ' \u00b7 ' + x.photos.length + ' \u00b7 ' + v.momBy.replace('{n}', nameOf(x.by))));
+      r.onclick = () => openLightbox(x.photos.map(p => p.f), 0);
+      if(x.by === myCode){ const d = mkEl('button', '', '\ud83d\uddd1'); d.type = 'button'; d.onclick = e => { e.stopPropagation(); delMoment(x); }; r.append(d); }
+      b.append(r);
+    });
+    b.scrollTop = sc;
+  }
+  async function delMoment(m){
+    if(!confirm(vt().momDelQ)) return;
+    const r = await api('delMoment', { id: m.id }); if(!r.ok) toast(vt().invFail);
+    momList = momList.filter(x => x.id !== m.id); paintMom(); paintMomW(); kickPoll();
+  }
+  momFile.addEventListener('change', async () => {
+    const files = [...momFile.files]; momFile.value = ''; const v = vt(), code = momFor, m = todayMom(code), inv = m ? { id: m.id } : todayInv(code);
+    if(!files.length || !inv || momBusy) return;
+    const room = MOM_MAX - (m ? m.photos.length : 0); if(files.length > room) toast(v.momMax);
+    const pick = files.slice(0, room), ids = []; let bad = false;
+    try{
+      for(let k = 0; k < pick.length; k++){
+        momBusy = v.momUp.replace('{a}', k + 1).replace('{b}', pick.length); paintMom();
+        const c = await compressImg(pick[k]), u = await api('uploadImage', { data: c.b64, mime: c.mime }, undefined, { timeout: 60000 });
+        if(!(u.ok && u.id)){ bad = true; break; } localImg.set(u.id, c.url); ids.push(u.id);
+      }
+      if(ids.length){ const r = await api('addMoment', { inv: inv.id, files: ids }, undefined, { timeout: 20000 }); if(r.ok && r.mom){ const k = momList.findIndex(x => x.id === r.mom.id); if(k < 0) momList.push(r.mom); else momList[k] = r.mom; SFX.success(); } else bad = true; }
+    }catch(e){ bad = true; }
+    momBusy = ''; if(bad) toast(v.momFail); paintMom(); paintMomW(); kickPoll();
+  });
+
+  // widget beranda: tumpukan polaroid di pojok kanan bawah, bergilir antar momen aktif
+  const momW = mkEl('div'); momW.id = 'momW';
+  momW.innerHTML = '<span class="sp s1"></span><span class="sp s2"></span><span class="sp s3"></span>' + [2, 1, 0].map(n => '<div class="pol q' + n + '"><img alt=""><i></i></div>').join('');
+  document.body.appendChild(momW);
+  let wItems = [], wSig = '', wIdx = 0, wTimer = null, wOrd = [momW.querySelector('.q0'), momW.querySelector('.q1'), momW.querySelector('.q2')];
+  const wSet = (c, it) => { const im = c.querySelector('img'); im.classList.remove('ld'); im.onload = () => im.classList.add('ld'); im.src = imgUrl(it.f, 240); c.querySelector('i').textContent = it.label; };
+  const wAt = k => wItems[((k % wItems.length) + wItems.length) % wItems.length];
+  function wShow(){ wOrd.forEach((c, n) => { c.className = 'pol q' + n; wSet(c, wAt(wIdx - n)); }); }
+  function wNext(){
+    if(document.hidden || wItems.length < 2 || !momW.getClientRects().length) return;
+    wIdx++; wOrd.unshift(wOrd.pop()); wOrd.forEach((c, n) => { c.className = 'pol q' + n; });
+    const f = wOrd[0]; wSet(f, wAt(wIdx));
+    if(!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){ f.classList.add('drop'); f.addEventListener('animationend', () => f.classList.remove('drop'), { once: true }); }
+  }
+  function paintMomW(){
+    const items = [];
+    momList.filter(x => x.day === dayNow() && x.photos.length).sort((x, y) => x.ts - y.ts).forEach(x => {
+      const ids = x.photos.map(p => p.f), label = nameOf(x.a) + ' & ' + nameOf(x.b);
+      x.photos.forEach((p, k) => items.push({ f: p.f, ids, k, label }));
+    });
+    const sig = items.map(i => i.f).join(',') + '|' + window.SkyApp.getLang();
+    if(sig === wSig) return; wSig = sig; wItems = items; wIdx = 0;
+    clearInterval(wTimer); wTimer = null; momW.classList.toggle('has', items.length > 0);
+    if(!items.length) return;
+    momW.dataset.n = Math.min(items.length, 3); wShow();
+    if(items.length > 1) wTimer = setInterval(wNext, 4500);
+  }
+  momW.addEventListener('click', () => { const it = wAt(wIdx); if(it) openLightbox(it.ids, it.k); });
   function openChat(friend){
     setReply(null);
     $('chatTitle').textContent = fLabel(friend); applyChatLang();
@@ -4112,7 +4412,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         const ma = mkEl('div', 'ma'), br = mkEl('button', 'mrp'), bc = mkEl('button', 'mcp'), bm = mkEl('button', 'mmo'); br.type = bc.type = bm.type = 'button'; br.innerHTML = ICO_REPLY; bc.innerHTML = ICO_COPY; bm.innerHTML = ICO_MORE; ma.append(br, bc, bm); el.append(ma);
       }
       fillMsg(el.querySelector('.mt'), m, v); paintQuote(el, m, v, list); el.querySelector('.tm').textContent = clockHM(m.ts); el._m = m; el.classList.toggle('gone', !!m.del);
-      { const bc = el.querySelector('.mcp'), bm = el.querySelector('.mmo'); bc.hidden = !!(m.del || m.st || imgInfo(m)); bc.title = v.copyMsg; bc.setAttribute('aria-label', v.copyMsg); bm.title = v.moreMsg; bm.setAttribute('aria-label', v.moreMsg); const br = el.querySelector('.mrp'); br.hidden = !!(m.del || m.st === 'failed'); br.title = v.rpl; br.setAttribute('aria-label', v.rpl); }
+      { const bc = el.querySelector('.mcp'), bm = el.querySelector('.mmo'); bc.hidden = !!(m.del || m.st || imgInfo(m) || invInfo(m)); bc.title = v.copyMsg; bc.setAttribute('aria-label', v.copyMsg); bm.title = v.moreMsg; bm.setAttribute('aria-label', v.moreMsg); const br = el.querySelector('.mrp'); br.hidden = !!(m.del || m.st === 'failed'); br.title = v.rpl; br.setAttribute('aria-label', v.rpl); }
       el.classList.toggle('pending', mine && m.st === 'sending'); el.classList.toggle('failed', mine && m.st === 'failed');
       const tk = el.querySelector('.tk');
       if(mine){ const t = tickInfo(m, rd); tk.textContent = m.st === 'failed' ? vt().failed : t[0]; tk.className = 'tk ' + t[1]; } else tk.textContent = '';
@@ -4181,14 +4481,14 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
           if(srvNow() - m.ts > (inf ? 300000 : 120000)){ patchMsg(pid, m.cid, { st:'failed' }); continue; }
           let text = m.text; const head = reSplit(m.text).re ? m.text.slice(0, m.text.indexOf('\n') + 1) : '';
           if(inf && inf.i.some(x => x.indexOf('p:') === 0)){   // unggah ke Drive dulu, baru kirim id file-nya
-            const ids = []; let stop = '';
+            const ids = []; let stop = '', why = '';
             for(const x of inf.i){
               if(x.indexOf('p:') !== 0){ ids.push(x); continue; }
               const pi = pendImgs.get(x); if(!pi){ stop = 'failed'; break; }
-              if(!pi.fid){ const u = await api('uploadImage', { data: pi.b64, mime: pi.mime }, undefined, { timeout: 60000 }); if(u.ok && u.id) pi.fid = u.id; else { stop = (u.error === 'net' || u.error === 'busy' || u.error === 'server') ? 'retry' : 'failed'; break; } }
+              if(!pi.fid){ const u = await api('uploadImage', { data: pi.b64, mime: pi.mime }, undefined, { timeout: 60000 }); if(u.ok && u.id){ pi.fid = u.id; localImg.set(u.id, pi.url); } else { pi.tries = (pi.tries || 0) + (u.error === 'server' ? 1 : 0); stop = (u.error === 'net' || u.error === 'busy' || (u.error === 'server' && pi.tries < 3)) ? 'retry' : 'failed'; why = u.error; break; } }
               ids.push(pi.fid);
             }
-            if(stop === 'failed'){ patchMsg(pid, m.cid, { st:'failed' }); toast(vt().imgFail); continue; }
+            if(stop === 'failed'){ patchMsg(pid, m.cid, { st:'failed' }); toast(why === 'server' ? vt().imgSrv : why === 'off' ? vt().onl : vt().imgFail); continue; }
             if(stop === 'retry') break;
             text = head + IMG_P + JSON.stringify({ i: ids, c: inf.c });
           }
@@ -4202,7 +4502,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     } finally { flushing = false; if(myUid === me){ renderChat(); renderFriends(); } }
   }
   window.addEventListener('storage', e => { if(chatPid && e.key === chatKey(chatPid)) renderChat(); });   // mode lokal: tab/akun lain
-  function closeChat(){ att = []; renderAtt(); setReply(null); emoOpen(false); closeSheet(); $('chatOverlay').classList.remove('open'); chatPid = null; chatEls.clear(); renderFriends(true); updateChatSub(); kickPoll(); }
+  function closeChat(){ $('invSheet').hidden = true; att = []; renderAtt(); setReply(null); emoOpen(false); closeSheet(); $('chatOverlay').classList.remove('open'); chatPid = null; chatEls.clear(); renderFriends(true); updateChatSub(); kickPoll(); }
   $('chatBack').addEventListener('click', closeChat);
   $('chatSend').addEventListener('pointerdown', e => e.preventDefault());   // tombol kirim tidak mencuri fokus: keyboard HP tetap terbuka
   $('chatForm').addEventListener('submit', e => {
@@ -4212,7 +4512,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     input.value = ''; SFX.send(); lastType = 0;
     const cid = myCode + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     if(att.length){ const ids = att.map((a, k) => { const id = 'p:' + cid + ':' + k; pendImgs.set(id, a); return id; }); text = IMG_P + JSON.stringify({ i: ids, c: text.slice(0, 180) }); att = []; renderAtt(); }
-    else if(text.indexOf(IMG_P) === 0 || text.indexOf(RE_P) === 0) text = '\u200b' + text;
+    else if(text.indexOf(IMG_P) === 0 || text.indexOf(RE_P) === 0 || text.indexOf(INV_P) === 0) text = '\u200b' + text;
     if(replyTo){ text = RE_P + JSON.stringify({ i: replyTo.id || 0, c: replyTo.cid || '', f: replyTo.from, t: snip(dispText(replyTo, vt()), 90) }) + '\n' + text; setReply(null); }
     const msg = { cid, from: myCode, text, ts: srvNow() };
     if(srv()) msg.st = 'sending'; else msg.id = msg.ts;
@@ -4338,7 +4638,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(on){ if(emoCat === 0 && !emoRecent.length) emoCat = 1; emoPaint(); }
   }
   function applyChatLang(){
-    const v = vt(); $('chatAttach').title = v.attach; $('chatAttach').setAttribute('aria-label', v.attach); $('chatEmoji').title = v.emoji; $('chatEmoji').setAttribute('aria-label', v.emoji);
+    const v = vt(); $('chatInv').title = v.invBtn; $('chatInv').setAttribute('aria-label', v.invBtn); $('chatMom').title = v.momBtn; $('chatMom').setAttribute('aria-label', v.momBtn); $('chatAttach').title = v.attach; $('chatAttach').setAttribute('aria-label', v.attach); $('chatEmoji').title = v.emoji; $('chatEmoji').setAttribute('aria-label', v.emoji);
     if(!$('emojiPanel').hidden) emoPaint();
   }
   window.addEventListener('sky:lang', applyChatLang);
@@ -4705,7 +5005,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
       authFails = 0; clockSkew = r.now - Date.now(); sigS = r.sig || '';
       if(typeof r.seq === 'number' && since > r.seq){ since = 0; lsSet('sky_since_' + myUid, '0'); }   // penghitung server lebih kecil dari yang diingat browser (server/sheet di-reset): ambil ulang dari awal
-      meta = r.metas || {}; typingMap = r.typing || {};
+      meta = r.metas || {}; typingMap = r.typing || {}; applyInvMom(r.inv, r.mom);
       if(curFriend) paintFCode();   // 'aktif X lalu' ikut segar
       if(Array.isArray(r.friends) && !friendOps && friendRev === rev0) applyServerFriends(r.friends);
       if(r.reads){   // status baca dari perangkat lain
@@ -4750,7 +5050,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   function kickPoll(){ if(!myUid) return; try{ if(pollCtl) pollCtl.abort(); }catch(e){} clearTimeout(pollTimer); startLoop(); }   // ulangi poll sekarang juga
   function startNet(){
-    stopNet();
+    stopNet(); invList = []; momList = []; invPrev = null; momPrev = null; paintMomW();
     prof = readProf(myUid); window.SkyMuted = !!prof.mute; if(window.SkyMusic) window.SkyMusic.sync();
     if(prof.lang && prof.lang !== window.SkyApp.getLang()) window.SkyApp.applyLang(prof.lang);   // pakai bahasa yang tersimpan di akun walau bahasa perangkat berbeda
     else if(!prof.lang) saveProf({ lang: window.SkyApp.getLang() }, true);   // akun lama: simpan bahasa saat ini sebagai bawaan
