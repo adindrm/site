@@ -1504,7 +1504,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .fl{ display:flex; flex-direction:column; }
   #fabOv .fgrid{ flex:none; }
   #fabOv .fmid{ flex:1 0 auto; min-height:104px; display:flex; flex-direction:column; }   /* Eden: tepat di tengah antara baris ikon di atas dan tombol abu-abu di bawah */
-  #fabOv .fedn{ isolation:isolate; display:flex; flex-direction:column; align-items:center; gap:2px; margin:auto; padding:10px 26px 8px; border:1px solid rgba(128,128,128,0.3); border-radius:16px; background:none; color:var(--ink); font:inherit; cursor:pointer; touch-action:manipulation; transition:background .2s ease, border-color .2s ease; }
+  #fabOv .fedn{ isolation:isolate; display:flex; flex-direction:column; align-items:center; gap:2px; margin:auto; padding:10px 26px 8px; border:0; border-radius:16px; background:none; color:var(--ink); font:inherit; cursor:pointer; touch-action:manipulation; transition:background .2s ease, border-color .2s ease; }
   #fabOv .fedn[hidden]{ display:none; }
   #fabOv .fedn b{ font-size:13px; font-weight:600; }
   #fabOv .fedn small{ font-size:10px; color:var(--ink-soft); }
@@ -1512,7 +1512,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .fedn .fi::before{ content:''; position:absolute; left:50%; top:50%; width:64px; height:64px; margin:-32px 0 0 -32px; border-radius:50%; background:radial-gradient(closest-side, rgba(255,40,30,.75) 0%, rgba(255,90,60,.4) 35%, rgba(255,150,90,.14) 62%, transparent 100%); pointer-events:none; z-index:-1; animation:edenGlow 3.2s ease-in-out infinite; }
   @keyframes edenGlow{ 0%,100%{ opacity:.65; transform:scale(.9); } 50%{ opacity:1; transform:scale(1.12); } }
   @media (prefers-reduced-motion: reduce){ #fabOv .fedn .fi::before{ animation:none; } }
-  #fabOv .fedn.on{ background:rgba(255,210,122,0.18); border-color:rgba(255,210,122,0.6); }
+
   #fabOv .fedn.on .fi{ opacity:1; filter:none; }
   #fabOv .fedn.on .fi::before{ display:none; }
   #fabOv .ff{ flex:none; display:grid; place-items:center; padding-top:2px; border-top:1px solid rgba(128,128,128,0.18); }
@@ -3449,6 +3449,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     fabOpen = -1; fabOv.classList.add('first'); setTimeout(() => fabOv.classList.remove('first'), 1100); fabOv.hidden = false; paintFab();
     requestAnimationFrame(() => { if(!fabOv.hidden) fabFly(true); });
   }, closeFab = () => { if(fabOv.hidden) return; fabOv.hidden = true; fabFly(false); };
+  fabOv.querySelector('.fp').addEventListener('click', e => { if(fabOpen >= 0 && !e.target.closest('.fblk, .fic, .fx')) fabToggle(fabOpen); }, true);   // menekan elemen lain = dropdown yang terbuka menutup
   fabOv.querySelector('.fx').onclick = closeFab; fabOv.addEventListener('click', e => { if(e.target === fabOv) closeFab(); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !fabOv.hidden) closeFab(); });
   window.addEventListener('sky:page', closeFab);
@@ -3561,7 +3562,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     cb.onclick = () => pgWrite(x => { const k = dayK(); x.cap = x.cap || {}; if(x.cap[k]) delete x.cap[k]; else x.cap[k] = 1; });
     const edOn = !!(d.ew || {})[weekK()], P = I18N[lang].pg;   // slot tengah: Eden (ikon + nama, selesai minggu ini) saat tidak ada dropdown terbuka
     const ed = mkTx('button', 'fedn' + (edOn ? ' on' : '')); ed.type = 'button'; ed.hidden = fabOpen >= 0; ed.setAttribute('aria-pressed', String(edOn));
-    { const ei = mkTx('span', 'fi'); ei.appendChild(fabIcon(['area/eden', 'rasi/eden'], areaGlyph('Eden', false))); ed.append(ei, mkTx('b', '', P.eden), mkTx('small', '', edOn ? P.done : P.edenS)); }
+    { const ei = mkTx('span', 'fi'); ei.appendChild(fabIcon(['area/eden', 'rasi/eden'], areaGlyph('Eden', false))); ed.append(ei, mkTx('b', '', 'Eye of Eden')); if(edOn) ed.appendChild(mkTx('small', '', P.done)); }
     ed.onclick = () => pgWrite(x => { const k = weekK(); x.ew = x.ew || {}; if(x.ew[k]) delete x.ew[k]; else x.ew[k] = 1; });
     const fmid = mkTx('div', 'fmid'); fmid.append(ed, pan);
     fl.append(grid, fmid);
