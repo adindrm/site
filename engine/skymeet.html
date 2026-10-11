@@ -567,6 +567,11 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .frWrap.fresh{ animation:fUp .35s ease both; }
   .fPrev{ display:flex; align-items:center; gap:4px; }
   .fPrev .tk{ font-size:10px; letter-spacing:-2px; flex:none; } .fPrev .tk.rd{ color:#6fb3ff; }
+  /* pratinjau pesan di kartu teman: ikon garis mungil (bukan emoji berwarna) + teks satu baris */
+  .fPrev .pvt{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .fPrev .pvi{ flex:none; display:inline-grid; width:12px; height:12px; opacity:.65; }
+  .fPrev .pvi svg{ width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:1.3; stroke-linecap:round; stroke-linejoin:round; }
+  .fPrev .pvi circle{ fill:currentColor; stroke:none; }
   .friendRow.typing .friendHint:first-of-type{ color:#8fe3a8; }
 
   /* progres teman: mata uang (kiri) + rasi bintang (kanan), pelacak di bawahnya */
@@ -965,6 +970,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .cap svg.gc{ fill:#9aa0b4; }   /* sebelumnya kalah oleh .cap svg{fill:kuning} sehingga lilin 'abu-abu' tampak kuning */
   .cap span{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
   .hbtns{ display:flex; align-items:center; gap:8px; flex:none; }
+  .thL{ display:flex; align-items:center; gap:2px; min-width:0; }
+  .thL .evl{ min-width:0; }
+  .thL .fabTog{ flex:none; margin-left:-8px; }   /* ikon sejajar dengan tepi kiri kartu */
   /* warna api: dua daftar filter dengan fungsi & urutan sama supaya bisa di-transisi mulus (abu-abu <-> kuning menyala) */
   :root{ --fx-gray:grayscale(1) opacity(.55) brightness(1) drop-shadow(0 0 0 rgba(255,236,150,0)) drop-shadow(0 0 0 rgba(255,190,70,0)); --fx-lit:grayscale(0) opacity(1) brightness(1.1) drop-shadow(0 0 3px rgba(255,236,150,.95)) drop-shadow(0 0 9px rgba(255,190,70,.7)); --fx-glow:grayscale(0) opacity(1) brightness(1.9) drop-shadow(0 0 5px rgba(255,248,210,1)) drop-shadow(0 0 16px rgba(255,200,80,.95)); }
   /* tombol on/off ikon melayang: ikon saja (tanpa kartu/bingkai), area sentuh 44px */
@@ -991,8 +999,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   /* harian selesai (lilin abu-abu): api berdenyut makin terang, membengkak, lalu pecah jadi partikel (JS) */
   /* selesai harian: TANPA membesar. Cahaya perlahan makin terang (0-55%), lalu ikon perlahan luruh/memudar (55-100%) sambil melepas partikel api (JS) */
   @keyframes fabFin{ 0%{ opacity:1; transform:scale(1); filter:drop-shadow(0 2px 6px rgba(0,0,0,.45)) blur(0px); } 45%{ opacity:1; transform:scale(.88); filter:drop-shadow(0 2px 6px rgba(0,0,0,.45)) blur(0px); } 100%{ opacity:0; transform:scale(.18); filter:drop-shadow(0 0 0 rgba(0,0,0,0)) blur(4px); } }   /* perlahan mengecil sambil memudar */
-  #fab.fin{ animation:fabFin 2.8s ease-in-out both; transform-origin:50% 86%; }   /* menciut ke tengah-bawah (dasar api) */
-  @keyframes fabGlow{ 0%{ filter:var(--fx-gray); } 55%,100%{ filter:grayscale(0) opacity(1) brightness(2.4) drop-shadow(0 0 6px rgba(255,250,215,1)) drop-shadow(0 0 24px rgba(255,205,95,1)); } }
+  #fab.fin{ animation:fabFin 2.8s ease-in-out both; transform-origin:50% 86%; }
+  #fab.up, #fab.up.fin{ transform-origin:50% var(--oy,76%); }   /* titik pusat = dasar api = ujung tali: skala 1.3 & animasi mengecil tetap berpusat di ujung tali (tanpa bergeser) */
+  #fab.up.dn{ scale:1; }   /* di panel: ikon sudah ber-scale 1.3 — mengganti titik pusat saat animasi mulai membuatnya bergeser */   /* menciut ke tengah-bawah (dasar api) */
+  @keyframes fabGlow{ 0%{ filter:var(--fin0, var(--fx-gray)); } 55%,100%{ filter:grayscale(0) opacity(1) brightness(2.4) drop-shadow(0 0 6px rgba(255,250,215,1)) drop-shadow(0 0 24px rgba(255,205,95,1)); } }
   #fab.fin .flame{ animation:fabGlow 2.8s ease-in-out both; }
   #fab .flame{ width:36px; height:36px; font-size:30px; pointer-events:none; filter:var(--fx-gray); transition:filter 1.8s ease; }   /* diam = abu-abu */
   #fab.lit .flame{ filter:var(--fx-lit); transition:filter 1.8s ease-in-out; }                                                                    /* poin selesai = menyala */
@@ -1000,6 +1010,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .fxp{ position:absolute; border-radius:50%; will-change:transform,opacity; }
   @media (prefers-reduced-motion: reduce){ .flame.fanim img.fr{ transition:none; } #fab.fin .flame{ animation:none; } body.ready.fabOn #fab, #fab.out, #fab.fin{ animation:none; } #fab .flame, .fabTog .flame{ transition:none; } }
   #fab.gray{ color:#9aa0b4; }
+  #fabOv .fp{ transition:filter 1.4s ease; }
+  #fabOv.gry .fp{ filter:grayscale(1); }
   /* ===== ikon melayang v2: bola kaca + aura berdenyut + cincin progres + percikan mengorbit + melayang halus + magnet ke tepi ===== */
   #fab{ isolation:isolate; transition:scale .22s ease; }
   #fab .flame{ position:relative; z-index:2; }
@@ -1401,12 +1413,13 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #chatEmoji, #chatAttach, #chatSend{ height:44px; align-self:flex-end; }
 
   /* ===== reaksi emoji di chat ===== */
-  .msg .rxs{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
+  /* reaksi: lencana mungil di sudut bawah kartu pesan. Reaksi KITA = kiri bawah, reaksi TEMAN = kanan bawah */
+  .msg .rxs{ position:absolute; left:0; right:0; bottom:-13px; z-index:2; display:flex; gap:3px; padding:0 8px; pointer-events:none; }
   .msg .rxs[hidden]{ display:none; }
-  .msg.me .rxs{ justify-content:flex-end; }
-  .msg.hasImg .rxs{ margin:6px 8px 0; }
-  .msg .rx{ font:inherit; font-size:12px; line-height:1; padding:3px 7px; border-radius:999px; border:1px solid rgba(128,128,128,0.35); background:rgba(128,128,128,0.2); color:inherit; cursor:pointer; touch-action:manipulation; }
-  .msg .rx.me{ border-color:rgba(255,200,90,0.95); background:rgba(255,200,90,0.28); }
+  .msg.hasRx{ margin-bottom:12px; }
+  .msg .rx{ pointer-events:auto; font:inherit; font-size:11px; line-height:1; padding:2px 5px; border-radius:999px; border:1px solid rgba(128,128,128,0.4); background:var(--top); color:var(--ink); cursor:pointer; touch-action:manipulation; box-shadow:0 1px 3px rgba(0,0,0,0.25); }
+  .msg .rx.me{ margin-right:auto; border-color:rgba(255,200,90,0.95); }
+  .msg .rx.th{ margin-left:auto; }
   #msgSheet .rxRow{ display:flex; gap:4px; justify-content:space-between; padding:0 0 8px; }
   #msgSheet .rxRow[hidden]{ display:none; }
   #msgSheet .rxRow button{ flex:1; padding:7px 0; font-size:24px; line-height:1; text-align:center; border-radius:12px; background:rgba(128,128,128,0.18); }
@@ -1452,6 +1465,58 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fab.fly{ transition:left .85s cubic-bezier(.45,.05,.2,1), top .85s cubic-bezier(.45,.05,.2,1), scale .85s cubic-bezier(.45,.05,.2,1); }
   #fab.up{ scale:1.3; translate:0 0 !important; }
   #fab.up:not(.gray) .flame{ filter:var(--fx-lit); }
+  /* api di sumbu panel mengikuti progres realm (--lv 0..1, diisi JS): 0 = abu-abu & redup & kecil; makin banyak area selesai = makin berwarna, terang, besar; lilin abu-abu (20) = paling terang */
+  #fab.up .flame, #fab.up:not(.gray) .flame{ scale:var(--fu,1); transform-origin:50% calc(var(--fy,.88) * 100%); filter:grayscale(var(--fg,1)) opacity(var(--fo,.42)) brightness(var(--fb,1)) drop-shadow(0 0 var(--fr,0px) rgba(255,214,90,var(--fa,0))); transition:filter 1.6s ease, scale 1.6s ease; }
+  #fab.up.dn .flame, #fab.up.dn:not(.gray) .flame{ scale:1; transition:filter 1.6s ease, scale .85s cubic-bezier(.45,.05,.2,1); }   /* panel ditutup: api kembali ke ukuran normal selama terbang pulang */
+  #fab.up .fabDeco{ opacity:calc(.1 + .9 * var(--lv,0)); transition:opacity 1.2s ease; }
+  @media (prefers-reduced-motion: reduce){ #fab.up .flame, #fab.up .fabDeco{ transition:none; } }
+  /* ===== panel progres harian: 8 kategori = ikon + nama kecil; urutan 1 2 3 [0] 4 5 6, lalu 20 di bawah ===== */
+  #fabOv .fgrid{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:3px; padding:2px 0 4px; }
+  #fabOv .fic{ position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; min-width:0; padding:8px 1px 6px; border:1px solid transparent; border-radius:14px; background:none; color:var(--ink); font:inherit; cursor:pointer; touch-action:manipulation; transition:background .2s ease, border-color .2s ease; }
+  #fabOv .fic:focus-visible, #fabOv .fcap:focus-visible{ outline:2px solid var(--ink); outline-offset:1px; }
+  #fabOv .fi{ width:30px; height:30px; display:grid; place-items:center; opacity:.72; transition:opacity .2s ease, transform .25s ease, filter .25s ease; }
+  #fabOv .fi .ri, #fabOv .fi svg, #fabOv .fi img.ai{ width:26px; height:26px; margin:0; }
+  #fabOv .fi .ri{ display:grid; place-items:center; }
+  #fabOv img.ai{ animation:none; }   /* panel digambar ulang tiap perubahan: tanpa fade-in ikon supaya tidak berkedip */
+  #fabOv .fn{ max-width:100%; min-height:2.3em; font-size:9px; line-height:1.15; text-align:center; color:var(--ink-soft); overflow:hidden; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  #fabOv .fic .fmb{ width:72%; margin:1px auto 0; }
+  #fabOv .fic.on{ background:rgba(255,210,122,0.14); border-color:rgba(255,210,122,0.4); }
+  #fabOv .fic.on .fi{ opacity:1; transform:translateY(-1px); }
+  #fabOv .fic.done .fi{ opacity:1; filter:drop-shadow(0 0 6px rgba(255,200,90,0.85)); }
+  #fabOv .fic.done .fn, #fabOv .fic.on .fn{ color:var(--ink); }
+  #fabOv .fpan{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .3s ease; }
+  #fabOv .fpan.open{ grid-template-rows:1fr; }
+  #fabOv .fpin{ min-height:0; overflow:hidden; }
+  #fabOv .fblk{ margin-top:8px; padding:10px 12px 12px; border:1px solid rgba(128,128,128,0.22); border-radius:16px; background:rgba(128,128,128,0.1); }
+  #fabOv .fblk[hidden]{ display:none; }
+  #fabOv .fbh{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:8px; font-size:13px; }
+  #fabOv .fbh small{ color:var(--ink-soft); }
+  #fabOv .fcap{ display:flex; flex-direction:column; align-items:center; gap:2px; margin:12px auto 0; padding:8px 20px 6px; border:1px solid rgba(128,128,128,0.3); border-radius:16px; background:none; color:var(--ink); font:inherit; cursor:pointer; touch-action:manipulation; transition:background .2s ease, border-color .2s ease; }
+  #fabOv .fcap .fi{ filter:grayscale(1); opacity:.6; }
+  #fabOv .fcap.on{ background:rgba(255,210,122,0.18); border-color:rgba(255,210,122,0.6); }
+  #fabOv .fcap.on .fi{ filter:grayscale(1) drop-shadow(0 0 6px rgba(255,220,140,0.9)); opacity:1; }
+  @media (prefers-reduced-motion: reduce){ #fabOv .fpan, #fabOv .fi{ transition:none; } }
+  /* bentuk lilin: tinggi TETAP setengah layar (dropdown tidak mengubah ukuran kotak, isinya yang menggulir), tersisa jarak kiri-kanan di layar kecil */
+  #fabOv .fp{ width:min(440px, calc(100% - 28px)); height:max(56vh, 360px); height:max(56dvh, 360px); max-height:86vh; max-height:86dvh; }
+  #fabOv .fl{ flex:1 1 auto; min-height:0; }
+  #fabOv .fgrid{ padding-top:18px; }   /* ruang untuk ikon area spesial yang naik */
+  #fabOv .fic.spc{ transform:translateY(-25%); }   /* area spesial (0): naik seperempat, tidak sampai di atas */
+  #fabOv .fl{ display:flex; flex-direction:column; }
+  #fabOv .fgrid{ flex:none; }
+  #fabOv .fmid{ flex:1 0 auto; min-height:104px; display:flex; flex-direction:column; }   /* Eden: tepat di tengah antara baris ikon di atas dan tombol abu-abu di bawah */
+  #fabOv .fedn{ isolation:isolate; display:flex; flex-direction:column; align-items:center; gap:2px; margin:auto; padding:10px 26px 8px; border:1px solid rgba(128,128,128,0.3); border-radius:16px; background:none; color:var(--ink); font:inherit; cursor:pointer; touch-action:manipulation; transition:background .2s ease, border-color .2s ease; }
+  #fabOv .fedn[hidden]{ display:none; }
+  #fabOv .fedn b{ font-size:13px; font-weight:600; }
+  #fabOv .fedn small{ font-size:10px; color:var(--ink-soft); }
+  #fabOv .fedn .fi{ position:relative; opacity:1; filter:drop-shadow(0 0 5px rgba(255,70,50,.85)); }
+  #fabOv .fedn .fi::before{ content:''; position:absolute; left:50%; top:50%; width:64px; height:64px; margin:-32px 0 0 -32px; border-radius:50%; background:radial-gradient(closest-side, rgba(255,40,30,.75) 0%, rgba(255,90,60,.4) 35%, rgba(255,150,90,.14) 62%, transparent 100%); pointer-events:none; z-index:-1; animation:edenGlow 3.2s ease-in-out infinite; }
+  @keyframes edenGlow{ 0%,100%{ opacity:.65; transform:scale(.9); } 50%{ opacity:1; transform:scale(1.12); } }
+  @media (prefers-reduced-motion: reduce){ #fabOv .fedn .fi::before{ animation:none; } }
+  #fabOv .fedn.on{ background:rgba(255,210,122,0.18); border-color:rgba(255,210,122,0.6); }
+  #fabOv .fedn.on .fi{ opacity:1; filter:none; }
+  #fabOv .fedn.on .fi::before{ display:none; }
+  #fabOv .ff{ flex:none; display:grid; place-items:center; padding-top:2px; border-top:1px solid rgba(128,128,128,0.18); }
+  #fabOv .ff .fcap{ margin:6px auto 0; }
   #fabOv{ background:rgba(28,18,8,0.5); }
   #fabOv .fp{ --ink:#3a2f26; --ink-soft:rgba(58,47,38,0.62); --top:#fff8e8; color:#3a2f26; overflow:visible; padding-top:30px;
     background:radial-gradient(120% 55% at 50% 0%, rgba(255,214,140,0.42), transparent 62%), linear-gradient(180deg,#fffefa,#f8f1e3 68%,#eee3cc);
@@ -2941,7 +3006,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const line = 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('L');
     const dots = pts.map(p => '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="1.5" fill="currentColor" stroke="none"/>').join('');
     const span = mk('span', 'ri', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + line + '" opacity=".55"/>' + dots + '</svg>');
-    if(window.SkyAsset) window.SkyAsset.swap(span.firstChild, 'rasi/' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.svg');
+    if(window.SkyAsset){   // direktori ikon area: aset/skymeet/area/<nama>.svg|webp (mis. special-areas, eden); tak ada -> aset/skymeet/rasi/<nama>
+      const A = window.SkyAsset, slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), gl = span.firstChild;
+      A.resolve('area/' + slug).then(u => u || A.resolve('rasi/' + slug)).then(u => { if(u && gl.isConnected) gl.replaceWith(A.mkImg(u)); });
+    }
     fyInit(span);
     return span;
   }
@@ -3279,7 +3347,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const flameCenter = () => { const f = fabBtn.querySelector('.flame'), r = (f || fabBtn).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };   // posisi api saat ini (ikut mengecil)
   const fabCenter = () => { const r = fabBtn.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
   // ---- ikon melayang: muncul (kecil -> normal) dan hilang (menciut -> ledakan partikel kecil) ----
-  let fabWas = null;
+  let fabWas = null, fabFinT = null;
   function fabShow(vis, kind){
     if(fabWas === vis) return;
     const first = fabWas === null; fabWas = vis;
@@ -3288,6 +3356,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(vis){ fabBtn.classList.remove('out', 'fin'); b.add('fabOn'); fabMagArm(); return; }
     if(first || reduceFlame.matches || getComputedStyle(fabBtn).display === 'none'){ fabBtn.classList.remove('out', 'fin'); b.remove('fabOn'); return; }
     const fin = kind === 'finish';
+    if(fin){ const fl0 = fabBtn.querySelector('.flame'); if(fl0) fabBtn.style.setProperty('--fin0', getComputedStyle(fl0).filter); }   // animasi selesai mulai dari warna api saat ini (bukan loncat ke abu-abu)
     fabBtn.classList.add('out'); if(fin) fabBtn.classList.add('fin'); b.remove('fabOn');
     const emit = [];
     if(fin){   // saat ikon luruh (55%-95% dari 2,1 dtk): lepaskan partikel api kecil sedikit demi sedikit; tiap partikel nanti pecah lagi
@@ -3296,6 +3365,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const done = () => {
       if(!fabBtn.classList.contains('out')) return;
       emit.forEach(clearTimeout); const [x, y] = fin ? flameCenter() : fabCenter(); fabBtn.classList.remove('out', 'fin');
+      if(fin) fabOv.classList.add('gry');   // ikon sudah hilang: seluruh isi overlay ikut abu-abu
       if(fin){ fxDrift(x, y, { n:16, dist:56, life:2300, size:[1.3, 3], up:26, wob:7, spread:8 }); }
       else fxSmoke(x, y - 6);   // dinonaktifkan: asap, bukan partikel
     };
@@ -3344,19 +3414,33 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const fabSwitch = mkTx('button', 'pill fabTog'); fabSwitch.type = 'button';
   flameInto(fabSwitch, 'sm'); const swSync = f => { if(fabSwitch.getAttribute('aria-pressed') === 'true') delete f.dataset.hold; else { f.dataset.hold = '1'; setFrame(f, 0); } };   // aktif = animasi api berulang terus; nonaktif = diam di frame awal
   fabSwitch._onFlame = swSync;
-  { const hb = mkTx('div', 'hbtns'); capBtn.parentNode.insertBefore(hb, capBtn); hb.append(fabSwitch, capBtn); }   // keduanya ikon saja (kartu bulat dihilangkan lewat CSS)
+  { const thd = runBox.querySelector('.thd'), evl = thd.querySelector('.evl'), lf = mkTx('div', 'thL'); thd.insertBefore(lf, evl); lf.append(fabSwitch, evl); }   // on/off ikon melayang: paling kiri, tepat di samping tulisan Candle run; lilin abu-abu tetap di kanan (keduanya ikon saja)
   fabSwitch.onclick = () => Store.set('fab', Store.get('fab', 0) ? 0 : 1);
   let fabHome = null, flyT = null;
+  let fabArt = .88;   // posisi dasar gambar api (0..1 dari tinggi kotak api); diukur dari piksel frame api
+  function artFy(){
+    const fl = fabBtn.querySelector('.flame'); if(!fl) return; let best = -1;
+    try{ fl.querySelectorAll('img').forEach(im => {
+      if(!im.complete || !im.naturalWidth) return;
+      const w = Math.min(im.naturalWidth, 128), h = Math.max(1, Math.round(w * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.drawImage(im, 0, 0, w, h); const d = x.getImageData(0, 0, w, h).data; let row = -1;
+      for(let y = h - 1; y >= 0 && row < 0; y--) for(let k = 0; k < w; k++) if(d[(y * w + k) * 4 + 3] > 24){ row = y; break; }
+      if(row >= 0) best = Math.max(best, (im.offsetTop + (row + 1) / h * im.offsetHeight) / fl.offsetHeight);
+    }); }catch(e){ return; }
+    if(best > .3 && best <= 1.1) fabArt = best;
+  }
   const fabFly = up => {   // ikon pindah pelan ke tepi atas panel; saat panel ditutup kembali ke tempat semula
     const fp = fabOv.querySelector('.fp');
-    clearTimeout(flyT); fabBtn.classList.add('fly');
+    clearTimeout(flyT); fabBtn.classList.add('fly'); fabBtn.classList.toggle('dn', !up);
     if(up){
       fabBtn.classList.add('up');
       fabBtn.style.left = Math.round(innerWidth / 2 - FAB_SZ / 2) + 'px';
-      fabBtn.style.top = Math.max(6, Math.round(innerHeight - fp.offsetHeight - 70)) + 'px';   // api duduk di ujung sumbu (sumbu 26px di atas panel; ikon diperbesar 1.3x)
+      artFy(); const fl = fabBtn.querySelector('.flame'), py = fl ? fl.offsetTop + fabArt * fl.offsetHeight : 8 + fabArt * 36;   // py: dasar gambar api di dalam ikon
+      fabBtn.style.setProperty('--fy', fabArt); fabBtn.style.setProperty('--oy', (py / FAB_SZ * 100).toFixed(2) + '%');
+      fabBtn.style.top = Math.round(innerHeight - fp.offsetHeight - 26 - py + 1) + 'px';   // dasar api tepat di ujung tali (ujung tali = 26px di atas panel)   // api duduk di ujung sumbu (sumbu 26px di atas panel; ikon diperbesar 1.3x)
     } else if(fabHome){
       fabBtn.style.left = fabHome.l + 'px'; fabBtn.style.top = fabHome.t + 'px';
-      flyT = setTimeout(() => { fabBtn.classList.remove('fly', 'up'); fabHome = null; fabMagArm(); }, 950);
+      flyT = setTimeout(() => { fabBtn.classList.remove('fly', 'up', 'dn'); fabHome = null; fabMagArm(); }, 950);
     }
   };
   const openFab = () => {
@@ -3376,7 +3460,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(fabPos && fabPos.s === 'l') x = FAB_EDGE; else if(fabPos && fabPos.s === 'r') x = w - FAB_SZ - FAB_EDGE;   // sudah menempel ke tepi: tetap menempel walau ukuran layar berubah
     fabBtn.style.left = Math.max(6, Math.min(w - 58, x)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(h - 58, y)) + 'px';
   };
-  fabPlace(); window.addEventListener('resize', () => { if(!fabOv.hidden){ fabFly(true); return; } if(fabHome) return; fabPlace(); fabMagArm(); });
+  fabPlace(); window.addEventListener('resize', () => { if(!fabOv.hidden){ paintFab(); fabFly(true); return; } if(fabHome) return; fabPlace(); fabMagArm(); });
   // magnet: kalau ikon dibiarkan bebas 10 detik (tidak disentuh, panel tertutup, tab terlihat), ia meluncur PELAN ke tepi kiri/kanan yang lebih dekat
   let magT = null, magEnd = null;
   function fabMagDisarm(){ clearTimeout(magT); magT = null; }
@@ -3404,37 +3488,85 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const flipArea = (ri, ai) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0); r[ri] ^= 1 << ai; if(r.every(x => !x)) delete d.runs[k]; });
   const flipRealm = (ri, len) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0), full = (1 << len) - 1; r[ri] = r[ri] === full ? 0 : full; if(r.every(x => !x)) delete d.runs[k]; });
   let fabOpen = -1;   // indeks dropdown area yang terbuka (-1 = semua tertutup); hanya satu yang boleh terbuka
+  const AIC = {};   // cache alamat aset ikon (slug -> url) supaya ikon tidak berkedip saat panel digambar ulang
+  function fabIcon(keys, svg){   // ikon dari aset (urutan: keys); belum ada file = gambar garis bawaan
+    const sp = mkTx('span', 'ri'), A = window.SkyAsset, ck = keys[0];
+    if(AIC[ck]) sp.appendChild(A.mkImg(AIC[ck]));
+    else { sp.innerHTML = svg; if(A) (async () => { for(const k of keys){ const u = await A.resolve(k); if(u){ AIC[ck] = u; if(sp.isConnected){ sp.textContent = ''; sp.appendChild(A.mkImg(u)); } return; } } })(); }
+    return sp;
+  }
+  const areaSlug = n => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  function areaGlyph(name, special){   // gambar bawaan: rasi acak (realm) / kilau (area spesial)
+    if(special) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l1.9 5.4 5.6 1.9-5.6 1.9L12 18.1l-1.9-5.4-5.6-1.9 5.6-1.9z"/><path d="M19 3v3M17.5 4.5h3" stroke-linecap="round"/></svg>';
+    let h = 0; for(let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    const rnd = () => { h = (h * 1103515245 + 12345) >>> 0; return ((h >>> 8) % 1000) / 1000; };
+    const pts = [0, 1, 2, 3, 4].map(i => [4 + i * 4 + (rnd() - 0.5) * 2, 5 + rnd() * 14]);
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M' + pts.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('L') + '" opacity=".55"/>' + pts.map(q => '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="1.5" fill="currentColor" stroke="none"/>').join('') + '</svg>';
+  }
   function fabToggle(ri){
-    const fl = fabOv.querySelector('.fl'); fabOpen = fabOpen === ri ? -1 : ri; setTimeout(() => { if(!fabOv.hidden) fabFly(true); }, 360);   // buka yang lain = yang sebelumnya otomatis menutup
-    [...fl.querySelectorAll('.fdd')].forEach((d, i) => { const o = i === fabOpen; d.classList.toggle('open', o); d.querySelector('.fddB').setAttribute('aria-expanded', String(o)); d.querySelector('.fddP').inert = !o; });
-    if(fabOpen >= 0){ const d = fl.querySelectorAll('.fdd')[fabOpen]; setTimeout(() => { if(d.isConnected && d.classList.contains('open')) d.scrollIntoView({ block:'nearest', behavior:'smooth' }); }, 320); }
+    const fl = fabOv.querySelector('.fl'); fabOpen = fabOpen === ri ? -1 : ri;   // buka yang lain = yang sebelumnya otomatis menutup; tinggi panel tetap, jadi api tidak perlu bergeser
+    { const ed = fl.querySelector('.fedn'); if(ed) ed.hidden = fabOpen >= 0; }
+    fl.querySelectorAll('.fic').forEach(b => { const o = b._ri === fabOpen; b.classList.toggle('on', o); b.setAttribute('aria-expanded', String(o)); });
+    fl.querySelectorAll('.fblk').forEach(k => { k.hidden = +k.dataset.ri !== fabOpen; });
+    const pan = fl.querySelector('.fpan'); if(pan){ pan.classList.toggle('open', fabOpen >= 0); pan.inert = fabOpen < 0; if(fabOpen >= 0) setTimeout(() => { if(pan.isConnected && pan.classList.contains('open')) pan.scrollIntoView({ block:'nearest', behavior:'smooth' }); }, 320); }
+  }
+  function fabFit(){   // tinggi panel = pas untuk dropdown TERBESAR (tanpa scroll), sama untuk semua kategori supaya kotak lilin tidak goyang
+    const fp = fabOv.querySelector('.fp'), fl = fp.querySelector('.fl'), grid = fl.querySelector('.fgrid');
+    if(!fp.offsetHeight || !grid) return;
+    let mx = 0; fl.querySelectorAll('.fblk').forEach(k => { const h = k.hidden; k.hidden = false; mx = Math.max(mx, k.offsetHeight + 8); k.hidden = h; });   // ukur tiap blok isi (8px = jarak atasnya)
+    const need = Math.ceil(fp.offsetHeight - fl.clientHeight + grid.offsetHeight + mx + 10), cap = Math.round(innerHeight * .86), lo = Math.round(Math.min(innerHeight * .56, cap));
+    const h = Math.max(lo, Math.min(need, cap));   // layar pendek: dibatasi 86% tinggi layar, sisanya baru menggulir
+    if(fp.style.height !== h + 'px'){ fp.style.height = h + 'px'; if(fabBtn.classList.contains('up')) fabFly(true); }
   }
   function paintFab(){
     if(!fabReady) return;
     const on = !!Store.get('fab', 0), d = pgData(), t = FAB_TXT[lang] || FAB_TXT.en, today = (d.runs || {})[dayK()] || [], cap = !!(d.cap || {})[dayK()], wu = lang === 'es' ? 'cera' : 'wax';
-    fabShow(on && !cap, cap ? 'finish' : 'off');
+    { const lv0 = parseFloat(fabBtn.style.getPropertyValue('--lv')) || 0;
+      if(cap && fabWas === true && on && (fabFinT || (fabBtn.classList.contains('up') && lv0 < .97))){   // ikon masih kecil: tumbuh perlahan dulu sampai penuh, baru animasi selesai
+        if(!fabFinT) fabFinT = setTimeout(() => { fabFinT = null; fabShow(false, 'finish'); }, 1700);
+      } else { clearTimeout(fabFinT); fabFinT = null; fabShow(on && !cap, cap ? 'finish' : 'off'); } }
     { fabSwitch.setAttribute('aria-pressed', String(on)); const sf = fabSwitch.querySelector('.flame'); if(sf) swSync(sf); } fabSwitch.title = t.tog; fabSwitch.setAttribute('aria-label', t.tog);
     let tot = 0, all = 0; AREAS.forEach(([r, l], ri) => { tot += pop(today[ri] || 0); all += l.length; });
     if(prevTot !== null && tot > prevTot && on && performance.now() - lastAct < 1500) fabCelebrate(tot - prevTot); prevTot = tot;
+    if(!cap) fabOv.classList.remove('gry');
     fabBtn.classList.toggle('gray', cap); fabBtn.setAttribute('aria-label', t.ttl + ' ' + tot + '/' + all); fabBtn.title = t.ttl;
+    const lv = cap ? 1 : (all ? Math.min(1, tot / all) : 0), sp = (k, v) => fabBtn.style.setProperty(k, v);   // lv: progres 0..1; lilin abu-abu (20) = langsung puncak terang
+    sp('--lv', lv.toFixed(3)); sp('--fg', Math.max(0, 1 - lv / .45).toFixed(3)); sp('--fo', (.42 + .58 * Math.min(1, lv / .55)).toFixed(3)); sp('--fb', (1 + .9 * lv).toFixed(3));
+    sp('--fr', (lv * 18).toFixed(1) + 'px'); sp('--fa', lv ? (.25 + .75 * lv).toFixed(3) : '0'); sp('--fs', (.78 + .42 * lv).toFixed(3)); sp('--fu', (.85 + 1.5 * lv).toFixed(3));   // --fu: ukuran api di panel terbuka (kecil -> sangat besar mengikuti progres)
+    
     fabBtn.style.setProperty('--p', all ? tot / all : 0); fabOv.style.setProperty('--p', all ? tot / all : 0);   // cincin progres di ikon + bilah di panel
     if(fabOv.hidden) return;
     fabOv.querySelector('b').textContent = t.ttl; fabOv.querySelector('.fx').setAttribute('aria-label', t.close);
     fabOv.querySelector('.fs').textContent = tot + '/' + all + ' ' + I18N[lang].pg.ar;
     const fl = fabOv.querySelector('.fl'), sc = fl.scrollTop; fl.textContent = '';
-    AREAS.forEach(([realm, list], ri) => {
-      const n = pop(today[ri] || 0), rw = REALM_WAX[realm], open = fabOpen === ri;
-      const dd = mkTx('div', 'fdd' + (open ? ' open' : '')), btn = mkTx('button', 'fddB'), nm = mkTx('span'), pn = mkTx('div', 'fddP'), inner = mkTx('div'), allRow = mkTx('div', 'fddAll'), al = mkTx('button', 'pill', t.all), box = mkTx('div', 'fpills');
-      nm.append(mkTx('b', '', realm), mkTx('small', '', '  ' + n + '/' + list.length + (rw ? ' \u00b7 \u2248' + rw + ' ' + wu : '')));
-      btn.type = 'button'; btn.setAttribute('aria-expanded', String(open)); btn.append(nm); btn.insertAdjacentHTML('beforeend', CHEV); btn.onclick = () => fabToggle(ri);
-      pn.inert = !open; dd.style.setProperty('--i', ri);
-      al.type = 'button'; al.setAttribute('aria-pressed', String(n === list.length)); al.onclick = () => flipRealm(ri, list.length); allRow.appendChild(al);
-      list.forEach((a, ai) => { const b = mkTx('button', 'pill', a), w = areaWax(realm, list.length); b.type = 'button'; if(w) b.appendChild(mkTx('small', 'wx', '\u2248' + w)); b.setAttribute('aria-pressed', String(!!((today[ri] || 0) >> ai & 1))); b.onclick = () => flipArea(ri, ai); box.appendChild(b); });
-      inner.append(allRow, box); pn.appendChild(inner); const mb = mkTx('i', 'fmb'); mb.style.setProperty('--q', list.length ? n / list.length : 0); dd.classList.toggle('done', n === list.length); dd.append(btn, mb, pn); fl.append(dd);
+    // urutan sesuai realm: 1 2 3 [0 = area spesial di tengah] 4 5 6; lalu dropdown isi; lalu 20 (lilin abu-abu) di bawah
+    const SPEC = AREAS.length - 1, rl = AREAS.map((_, k) => k).filter(k => k !== SPEC), mid = Math.ceil(rl.length / 2), ORDER = [...rl.slice(0, mid), SPEC, ...rl.slice(mid)];
+    const grid = mkTx('div', 'fgrid'), pan = mkTx('div', 'fpan' + (fabOpen >= 0 ? ' open' : '')), pin = mkTx('div', 'fpin'); pan.appendChild(pin); pan.inert = fabOpen < 0;
+    ORDER.forEach(ri => {
+      const [realm, list] = AREAS[ri], n = pop(today[ri] || 0), rw = REALM_WAX[realm], open = fabOpen === ri, full = n === list.length, slug = areaSlug(realm);
+      const b = mkTx('button', 'fic' + (open ? ' on' : '') + (full ? ' done' : '') + (ri === SPEC ? ' spc' : '')); b.type = 'button'; b._ri = ri;
+      b.setAttribute('aria-expanded', String(open)); b.setAttribute('aria-label', realm + ' ' + n + '/' + list.length); b.title = realm;
+      const ic = mkTx('span', 'fi'); ic.appendChild(fabIcon(['area/' + slug, 'rasi/' + slug], areaGlyph(realm, ri === SPEC)));
+      const mb = mkTx('i', 'fmb'); mb.style.setProperty('--q', list.length ? n / list.length : 0);
+      b.append(ic, mkTx('span', 'fn', realm), mb); b.onclick = () => fabToggle(ri); grid.appendChild(b);
+      const blk = mkTx('div', 'fblk'); blk.hidden = !open; blk.dataset.ri = String(ri);
+      const head = mkTx('div', 'fbh'); head.append(mkTx('b', '', realm), mkTx('small', '', n + '/' + list.length + (rw ? ' \u00b7 \u2248' + rw + ' ' + wu : '')));
+      const allRow = mkTx('div', 'fddAll'), al = mkTx('button', 'pill', t.all), box = mkTx('div', 'fpills');
+      al.type = 'button'; al.setAttribute('aria-pressed', String(full)); al.onclick = () => flipRealm(ri, list.length); allRow.appendChild(al);
+      list.forEach((a, ai) => { const pb = mkTx('button', 'pill', a), w = areaWax(realm, list.length); pb.type = 'button'; if(w) pb.appendChild(mkTx('small', 'wx', '\u2248' + w)); pb.setAttribute('aria-pressed', String(!!((today[ri] || 0) >> ai & 1))); pb.onclick = () => flipArea(ri, ai); box.appendChild(pb); });
+      blk.append(head, allRow, box); pin.appendChild(blk);
     });
-    const cb = mkTx('button', 'pill', t.cap); cb.type = 'button'; cb.style.marginTop = '14px'; cb.setAttribute('aria-pressed', String(cap));
+    const cb = mkTx('button', 'fcap' + (cap ? ' on' : '')); cb.type = 'button'; cb.setAttribute('aria-pressed', String(cap)); cb.setAttribute('aria-label', t.cap); cb.title = t.cap;
+    { const ci = mkTx('span', 'fi'); ci.appendChild(fabIcon(['area/abu-abu', GREY_ASSET, 'matauang/candles'], '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5c2 2.9 3.6 4.6 3.6 7a3.6 3.6 0 0 1-7.2 0c0-2.4 1.6-4.1 3.6-7Z"/><rect x="9.2" y="14.4" width="5.6" height="7" rx="1.4"/></svg>')); cb.append(ci, mkTx('span', 'fn', I18N[lang].pg.cap)); }
     cb.onclick = () => pgWrite(x => { const k = dayK(); x.cap = x.cap || {}; if(x.cap[k]) delete x.cap[k]; else x.cap[k] = 1; });
-    fl.appendChild(cb); fl.scrollTop = sc;
+    const edOn = !!(d.ew || {})[weekK()], P = I18N[lang].pg;   // slot tengah: Eden (ikon + nama, selesai minggu ini) saat tidak ada dropdown terbuka
+    const ed = mkTx('button', 'fedn' + (edOn ? ' on' : '')); ed.type = 'button'; ed.hidden = fabOpen >= 0; ed.setAttribute('aria-pressed', String(edOn));
+    { const ei = mkTx('span', 'fi'); ei.appendChild(fabIcon(['area/eden', 'rasi/eden'], areaGlyph('Eden', false))); ed.append(ei, mkTx('b', '', P.eden), mkTx('small', '', edOn ? P.done : P.edenS)); }
+    ed.onclick = () => pgWrite(x => { const k = weekK(); x.ew = x.ew || {}; if(x.ew[k]) delete x.ew[k]; else x.ew[k] = 1; });
+    const fmid = mkTx('div', 'fmid'); fmid.append(ed, pan);
+    fl.append(grid, fmid);
+    { const fp = fabOv.querySelector('.fp'); let ff = fp.querySelector('.ff'); if(!ff){ ff = mkTx('div', 'ff'); fp.appendChild(ff); } ff.textContent = ''; ff.appendChild(cb); }   // 20 (lilin abu-abu) tetap di dasar lilin, tidak ikut menggulir
+    fabFit(); fl.scrollTop = sc;
   }
   fabReady = true;
   { let fd = dayK(); const chk = () => { if(dayK() !== fd){ fd = dayK(); paintPg(); } }; setInterval(chk, 30000); document.addEventListener('visibilitychange', () => { if(!document.hidden) chk(); }); }   // hari baru: lilin abu-abu & progres ter-reset -> ikon melayang muncul lagi
@@ -4006,6 +4138,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     row.fav = fb; row.wrap.append(row.b, w);
     return row;
   }
+  const PV_ICO = {
+    img:'<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><circle cx="6" cy="7" r="1"/><path d="m3 12 3.6-3.4 2.6 2.4 1.6-1.4L13 12"/></svg>',
+    inv:'<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.8" y="5" width="12.4" height="6.6" rx="3.3"/><path d="M5 6.8v3M3.5 8.3h3"/><circle cx="10.6" cy="7.6" r=".55"/><circle cx="12" cy="9.2" r=".55"/></svg>'
+  };
   function paintFriendRow(row, d, v){
     const { f, m, n, l, ty, fav } = d, ti = timeInfo(m), lbl = fLabel(f);
     const sig = [window.SkyApp.getLang(), fav, flamedToday(f.code), lbl, f.name, m.online, m.avatar, m.status, ti, m.rd, n, ty, l && l.id, l && l.st, l && l.text, l && l.from, l && l.del].join('\u0001');
@@ -4016,7 +4152,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     row.nm.textContent = lbl;
     row.prev.textContent = '';
     if(ty) row.prev.textContent = v.typing;
-    else if(l){ if(l.from === myCode){ const t = tickInfo(l, m.rd); row.prev.appendChild(mkEl('span', 'tk ' + t[1], t[0])); } row.prev.appendChild(mkEl('span', '', dispText(l, v))); }
+    else if(l){
+      if(l.from === myCode){ const t = tickInfo(l, m.rd); row.prev.appendChild(mkEl('span', 'tk ' + t[1], t[0])); }
+      const kind = l.del ? '' : invInfo(l) ? 'inv' : imgInfo(l) ? 'img' : '';   // undangan game / foto: ikon garis minimalis menggantikan emoji
+      if(kind){ const ic = mkEl('span', 'pvi'); ic.innerHTML = PV_ICO[kind]; row.prev.appendChild(ic); row.prev.appendChild(mkEl('span', 'pvt', kind === 'inv' ? v.invCard : (imgInfo(l).c || v.photo))); }
+      else row.prev.appendChild(mkEl('span', 'pvt', dispText(l, v)));
+    }
     else row.prev.textContent = m.status || ((f.name ? f.code + ' \u00b7 ' : '') + v.tap);
     row.hint.hidden = !ti; row.hint.textContent = ti || '';
     row.ub.hidden = !n; row.ub.textContent = n > 9 ? '9+' : String(n);
@@ -4746,12 +4887,14 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const ICO_MORE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
   const ICO_RX = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2M9 9.5h.01M15 9.5h.01"/></svg>';
   const RX_SET = ['\ud83d\udc4d', '\u2764\ufe0f', '\ud83d\ude02', '\ud83d\ude2e', '\ud83d\ude22', '\ud83d\ude4f', '\ud83d\udd25', '\u2728'];
-  function paintRx(el, m){   // deretan reaksi di bawah isi pesan; ketuk = tambah / cabut reaksiku
-    const box = el.querySelector('.rxs'), rx = m.del ? {} : (m.rx || {}), g = {};
-    Object.keys(rx).forEach(c => { (g[rx[c]] = g[rx[c]] || []).push(c); });
-    const sig = JSON.stringify(g); if(box._sig === sig) return; box._sig = sig; box.textContent = '';
-    Object.keys(g).forEach(e => { const b = mkEl('button', 'rx' + (g[e].indexOf(myCode) > -1 ? ' me' : ''), e + (g[e].length > 1 ? ' ' + g[e].length : '')); b.type = 'button'; b.addEventListener('click', ev => { ev.stopPropagation(); if(el._m) setRx(el._m, e); }); box.appendChild(b); });
-    box.hidden = !Object.keys(g).length;
+  function paintRx(el, m){   // lencana reaksi di sudut bawah kartu: milikku di kiri, milik teman di kanan; ketuk = tambah / cabut reaksiku
+    const box = el.querySelector('.rxs'), rx = m.del ? {} : (m.rx || {}), mine = rx[myCode] || '', g = {};
+    Object.keys(rx).forEach(c => { if(c !== myCode) g[rx[c]] = (g[rx[c]] || 0) + 1; });
+    const sig = JSON.stringify([mine, g]); if(box._sig === sig) return; box._sig = sig; box.textContent = '';
+    const add = (e, cls, label) => { const b = mkEl('button', 'rx ' + cls, label); b.type = 'button'; b.addEventListener('click', ev => { ev.stopPropagation(); if(el._m) setRx(el._m, e); }); box.appendChild(b); };
+    if(mine) add(mine, 'me', mine);
+    Object.keys(g).forEach(e => add(e, 'th', e + (g[e] > 1 ? ' ' + g[e] : '')));
+    const has = !!(mine || Object.keys(g).length); box.hidden = !has; el.classList.toggle('hasRx', has);
   }
   async function setRx(m, emoji){
     const v = vt(), pid = chatPid; if(!pid || !m || !m.id || m.del) return;
