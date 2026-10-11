@@ -57,6 +57,11 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     --panel: rgba(0,0,0,0.34);   /* latar menu dropdown: gelap saat malam, terang saat siang agar teks tetap terbaca */
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
+  /* tanpa kotak sorot ketukan, kotak seleksi teks, dan outline fokus akibat ketukan/klik; outline papan ketik (:focus-visible) tetap ada */
+  *{ -webkit-tap-highlight-color:transparent; }
+  body{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  input, textarea, select, [contenteditable], .msg, .msg *{ -webkit-user-select:text; user-select:text; -webkit-touch-callout:default; }
+  button:focus:not(:focus-visible), [tabindex]:focus:not(:focus-visible), a:focus:not(:focus-visible), summary:focus:not(:focus-visible), label:focus:not(:focus-visible), section:focus, div:focus, canvas:focus, svg:focus{ outline:none; }
   html,body{ overscroll-behavior:none; height:100%; height:100dvh; -webkit-tap-highlight-color:transparent; -webkit-text-size-adjust:100%; }
   body{
     font-family:'Space Grotesk', sans-serif;
@@ -1427,6 +1432,19 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   /* ===== ikon melayang v3: terbang ke atas panel & kembali ===== */
   #fab.fly{ transition:left .85s cubic-bezier(.45,.05,.2,1), top .85s cubic-bezier(.45,.05,.2,1), scale .22s ease; }
   #fab.up{ z-index:205; }
+  body:has(#friendOverlay.open) #fab, body:has(#chatOverlay.open) #fab{ z-index:61; }   /* ikon melayang tetap tampak di profil teman & room chat (di bawah kartu tambah teman/pengaturan) */
+  #fabHint{ position:fixed; inset:0; z-index:300; opacity:0; transition:opacity .35s ease; cursor:pointer; }
+  #fabHint.on{ opacity:1; }
+  #fabHint .hdim{ position:absolute; inset:0; background:rgba(4,7,18,.62); -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);
+    -webkit-mask:radial-gradient(circle at var(--hx) var(--hy), transparent calc(var(--hr) - 1px), #000 var(--hr)); mask:radial-gradient(circle at var(--hx) var(--hy), transparent calc(var(--hr) - 1px), #000 var(--hr)); }   /* lubang bulat di atas tombol: sekitarnya redup + blur */
+  #fabHint .hring{ position:absolute; left:calc(var(--hx) - var(--hr)); top:calc(var(--hy) - var(--hr)); width:calc(var(--hr) * 2); height:calc(var(--hr) * 2); border-radius:50%; pointer-events:none; border:2px solid rgba(255,226,160,.85); box-shadow:0 0 18px rgba(255,200,110,.55), inset 0 0 14px rgba(255,200,110,.25); animation:hintPulse 2.4s ease-in-out infinite; }
+  @keyframes hintPulse{ 0%,100%{ transform:scale(1); opacity:.85; } 50%{ transform:scale(1.07); opacity:1; } }
+  #fabHint .hbox{ position:absolute; padding:14px 16px 12px; border-radius:16px; color:#f4f5fb; background:rgba(22,28,58,.97); border:1px solid rgba(255,226,160,.3); box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 22px rgba(255,200,110,.14); }
+  #fabHint .hbox b{ display:block; font-size:15px; font-weight:600; margin-bottom:4px; color:#ffe2a0; }
+  #fabHint .hbox p{ font-size:13px; line-height:1.45; color:rgba(244,245,251,.82); margin:0 0 10px; }
+  #fabHint .hbox button{ display:block; margin-left:auto; min-height:34px; padding:0 16px; border:0; border-radius:12px; font:inherit; font-size:13px; font-weight:600; color:#2a2140; background:linear-gradient(135deg,#ffe9a8,#ffc86a); cursor:pointer; }
+  #fabHint .harr{ position:absolute; top:-6px; width:12px; height:12px; background:rgba(22,28,58,.97); border-left:1px solid rgba(255,226,160,.3); border-top:1px solid rgba(255,226,160,.3); transform:rotate(45deg); }
+  @media (prefers-reduced-motion: reduce){ #fabHint{ transition:none; } #fabHint .hring{ animation:none; } }
   /* ===== panel progres harian v3 ===== */
   #fabOv .fp{ padding:42px 16px calc(env(safe-area-inset-bottom,0px) + 16px); border-radius:28px 28px 0 0; border-bottom:0; border-color:rgba(255,226,160,0.28);
     background:radial-gradient(120% 60% at 50% 0%, rgba(255,205,120,0.22), transparent 62%), radial-gradient(60% 40% at 90% 100%, rgba(120,140,255,0.12), transparent 70%), linear-gradient(180deg, rgba(40,48,98,0.98), rgba(14,18,42,0.99));
@@ -1540,20 +1558,110 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .pill{ border-color:rgba(110,80,40,0.28); background:rgba(255,255,255,0.7); color:#3a2f26; }
   #fabOv .pill[aria-pressed="true"]{ background:linear-gradient(135deg,#ffe9a8,#ffbf55); color:#3a2310; border-color:transparent; box-shadow:0 0 12px rgba(240,170,60,0.5); }
   @media (prefers-reduced-motion: reduce){ #fabOv .wick{ animation:none; } }
+  /* ===== Pemandangan langit (dari web "Terbang dengan Jejak Kondensasi"): latar tetap di belakang semua halaman =====
+     Dua lapisan terlepas dari alur halaman (fixed, tidak bisa disentuh, tidak mengubah tata letak):
+     #skBack  = gradasi langit (di bawah bintang)   |   #skFront = matahari/bulan, laut senja, awan, cuaca, Sky kid (di atas bintang, di bawah halaman) */
+  #skBack, #skFront{ position:fixed; inset:0; pointer-events:none; overflow:hidden; contain:layout paint style; }
+  #skBack{ background:linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%); }
+  #skFront{ z-index:1; --skfog:250,253,255; --sktint:transparent; }
+  body:not(.go) #skBack, body:not(.go) #skFront{ opacity:0; }
+  body.go #skBack, body.go #skFront{ animation:fadeFrom 1.6s ease .1s backwards; }
+  #celestial{ display:none; }   /* matahari & bulan lama diganti yang dari pemandangan */
+  #skFront canvas{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  #skSea{ display:none; }
+  .skFog{ position:absolute; left:-12%; width:124%; pointer-events:none; background:rgba(var(--skfog),.74); filter:blur(24px); }
+  .skFog.bottom{
+    bottom:-12%; height:clamp(190px,34vh,370px); border-radius:47% 36% 0 0 / 25% 20% 0 0;
+    background:
+      radial-gradient(ellipse at 9% 16%, rgba(var(--skfog),.98) 0 15%, transparent 39%),
+      radial-gradient(ellipse at 31% 23%, rgba(var(--skfog),.93) 0 19%, transparent 43%),
+      radial-gradient(ellipse at 58% 18%, rgba(var(--skfog),.88) 0 18%, transparent 42%),
+      radial-gradient(ellipse at 85% 22%, rgba(var(--skfog),.98) 0 18%, transparent 42%),
+      linear-gradient(0deg, rgba(var(--skfog),.98) 0%, rgba(var(--skfog),.82) 42%, rgba(var(--skfog),.24) 76%, transparent 100%);
+  }
+  .skFog::before, .skFog::after{ content:""; position:absolute; display:block; border-radius:50%; background:rgba(var(--skfog),.66); filter:blur(28px); }
+  .skFog.bottom::before{ width:48%; height:52%; left:14%; top:0; }
+  .skFog.bottom::after{ width:45%; height:58%; right:2%; top:-3%; background:rgba(var(--skfog),.72); }
+  .skMist{ position:absolute; left:-10%; width:120%; height:12vh; pointer-events:none; filter:blur(34px);
+    background:linear-gradient(90deg, transparent, rgba(var(--skfog),.24) 18%, rgba(var(--skfog),.38) 48%, rgba(var(--skfog),.2) 82%, transparent); }
+  .skMist.bottom{ bottom:18%; opacity:.75; }
+  @media (prefers-reduced-motion: no-preference){
+    .skFog.bottom{ animation:skDriftBottom 29s ease-in-out infinite alternate; }
+    .skMist.bottom{ animation:skMistDrift 23s ease-in-out infinite alternate-reverse; }
+  }
+  @keyframes skDriftBottom{ from{ transform:translateX(1.1%) scale(1.015); } to{ transform:translateX(-1.2%) scale(1); } }
+  @keyframes skMistDrift{ from{ transform:translateX(-2%); opacity:.55; } to{ transform:translateX(2%); opacity:.9; } }
+  #skSplash{ z-index:3; }   /* cipratan awan saat Sky kid menyelam: di atas kid supaya menutupi garis potong permukaan */
+  .dclip{ position:absolute; inset:0; pointer-events:none; }   /* pembungkus kid yang sedang menyelam (dipotong di garis permukaan lewat mask) */
+  .skWinds{ transform-origin:50% 100%; }   /* goyangan awan bawah saat ada yang menyelam */
+  #skKid, .skKid{ position:absolute; left:-155px; top:-150px; width:300px; height:300px; transform-origin:155px 150px; opacity:0; pointer-events:none; will-change:transform, opacity; filter:drop-shadow(0 6px 10px rgba(20,60,130,.28)); }
+  #skKid svg, .skKid svg{ display:block; width:100%; height:100%; overflow:visible; }
+  .skWinds{ position:absolute; left:0; right:0; bottom:0; height:46%; pointer-events:none; overflow:hidden; }
+  .skCover{ position:absolute; left:0; right:0; top:0; height:62%; overflow:hidden; pointer-events:none; opacity:0; transition:opacity 2.5s; }
+  .skPuff{ position:absolute; left:0; will-change:transform; animation:skWindMove var(--dur) linear infinite; animation-delay:var(--delay); }
+  .skPuff i{ display:block; width:100%; height:100%; border-radius:50%;
+    background:radial-gradient(ellipse at 50% 55%, rgba(var(--skfog),var(--o)) 0%, rgba(var(--skfog),calc(var(--o) * .55)) 38%, rgba(var(--skfog),0) 70%);
+    animation:skPuffBreathe var(--br) ease-in-out infinite alternate; }
+  @keyframes skWindMove{ from{ transform:translate3d(calc(var(--w) * -1),0,0); } to{ transform:translate3d(100vw,0,0); } }
+  @keyframes skPuffBreathe{ from{ transform:translateY(-4%) scale(1,1); } to{ transform:translateY(5%) scale(1.1,.94); } }
+  /* cuaca */
+  #skFront .skTint{ position:absolute; inset:0; pointer-events:none; background:var(--sktint); transition:background 2s; }
+  #skFront.w-cloudy{ --sktint:rgba(110,122,140,.26); } #skFront.w-rain{ --sktint:rgba(80,90,106,.5); } #skFront.w-storm{ --sktint:rgba(46,52,66,.62); } #skFront.w-snow{ --sktint:rgba(235,242,255,.14); } #skFront.w-fog{ --sktint:rgba(235,240,246,.4); }
+  #skFront.night.w-cloudy{ --sktint:rgba(30,38,64,.25); } #skFront.night.w-rain{ --sktint:rgba(24,30,48,.45); } #skFront.night.w-storm{ --sktint:rgba(14,18,32,.55); } #skFront.night.w-fog{ --sktint:rgba(60,70,100,.35); }
+  #skFront.w-cloudy:not(.night){ --skfog:208,216,228; } #skFront.w-rain:not(.night){ --skfog:150,158,170; } #skFront.w-storm:not(.night){ --skfog:98,104,118; }
+  #skFront.night.w-rain{ --skfog:60,70,104; } #skFront.night.w-storm{ --skfog:44,52,82; }
+  #skFront.w-cloudy .skCover{ opacity:.5; } #skFront.w-rain .skCover{ opacity:.9; } #skFront.w-storm .skCover{ opacity:1; } #skFront.w-fog .skCover{ opacity:.6; }
+  .skFlash{ position:absolute; inset:0; pointer-events:none; background:#fff; opacity:0; }
+  /* tirai tipis: menjaga teks tetap terbaca di atas pemandangan (warnanya ikut tema siang/malam lewat --veil) */
+  #skVeil{ position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse 85% 75% at 50% 46%, var(--veil, rgba(0,0,0,.2)) 0%, transparent 100%); transition:background 1s linear; }
+  @media (prefers-reduced-motion: reduce){ #skFront *, #skFront *::before, #skFront *::after{ animation:none !important; } }
+  /* baris suhu & cuaca di Beranda: di dalam jarak kosong antara sapaan dan jam (tidak menggeser apa pun) */
+  #greet{ position:relative; }
+  #wxLine{ position:absolute; left:0; right:0; top:100%; margin-top:clamp(8px, 2.2vh, 18px); display:flex; align-items:center; justify-content:center; gap:7px; font-size:clamp(13px,3.4vw,15px); color:var(--ink-soft); white-space:nowrap; pointer-events:none; transition:opacity .6s ease; }
+  #wxLine[hidden]{ display:none; }
+  #wxLine svg{ width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  #wxLine .wt{ color:var(--ink); font-weight:500; }
+  @media (max-height:420px) and (orientation:landscape){ #wxLine{ display:none; } }
+  .setCard .locSt{ font-size:13px; line-height:1.4; color:var(--ink-soft); margin:2px 0 10px; }
 </style>
 </head>
 <body class="notranslate" translate="no">
+<div id="skBack" aria-hidden="true"></div>
 
 <div id="horizon"></div>
 <div id="stars"></div>
 <div id="celestial"></div>
+<div id="skFront" aria-hidden="true">
+  <canvas id="skBodies"></canvas>
+  <canvas id="skSea"></canvas>
+  <div class="skMist bottom"></div>
+  <div class="skFog bottom"></div>
+  <div class="skCover" id="skCover"></div>
+  <div class="skWinds" id="skWinds"></div>
+  <div class="skTint"></div>
+  <canvas id="skTrail"></canvas>
+  <canvas id="skHspark"></canvas>
+  <canvas id="skSplash"></canvas>
+  <div id="skKid">
+    <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g fill="#F5F5E0">
+        <path d="M146.4,179.8c-24.7,0-65.1-26-86.3-50.2c-6.4-7-5.4-11.7,4.1-13.7c27.7-6.2,55.9-8.3,84.2-6.3c14.1,0.8,22.3-13.6,34.9-17.2c15.8-5.2,32-9.5,48.1-13.6C259.7,69.2,244,184.8,146.4,179.8z"/>
+        <path d="M121.9,85.2c0-28.6,42.8-28.8,43.3-0.2C164.7,112.9,122.7,113.4,121.9,85.2z"/>
+        <path d="M224,236.4c-6.9-17.4-10.3-35.9-24.1-49.8c-6.1-6.5-5.1-8.4,3.2-11.6c33.2-11.9,26.4,42.6,23.3,61C225.5,236.1,224.8,236.3,224,236.4z"/>
+        <path d="M210.9,229.1c-17.1-1-40.3-22.4-47-42.8c5.9-0.3,23.8-10.1,25.8-2.9C191.1,201.8,204.8,212.7,210.9,229.1z"/>
+      </g>
+    </svg>
+  </div>
+  <canvas id="skWx"></canvas><div class="skFlash" id="skFlash"></div>
+  <div id="skVeil"></div>
+</div>
 
 <div id="pages">
   <div id="track">
 
     <section class="page" id="p1">
       <div class="page-in">
-        <div id="greet" class="in" style="--d:0.1s"><span class="gh" id="greetH"></span><span class="gs" id="greetS"></span></div>
+        <div id="greet" class="in" style="--d:0.1s"><span class="gh" id="greetH"></span><span class="gs" id="greetS"></span><div id="wxLine" hidden></div></div>
         <div id="clock">
           <span class="digit">-</span><span class="digit">-</span><span class="colon">:</span><span class="digit">-</span><span class="digit">-</span>
         </div>
@@ -1641,6 +1749,13 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       <section class="setCard">
         <div class="idLabel" id="sndT"></div>
         <button type="button" class="fBtn" id="muteBtn" aria-pressed="false"></button>
+      </section>
+      <!-- berdiri sendiri: lokasi perangkat (cuaca & senja sesuai tempatmu) -->
+      <section class="setCard" id="locSec">
+        <div class="idLabel" id="locT"></div>
+        <div class="locSt" id="locSt"></div>
+        <button type="button" class="fBtn" id="locBtn"></button>
+        <div class="fNote" id="locNote" hidden></div>
       </section>
       <!-- berdiri sendiri: akun -->
       <section class="setCard" id="accSec" hidden>
@@ -2077,6 +2192,870 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 })();
 </script>
 <script>
+(function () {
+
+const scene = document.getElementById('skFront'), back = document.getElementById('skBack'), veil = document.getElementById('skVeil'),
+      cv = document.getElementById('skTrail'), ctx = cv.getContext('2d'), kid = document.getElementById('skKid'),
+      sv = document.getElementById('skBodies'), sx = sv.getContext('2d'),
+      wxc = document.getElementById('skWx'), wx2 = wxc.getContext('2d'),
+      seaC = document.getElementById('skSea'), seaX = seaC.getContext('2d'),
+      hsv = document.getElementById('skHspark'), hsx = hsv.getContext('2d'),
+      spc = document.getElementById('skSplash'), spx = spc.getContext('2d');
+if (!scene || !back) return;
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;   // gerak dikurangi: tanpa Sky kid, hujan/salju, dan kilat
+const LOW = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);   // perangkat ringan: resolusi & partikel dikurangi
+let night = false;
+let W, H, unit;
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, LOW ? 1 : 1.75);
+  W = scene.clientWidth; H = scene.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sv.width = cv.width; sv.height = cv.height; sx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  wxc.width = cv.width; wxc.height = cv.height; wx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  seaC.width = cv.width; seaC.height = cv.height; seaX.setTransform(dpr, 0, 0, dpr, 0, 0);
+  hsv.width = cv.width; hsv.height = cv.height; hsx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  spc.width = cv.width; spc.height = cv.height; spx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  unit = Math.min(1.4, Math.max(.5, Math.min(W, H * .8) / 420));
+}
+addEventListener('resize', resize); resize();
+
+// Sprite gumpalan kabut lembut untuk jejak kondensasi
+const sp = document.createElement('canvas'); sp.width = sp.height = 64;
+{ const g = sp.getContext('2d'), gr = g.createRadialGradient(32,32,0,32,32,32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.4, 'rgba(250,253,255,.4)'); gr.addColorStop(1, 'rgba(245,251,255,0)');
+  g.fillStyle = gr; g.fillRect(0,0,64,64); }
+
+// Kepala (lingkaran) ada di (143,85), kaki di sekitar (215,230).
+// Arah kaki -> kepala = sekitar -116° di koordinat SVG; kepala harus jadi ujung depan.
+const HEAD_ANGLE = -116 * Math.PI / 180;
+const bez = (u,a,b,c) => (1-u)*(1-u)*a + 2*(1-u)*u*b + u*u*c;
+const dbez = (u,a,b,c) => 2*(1-u)*(b-a) + 2*u*(c-b);
+const rnd = (a, b) => a + Math.random() * (b - a);
+const clamp01 = v => Math.max(0, Math.min(1, v));
+
+const skWindsEl = document.getElementById('skWinds');
+const hsparks = [];   // partikel cahaya mini dari jubah
+// Satu "dorongan" (seperti kepakan jubah di Sky): semua dihitung dari detik sejak dorongan mulai (tau).
+//  - kepakan jubah : 0 s .. 1,3 s (angkat jubah, hentakan di sekitar 0,3-0,6 s)
+//  - cahaya        : menyala bersama hentakan, puncak di 0,6 s, lalu padam pelan
+//  - kecepatan     : naik halus selama hentakan, lalu turun lambat kembali ke kecepatan awal
+const boostCurve = tau => tau < .2 ? 0 : tau < 1 ? ease((tau - .2) / .8) : Math.exp(-(tau - 1) / 2.4);
+const glowCurve  = tau => tau < 0 ? 0 : tau < .6 ? ease(tau / .6) : Math.exp(-(tau - .6) / 1.8);
+
+// Profil kecepatan: mulai pelan, (kadang) ada satu dorongan yang hanya menambah kecepatan sedikit (sekitar 1,5-1,9x).
+// Posisi didapat dari integrasi kecepatan, jadi selalu halus.
+function makeProfile(durSec) {
+  const N = 240, A = Math.random() < .75 ? rnd(.5, .9) : 0, tb = rnd(.22, .55) * durSec;
+  const v = [], u = [0];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, ramp = clamp01(t / .3);
+    v[i] = (.8 + .2 * ramp * ramp * (3 - 2 * ramp)) * (1 + A * boostCurve(t * durSec - tb));
+  }
+  for (let i = 0; i < N; i++) u[i+1] = u[i] + (v[i] + v[i+1]) / 2;
+  const tot = u[N];
+  for (let i = 0; i <= N; i++) u[i] /= tot;
+  return { N, u, A, tb };
+}
+function sample(arr, N, t) { const f = clamp01(t) * N, i = Math.min(N - 1, Math.floor(f)); return arr[i] + (arr[i+1] - arr[i]) * (f - i); }
+
+
+// Jubah: titik-titik path dalam koordinat absolut. Bentuknya digeser per frame (morph), jadi tidak perlu gambar frame manual.
+const CAPE = [146.4,179.8,121.7,179.8,81.3,153.8,60.1,129.6,53.7,122.6,54.7,117.9,64.2,115.9,91.9,109.7,120.1,107.6,148.4,109.6,162.5,110.4,170.7,96.0,183.3,92.4,199.1,87.2,215.3,82.9,231.4,78.8,259.7,69.2,244,184.8,146.4,179.8];
+const AXV = [Math.cos(HEAD_ANGLE), Math.sin(HEAD_ANGLE)], LATV = [-AXV[1], AXV[0]], PIV = [150, 125];
+let CAPE_PTS = [];   // titik jubah (pasangan x,y) setelah berubah bentuk
+const CAPE_TIPS = [[53.7, 122.6], [259.7, 69.2]];   // ujung kiri dan kanan jubah setelah berubah bentuk
+function capeD(f, t = 0, amp = 0, sw = 0, nr = 0) {
+  let d = '';
+  const PP = [];
+  for (let i = 0; i < CAPE.length; i += 2) {
+    const x = CAPE[i], y = CAPE[i+1], dx = x - PIV[0], dy = y - PIV[1], lat = dx * LATV[0] + dy * LATV[1];
+    const k = Math.pow(Math.min(1.3, Math.abs(lat) / 120), 1.5);   // makin jauh dari badan, makin ikut bergerak
+    const u = dx * AXV[0] + dy * AXV[1];
+    const wv = amp * k * (Math.sin(t * 5.2 - lat * .05 + u * .035) + .55 * Math.sin(t * 8.7 - lat * .09 - u * .02));   // riak kain merambat ke ujung
+    const ax = f * 40 * k + wv * 13, ln = -lat * (.16 * Math.abs(f) + nr) * k + wv * 9;   // nr: jubah menyempit saat tertarik ke belakang
+    let X = x, Y = y;
+    if (sw) { const a = sw * k * (lat / Math.hypot(lat, 25)), ca = Math.cos(a), sa = Math.sin(a); X = PIV[0] + dx * ca - dy * sa; Y = PIV[1] + dx * sa + dy * ca; }       // ujung jubah terayun, dan sedikit menguncup
+    const px = (X + AXV[0] * ax + LATV[0] * ln).toFixed(1), py = (Y + AXV[1] * ax + LATV[1] * ln).toFixed(1);
+    PP.push([+px, +py]);
+    d += (i === 0 ? 'M' : (i % 6 === 2 ? 'C' : ' ')) + px + ',' + py;
+    if (i > 0 && i % 6 !== 2) d += '';
+  }
+  // Ujung jubah = titik di atas kurva (bukan titik kontrol), dihitung dari bentuk jubah yang sudah berubah
+  const bz = (a, b, c, e, q) => { const u = 1 - q; return [u*u*u*a[0] + 3*u*u*q*b[0] + 3*u*q*q*c[0] + q*q*q*e[0], u*u*u*a[1] + 3*u*u*q*b[1] + 3*u*q*q*c[1] + q*q*q*e[1]]; };
+  CAPE_TIPS[0] = bz(PP[3], PP[4], PP[5], PP[6], .5); CAPE_TIPS[1] = bz(PP[15], PP[16], PP[17], PP[18], .12);
+  CAPE_PTS = PP;
+  return d + 'z';
+}
+// Kurva kepakan (0..1): angkat jubah dulu, hentakan ke bawah, lalu bergoyang mereda
+const ease = q => q * q * (3 - 2 * q);
+function flapCurve(p) {
+  if (p < .2) return .9 * ease(p / .2);
+  if (p < .45) return .9 - 2.05 * ease((p - .2) / .25);
+  const q = (p - .45) / .55;
+  return -1.15 * Math.exp(-4.5 * q) * Math.cos(Math.PI * 1.2 * q);
+}
+
+// Keluar jalur: satu kid menyimpang tegak lurus dari jalur kelompok, lalu mengayun kembali (nol di awal dan akhir, jadi mulus).
+function devOff(f, t) {
+  const d = f.dev; if (!d || t <= d.t0 || t >= d.t0 + d.len) return 0;
+  return d.amp * Math.min(W, H) * Math.pow(Math.sin(Math.PI * (t - d.t0) / d.len), 2);
+}
+function basePt(f, t) {
+  const u = sample(f.prof.u, f.prof.N, t);
+  const [a0,b0,a1,b1,a2,b2] = f.P, x0=a0*W, y0=b0*H, x1=a1*W, y1=b1*H, x2=a2*W, y2=b2*H;
+  const h = Math.atan2(dbez(u,y0,y1,y2), dbez(u,x0,x1,x2)), o = f.dev ? devOff(f, t) : 0;
+  return { x: bez(u,x0,x1,x2) - Math.sin(h) * o, y: bez(u,y0,y1,y2) + Math.cos(h) * o, h };
+}
+function pose(f, t, now) {
+  const a = basePt(f, t); let h = a.h;
+  if (f.dev) { const b = basePt(f, Math.min(1, t + .004)); if (Math.hypot(b.x - a.x, b.y - a.y) > .01) h = Math.atan2(b.y - a.y, b.x - a.x); }   // arah badan ikut menyimpang
+  return { x: a.x, y: a.y, rot: h - HEAD_ANGLE + Math.sin(now / 650 + f.wob) * .05, s: f.sc };
+}
+// Waktu kepakan (detik sejak mulai) tiap kid. Sendirian: sama seperti dorongan kecepatan. Berkelompok: tiap kid berbeda-beda.
+function flapTimes(i, prof, durSec, count) {
+  if (count === 1) return prof.A ? [prof.tb] : [];
+  const out = [];
+  if (prof.A) { if (Math.random() < .85) out.push(Math.max(.3, prof.tb + (i ? rnd(-1, 1.6) : rnd(-.2, .4)))); }
+  else if (Math.random() < .4) out.push(rnd(.2, .6) * durSec);
+  if (Math.random() < .35) out.push((out.length ? out[0] : rnd(.2, .5) * durSec) + rnd(5, 9));
+  return out.sort((a, b) => a - b).filter(v => v < durSec - 3);
+}
+function toScreen(p, lx, ly) {
+  const k = p.s * unit, dx = (lx-155)*k, dy = (ly-150)*k, c = Math.cos(p.rot), s = Math.sin(p.rot);
+  return [p.x + dx*c - dy*s, p.y + dx*s + dy*c];
+}
+
+// Titik pelepasan: kaki (jejak utama) dan dua ujung jubah (jejak tipis)
+const EM = [
+  { lx:212, ly:226, r:7, a:1,  life:90 },
+  { lx:62,  ly:128, r:5, a:.8, life:90 },
+  { lx:257, ly:70,  r:5, a:.8, life:90 }
+];
+let parts = [], last = performance.now(), nextAt = last + 300;
+const flyers = [];
+kid.style.display = 'none';
+
+// Satu kali muncul: sendirian atau berdua, arah dan jalurnya acak
+// Jumlah yang terbang bersama: 1 sampai 8. Makin banyak, makin langka.
+const GROUP_W = [64, 30, 6, 3, 1.5, .8, .4, .2];
+function pickCount() { let r = Math.random() * GROUP_W.reduce((a, b) => a + b, 0); for (let i = 0; i < GROUP_W.length; i++) { r -= GROUP_W[i]; if (r < 0) return i + 1; } return 1; }
+function spawn(now) {
+  const count = pickCount(), dir = Math.random() < .5 ? 1 : -1;
+  // mulai dan berakhir di luar layar
+  const x0 = dir > 0 ? rnd(-.1, -.05) : rnd(1.05, 1.1), x2 = dir > 0 ? rnd(1.05, 1.12) : rnd(-.12, -.05);
+  const y0 = rnd(.25, .7), y2 = rnd(.15, .6);
+  const P = [x0, y0, (x0 + x2) / 2 + rnd(-.1, .1), Math.max(.08, Math.min(y0, y2) - rnd(.05, .25)), x2, y2];
+  const depth = Math.random() < .3 ? 1 : rnd(.4, .95), dur = rnd(13000, 18000) / depth, prof = makeProfile(dur / 1000), gap = rnd(.03, .045) * (Math.random() < .5 ? 1 : -1), stepMs = rnd(300, 600);
+  const devIdx = new Set();   // kelompok kadang punya satu (jarang dua) kid yang keluar jalur lalu kembali
+  if (Math.random() < (count > 1 ? .5 : .4)) devIdx.add(Math.floor(Math.random() * count));   // kelompok maupun yang sendirian bisa menyimpang lalu kembali
+  if (count >= 5 && Math.random() < .4) devIdx.add(Math.floor(Math.random() * count));
+  // kadang satu kid (dari rombongan atau yang sendirian) menyelam ke awan di bawah, atau ke air bila laut sedang tampil, lalu muncul lagi
+  let diveIdx = -1;
+  if (!REDUCE && Math.random() < DIVE_P) { const c = []; for (let i = 0; i < count; i++) if (!devIdx.has(i)) c.push(i); if (c.length) diveIdx = c[Math.floor(Math.random() * c.length)]; }
+  for (let i = 0; i < count; i++) {
+    const el = kid.cloneNode(true);
+    el.removeAttribute('id'); el.className = 'skKid'; el.style.display = ''; scene.insertBefore(el, veil);
+    const rank = (i + 1) >> 1;   // formasi V: pemimpin di depan, lalu berpasangan kiri-kanan makin ke belakang
+    const oy = i ? (i % 2 ? gap : -gap) * rank : 0, ox = i ? -dir * rank * rnd(.01, .02) : 0;
+    const dev = devIdx.has(i) ? { t0: rnd(.2, .5), len: rnd(.3, .42), amp: rnd(.16, .28) * (Math.random() < .5 ? 1 : -1) } : null;
+    let flaps = flapTimes(i, prof, dur / 1000, count);
+    const dv = i === diveIdx ? { st: 0, t0: rnd(.14, .3) * dur / 1000 } : null;   // detik sejak kid mulai terbang; sisanya ditentukan saat mulai menyelam
+    if (dev) {   // setiap perubahan arah penyimpangan (mulai menyimpang, lalu berbalik kembali ke jalur) diiringi kepakan jubah
+      const dT = [dev.t0 * dur / 1000 - .1, (dev.t0 + dev.len * .5) * dur / 1000 - .1];
+      flaps = flaps.filter(v => dT.every(d => Math.abs(v - d) > 3)).concat(dT).sort((a, b) => a - b);
+    }
+    flyers.push({ el, depth, cape: el.querySelector('path'), l1: el.querySelectorAll('path')[2], l2: el.querySelectorAll('path')[3], la: 0, tips: [[53.7, 122.6], [259.7, 69.2]], start: now + rank * stepMs, dur, g: 0, flapAt: 0, prof, flaps,
+      dev, dv, cx: rnd(.65, 1.35), cf: rnd(.75, 1.35), fs: rnd(.85, 1.15), lean: rnd(-.12, .12),   // variasi kain per kid: besar ayunan, kecepatan riak, kuat kepakan, kemiringan dasar
+      P: P.map((v, j) => j % 2 ? v + oy : v + ox),
+      sc: rnd(.03, .042) * depth * (1 + .25 * depth),   // makin dekat (depth 1) makin besar: terdekat +25% (maks ±.0525), yang jauh nyaris tak berubah
+      wob: rnd(0, 6.28),
+      em: EM.map((e, idx) => { const L = Math.max(W, H) * (idx ? .38 : .5) * (.45 + .55 * depth); return { ...e, prev: null, s: idx * 97, L, ret: L / 2.5, depth, m: 1 + .25 * (count - 1) }; }) });
+  }
+  nextAt = Infinity;
+}
+
+// ===== Menyelam: turun ke awan bawah (atau ke air saat laut tampil), hilang di bawah permukaan, lalu muncul lagi =====
+const DIVE_P = .25;   // peluang satu kemunculan punya satu kid yang menyelam
+const fxs = [], fogSprites = {}, wob = { cloud: null, sea: null };
+function fogSprite(rgb) {   // gumpalan lembut berwarna kabut/awan saat ini (abu saat hujan/badai)
+  return fogSprites[rgb] || (fogSprites[rgb] = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, `rgba(${rgb},1)`); gr.addColorStop(.45, `rgba(${rgb},.55)`); gr.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c; })());
+}
+// tabrakan dengan permukaan: masuk ('in') atau keluar ('out'). u = ukuran kid di layar (px)
+function fxImpact(kind, x, y, u, out, dirx, now) {
+  const E = out ? 1.35 : 1;
+  if (kind === 'cloud') {
+    const spr = fogSprite((getComputedStyle(scene).getPropertyValue('--skfog') || '250,253,255').trim()), n = Math.round(10 + u * .55);
+    for (let i = 0; i < n; i++) {   // gumpalan terhambur ke atas dan menyamping
+      const a = rnd(-Math.PI * .95, -Math.PI * .05), v = rnd(.5, 2.6) * u * 2.4 * E;
+      fxs.push({ k: 'puff', spr, x: x + rnd(-.5, .5) * u, y: y + rnd(-.1, .3) * u, vx: Math.cos(a) * v + dirx * u * .6, vy: Math.sin(a) * v, r: rnd(.35, .8) * u, grow: rnd(1.4, 2.4), buoy: rnd(6, 16), life: rnd(1.1, 1.9), a: rnd(.55, .9), age: -rnd(0, .12) });
+    }
+    for (let i = 0; i < 2; i++) fxs.push({ k: 'puff', spr, x: x + rnd(-.3, .3) * u, y, vx: dirx * u * .3, vy: -u * .9 * E, r: u * rnd(.9, 1.3), grow: 1.9, buoy: 5, life: 1.9, a: .7, age: -.02 * i });   // kubah awan terdorong naik, lalu mereda
+    fxs.push({ k: 'ring', x, y: y + u * .15, r0: u * .4, r1: u * 2.7 * E, life: 1.5, a: .5, col: 'rgba(255,255,255,1)', soft: 1, age: -.04 });
+    fxs.push({ k: 'ring', x, y: y + u * .15, r0: u * .4, r1: u * 4 * E, life: 1.9, a: .32, col: 'rgba(255,255,255,1)', soft: 1, age: -.2 });
+    wob.cloud = { t0: now, a: out ? 1.15 : .85 };
+  } else {
+    const ku = u / 18, n = Math.round(16 + u * 1.1), spr = fogSprite('236,247,255');
+    for (let i = 0; i < n; i++) {   // percikan air membentuk mahkota
+      const a = rnd(-Math.PI * .9, -Math.PI * .1), v = rnd(70, 230) * ku * E;
+      fxs.push({ k: 'drop', x: x + rnd(-.35, .35) * u, y, y0: y, vx: Math.cos(a) * v * .8 + dirx * 30 * ku, vy: Math.sin(a) * v * 1.5, g: 560 * ku, r: rnd(.8, 1.9) * Math.max(.8, Math.sqrt(ku)), life: rnd(.6, 1.1), age: -rnd(0, .05) });
+    }
+    for (let i = 0; i < 5; i++) fxs.push({ k: 'puff', spr, x: x + rnd(-.4, .4) * u, y, vx: rnd(-1, 1) * u, vy: -rnd(.6, 1.6) * u * E, r: rnd(.35, .6) * u, grow: 1.8, buoy: 4, life: rnd(.8, 1.2), a: .38, age: -rnd(0, .08) });   // kabut percikan
+    [[0, 1.8, .75], [.12, 2.7, .55], [.27, 3.7, .36]].forEach(([dl, rr, aa]) => fxs.push({ k: 'ring', x, y, r0: u * .3, r1: u * rr * E, life: rnd(.95, 1.3), a: aa, col: 'rgba(238,249,255,1)', age: -dl }));   // riak melebar
+    wob.sea = { t0: now, a: out ? 1.2 : .9 };
+  }
+}
+function drawFx(dt) {
+  spx.clearRect(0, 0, W, H);
+  if (!fxs.length) return;
+  let j = 0;
+  for (const q of fxs) {
+    q.age += dt;
+    if (q.age < 0) { fxs[j++] = q; continue; }
+    const k = q.age / q.life; if (k >= 1) continue;
+    if (q.k === 'puff') {
+      const dr = Math.exp(-dt * 1.8); q.vx *= dr; q.vy = q.vy * dr - q.buoy * dt; q.x += q.vx * dt; q.y += q.vy * dt;
+      const rr = q.r * (1 + (q.grow - 1) * Math.pow(k, .5));
+      spx.globalAlpha = q.a * Math.min(1, q.age / .12) * Math.pow(1 - k, 1.3); spx.drawImage(q.spr, q.x - rr, q.y - rr, rr * 2, rr * 2);
+    } else if (q.k === 'drop') {
+      q.vy += q.g * dt; q.x += q.vx * dt; q.y += q.vy * dt;
+      if (q.vy > 0 && q.y > q.y0) continue;   // jatuh kembali ke permukaan: hilang
+      spx.globalAlpha = (1 - k * .6) * .9; spx.strokeStyle = 'rgb(236,248,255)'; spx.lineWidth = q.r; spx.lineCap = 'round';
+      spx.beginPath(); spx.moveTo(q.x, q.y); spx.lineTo(q.x - q.vx * .025, q.y - q.vy * .025); spx.stroke();
+    } else {
+      const e = 1 - Math.pow(1 - k, 2), rx = q.r0 + (q.r1 - q.r0) * e;
+      spx.globalAlpha = q.a * Math.pow(1 - k, 1.4); spx.strokeStyle = q.col; spx.lineWidth = q.soft ? 3.2 * (1 - k) + 1 : 1.4 * (1 - k) + .5;
+      spx.beginPath(); spx.ellipse(q.x, q.y, rx, rx * .26, 0, 0, 6.2832); spx.stroke();
+    }
+    fxs[j++] = q;
+  }
+  fxs.length = j; spx.globalAlpha = 1;
+}
+function applyWob(now) {   // goyangan teredam: awan bawah bergeser + menggelembung, laut bergelombang
+  const c = wob.cloud, w = wob.sea;
+  if (c) { const t = (now - c.t0) / 1000;
+    if (t > 2.6) { skWindsEl.style.transform = ''; wob.cloud = null; }
+    else { const env = Math.exp(-t * 2.2) * Math.min(1, t / .05); skWindsEl.style.transform = `translateX(${(Math.sin(t * 10.5) * 3.4 * c.a * env).toFixed(2)}px) scale(1,${(1 + .04 * c.a * env * Math.sin(t * 8 + 1)).toFixed(4)})`; } }
+  if (w) { const t = (now - w.t0) / 1000;
+    if (t > 2.4) { seaC.style.transform = ''; wob.sea = null; }
+    else { const env = Math.exp(-t * 2.4) * Math.min(1, t / .05); seaC.style.transform = `scale(1,${(1 + .016 * w.a * env * Math.sin(t * 7)).toFixed(4)})`; } }
+}
+function diveEnd(f) { const d = f.dv; if (d && d.clip) { scene.insertBefore(f.el, d.clip); d.clip.remove(); } f.under = false; f.dv = null; }
+const angDiff = (a, b) => { let d = (a - b) % 6.2832; if (d > 3.1416) d -= 6.2832; if (d < -3.1416) d += 6.2832; return d; };
+// gumpalan awan bawah yang benar-benar ada saat ini (lapis depan yang cukup pekat), supaya kid menyelam ke awan yang nyata
+function puffList() {
+  const sr = scene.getBoundingClientRect(), out = [];
+  for (const el of skWindsEl.children) {
+    const o = parseFloat(el.style.getPropertyValue('--o')) || 0; if (o < .45) continue;
+    const r = el.getBoundingClientRect(), cx = r.left - sr.left + r.width / 2;
+    if (cx < W * .08 || cx > W * .92) continue;
+    out.push({ el, cx, w: r.width, ey: r.top - sr.top + r.height * .45 });   // ey: bagian pekat gumpalan
+  }
+  return out;
+}
+const puffAt = (pf, rx) => { const sr = scene.getBoundingClientRect(), r = pf.el.getBoundingClientRect(); return [Math.max(W * .06, Math.min(W * .94, r.left - sr.left + r.width / 2 + rx * r.width)), r.top - sr.top + r.height * .45]; };
+function setDiveMask(d, ys, u) {   // pudar di awan, tegas di air
+  const soft = d.kind === 'cloud' ? Math.max(6, u * .6) : Math.max(2, u * .12), m = `linear-gradient(180deg,#000 0,#000 ${ys - soft}px,rgba(0,0,0,${d.fl || 0}) ${ys + soft * .4}px)`;   // d.fl > 0: di awan, kid kadang masih terlihat samar (belum 'nyemplung' sepenuhnya); air selalu tegas
+  d.clip.style.webkitMaskImage = d.clip.style.maskImage = m;
+}
+// setelah muncul: jalur baru dari titik muncul (arah awal = arah mendongak), kecepatan dan tujuan keluar layar acak; jalur semula ditinggalkan
+function reroute(f, now, x, y, h, v, tOut, flip) {
+  let dir = Math.cos(h) >= 0 ? 1 : -1; if (Math.random() < (flip ? .5 : .3)) dir = -dir;
+  const x2 = dir > 0 ? rnd(1.05, 1.12) : rnd(-.12, -.05), y2 = rnd(.12, .5), Lh = rnd(.12, .25) * W, x1 = x + Math.cos(h) * Lh, y1 = Math.max(H * .06, y + Math.sin(h) * Lh);
+  const len = Math.hypot(x2 * W - x, y2 * H - y) * 1.25 + Lh, dur = Math.max(6500, Math.min(24000, len / Math.max(18, v) * 1000));
+  f.P = [x / W, y / H, x1 / W, y1 / H, x2, y2]; f.prof = makeProfile(dur / 1000); f.dur = dur; f.start = now; f.dev = null;
+  f.flaps = [(tOut - now) / 1000 - .22]; if (Math.random() < .45) f.flaps.push(rnd(3, 6));   // kepakan saat muncul tetap berlanjut mulus
+}
+function diveStep(f, p, t, now, dt) {
+  const d = f.dv, T = (now - f.start) / 1000, u = Math.max(14, 300 * p.s * unit), ho = 80 * p.s * unit;
+  const vel = () => { const b = basePt(f, Math.min(1, t + .004)), st = .004 * f.dur / 1000; return [(b.x - p.x) / st, (b.y - p.y) / st]; };
+  if (d.st === 0) {   // menunggu waktunya, lalu pilih sasaran
+    if (T < d.t0) return;
+    if (f.trk) { d.t0 += dt; if (d.t0 > f.dur / 1000 * .5) f.dv = null; return; }   // sedang freestyle: tunda
+    const kind = cam < .06 ? 'cloud' : cam > .2 ? 'sea' : null;   // laut tampil = air; langit tinggi = awan bawah
+    if (!kind) { f.dv = null; return; }
+    const [vxb, vyb] = vel(), v0 = Math.max(10, Math.hypot(vxb, vyb)), dirx = Math.sign(vxb) || 1;
+    let tx, ty, pf = null, rx = 0;
+    if (kind === 'cloud') {   // masuk ke gumpalan awan yang nyata, yang terdekat di depan dan tidak terlalu jauh di bawah
+      const L = puffList().filter(c => c.ey > p.y + 50 && c.ey < H * .92); if (!L.length) { f.dv = null; return; }
+      L.forEach(c => { c.rx = rnd(-.18, .18); c.sc = Math.abs(c.cx + c.rx * c.w - (p.x + dirx * W * .12)) * .5 + (c.ey - p.y); });
+      L.sort((m, n) => m.sc - n.sc); pf = L[0]; rx = pf.rx; [tx, ty] = puffAt(pf, rx);
+    } else {
+      const yh = H * (1 - .34 * cam), k01 = clamp01((f.depth - .4) / .6);
+      ty = yh + (H - yh) * (.16 + .5 * k01); if (ty < p.y + u * 1.5) ty = p.y + Math.max(u * 1.5, H * .06);
+      tx = Math.max(W * .1, Math.min(W * .9, p.x + dirx * W * rnd(.06, .16)));
+    }
+    if (Math.hypot(tx - p.x, ty - p.y) * 1.25 / (v0 * 1.15) > 9) { f.dv = null; return; }   // terlalu jauh untuk kecepatan terbangnya: batal
+    Object.assign(d, { kind, fl: kind === 'cloud' && Math.random() < .55 ? rnd(.34, .6) : 0, st: 1, on: 1, tF: T, tP: T + .5, v0, pf, rx, tx, ty, ys: ty, dirx });
+    f.flaps = f.flaps.filter(v => v <= T); f.flaps.push(T);   // satu kepakan sebelum turun
+  }
+  if (d.st === 1) {   // bersiap: masih di jalur semula selama jubah mengepak
+    if (T < d.tP) return;
+    const [vxb, vyb] = vel(); d.x = p.x; d.y = p.y; d.h = Math.atan2(vyb, vxb); d.T1 = T; d.st = 2;
+    d.clip = document.createElement('div'); d.clip.className = 'dclip'; setDiveMask(d, d.ys, u);
+    scene.insertBefore(d.clip, f.el); d.clip.appendChild(f.el);
+  }
+  const R = (a, k) => a * (1 - Math.exp(-dt * k)), mv = v => { d.x += Math.cos(d.h) * v * dt; d.y += Math.sin(d.h) * v * dt; d.v = v; };
+  if (d.st === 2) {   // turun: kecepatan terbang semula + sedikit tambahan dari kepakan (naik lalu mereda), arah menuju sasaran
+    if (d.pf) d.tx = puffAt(d.pf, d.rx)[0];
+    d.h += R(angDiff(Math.atan2(d.ty - d.y, d.tx - d.x), d.h), 1.8);
+    mv(d.v0 * (1 + .16 * boostCurve(T - d.tF)) / (1 + .16 * boostCurve(d.T1 - d.tF)));   // kecepatan terbang semula, hanya bertambah sedikit oleh satu kepakan
+    if (d.y + ho >= d.ty) {
+      d.st = 3; fxImpact(d.kind, d.x, d.ys, u, false, Math.sign(Math.cos(d.h)) || 1, now);
+      let ex = d.x, ey = d.ys;   // titik muncul acak: gumpalan lain (awan) atau titik lain (air)
+      if (d.kind === 'cloud') {
+        const L = puffList().filter(c => c.ey < H * .92), far = L.filter(c => Math.abs(c.cx - d.x) > W * .1), pool = far.length ? far : L;
+        if (pool.length) { d.pe = pool[Math.floor(Math.random() * pool.length)]; d.rx2 = rnd(-.18, .18); [ex, ey] = puffAt(d.pe, d.rx2); }
+      } else ex = Math.max(W * .1, Math.min(W * .9, d.x + (Math.random() < .5 ? -1 : 1) * W * rnd(.08, .35)));
+      d.ex = ex; d.ys2 = ey; d.yDeep = Math.max(d.ys, ey) + Math.min(d.fl ? 34 : 80, H * .09);   // kid yang masih tampak di awan tidak turun terlalu dalam
+      const dist = Math.abs(ex - d.x), vh = d.v0 * rnd(.8, 1.6);
+      d.hold = Math.max(rnd(.8, 1.5), Math.min(3.6, dist / vh)); d.vh = Math.max(8, dist / d.hold); d.vu = Math.max(22, d.v0 * rnd(.9, 1.7)); d.tU = T + d.hold;   // lama bersembunyi dan kecepatan naik: acak
+    } else if (T - d.T1 > 13) { diveEnd(f); return; }
+  }
+  if (d.st === 3) {   // bersembunyi di bawah permukaan menuju titik muncul
+    if (d.pe) d.ex = puffAt(d.pe, d.rx2)[0];
+    if (Math.hypot(d.ex - d.x, d.yDeep - d.y) > 10) d.h += R(angDiff(Math.atan2(d.yDeep - d.y, d.ex - d.x), d.h), 2.2);
+    mv(d.v + (d.vh - d.v) * (1 - Math.exp(-dt * 2)));
+    if (T >= d.tU) {
+      d.st = 4; setDiveMask(d, d.ys2, u);
+      const th = rnd(50, 72) * Math.PI / 180, dirU = d.x > W * .72 ? -1 : d.x < W * .28 ? 1 : (Math.random() < .5 ? -1 : 1);
+      d.up = Math.atan2(-Math.sin(th), dirU * Math.cos(th));   // mendongak ke arah acak
+    }
+  }
+  if (d.st === 4) {   // naik: kecepatan acak, mendongak, muncul dengan satu kepakan jubah
+    d.h += R(angDiff(d.up, d.h), 2.6);
+    mv(d.v + (d.vu - d.v) * (1 - Math.exp(-dt * 1.6)));
+    if (!d.out && d.y - ho <= d.ys2) { d.out = 1; d.tOut = now; fxImpact(d.kind, d.x, d.ys2, u, true, Math.sign(Math.cos(d.h)) || 1, now); f.flaps.push(T - .22); }   // satu kepakan mulai sedikit sebelum kepala menembus permukaan
+    if (d.out && d.y + 150 * p.s * unit < d.ys2 - 2) { const tOut = d.tOut, x = d.x, y = d.y, h = d.h, v = d.v; diveEnd(f); reroute(f, now, x, y, h, v, tOut); p.x = x; p.y = y; p.rot = h - HEAD_ANGLE; return; }
+    if (T - d.tU > 12) { diveEnd(f); return; }
+  }
+  p.x = d.x; p.y = d.y; p.rot = d.h - HEAD_ANGLE + Math.sin(now / 650 + f.wob) * .05;
+  f.under = d.st === 3 || (d.st === 2 ? d.y > d.ys - 2 : d.y > d.ys2 - 2);
+}
+
+const spk = document.createElement('canvas'); spk.width = spk.height = 64;
+{ const g = spk.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.14, 'rgba(255,250,210,1)'); gr.addColorStop(.32, 'rgba(255,224,120,.85)');
+  gr.addColorStop(.62, 'rgba(255,184,64,.38)'); gr.addColorStop(1, 'rgba(255,160,40,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }
+const TAU2 = Math.PI * 2;
+const TRICKS = {
+  guling:  { label: 'Guling',  dur: 1.8, flaps: [0],        f: p => ({ roll: TAU2 * ease(p), lean: .4 * Math.sin(Math.PI * p) }) },
+  loop:    { label: 'Loop',    dur: 2.8, flaps: [0],        f: (p, S) => { const ph = TAU2 * ease(p), R = S * .3; return { dth: -ph, ox: R * Math.sin(ph), oy: R * (Math.cos(ph) - 1) }; } },
+  salto:   { label: 'Salto',   dur: 1.7, flaps: [0],        f: (p, S) => ({ dth: -TAU2 * ease(p), oy: -S * .12 * Math.sin(Math.PI * p) }) },
+  spiral:  { label: 'Spiral',  dur: 3.0, flaps: [0, .55],   f: (p, S) => { const e = ease(p), env = Math.sin(Math.PI * p);
+              return { roll: 2 * TAU2 * e, oy: S * .2 * Math.sin(2 * TAU2 * e) * env, dth: .4 * Math.cos(2 * TAU2 * e) * env, lean: .25 * env }; } },
+  menukik: { label: 'Menukik', dur: 3.2, flaps: [.36], ty: true, f: p => ({ dth: p < .4 ? 1.05 * ease(p / .4) : p < .75 ? 1.05 - 1.75 * ease((p - .4) / .35) : -.7 * (1 - ease((p - .75) / .25)) }) },
+  luncur:  { label: 'Luncur',  dur: 3.4, flaps: [.72],      f: (p, S) => { const env = clamp01(Math.min(p / .15, (1 - p) / .2)), e = ease(env);
+              return { lean: .8 * e, dth: -.1 * e, oy: S * .04 * Math.sin(TAU2 * p) * e }; } },
+  zigzag:  { label: 'Zig-zag', dur: 4.0, flaps: [.05, .5], ty: true, f: p => ({ dth: .7 * Math.sin(TAU2 * 1.5 * p) * clamp01(Math.min(p / .1, (1 - p) / .12)) }) }
+};
+const T0 = { dth: 0, ox: 0, oy: 0, roll: 0, lean: 0 };
+const NR = .18, CLOSE_FLAP_S = 2.8, CF_UP = .26, CF_DOWN = .585, CF_DEPTH = 1.6;
+function closeFlap(t) {
+  if (t < CF_UP) return .95 * ease(t / CF_UP);
+  if (t < CF_DOWN) return .95 - (.95 + CF_DEPTH) * ease((t - CF_UP) / (CF_DOWN - CF_UP));
+  const q = (t - CF_DOWN) / (CLOSE_FLAP_S - CF_DOWN), w = q * q * (3 - 2 * q);
+  return -CF_DEPTH * Math.exp(-3 * w) * Math.cos(Math.PI * 1.1 * w);
+}
+// Beranda memakai gerak jubah, kaki, dan titik jejak yang sama dengan Closeup.
+function applyCape(f, ct, tau, g, bo, dv = 0) {
+  ct *= f.cf || 1;   // tiap kid punya kecepatan riak kain sendiri
+  const fc = (tau >= 0 && tau < CLOSE_FLAP_S ? closeFlap(tau) : 0) * (f.fs || 1), down = Math.max(0, -fc), up = Math.max(0, fc);
+  // Semua nilai dibatasi supaya jubah tidak memanjang berlebihan ke belakang saat hentakan
+  const cl = (v, a, b) => Math.max(a, Math.min(b, v)), CX = f.cx || 1,
+        fold = cl(((fc < 0 ? fc * 1.6 : fc * 2.3) - dv * .9 + .1 * Math.sin(ct * 2.3) + .05 * Math.sin(ct * 5.1) + (f.lean || 0)) * 1.1, -2.8, 2.6),
+        amp = Math.min(3.4, (.8 + 1.4 * g + .6 * bo + .7 * dv) * 1.2 * CX), swg = Math.min(1.05, (down * .5 + dv * .22) * 1.25);
+  f.cape.setAttribute('d', capeD(fold, ct, amp, swg, down * NR + dv * .06));
+  f.tips = [CAPE_TIPS[0].slice(), CAPE_TIPS[1].slice()];
+  const la = Math.sin(ct * 2.1) * 3.5 + Math.sin(ct * 3.7 + 1) * 1.5 + (down + dv * .8) * 10 - up * 5,
+        lb = Math.sin(ct * 2.1 + .9) * 4 + Math.sin(ct * 4.1) * 1.5 + (down + dv * .8) * 12 - up * 6;
+  f.l1.setAttribute('transform', `rotate(${(la * 1.5).toFixed(2)} 205 178)`); f.l2.setAttribute('transform', `rotate(${(lb * 1.5).toFixed(2)} 168 186)`);
+  f.la = la;
+}
+function emLocal(f, i) {
+  if (i) return f.tips[i - 1];
+  const a = f.la * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a), ox = EM[0].lx - 205, oy = EM[0].ly - 178;
+  return [205 + ox * ca - oy * sa, 178 + ox * sa + oy * ca];
+}
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  updateSky(dt, now);
+  sx.clearRect(0, 0, W, H); drawBodies();
+  drawWx(dt, now);
+  for (let i = flyers.length - 1; i >= 0; i--) {
+    const f = flyers[i], t = (now - f.start) / f.dur;
+    if (t < 0) continue;
+    if (t >= 1 && !(f.dv && f.dv.on)) {
+      f.el.remove(); if (f.dv && f.dv.clip) f.dv.clip.remove(); flyers.splice(i, 1); for (const e of f.em) e.endAt = now;
+      if (!flyers.length) nextAt = now + rnd(6000, 14000);   // sebentar jeda, lalu muncul lagi
+      continue;
+    }
+    const p = pose(f, t, now), vis = 1;
+    if (f.dv) diveStep(f, p, t, now, dt);   // menyelam: ubah posisi/arah, picu cipratan
+    // freestyle saat diklik: gerakan (guling, loop, dll.) ditambahkan di atas jalur penerbangan
+    let TR = T0;
+    const bx0 = p.x, by0 = p.y, h0 = p.rot + HEAD_ANGLE;
+    if (f.trk) {
+      const pp = (now - f.trk.start) / (f.trk.def.dur * 1000);
+      if (pp >= 1) f.trk = null;
+      else {
+        TR = { ...T0, ...f.trk.def.f(pp, 300 * p.s * unit * 4.5) };
+        const c_ = Math.cos(h0), s_ = Math.sin(h0);
+        p.x += TR.ox * c_ - TR.oy * s_; p.y += TR.ox * s_ + TR.oy * c_;
+        p.rot += TR.dth;
+        if (f.trk.def.ty && f.lx !== undefined) {   // menukik / zig-zag: badan benar-benar bergeser mengikuti arah baru lalu kembali ke jalur
+          const spd = Math.hypot(bx0 - f.lx, by0 - f.ly) / Math.max(dt, .001), a1 = h0 + TR.dth;
+          f.tyx = (f.tyx || 0) + (Math.cos(a1) - Math.cos(h0)) * spd * .7 * dt; f.tyy = (f.tyy || 0) + (Math.sin(a1) - Math.sin(h0)) * spd * .7 * dt;
+        }
+      }
+    }
+    if (!f.trk || !f.trk.def.ty) { f.tyx = (f.tyx || 0) * Math.exp(-dt * 3); f.tyy = (f.tyy || 0) * Math.exp(-dt * 3); }
+    else { f.tyx -= f.tyx * dt * 1.2; f.tyy -= f.tyy * dt * 1.2; }
+    p.x += f.tyx || 0; p.y += f.tyy || 0; f.lx = bx0; f.ly = by0;
+    f.sx = p.x; f.sy = p.y; f.sz = 300 * p.s * unit;   // untuk deteksi klik
+    if (f.lean0 === undefined) f.lean0 = f.lean; f.lean = f.lean0 + TR.lean;
+    // cahaya, kepakan jubah, dan percepatan terbang berjalan bersamaan dari satu waktu dorongan
+    const T = (now - f.start) / 1000; let tau = -1;
+    for (const tb of f.flaps) if (T >= tb) tau = T - tb;   // kepakan terakhir yang sudah dimulai
+    const g = tau >= 0 ? glowCurve(tau) : 0;
+    // menukik: begitu lintasan mulai menurun, jubah tertarik ke bawah; makin curam turunnya, makin dalam
+    f.dive = (f.dive || 0) + (clamp01(Math.sin(p.rot + HEAD_ANGLE) / .5) - (f.dive || 0)) * (1 - Math.exp(-dt * 3));
+    applyCape(f, now / 1000 + f.wob * 3, tau, g, tau >= 0 ? boostCurve(tau) : 0, f.dive);   // jubah seperti kain, kepakan dalam, kaki bergoyang
+    // partikel cahaya mini dari jubah, hanya sesaat saat kepakan, hanyut ke belakang (sama seperti di Closeup)
+    if (tau >= 0 && CAPE_PTS.length > 18 && !f.under) {
+      const pulse = Math.pow(Math.sin(Math.PI * clamp01((tau - (CF_UP - .06)) / (CF_DOWN - CF_UP + .5))), 1.5), dz2 = .6 + .4 * f.depth, kS = p.s * unit;
+      f.sacc = (f.sacc || 0) + 110 * pulse * dz2 * dt;
+      const ns = Math.floor(f.sacc); f.sacc -= ns;
+      for (let n = 0; n < ns; n++) {
+        const i0 = 3 * Math.floor(rnd(0, 6)), a = CAPE_PTS[i0], b = CAPE_PTS[i0 + 3], u = rnd(0, 1), kq = rnd(.4, 1),
+              lx = PIV[0] + (a[0] + (b[0] - a[0]) * u - PIV[0]) * kq, ly = PIV[1] + (a[1] + (b[1] - a[1]) * u - PIV[1]) * kq,
+              pos = toScreen(p, lx, ly), ox = pos[0] - p.x, oy = pos[1] - p.y, ol = Math.hypot(ox, oy) || 1, out = rnd(2, 16) * kS * 2.5;
+        hsparks.push({ x: pos[0], y: pos[1], vx: ox / ol * out + rnd(-5, 5) * kS * 2.5, vy: oy / ol * out - rnd(0, 7) * kS * 2.5 + rnd(-5, 5) * kS * 2.5,
+          r: rnd(.08, .17) * dz2, k: kS, age: 0, life: rnd(.6, 1.3), ph: rnd(0, 6.28), sw: rnd(2, 4.5) });
+      }
+    }
+    f.el.style.opacity = .85;   // sedikit transparan agar tidak mengganggu teks di depannya
+    const kk = 1 / (p.s * unit), dz = .5 + .5 * f.depth;
+    const gn = night ? .3 + .7 * g : g;   // malam: karakter selalu sedikit berpendar
+    f.el.style.filter = `drop-shadow(0 0 ${(1 + 6*gn) * dz * kk}px rgba(255,244,190,${.03 + .97*gn})) drop-shadow(0 0 ${(.5 + 2.5*gn) * dz * kk}px rgba(255,255,255,${.06 + .84*gn}))`;
+    let rs = Math.cos(TR.roll); if (Math.abs(rs) < .05) rs = rs < 0 ? -.05 : .05;
+    f.el.style.transform = `translate(${p.x}px,${p.y}px) rotate(${p.rot}rad) scale(${p.s * unit})` + (TR.roll ? ` rotate(${HEAD_ANGLE}rad) scale(1,${rs.toFixed(3)}) rotate(${-HEAD_ANGLE}rad)` : '');
+    let ei = -1;
+    for (const e of f.em) {
+      ei++;
+      if (f.under) { e.prev = null; continue; }   // di bawah permukaan: tidak ada jejak; jejak baru mulai lagi saat muncul
+      const lp = emLocal(f, ei), pos = toScreen(p, lp[0], lp[1]), r0 = Math.max(.6 + .6 * f.depth, e.r * p.s * unit);
+      if (e.prev) {
+        const dx = pos[0]-e.prev[0], dy = pos[1]-e.prev[1], d = Math.hypot(dx,dy), step = Math.max(.8, r0 * .3) * e.m;   // rombongan besar: butiran asap lebih jarang agar tetap ringan
+        const n = Math.floor(d / step);
+        if (n > 0) {
+          const nx = -dy/d, ny = dx/d;
+          for (let k = 1; k <= n; k++) {
+            const fr = k * step / d, jt = (Math.random() - .5) * r0;
+            parts.push({ x: e.prev[0]+dx*fr+nx*jt, y: e.prev[1]+dy*fr+ny*jt, s: e.s + k * step,
+              r: r0 * (.8 + Math.random() * .5), age: 0, jx: (Math.random()-.5) * r0, jy: (Math.random()-.5) * r0,
+              life: e.life * (.9 + Math.random() * .2), a: e.a * vis * Math.min(1.5, Math.sqrt(e.m)), e });
+          }
+          e.s += n * step;
+          e.prev = [e.prev[0]+dx*n*step/d, e.prev[1]+dy*n*step/d];
+        }
+      } else e.prev = pos;
+    }
+  }
+  if (!flyers.length && now >= nextAt && !REDUCE) spawn(now);
+
+  hsx.clearRect(0, 0, W, H);
+  { let m = 0;
+    for (const q of hsparks) {
+      q.age += dt; const k = q.age / q.life; if (k >= 1) continue;
+      const dr = Math.exp(-dt * 1.3); q.vx *= dr; q.vy *= dr;
+      const sway = Math.sin(q.age * q.sw + q.ph) * 9 * q.k * 2.5 * (.3 + k);   // meliuk pelan tegak lurus arah gerak
+      q.x += (q.vx - sway * .3) * dt; q.y += (q.vy + sway) * dt - 3 * q.k * 2.5 * dt * k;
+      const tw = .75 + .25 * Math.sin(q.age * 14 + q.ph), rr = q.r * (1 + .7 * (1 - k)) * 2.2, al = Math.min(1, q.age / .04) * Math.pow(1 - k, 1.4) * tw;
+      hsx.globalCompositeOperation = 'source-over'; hsx.globalAlpha = al * .7; hsx.drawImage(spk, q.x - rr * 2, q.y - rr * 2, rr * 4, rr * 4);
+      hsx.globalCompositeOperation = 'lighter'; hsx.globalAlpha = al; hsx.drawImage(spk, q.x - rr * 1.2, q.y - rr * 1.2, rr * 2.4, rr * 2.4);
+      hsx.globalAlpha = al; hsx.drawImage(spk, q.x - rr * .55, q.y - rr * .55, rr * 1.1, rr * 1.1);
+      hsparks[m++] = q;
+    }
+    hsparks.length = m; hsx.globalAlpha = 1; hsx.globalCompositeOperation = 'source-over'; }
+  ctx.clearRect(0, 0, W, H);
+  let j = 0;
+  for (const q of parts) {
+    q.age += dt;
+    // Memudar berdasarkan jarak dari karakter: ujung paling belakang (paling tua) hilang duluan.
+    // Setelah karakter pergi, ujung belakang terus "ditarik" maju sampai seluruh jejak habis.
+    const e = q.e, dist = (e.s - q.s) + (e.endAt ? (now - e.endAt) / 1000 * e.ret : 0), k = dist / e.L;
+    if (k >= 1 || q.age >= q.life) continue;
+    // Pergeseran asap bergantung pada posisi di sepanjang jejak (q.s) dan umur, bukan acak per butir.
+    // Butir yang bertetangga bergeser hampir sama, jadi jejak tetap menyambung dan hanya meliuk.
+    const A = unit * (.4 + 2.2 * k) * (.4 + .6 * e.depth);
+    const ox = A * (Math.sin(q.s * .018 + q.age * .45) + .5 * Math.sin(q.s * .047 - q.age * .8));
+    const oy = A * (Math.cos(q.s * .015 + q.age * .4) + .5 * Math.cos(q.s * .041 + q.age * .7));
+    const rr = q.r * (1 + 2.5 * Math.pow(k, .6)), sp2 = 1 + 1.5 * k;
+    ctx.globalAlpha = q.a * Math.min(1, q.age / .25) * Math.pow(1 - k, 1.3) * .3 / Math.sqrt(rr / q.r);
+    ctx.drawImage(sp, q.x + ox + q.jx * sp2 - rr, q.y + oy + q.jy * sp2 - rr, rr * 2, rr * 2);
+    parts[j++] = q;
+  }
+  parts.length = j;
+  applyWob(now); drawFx(dt);
+  raf = document.hidden ? 0 : requestAnimationFrame(frame);
+}
+// Beranda: klik atau ketuk sebuah Sky kid -> ia berganti jadi freestyle acak dan menyimpang dari jalurnya, lalu kembali ke jalur
+function triggerFly(f, now) {
+  const t = (now - f.start) / f.dur;
+  if (f.trk || t < 0 || t > .92 || (f.dv && f.dv.st)) return false;   // kid yang sedang menyelam tidak bisa diklik
+  const names = Object.keys(TRICKS), def = TRICKS[names[Math.floor(Math.random() * names.length)]], Ts = (now - f.start) / 1000;
+  f.trk = { def, start: now };
+  const fl = def.flaps.map(fr => Ts + fr * def.dur);
+  if (!f.dev || t < f.dev.t0 || t >= f.dev.t0 + f.dev.len) {   // menyimpang dari titik ini, lalu mengayun kembali (mulus, nol di awal dan akhir)
+    const len = Math.min(rnd(.3, .42), 1 - t - .04);
+    if (len >= .12) { f.dev = { t0: t, len, amp: rnd(.16, .28) * (Math.random() < .5 ? 1 : -1) }; fl.push(Ts, Ts + len * .5 * f.dur / 1000); }
+  }
+  fl.sort((a, b) => a - b);
+  const keep = []; for (const v of fl) if (!keep.length || v - keep[keep.length - 1] > 1.7) keep.push(v);
+  f.flaps = f.flaps.filter(v => v <= Ts).concat(keep);   // kepakan yang sudah lewat tetap, yang akan datang diganti kepakan freestyle
+  return true;
+}
+// klik dua kali pada sebuah kid: ia berbelok memilih jalur baru (arah, tujuan, dan kecepatan acak) dari posisinya sekarang
+function doubleTapReroute(f, now) {
+  const t = (now - f.start) / f.dur; if (t < 0 || t > .92 || (f.dv && f.dv.st)) return;
+  const a = basePt(f, t), b = basePt(f, Math.min(1, t + .004)), st = .004 * f.dur / 1000, h = Math.hypot(b.x - a.x, b.y - a.y) > .01 ? Math.atan2(b.y - a.y, b.x - a.x) : a.h, v = Math.hypot(b.x - a.x, b.y - a.y) / st;
+  f.trk = null; reroute(f, now, f.sx, f.sy, h, v, now, true); f.flaps = [0];   // satu kepakan saat berbelok
+}
+let lastTap = { f: null, t: 0 };
+document.addEventListener('pointerdown', e => {   // kid ada di belakang halaman: ketukan di area kosong (bukan tombol/isian/dialog) yang dekat kid memicunya
+  if (e.target.closest('button, a, input, textarea, select, label, summary, [role="button"], [role="dialog"], [contenteditable]')) return;
+  const r = scene.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top, now = performance.now();
+  let best = null, bd = 1e9;
+  for (const f of flyers) {
+    if (f.sx === undefined || now < f.start) continue;
+    const d = Math.hypot(f.sx - mx, f.sy - my), R = Math.max(40, f.sz * 3);
+    if (d < R && d < bd) { best = f; bd = d; }
+  }
+  if (best) { if (lastTap.f === best && now - lastTap.t < 380) { lastTap = { f: null, t: 0 }; doubleTapReroute(best, now); } else { lastTap = { f: best, t: now }; triggerFly(best, now); } }
+});
+let raf = 0;
+function startLoop() { if (!raf && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+function stopLoop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+// tab tersembunyi: semua animasi & penyegaran cuaca berhenti; saat dibuka lagi waktu direset supaya tidak melompat
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopLoop(); else { startLoop(); if (Date.now() - lastWxAt > WX_EVERY) refreshWx(); } });
+
+// Lapisan awan atas (hanya terlihat lewat .cover saat cuaca mendung)
+(function () {
+  const box = document.getElementById('skCover'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (let i = 0; i < 7; i++) {
+    const el = document.createElement('div'), w = rnd(55, 95), dur = rnd(100, 170);
+    el.className = 'skPuff';
+    el.style.cssText = `--w:${w}vw;--dur:${dur}s;--delay:${-rnd(0, dur)}s;--o:${rnd(.7, .95)};--br:${rnd(11, 18)}s;width:${w}vw;height:${rnd(22, 36)}vh;top:${rnd(-8, 25)}%`;
+    el.innerHTML = '<i></i>';
+    if (reduce) el.style.transform = `translateX(${rnd(0, 90)}vw)`;
+    box.appendChild(el);
+  }
+})();
+
+// Awan bawah: gumpalan berukuran dan berkecepatan beda, lapisan depan lebih cepat dan lebih pekat
+(function () {
+  const box = document.getElementById('skWinds'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (let i = 0; i < 10; i++) {
+    const front = i % 2, el = document.createElement('div'), w = rnd(34, 60), dur = front ? rnd(85, 125) : rnd(130, 190);
+    el.className = 'skPuff';
+    el.style.cssText = `--w:${w}vw;--dur:${dur}s;--delay:${-rnd(0, dur)}s;--o:${front ? rnd(.55, .8) : rnd(.3, .5)};--br:${rnd(9, 16)}s;width:${w}vw;height:${rnd(14, 26)}vh;bottom:${rnd(-8, 10)}%`;
+    el.innerHTML = '<i></i>';
+    if (reduce) el.style.transform = `translateX(${rnd(0, 90)}vw)`;
+    box.appendChild(el);
+  }
+})();
+
+// Posisi matahari dan bulan dihitung langsung dari waktu perangkat dan lokasi (rumus astronomi, mengikuti SunCalc),
+// jadi realtime tanpa internet. Lokasi bawaan Makassar; berubah ke lokasimu jika izin lokasi diberikan.
+// pratinjau tersembunyi (tanpa tombol): tambahkan ?jam=17:45 di alamat untuk melihat langit pada jam itu hari ini
+let timeShift = 0;
+{ const m = /[?&]jam=(\d{1,2}):(\d{2})/.exec(location.search); if (m) { const d = new Date(); d.setHours(+m[1], +m[2], 0, 0); timeShift = d.getTime() - Date.now(); } }
+let extra = 0;   // offset sementara untuk animasi intro (langit berputar menuju waktu sekarang)
+const simNow = () => Date.now() + timeShift + extra;
+
+const LS = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+const TZ = {'Asia/Jakarta':[-6.2,106.85],'Asia/Pontianak':[-0.03,109.33],'Asia/Makassar':[-5.15,119.43],'Asia/Jayapura':[-2.53,140.72],'Asia/Singapore':[1.35,103.82],'Asia/Kuala_Lumpur':[3.14,101.69],'Asia/Bangkok':[13.75,100.5],'Asia/Ho_Chi_Minh':[10.82,106.63],'Asia/Saigon':[10.82,106.63],'Asia/Manila':[14.6,120.98],'Asia/Hong_Kong':[22.32,114.17],'Asia/Shanghai':[31.23,121.47],'Asia/Taipei':[25.03,121.57],'Asia/Tokyo':[35.68,139.69],'Asia/Seoul':[37.57,126.98],'Asia/Kolkata':[21.15,79.09],'Asia/Calcutta':[21.15,79.09],'Asia/Dhaka':[23.81,90.41],'Asia/Karachi':[24.86,67.01],'Asia/Dubai':[25.2,55.27],'Asia/Riyadh':[24.71,46.68],'Asia/Baghdad':[33.31,44.36],'Asia/Tehran':[35.69,51.39],'Asia/Jerusalem':[31.77,35.22],'Asia/Istanbul':[41.01,28.98],'Europe/Istanbul':[41.01,28.98],'Asia/Kathmandu':[27.7,85.32],'Asia/Katmandu':[27.7,85.32],'Asia/Colombo':[6.93,79.86],'Asia/Yangon':[16.87,96.2],'Asia/Rangoon':[16.87,96.2],'Asia/Brunei':[4.89,114.94],'Asia/Phnom_Penh':[11.56,104.92],'Asia/Vientiane':[17.97,102.63],'Asia/Almaty':[43.24,76.89],'Asia/Tashkent':[41.3,69.24],'Asia/Kabul':[34.53,69.17],'Asia/Baku':[40.41,49.87],'Asia/Tbilisi':[41.72,44.79],'Asia/Yerevan':[40.18,44.51],'Asia/Vladivostok':[43.12,131.89],'Asia/Novosibirsk':[55.03,82.92],'Asia/Yekaterinburg':[56.84,60.6],'Australia/Sydney':[-33.87,151.21],'Australia/Melbourne':[-37.81,144.96],'Australia/Brisbane':[-27.47,153.03],'Australia/Perth':[-31.95,115.86],'Australia/Adelaide':[-34.93,138.6],'Australia/Darwin':[-12.46,130.84],'Pacific/Auckland':[-36.85,174.76],'Pacific/Fiji':[-18.14,178.44],'Pacific/Honolulu':[21.31,-157.86],'Pacific/Port_Moresby':[-9.44,147.18],'Pacific/Guam':[13.44,144.79],'Europe/London':[51.51,-0.13],'Europe/Dublin':[53.35,-6.26],'Europe/Lisbon':[38.72,-9.14],'Europe/Paris':[48.86,2.35],'Europe/Berlin':[52.52,13.4],'Europe/Madrid':[40.42,-3.7],'Europe/Rome':[41.9,12.5],'Europe/Amsterdam':[52.37,4.9],'Europe/Brussels':[50.85,4.35],'Europe/Zurich':[47.38,8.54],'Europe/Vienna':[48.21,16.37],'Europe/Stockholm':[59.33,18.07],'Europe/Oslo':[59.91,10.75],'Europe/Copenhagen':[55.68,12.57],'Europe/Helsinki':[60.17,24.94],'Europe/Warsaw':[52.23,21.01],'Europe/Prague':[50.08,14.44],'Europe/Budapest':[47.5,19.04],'Europe/Athens':[37.98,23.73],'Europe/Bucharest':[44.43,26.1],'Europe/Kiev':[50.45,30.52],'Europe/Kyiv':[50.45,30.52],'Europe/Moscow':[55.76,37.62],'Europe/Minsk':[53.9,27.57],'Africa/Cairo':[30.04,31.24],'Africa/Johannesburg':[-26.2,28.05],'Africa/Lagos':[6.52,3.38],'Africa/Nairobi':[-1.29,36.82],'Africa/Casablanca':[33.57,-7.59],'Africa/Algiers':[36.75,3.06],'Africa/Addis_Ababa':[9.03,38.74],'Africa/Accra':[5.6,-0.19],'Africa/Dar_es_Salaam':[-6.79,39.21],'Africa/Kinshasa':[-4.44,15.27],'America/New_York':[40.71,-74.0],'America/Chicago':[41.88,-87.63],'America/Denver':[39.74,-104.99],'America/Los_Angeles':[34.05,-118.24],'America/Phoenix':[33.45,-112.07],'America/Anchorage':[61.22,-149.9],'America/Toronto':[43.65,-79.38],'America/Vancouver':[49.28,-123.12],'America/Mexico_City':[19.43,-99.13],'America/Bogota':[4.71,-74.07],'America/Lima':[-12.05,-77.04],'America/Santiago':[-33.45,-70.67],'America/Argentina/Buenos_Aires':[-34.6,-58.38],'America/Buenos_Aires':[-34.6,-58.38],'America/Sao_Paulo':[-23.55,-46.63],'America/Caracas':[10.48,-66.9],'America/Havana':[23.11,-82.37],'America/Halifax':[44.65,-63.57],'America/Montevideo':[-34.9,-56.16],'America/Panama':[8.98,-79.52],'America/Guatemala':[14.63,-90.51]};   // zona waktu -> kota acuan (perkiraan wilayah tanpa izin lokasi)
+const tzName = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } })();
+function estLoc() {   // 1) perkiraan dari zona waktu perangkat: otomatis, tanpa izin & tanpa internet
+  const e = TZ[tzName];
+  if (e) return { lat: e[0], lon: e[1], src: 'tz' };
+  const off = -new Date().getTimezoneOffset() / 60;   // zona tak dikenal: selisih jam UTC -> perkiraan garis bujur (15 derajat per jam)
+  return { lat: 0, lon: Math.max(-180, Math.min(180, off * 15)), src: 'tz' };
+}
+let loc = estLoc(), tgt = { lat: loc.lat, lon: loc.lon, src: loc.src };   // loc = lokasi yang dipakai menghitung (bergeser halus ke tgt agar warna langit tidak melompat)
+try { const g = JSON.parse(LS.get('skymeet_gps') || 'null'); if (g && isFinite(g.lat) && isFinite(g.lon) && g.tz === tzName) { loc = { lat: g.lat, lon: g.lon, src: 'gps' }; tgt = { lat: g.lat, lon: g.lon, src: 'gps' }; } } catch (e) {}   // GPS tersimpan hanya dipakai bila zona waktu belum berubah (belum bepergian jauh)
+const emit = n => window.dispatchEvent(new Event(n));
+function setTarget(lat, lon, src) { tgt = { lat, lon, src }; loc.src = src; if (document.hidden) { loc.lat = lat; loc.lon = lon; } emit('sky:loc'); }
+function easeLoc(dt) {
+  const k = 1 - Math.exp(-dt * 1.4), dl = tgt.lat - loc.lat, dn = tgt.lon - loc.lon;
+  if (Math.abs(dl) < .0005 && Math.abs(dn) < .0005) { loc.lat = tgt.lat; loc.lon = tgt.lon; return; }
+  loc.lat += dl * k; loc.lon += dn * k;
+}
+// 2) izin lokasi browser: bila sudah diizinkan, dibaca diam-diam dan menggantikan perkiraan zona waktu
+let perm = navigator.geolocation ? 'prompt' : 'unsupported', gpsBusy = null;
+function setPerm(p) { if (p !== perm) { perm = p; emit('sky:loc'); } }
+function readGps() {
+  if (!navigator.geolocation) return Promise.resolve('unsupported');
+  if (gpsBusy) return gpsBusy;
+  gpsBusy = new Promise(res => {
+    navigator.geolocation.getCurrentPosition(p => {
+      LS.set('skymeet_gps', JSON.stringify({ lat: p.coords.latitude, lon: p.coords.longitude, tz: tzName }));
+      setTarget(p.coords.latitude, p.coords.longitude, 'gps'); setPerm('granted'); res('ok'); refreshWx(true);
+    }, e => {
+      if (e && e.code === 1) { if (/policy|disabled|not allowed in this/i.test(e.message || '')) { setPerm('unsupported'); res('unsupported'); } else { setPerm('denied'); res('denied'); } }
+      else res('unavailable');
+    }, { timeout: 9000, maximumAge: 600000 });
+  }).then(r => { gpsBusy = null; return r; });
+  return gpsBusy;
+}
+async function initPerm() {
+  if (!navigator.geolocation) return;
+  try {
+    const r = await navigator.permissions.query({ name: 'geolocation' });
+    setPerm(r.state); r.onchange = () => { setPerm(r.state); if (r.state === 'granted') readGps(); };
+  } catch (e) {}
+  if (perm === 'granted') readGps();
+}
+
+const RAD = Math.PI / 180, OBL = RAD * 23.4397, toDays = ms => ms / 86400000 - .5 + 2440588 - 2451545;
+const rAsc = (l, b) => Math.atan2(Math.sin(l) * Math.cos(OBL) - Math.tan(b) * Math.sin(OBL), Math.cos(l));
+const decl = (l, b) => Math.asin(Math.sin(b) * Math.cos(OBL) + Math.cos(b) * Math.sin(OBL) * Math.sin(l));
+function sunCoords(d) {
+  const M = RAD * (357.5291 + .98560028 * d), C = RAD * (1.9148 * Math.sin(M) + .02 * Math.sin(2 * M) + .0003 * Math.sin(3 * M));
+  const L = M + C + RAD * 102.9372 + Math.PI; return { ra: rAsc(L, 0), dec: decl(L, 0) };
+}
+function moonCoords(d) {
+  const L = RAD * (218.316 + 13.176396 * d), M = RAD * (134.963 + 13.064993 * d), F = RAD * (93.272 + 13.22935 * d);
+  const l = L + RAD * 6.289 * Math.sin(M), b = RAD * 5.128 * Math.sin(F);
+  return { ra: rAsc(l, b), dec: decl(l, b), dist: 385001 - 20905 * Math.cos(M) };
+}
+function getPos(ms, c) {   // azimut dari selatan, positif ke barat
+  const phi = RAD * loc.lat, H = RAD * (280.16 + 360.9856235 * toDays(ms)) - RAD * -loc.lon - c.ra;
+  return { azimuth: Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(c.dec) * Math.cos(phi)),
+           altitude: Math.asin(Math.sin(phi) * Math.sin(c.dec) + Math.cos(phi) * Math.cos(c.dec) * Math.cos(H)) };
+}
+function moonFrac(ms) {
+  const d = toDays(ms), s = sunCoords(d), m = moonCoords(d);
+  const phi = Math.acos(Math.sin(s.dec) * Math.sin(m.dec) + Math.cos(s.dec) * Math.cos(m.dec) * Math.cos(s.ra - m.ra));
+  return (1 + Math.cos(Math.atan2(149598000 * Math.sin(phi), m.dist - 149598000 * Math.cos(phi)))) / 2;
+}
+const WXF = { clear: 1, cloudy: .6, rain: .25, storm: .08, snow: .35, fog: .3 };   // cuaca meredupkan matahari/bulan
+// ---- Sunset: langit berubah warna menurut tinggi matahari, dan pandangan "turun" ke dataran rendah dengan lautan ----
+let cam = 0, SP = null, MP = null, starK = 0, skyTick = 0, skyOwn = false;   // cam: 0 = pandangan tinggi, 1 = turun ke permukaan laut
+const HEX = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+const rgb = c => `rgb(${c.map(Math.round).join(',')})`;
+const smooth = t => t * t * (3 - 2 * t);
+const wrapA = x => Math.atan2(Math.sin(x), Math.cos(x));
+const hash = (a, b) => { const v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return v - Math.floor(v); };
+// kunci warna menurut tinggi matahari (derajat): siang, jam emas, sunset, senja, malam
+const SKY_KEYS = [
+  { a: 14,  sky: ['#b7e6ff', '#83c9f0', '#559bd8', '#3166aa'], fog: [250,253,255], sea: [28,100,160] },
+  { a: 5,   sky: ['#9fd3f5', '#bfe0ee', '#f6dcae', '#ffc27a'], fog: [255,236,205], sea: [40,100,140] },
+  { a: -1,  sky: ['#4a5aa0', '#9a6aa8', '#f08a6a', '#ffb06a'], fog: [255,168,140], sea: [50,55,95] },
+  { a: -8,  sky: ['#101a40', '#26336a', '#5c4f86', '#b8706f'], fog: [150,110,150], sea: [25,32,70] },
+  { a: -15, sky: ['#030611', '#050b1d', '#08102a', '#0a1330'], fog: [58,70,118],  sea: [4,8,22] }   // malam = palet malam web utama
+].map(k => ({ ...k, sky: k.sky.map(HEX) }));
+function skyAt(a) {
+  if (a >= SKY_KEYS[0].a) return SKY_KEYS[0];
+  for (let i = 0; i < SKY_KEYS.length - 1; i++) {
+    const k0 = SKY_KEYS[i], k1 = SKY_KEYS[i + 1];
+    if (a <= k0.a && a >= k1.a) { const t = (k0.a - a) / (k0.a - k1.a);
+      return { sky: k0.sky.map((c, j) => mix(c, k1.sky[j], t)), fog: mix(k0.fog, k1.fog, t), sea: mix(k0.sea, k1.sea, t) }; }
+  }
+  return SKY_KEYS[SKY_KEYS.length - 1];
+}
+const skyColorAt = (k, f) => { const P = [0, .35, .7, 1]; for (let i = 0; i < 3; i++) if (f <= P[i + 1]) return mix(k.sky[i], k.sky[i + 1], (f - P[i]) / (P[i + 1] - P[i])); return k.sky[3]; };
+
+// Posisi di layar. Saat cam naik, pandangan menoleh ke arah matahari dan cakrawala (laut) naik ke layar.
+function at(p) {
+  const dz = wrapA(p.azimuth - cam * SP.azimuth), hy = H * (.78 - .12 * cam);
+  const alt = Math.max(-.25, p.altitude) / (Math.PI / 2) * (1 + 2 * cam);   // dekat cakrawala diperbesar agar sunset terlihat
+  return { x: W * (.5 + .46 * Math.sin(dz)), y: hy - Math.min(1, alt) * (hy - H * .1), behind: clamp01((Math.PI * .58 - Math.abs(dz)) / .26) };
+}
+const fogB = document.querySelector('.skFog.bottom'), mistB = document.querySelector('.skMist.bottom'), windsEl = document.getElementById('skWinds');
+function updateSky(dt, now) {
+  easeLoc(dt);
+  const ms = simNow(), d = toDays(ms);
+  SP = getPos(ms, sunCoords(d)); MP = getPos(ms, moonCoords(d));
+  const a = SP.altitude / RAD, nn = SP.altitude < -.05;
+  if (nn !== night) { night = nn; scene.classList.toggle('night', night); }
+  // turun saat matahari mendekati cakrawala (sekitar 14 derajat), naik lagi saat senja berakhir (sekitar -8 sampai -16 derajat)
+  const target = smooth(clamp01((14 - a) / 11)) * (1 - smooth(clamp01((-8 - a) / 8)));
+  cam += (target - cam) * (1 - Math.exp(-dt * 3)); if (Math.abs(cam - target) < .001) cam = target;
+  if (++skyTick % 3 === 0 || !skyOwn) {
+    const k = skyAt(a), c = k.sky.map(rgb);
+    back.style.background = `linear-gradient(180deg, ${c[0]} 0%, ${c[1]} 35%, ${c[2]} 70%, ${c[3]} 100%)`;
+    scene.style.setProperty('--skfog', k.fog.map(Math.round).join(','));
+    skyOwn = true;
+  }
+  fogB.style.opacity = 1 - .92 * cam; mistB.style.filter = `blur(34px) opacity(${1 - cam})`; windsEl.style.opacity = 1 - .55 * cam;
+  if (cam > .01) { seaC.style.display = 'block'; drawSea(now, a); } else if (seaC.style.display !== 'none') seaC.style.display = 'none';
+}
+function drawSea(now, a) {
+  const yh = H * (1 - .34 * cam), t = now / 1000, k = skyAt(a), deep = k.sea, skyH = skyColorAt(k, yh / H);
+  const sa = at(SP), xs = sa.x, wf = WXF[wx] ?? 1;
+  seaX.clearRect(0, 0, W, H);
+  const gr = seaX.createLinearGradient(0, yh, 0, H);
+  gr.addColorStop(0, rgb(mix(skyH, [255, 255, 255], .12))); gr.addColorStop(.35, rgb(mix(skyH, deep, .6))); gr.addColorStop(1, rgb(deep));
+  seaX.fillStyle = gr; seaX.fillRect(0, yh, W, H - yh + 1);
+  const inten = clamp01((a + 1) / 3) * clamp01((18 - a) / 16) * wf, col = mix([255, 245, 215], [255, 165, 85], clamp01((8 - a) / 8)).map(Math.round).join(',');
+  // riak gelombang halus (makin dekat makin lebar)
+  const light = mix(skyH, [255, 255, 255], .5).map(Math.round).join(',');
+  for (let j = 0; j < 46; j++) {
+    const f = j / 46, y = yh + Math.pow(f, 1.7) * (H - yh) + 2;
+    for (let q = 0; q < 5; q++) {
+      const x = ((hash(j, q) * W * 1.2 + t * (4 + 30 * f) * (q % 2 ? 1 : -1)) % (W * 1.2) + W * 1.2) % (W * 1.2) - W * .1, len = (16 + 150 * f) * (.5 + hash(q, j));
+      seaX.fillStyle = `rgba(${light},${(.04 + .1 * f) * (.5 + .5 * Math.sin(t * 1.2 + j + q * 2))})`; seaX.fillRect(x, y, len, 1 + f * 1.5);
+    }
+  }
+  // pantulan matahari: kilauan memanjang tepat di bawah matahari
+  if (inten > .02) for (let j = 0; j < 70; j++) {
+    const f = j / 70, y = yh + Math.pow(f, 1.5) * (H - yh), spread = 8 + (y - yh) * .22;
+    for (let q = 0; q < 5; q++) {
+      const x = xs + (hash(j, q + 9) - .5) * 2 * spread * (1 + .3 * Math.sin(t * .6 + j)), w = (4 + (y - yh) * .06) * (.4 + hash(q, j * 3));
+      seaX.fillStyle = `rgba(${col},${inten * (1 - f * .7) * (.35 + .65 * Math.max(0, Math.sin(t * 2 + j * 1.7 + q * 4.1))) * .8})`;
+      seaX.fillRect(x - w / 2, y, w, 1.5 + f * 2.5);
+    }
+  }
+  // cahaya hangat di cakrawala dan kabut tipis di garis pertemuan laut-langit
+  if (inten > .02) { seaX.save(); seaX.translate(xs, yh); seaX.scale(1, .1);
+    const hg = seaX.createRadialGradient(0, 0, 0, 0, 0, W * .45); hg.addColorStop(0, `rgba(${col},${.5 * inten})`); hg.addColorStop(1, `rgba(${col},0)`);
+    seaX.fillStyle = hg; seaX.fillRect(-W * .5, -W * .45, W, W * .9); seaX.restore(); }
+  const hz = seaX.createLinearGradient(0, yh - 10, 0, yh + 10), hc = skyH.map(Math.round).join(',');
+  hz.addColorStop(0, `rgba(${hc},0)`); hz.addColorStop(.5, `rgba(${hc},.45)`); hz.addColorStop(1, `rgba(${hc},0)`);
+  seaX.fillStyle = hz; seaX.fillRect(0, yh - 10, W, 20);
+  // daratan rendah di kejauhan
+  seaX.fillStyle = `rgba(${mix(deep, [0, 0, 0], .4).map(Math.round).join(',')},.88)`;
+  seaX.beginPath(); seaX.moveTo(0, yh + 1); seaX.lineTo(0, yh - H * .02);
+  seaX.bezierCurveTo(W * .06, yh - H * .032, W * .13, yh - H * .012, W * .24, yh - H * .006); seaX.lineTo(W * .31, yh + 1); seaX.closePath(); seaX.fill();
+  seaX.beginPath(); seaX.moveTo(W * .74, yh + 1); seaX.quadraticCurveTo(W * .785, yh - H * .016, W * .84, yh + 1); seaX.closePath(); seaX.fill();
+}
+
+function drawBodies() {
+  sx.globalAlpha = 1;
+  const ms = simNow(), k = WXF[wx] ?? 1, R = Math.min(W, H) * .04, sp = SP, mp = MP, sa = at(sp), ma = at(mp);
+  const vis = (p, o) => clamp01((p.altitude + .08) / .06) * (1 - cam + cam * o.behind);   // tenggelam ke cakrawala, bukan memudar di langit
+  const sv_ = vis(sp, sa) * k;
+  if (!night && sv_ > 0) {                       // matahari: makin rendah makin jingga
+    const { x, y } = sa, low = 1 - clamp01(sp.altitude / .5);
+    const gr = sx.createRadialGradient(x, y, R * .6, x, y, R * 5);
+    gr.addColorStop(0, `rgba(255,${240 - 70 * low | 0},${170 - 90 * low | 0},${.42 * sv_})`); gr.addColorStop(1, 'rgba(255,220,150,0)');
+    sx.fillStyle = gr; sx.fillRect(x - R * 5, y - R * 5, R * 10, R * 10);
+    sx.fillStyle = `rgba(255,${252 - 60 * low | 0},${225 - 110 * low | 0},${sv_})`; sx.beginPath(); sx.arc(x, y, R, 0, 6.283); sx.fill();
+  }
+  const mv = vis(mp, ma) * k * (night ? 1 : .5);
+  if (mv > 0) {                                  // bulan: fase dan arah sisi terang sesuai posisi matahari di langit
+    const { x, y } = ma, fr = moonFrac(ms), dl = sp.azimuth - mp.azimuth, aS = sp.altitude, aM = mp.altitude;
+    const th = Math.atan2(Math.sin(dl) * Math.cos(aS), Math.cos(aM) * Math.sin(aS) - Math.sin(aM) * Math.cos(aS) * Math.cos(dl));
+    const rx = R * Math.abs(2 * fr - 1);
+    const gr = sx.createRadialGradient(x, y, R * .8, x, y, R * 5);
+    gr.addColorStop(0, `rgba(220,230,255,${.3 * mv * fr})`); gr.addColorStop(1, 'rgba(220,230,255,0)');
+    sx.fillStyle = gr; sx.fillRect(x - R * 5, y - R * 5, R * 10, R * 10);
+    sx.save(); sx.translate(x, y); sx.globalAlpha = mv;
+    if (night) { sx.fillStyle = 'rgba(75,88,130,.55)'; sx.beginPath(); sx.arc(0, 0, R, 0, 6.283); sx.fill(); }
+    sx.rotate(Math.atan2(-Math.cos(th), Math.sin(th)));
+    sx.fillStyle = '#f3f0dc'; sx.beginPath(); sx.arc(0, 0, R, -Math.PI / 2, Math.PI / 2, false);
+    if (fr < .5) sx.ellipse(0, 0, rx, R, 0, Math.PI / 2, -Math.PI / 2, true); else sx.ellipse(0, 0, rx, R, 0, Math.PI / 2, 3 * Math.PI / 2, false);
+    sx.closePath(); sx.fill(); sx.restore();
+  }
+}
+// Cuaca: hujan, petir, salju, berawan, berkabut
+const WXN = { clear: 1, cloudy: 1, rain: 1, storm: 1, snow: 1, fog: 1 };
+let wx = 'clear', drops = [], flakes = [], nextBolt = 0, boltAt = -1e9, wxTemp = null, wxKnown = false, lastWxAt = 0;
+const flashEl = document.getElementById('skFlash');
+function setWx(type) {
+  wx = type;
+  for (const k in WXN) scene.classList.toggle('w-' + k, k === type);
+  const rain = (type === 'rain' || type === 'storm') && !REDUCE, n = Math.min(LOW ? 220 : 520, Math.round(W * H / (type === 'storm' ? 3200 : 6000)));
+  drops = rain ? Array.from({ length: n }, () => ({ x: rnd(-.2, 1.2) * W, y: rnd(0, H), l: rnd(10, 22), v: rnd(700, 1100) })) : [];
+  flakes = type === 'snow' && !REDUCE ? Array.from({ length: Math.min(LOW ? 90 : 220, Math.round(W * H / 10000)) }, () =>
+    ({ x: rnd(0, W), y: rnd(0, H), r: rnd(1, 3), v: rnd(35, 80), w: rnd(.6, 1.6), p: rnd(0, 6.28) })) : [];
+}
+function drawWx(dt, now) {
+  wx2.clearRect(0, 0, W, H);
+  if (drops.length) {
+    wx2.strokeStyle = night ? 'rgba(170,190,235,.5)' : 'rgba(225,238,255,.55)'; wx2.lineWidth = 1; wx2.beginPath();
+    for (const d of drops) {
+      d.y += d.v * dt; d.x += d.v * .18 * dt;
+      if (d.y > H) { d.y = -20; d.x = rnd(-.2, 1.2) * W; }
+      wx2.moveTo(d.x, d.y); wx2.lineTo(d.x - d.l * .18, d.y - d.l);
+    }
+    wx2.stroke();
+  }
+  if (flakes.length) {
+    wx2.fillStyle = 'rgba(255,255,255,.85)';
+    for (const f of flakes) {
+      f.y += f.v * dt; f.x += Math.sin(now / 1000 * f.w + f.p) * 14 * dt + 6 * dt;
+      if (f.y > H) { f.y = -5; f.x = rnd(0, W); }
+      if (f.x > W + 5) f.x = -5;
+      wx2.beginPath(); wx2.arc(f.x, f.y, f.r, 0, 6.283); wx2.fill();
+    }
+  }
+  if (wx === 'storm' && !REDUCE) {
+    if (now > nextBolt) { boltAt = now; nextBolt = now + rnd(7000, 16000); }
+    const q = now - boltAt;
+    flashEl.style.opacity = q < 80 ? .16 : q < 160 ? .03 : q < 240 ? .13 : q < 520 ? .13 * (1 - (q - 240) / 280) : 0;   // lembut agar teks tidak "menyilaukan"
+  } else flashEl.style.opacity = 0;
+}
+
+
+// ---- cuaca realtime (Open-Meteo) mengikuti lokasi perangkat; berhenti saat tab tersembunyi ----
+const WCODE = c => c <= 1 ? 'clear' : c <= 3 ? 'cloudy' : c <= 48 ? 'fog' : (c <= 67 || (c >= 80 && c <= 82)) ? 'rain'
+  : (c <= 77 || c === 85 || c === 86) ? 'snow' : c >= 95 ? 'storm' : 'rain';
+const WX_EVERY = 600000;
+let wxBusy = false;
+try { const c = JSON.parse(LS.get('skymeet_wx') || 'null'); if (c && WXN[c.type] && Date.now() - c.t < 3 * 3600000 && Math.abs(c.lat - tgt.lat) < 1 && Math.abs(c.lon - tgt.lon) < 1) { setWx(c.type); wxTemp = isFinite(c.temp) ? c.temp : null; wxKnown = true; lastWxAt = c.t; } } catch (e) {}
+async function refreshWx(force) {
+  if (wxBusy || (document.hidden && !force)) return;
+  wxBusy = true;
+  try {
+    const ac = new AbortController(), to = setTimeout(() => ac.abort(), 9000);
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + tgt.lat.toFixed(3) + '&longitude=' + tgt.lon.toFixed(3) + '&current=weather_code,temperature_2m', { signal: ac.signal });
+    clearTimeout(to);
+    if (!r.ok) throw 0;
+    const cur = (await r.json()).current || {};
+    if (!isFinite(cur.weather_code)) throw 0;
+    const type = WCODE(cur.weather_code);
+    setWx(type); wxTemp = isFinite(cur.temperature_2m) ? Math.round(cur.temperature_2m) : null; wxKnown = true; lastWxAt = Date.now();
+    LS.set('skymeet_wx', JSON.stringify({ t: lastWxAt, type, temp: wxTemp, lat: tgt.lat, lon: tgt.lon }));
+    emit('sky:wx');
+  } catch (e) { /* gagal (offline/diblokir): tetap memakai cuaca terakhir yang diketahui, atau cerah */ }
+  wxBusy = false;
+}
+setInterval(() => { if (!document.hidden) refreshWx(); }, WX_EVERY);
+
+// ---- API untuk bagian lain aplikasi (warna langit & teks, sapaan, baris suhu, pengaturan lokasi) ----
+function sunAt(ms) { const p = getPos(ms, sunCoords(toDays(ms))); return { alt: p.altitude / RAD, az: p.azimuth }; }
+function sunNow() { return sunAt(simNow()); }
+const lin = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+const relLum = c => .2126 * lin(c[0]) + .7152 * lin(c[1]) + .0722 * lin(c[2]);
+window.SkyScene = {
+  sun: sunNow,
+  frame() {   // warna UI dari langit sungguhan di lokasi perangkat; lum = kecerahan bagian tengah layar (tempat teks) untuk memilih tinta gelap/terang
+    const a = sunNow().alt, c = skyAt(a).sky;
+    return { alt: a, edge: rgb(c[0]), top: rgb(c[1]), bottom: rgb(c[2]), lum: relLum(mix(c[1], c[2], .5)), stars: clamp01((-a - 3) / 7) };
+  },
+  phase() {
+    const s = sunAt(Date.now() + timeShift), a = s.alt, am = s.az < 0;   // am: sisi pagi (matahari di timur); sapaan selalu memakai waktu nyata, bukan offset intro
+    if (a >= 35) return 'midday'; if (a >= 6) return am ? 'morning' : 'afternoon';
+    if (a >= -6) return am ? 'morning' : 'dusk'; if (a >= -12) return am ? 'predawn' : 'night';
+    return am ? 'midnight' : 'night';
+  },
+  weather() { return { type: wx, temp: wxTemp, known: wxKnown }; },
+  loc() { return { src: loc.src, perm, tz: tzName }; },
+  setOffset(ms) { extra = ms || 0; },
+  useDevice: readGps,   // memicu kotak izin browser bila belum pernah ditanya
+};
+initPerm(); startLoop();
+
+
+})();
+</script>
+<script>
 (function(){
   // --- palet langit sepanjang hari (jam desimal, warna atas, warna bawah, warna benda langit, warna cahaya, opasitas bintang) ---
   const stops = [
@@ -2179,7 +3158,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
       greet: { midnight:'Good night', predawn:'Good morning', morning:'Good morning', midday:'Good day', afternoon:'Good afternoon', dusk:'Good evening', night:'Good evening' },
       sys:'System time', sky:'Sky time', hint:'Tap', hintUp:'Back',
-      pac:'Pacific', langLabel:'Language', welcome:'Welcome, Sky kid', welcomeBack:'Welcome back',
+      pac:'Pacific', langLabel:'Language', welcome:'Welcome, Sky kid', welcomeBack:'Welcome back', wx:{ clear:'Clear', cloudy:'Cloudy', rain:'Rain', storm:'Thunderstorm', snow:'Snow', fog:'Foggy' },
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Fairy ring', sunset:'Sunset', rainbow:'Forest Brook rainbow', daily:'Daily reset', weekly:'Weekly reset', ts:'Traveling Spirit', seats:'Take your seats', concert:'Concert starts', shardRed:'Red shard', shardBlack:'Black shard' },
       tips:['Don\'t lose track of time, your candles are waiting.', 'Got a spare candle? Light one for someone today.', 'Even a tiny light can help someone find their way.', 'No rush, the sky isn\'t going anywhere.', 'Did you grab your daily candles yet?', 'Take a break, Sky kid. Tomorrow\'s flight will still be here.', 'Hold someone\'s hand and share your light.', 'Drink some water and stretch a bit between flights.', 'Some spirits are still waiting for you to remember them.', 'Sunsets are worth slowing down for.', 'Go to bed on time, the stars will be back tomorrow.', 'Keep shining, wherever you fly.'],
       reward:{ ascended:'Ascended Candle', wax:'Wax' },
@@ -2195,7 +3174,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       months: ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],
       greet: { midnight:'Selamat malam', predawn:'Selamat dini hari', morning:'Selamat pagi', midday:'Selamat siang', afternoon:'Selamat sore', dusk:'Selamat petang', night:'Selamat malam' },
       sys:'Waktu sistem', sky:'Waktu Sky', hint:'Tekan', hintUp:'Kembali',
-      pac:'Pasifik', langLabel:'Bahasa', welcome:'Selamat datang, Sky kid', welcomeBack:'Selamat datang kembali',
+      pac:'Pasifik', langLabel:'Bahasa', welcome:'Selamat datang, Sky kid', welcomeBack:'Selamat datang kembali', wx:{ clear:'Cerah', cloudy:'Berawan', rain:'Hujan', storm:'Hujan petir', snow:'Salju', fog:'Berkabut' },
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Cincin peri', sunset:'Matahari terbenam', rainbow:'Pelangi Sungai Hutan', daily:'Reset harian', weekly:'Reset mingguan', ts:'Roh pengembara', seats:'Ambil kursi', concert:'Konser dimulai', shardRed:'Shard merah', shardBlack:'Shard hitam' },
       tips:['Jangan lupa waktu ya, lilinmu sudah menunggu.', 'Ada lilin cadangan? Nyalakan satu buat seseorang hari ini.', 'Cahaya sekecil apa pun bisa bantu orang lain menemukan jalan.', 'Santai aja, langitnya nggak ke mana-mana.', 'Sudah ambil lilin harianmu belum?', 'Istirahat dulu, Sky kid. Besok masih bisa terbang lagi.', 'Gandeng tangan temanmu, bagikan cahayamu.', 'Jangan lupa minum air dan regangkan badan di sela-sela terbang.', 'Ada roh yang masih menunggu untuk kamu ingat.', 'Pemandangan sunset layak buat berhenti sebentar.', 'Jangan begadang ya, bintangnya masih ada besok.', 'Terus bersinar, ke mana pun kamu terbang.'],
       reward:{ ascended:'Ascended Candle', wax:'Wax' },
@@ -2211,7 +3190,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       months: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
       greet: { midnight:'Buenas noches', predawn:'Buenos días', morning:'Buenos días', midday:'Buen día', afternoon:'Buenas tardes', dusk:'Buenas tardes', night:'Buenas noches' },
       sys:'Hora del sistema', sky:'Hora de Sky', hint:'Toca', hintUp:'Volver',
-      pac:'Pacífico', langLabel:'Idioma', welcome:'Bienvenido, Sky kid', welcomeBack:'Bienvenido de nuevo',
+      pac:'Pacífico', langLabel:'Idioma', welcome:'Bienvenido, Sky kid', welcomeBack:'Bienvenido de nuevo', wx:{ clear:'Despejado', cloudy:'Nublado', rain:'Lluvia', storm:'Tormenta', snow:'Nieve', fog:'Niebla' },
       ev:{ geyser:'Géiser', grandma:'Abuela', turtle:'Tortuga', eden:'Edén', fairy:'Círculo de hadas', sunset:'Atardecer', rainbow:'Arcoíris del Arroyo del Bosque', daily:'Reinicio diario', weekly:'Reinicio semanal', ts:'Espíritu viajero', seats:'Toma asiento', concert:'Empieza el concierto', shardRed:'Fragmento rojo', shardBlack:'Fragmento negro' },
       tips:['No pierdas la noción del tiempo, tus velas te esperan.', '¿Tienes una vela de sobra? Enciende una por alguien hoy.', 'Hasta una lucecita puede ayudar a alguien a encontrar su camino.', 'Sin prisa, el cielo no se va a ir a ningún lado.', '¿Ya recogiste tus velas de hoy?', 'Tómate un descanso, Sky kid. El vuelo de mañana seguirá ahí.', 'Dale la mano a alguien y comparte tu luz.', 'Toma un poco de agua y estírate entre vuelos.', 'Hay espíritus que todavía esperan que los recuerdes.', 'Un atardecer vale la pena para ir más despacio.', 'Duerme a tu hora, las estrellas vuelven mañana.', 'Sigue brillando, vueles donde vueles.'],
       reward:{ ascended:'Vela ascendida', wax:'Cera' },
@@ -2283,17 +3262,21 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
   }
 
+  let inkDark = false;
   function applySky(h){
-    const f = getFrame(h);
+    const S = window.SkyScene;
+    const f = S ? S.frame() : getFrame(h);   // langit & warna tulisan mengikuti matahari sungguhan di lokasi perangkat (cadangan: tabel jam)
     root.setProperty('--top', f.top);
     root.setProperty('--bottom', f.bottom);
-    root.setProperty('--body-color', f.body);
-    root.setProperty('--glow', f.glow);
+    if(!S){ root.setProperty('--body-color', f.body); root.setProperty('--glow', f.glow); }
     root.setProperty('--star-opacity', f.stars.toFixed(2));
     { const was = starsOn; starsOn = f.stars > 0.02; if(starsOn && !was) window.dispatchEvent(new Event('sky:starsvis')); }
 
-    const lum = (luminance(f.top) + luminance(f.bottom)) / 2;
-    if(lum > 0.62){
+    // tinta gelap bila bagian tengah langit terang (kontras lebih baik daripada putih); jeda kecil agar tidak berkedip di batasnya
+    const dark = S ? (Math.abs(f.lum - 0.207) < 0.012 ? inkDark : f.lum > 0.207) : ((luminance(f.top) + luminance(f.bottom)) / 2 > 0.62);
+    inkDark = dark;
+    root.setProperty('--veil', dark ? 'rgba(255,255,255,0.22)' : 'rgba(3,6,20,0.3)');
+    if(dark){
       root.setProperty('--ink', '#1a2140');
       root.setProperty('--ink-soft', 'rgba(26,33,64,0.62)');
       root.setProperty('--panel', 'rgba(255,255,255,0.62)');
@@ -2313,22 +3296,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
     document.body.style.background = `linear-gradient(180deg, ${f.top} 0%, ${f.bottom} 100%)`;
     const themeMeta = document.querySelector('meta[name="theme-color"]');
-    if(themeMeta) themeMeta.setAttribute('content', f.top);
+    if(themeMeta) themeMeta.setAttribute('content', S ? f.edge : f.top);
 
-    const pos = celestialPosition(h);
-    // saat pergantian siang<->malam, pindahkan benda langit tanpa transisi (hindari meluncur melintasi layar)
-    const isDay = h >= 6 && h < 18;
-    if(lastDay !== null && isDay !== lastDay){
-      celestialEl.style.transition = 'none';
-      celestialEl.style.left = pos.x + '%';
-      celestialEl.style.top = pos.y + '%';
-      void celestialEl.offsetWidth;
-      celestialEl.style.transition = '';
-    } else {
-      celestialEl.style.left = pos.x + '%';
-      celestialEl.style.top = pos.y + '%';
-    }
-    lastDay = isDay;
   }
 
   // --- jam Sky: waktu server game = Pacific Time (America/Los_Angeles, PST/PDT otomatis) ---
@@ -2634,6 +3603,32 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     renderTip();
   }
 
+  // ---- baris suhu & cuaca di Beranda (di antara sapaan dan jam; posisi elemen lain tidak bergeser) ----
+  const WXI = {
+    clear:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/>',
+    night:'<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
+    cloudy:'<path d="M7 18a4 4 0 0 1-.6-7.95A5.5 5.5 0 0 1 17 9.5a4.2 4.2 0 0 1 .5 8.5z"/>',
+    rain:'<path d="M7 15a4 4 0 0 1-.6-7.95A5.5 5.5 0 0 1 17 6.5a4.2 4.2 0 0 1 .5 8.5"/><path d="M8 18l-1 2M12 18l-1 2M16 18l-1 2"/>',
+    storm:'<path d="M7 14a4 4 0 0 1-.6-7.95A5.5 5.5 0 0 1 17 5.5a4.2 4.2 0 0 1 .5 8.5"/><path d="M12 13l-2.5 4h3L11 21"/>',
+    snow:'<path d="M7 14a4 4 0 0 1-.6-7.95A5.5 5.5 0 0 1 17 5.5a4.2 4.2 0 0 1 .5 8.5"/><path d="M8 18h.01M12 20h.01M16 18h.01"/>',
+    fog:'<path d="M4 9h16M3 13h18M5 17h14"/>'
+  };
+  let wxSig = '';
+  function renderWx(){
+    const el = document.getElementById('wxLine'), S = window.SkyScene; if(!el || !S) return;
+    const w = S.weather(); if(!w.known){ if(!el.hidden){ el.hidden = true; wxSig = ''; } return; }
+    const night = S.sun().alt < -2.9, key = (w.type === 'clear' && night) ? 'night' : w.type, sig = [lang, key, w.temp].join('|');
+    if(sig === wxSig) return; wxSig = sig;
+    const name = (I18N[lang].wx || I18N.en.wx)[w.type];
+    el.textContent = '';
+    const ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); ic.setAttribute('viewBox', '0 0 24 24'); ic.setAttribute('aria-hidden', 'true'); ic.innerHTML = WXI[key] || WXI.clear;
+    const tx = document.createElement('span'); tx.className = 'wt'; tx.textContent = (w.temp != null ? w.temp + '\u00b0C' : '') ;
+    const nm = document.createElement('span'); nm.textContent = (w.temp != null ? '\u00b7 ' : '') + name;
+    el.append(ic, tx, nm); el.hidden = false; el.setAttribute('aria-label', (w.temp != null ? w.temp + '\u00b0C, ' : '') + name);
+  }
+  window.addEventListener('sky:wx', renderWx);
+  window.addEventListener('sky:lang', () => { wxSig = ''; renderWx(); });
+
   function renderGreeting(t, key){
     greetH.textContent = t.greet[key] + (userName ? ', ' + userName : '');
     greetS.textContent = userName ? t.welcomeBack : t.welcome;
@@ -2663,7 +3658,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(page === 3) paintPg();
 
     dateEl.textContent = t.date(t.days[now.getDay()], now.getDate(), t.months[now.getMonth()], now.getFullYear());
-    renderGreeting(t, phaseKey(h));
+    renderGreeting(t, window.SkyScene ? window.SkyScene.phase() : phaseKey(h)); renderWx();
 
     // --- digit jam: hanya ditulis di sini setelah animasi masuk selesai ---
     if(!introActive){
@@ -2892,13 +3887,17 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
       const hmDigits = formatHM(hh, mm).replace(':', '');
       digitEls.forEach((el, i) => { el.textContent = hmDigits[i]; });
+      if(window.SkyScene){   // time-lapse: matahari, bulan, dan warna langit ikut berputar dari 12 jam lalu menuju sekarang
+        let dl = ((hh + mm / 60) - (now.getHours() + now.getMinutes() / 60)) % 24; if(dl < 0) dl += 24; if(dl > 11.99) dl -= 24;
+        window.SkyScene.setOffset(dl * 3600000);
+      }
       applySky(hh + mm / 60);
 
       if(progress < 1){
         requestAnimationFrame(frame);
       } else {
         digitEls.forEach(el => el.classList.add('settled'));
-        introActive = false;
+        introActive = false; if(window.SkyScene) window.SkyScene.setOffset(0);
         document.body.classList.add('ready');
         tick(); // pastikan langit & digit final presisi ke waktu nyata
         if(pendingPage !== page) show(pendingPage);
@@ -3400,9 +4399,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   window.SkyFlame = { into: flameInto, setFrame };   // dipakai tombol nyalakan api di daftar teman
   const FAB_TXT = {
-    en:{ tog:'Floating daily-progress icon', ttl:'Daily progress', all:'Select all', cap:'Grey candle (~20/day)', close:'Close' },
-    id:{ tog:'Ikon melayang progres harian', ttl:'Progres harian', all:'Pilih semua', cap:'Lilin abu-abu (\u00b120/hari)', close:'Tutup' },
-    es:{ tog:'Icono flotante del progreso diario', ttl:'Progreso diario', all:'Seleccionar todo', cap:'Vela gris (~20/d\u00eda)', close:'Cerrar' }
+    en:{ tog:'Floating daily-progress icon', ttl:'Daily progress', all:'Select all', cap:'Grey candle (~20/day)', close:'Close', hintT:'Floating icon', hintB:'Turn this on to open your Candle run from any page. Tick areas, track daily progress and use the grey candle right from the floating icon.', hintOk:'Got it' },
+    id:{ tog:'Ikon melayang progres harian', ttl:'Progres harian', all:'Pilih semua', cap:'Lilin abu-abu (\u00b120/hari)', close:'Tutup', hintT:'Ikon melayang', hintB:'Aktifkan ini agar progres Candle run bisa dibuka dari halaman mana pun. Centang area, pantau progres harian, dan pakai lilin abu-abu langsung dari ikon melayang.', hintOk:'Mengerti' },
+    es:{ tog:'Icono flotante del progreso diario', ttl:'Progreso diario', all:'Seleccionar todo', cap:'Vela gris (~20/d\u00eda)', close:'Cerrar', hintT:'Icono flotante', hintB:'Activa esto para abrir tu Candle run desde cualquier p\u00e1gina. Marca \u00e1reas, sigue el progreso diario y usa la vela gris desde el icono flotante.', hintOk:'Entendido' }
   };
   const mkTx = (tag, cls, txt) => { const e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; return e; };
   const fabBtn = mkTx('button'); fabBtn.id = 'fab'; fabBtn.type = 'button'; flameInto(fabBtn);
@@ -3416,6 +4415,36 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   fabSwitch._onFlame = swSync;
   { const thd = runBox.querySelector('.thd'), evl = thd.querySelector('.evl'), lf = mkTx('div', 'thL'); thd.insertBefore(lf, evl); lf.append(fabSwitch, evl); }   // on/off ikon melayang: paling kiri, tepat di samping tulisan Candle run; lilin abu-abu tetap di kanan (keduanya ikon saja)
   fabSwitch.onclick = () => Store.set('fab', Store.get('fab', 0) ? 0 : 1);
+  // ---- petunjuk: pertama kali halaman Progres dibuka pada hari itu, lingkaran menyorot tombol on/off ikon melayang (sekitarnya redup & blur) ----
+  const FH_KEY = 'sky_fabhint_day';
+  let fhEl = null, fhT = null, fhShownMem = '';
+  const fhSeen = () => { try{ return localStorage.getItem(FH_KEY) === dayK(); }catch(e){ return fhShownMem === dayK(); } };
+  const fhClose = () => {
+    clearTimeout(fhT); if(!fhEl) return; const el = fhEl; fhEl = null; el.classList.remove('on');
+    removeEventListener('resize', fhPlace); setTimeout(() => el.remove(), 380);
+  };
+  function fhPlace(){
+    if(!fhEl) return; const r = fabSwitch.getBoundingClientRect(); if(!r.width){ fhClose(); return; }
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2, R = Math.max(r.width, r.height) / 2 + 12, st = fhEl.style;
+    st.setProperty('--hx', cx + 'px'); st.setProperty('--hy', cy + 'px'); st.setProperty('--hr', R + 'px');
+    const bx = fhEl.querySelector('.hbox'), bw = Math.min(300, innerWidth - 32); bx.style.width = bw + 'px';
+    bx.style.left = Math.max(16, Math.min(innerWidth - bw - 16, cx - 32)) + 'px';
+    bx.style.top = Math.min(innerHeight - bx.offsetHeight - 16, cy + R + 14) + 'px';
+    fhEl.querySelector('.harr').style.left = Math.max(10, Math.min(bw - 22, cx - parseFloat(bx.style.left) - 6)) + 'px';
+  }
+  function fhShow(){
+    if(fhEl || fhSeen() || !document.body.classList.contains('p3') || !fabOv.hidden) return;
+    const t = FAB_TXT[lang] || FAB_TXT.en;
+    try{ localStorage.setItem(FH_KEY, dayK()); }catch(e){ fhShownMem = dayK(); }
+    fhEl = mkTx('div'); fhEl.id = 'fabHint'; fhEl.setAttribute('role', 'dialog'); fhEl.setAttribute('aria-label', t.hintT);
+    fhEl.innerHTML = '<i class="hdim"></i><i class="hring"></i><div class="hbox"><i class="harr"></i><b></b><p></p><button type="button"></button></div>';
+    fhEl.querySelector('b').textContent = t.hintT; fhEl.querySelector('p').textContent = t.hintB; fhEl.querySelector('button').textContent = t.hintOk;
+    fhEl.addEventListener('click', fhClose);
+    document.body.appendChild(fhEl); fhPlace(); addEventListener('resize', fhPlace);
+    const el0 = fhEl; requestAnimationFrame(() => { if(fhEl === el0) el0.classList.add('on'); });
+    const track = () => { if(fhEl !== el0) return; fhPlace(); requestAnimationFrame(track); }; track();   // ikut posisi tombol selama halaman masih bergeser/animasi masuk, jadi lingkaran selalu tepat di tengah
+  }
+  window.addEventListener('sky:page', e => { clearTimeout(fhT); if(e.detail.page === 3) fhT = setTimeout(fhShow, 1100); else fhClose(); });
   let fabHome = null, flyT = null;
   let fabArt = .88;   // posisi dasar gambar api (0..1 dari tinggi kotak api); diukur dari piksel frame api
   function artFy(){
@@ -3814,6 +4843,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       cfAccT:'\u00bfGuardar los cambios de la cuenta?', cfAccMsg:'Se actualizar\u00e1n tu usuario, correo o contrase\u00f1a.', cfUpT:'\u00bfCrear una cuenta completa?', cfUpMsg:'Tu progreso, amigos e ID se conservar\u00e1n y pasar\u00e1n a la nueva cuenta.', closeB:'Cerrar' }
   };
   Object.keys(VT6).forEach(l => Object.assign(VT[l], VT6[l]));
+  const VTLOC = {
+    en:{ locT:'Location', locSrcGps:'Using your device location: weather and sunrise/sunset match where you are.', locSrcTz:'Estimated from your time zone ({tz}). Allow location for exact weather and sunset times.', locUse:'Use device location', locRefresh:'Update location', locDenied:'Location is blocked for this site. Open your browser\u2019s site settings, set Location to Allow, then tap the button again.', locUnsup:'Location is not available on this page or device, so your time zone is used.', locDone:'Location updated', locFail:'Could not read your location. Try again.', locAskT:'Allow location?', locAskMsg:'Skymeet uses your location only to match the weather and sunrise/sunset to where you are. It stays on this device.', locAskOk:'Continue', locAskNo:'Not now' },
+    id:{ locT:'Lokasi', locSrcGps:'Memakai lokasi perangkatmu: cuaca dan matahari terbit/terbenam sesuai tempatmu.', locSrcTz:'Diperkirakan dari zona waktumu ({tz}). Izinkan lokasi untuk cuaca dan jam senja yang tepat.', locUse:'Gunakan lokasi perangkat', locRefresh:'Perbarui lokasi', locDenied:'Lokasi diblokir untuk situs ini. Buka pengaturan situs di browser, ubah Lokasi menjadi Izinkan, lalu tekan tombol lagi.', locUnsup:'Lokasi tidak tersedia di halaman atau perangkat ini, jadi zona waktumu yang dipakai.', locDone:'Lokasi diperbarui', locFail:'Lokasi tidak bisa dibaca. Coba lagi.', locAskT:'Izinkan lokasi?', locAskMsg:'Skymeet memakai lokasimu hanya untuk menyesuaikan cuaca dan jam matahari terbit/terbenam dengan tempatmu. Data ini tetap di perangkat ini.', locAskOk:'Lanjutkan', locAskNo:'Nanti saja' },
+    es:{ locT:'Ubicaci\u00f3n', locSrcGps:'Usando la ubicaci\u00f3n de tu dispositivo: el clima y el amanecer/atardecer coinciden con tu lugar.', locSrcTz:'Estimada seg\u00fan tu zona horaria ({tz}). Permite la ubicaci\u00f3n para el clima y el atardecer exactos.', locUse:'Usar ubicaci\u00f3n del dispositivo', locRefresh:'Actualizar ubicaci\u00f3n', locDenied:'La ubicaci\u00f3n est\u00e1 bloqueada para este sitio. Abre la configuraci\u00f3n del sitio en tu navegador, pon Ubicaci\u00f3n en Permitir y pulsa de nuevo el bot\u00f3n.', locUnsup:'La ubicaci\u00f3n no est\u00e1 disponible en esta p\u00e1gina o dispositivo, as\u00ed que se usa tu zona horaria.', locDone:'Ubicaci\u00f3n actualizada', locFail:'No se pudo leer tu ubicaci\u00f3n. Int\u00e9ntalo de nuevo.', locAskT:'\u00bfPermitir la ubicaci\u00f3n?', locAskMsg:'Skymeet usa tu ubicaci\u00f3n solo para ajustar el clima y el amanecer/atardecer a tu lugar. Se queda en este dispositivo.', locAskOk:'Continuar', locAskNo:'Ahora no' }
+  };
+  Object.keys(VTLOC).forEach(l => Object.assign(VT[l], VTLOC[l]));
   const VT4 = {
     en:{ actOn:'Online', actNow:'Active just now', actAgo:'Active {t} ago', uM:'min', uH:'h', uD:'d' },
     id:{ actOn:'Online', actNow:'Baru saja aktif', actAgo:'Aktif {t} lalu', uM:'mnt', uH:'jam', uD:'hari' },
@@ -3835,17 +4870,17 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   };
   const VT9 = {
     en:{ flameDone:'You already lit a flame for {n} today', onl:'This needs an online account', you:'You', invBtn:'Invite to play', invT:'Play together', invWhat:'Activity', invWhen:'Time', invNow:'Now', invPick:'Pick a time', invNote:'Note (optional)', invHint:'Valid for 30 min after the play time, and never past the daily reset.', invSend:'Send invite', invSent:'Invite sent', invLater:'Not now',
-      a_daily:'Daily quests', a_run:'Candle run', a_wax:'Wax farming', a_spirit:'Spirits & seasons', a_chill:'Just hanging out', a_other:'Something else',
+      a_daily:'Daily quests', a_run:'Candle run', a_wax:'Eden', a_spirit:'Spirits & seasons', a_chill:'Just hanging out', a_other:'Something else',
       invCard:'Play together', invAt:'Play at {t}', invNowT:'Right now', invWait:'Waiting \u00b7 valid until {t} ({r})', invLeft:'{t} left', invReset:'ends at daily reset', invOk:'Accepted', invNo:'Declined', invCan:'Cancelled', invEnd:'Ended ({t})', invAcc:'Accept', invDec:'Decline', invCancel:'Cancel invite', invMomB:"Open today's moment",
       invGot:'{n} invited you to play', invAccd:'{n} accepted your invite', invDecd:'{n} declined your invite', invActive:'There is already an active invite with this friend', invTimeBad:'Pick a time later today, before the daily reset', invLate:'Too close to the daily reset', invExpired:'This invite has already ended', invStale:'This invite was already answered', invFail:'Could not do that, try again',
       momOpen:"Moment unlocked: add photos from today's session", momBtn:"Today's moment", momT:"Today's moment", momLock:'Opens once a play invite is accepted today.', momAdd:'Add photos', momBy:'Created by {n}', momPh:'by {n}', momNone:'No photos yet', momMax:'Up to 6 photos per moment', momUp:'Uploading {a}/{b}\u2026', momShare:'Share with all my friends', momDel:'Delete moment', momDelQ:'Delete this moment and all its photos?', momDelPhQ:'Delete this photo?', momArch:'Archive', momArchNone:'Nothing archived yet', momNew:'{n} added photos to your moment', momFail:'Photos could not be added', uMin:'min', uHr:'h' },
     id:{ flameDone:'Kamu sudah menyalakan api untuk {n} hari ini', onl:'Ini butuh akun online', you:'Kamu', invBtn:'Ajak main', invT:'Main bareng', invWhat:'Aktivitas', invWhen:'Waktu', invNow:'Sekarang', invPick:'Pilih jam', invNote:'Catatan (opsional)', invHint:'Berlaku 30 menit setelah waktu main, dan tidak pernah melewati reset harian.', invSend:'Kirim ajakan', invSent:'Ajakan terkirim', invLater:'Nanti saja',
-      a_daily:'Daily quest', a_run:'Candle run', a_wax:'Farming wax', a_spirit:'Spirit & season', a_chill:'Santai saja', a_other:'Lainnya',
+      a_daily:'Daily quest', a_run:'Candle run', a_wax:'Eden', a_spirit:'Spirit & season', a_chill:'Santai saja', a_other:'Lainnya',
       invCard:'Main bareng', invAt:'Main jam {t}', invNowT:'Sekarang juga', invWait:'Menunggu \u00b7 berlaku sampai {t} ({r})', invLeft:'tersisa {t}', invReset:'berakhir di reset harian', invOk:'Diterima', invNo:'Ditolak', invCan:'Dibatalkan', invEnd:'Sudah berakhir ({t})', invAcc:'Terima', invDec:'Tolak', invCancel:'Batalkan ajakan', invMomB:'Buka momen hari ini',
       invGot:'{n} mengajak kamu main', invAccd:'{n} menerima ajakanmu', invDecd:'{n} menolak ajakanmu', invActive:'Masih ada ajakan aktif dengan teman ini', invTimeBad:'Pilih jam nanti hari ini, sebelum reset harian', invLate:'Terlalu dekat dengan reset harian', invExpired:'Ajakan ini sudah berakhir', invStale:'Ajakan ini sudah dijawab', invFail:'Gagal, coba lagi',
       momOpen:'Momen terbuka: tambahkan foto dari sesi hari ini', momBtn:'Momen hari ini', momT:'Momen hari ini', momLock:'Terbuka setelah ajakan main diterima hari ini.', momAdd:'Tambah foto', momBy:'Dibuat oleh {n}', momPh:'oleh {n}', momNone:'Belum ada foto', momMax:'Maksimal 6 foto per momen', momUp:'Mengunggah {a}/{b}\u2026', momShare:'Bagikan ke semua temanku', momDel:'Hapus momen', momDelQ:'Hapus momen ini beserta semua fotonya?', momDelPhQ:'Hapus foto ini?', momArch:'Arsip', momArchNone:'Belum ada arsip', momNew:'{n} menambah foto ke momenmu', momFail:'Foto gagal ditambahkan', uMin:'mnt', uHr:'j' },
     es:{ flameDone:'Ya encendiste una llama para {n} hoy', onl:'Esto requiere una cuenta en l\u00ednea', you:'T\u00fa', invBtn:'Invitar a jugar', invT:'Jugar juntos', invWhat:'Actividad', invWhen:'Hora', invNow:'Ahora', invPick:'Elegir hora', invNote:'Nota (opcional)', invHint:'V\u00e1lida 30 min despu\u00e9s de la hora de juego y nunca m\u00e1s all\u00e1 del reinicio diario.', invSend:'Enviar invitaci\u00f3n', invSent:'Invitaci\u00f3n enviada', invLater:'Ahora no',
-      a_daily:'Misiones diarias', a_run:'Carrera de velas', a_wax:'Cultivo de cera', a_spirit:'Esp\u00edritus y temporadas', a_chill:'Solo pasar el rato', a_other:'Otra cosa',
+      a_daily:'Misiones diarias', a_run:'Carrera de velas', a_wax:'Eden', a_spirit:'Esp\u00edritus y temporadas', a_chill:'Solo pasar el rato', a_other:'Otra cosa',
       invCard:'Jugar juntos', invAt:'Jugar a las {t}', invNowT:'Ahora mismo', invWait:'En espera \u00b7 v\u00e1lida hasta las {t} ({r})', invLeft:'quedan {t}', invReset:'termina en el reinicio diario', invOk:'Aceptada', invNo:'Rechazada', invCan:'Cancelada', invEnd:'Terminada ({t})', invAcc:'Aceptar', invDec:'Rechazar', invCancel:'Cancelar invitaci\u00f3n', invMomB:'Abrir el momento de hoy',
       invGot:'{n} te invit\u00f3 a jugar', invAccd:'{n} acept\u00f3 tu invitaci\u00f3n', invDecd:'{n} rechaz\u00f3 tu invitaci\u00f3n', invActive:'Ya hay una invitaci\u00f3n activa con este amigo', invTimeBad:'Elige una hora m\u00e1s tarde hoy, antes del reinicio diario', invLate:'Demasiado cerca del reinicio diario', invExpired:'Esta invitaci\u00f3n ya termin\u00f3', invStale:'Esta invitaci\u00f3n ya fue respondida', invFail:'No se pudo, int\u00e9ntalo de nuevo',
       momOpen:'Momento desbloqueado: a\u00f1ade fotos de la sesi\u00f3n de hoy', momBtn:'Momento de hoy', momT:'Momento de hoy', momLock:'Se abre cuando se acepta una invitaci\u00f3n a jugar hoy.', momAdd:'A\u00f1adir fotos', momBy:'Creado por {n}', momPh:'de {n}', momNone:'A\u00fan no hay fotos', momMax:'M\u00e1ximo 6 fotos por momento', momUp:'Subiendo {a}/{b}\u2026', momShare:'Compartir con todos mis amigos', momDel:'Eliminar momento', momDelQ:'\u00bfEliminar este momento y todas sus fotos?', momDelPhQ:'\u00bfEliminar esta foto?', momArch:'Archivo', momArchNone:'Nada archivado todav\u00eda', momNew:'{n} a\u00f1adi\u00f3 fotos a tu momento', momFail:'No se pudieron a\u00f1adir las fotos', uMin:'min', uHr:'h' }
@@ -5175,7 +6210,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   function applyProfLang(){
     const v = vt(), set = (id, t) => { const e = $(id); if(e) e.textContent = t; };
-    set('setT', v.settings); set('avT', v.avT); set('visT', v.visT); set('lgT', ({ en:'Account language', id:'Bahasa akun', es:'Idioma de la cuenta' })[window.SkyApp.getLang()] || 'Account language'); set('accT', v.accT); set('upT', v.upT); set('friendsT', v.friendsT);
+    renderLoc(); set('setT', v.settings); set('avT', v.avT); set('visT', v.visT); set('lgT', ({ en:'Account language', id:'Bahasa akun', es:'Idioma de la cuenta' })[window.SkyApp.getLang()] || 'Account language'); set('accT', v.accT); set('upT', v.upT); set('friendsT', v.friendsT);
     set('nmT', v.nmT); set('stT', v.stT); set('sndT', v.sndT); set('setSave', v.save); set('avSave', v.save); $('setClose').setAttribute('aria-label', v.closeB); $('avClose').setAttribute('aria-label', v.closeB); $('setName').placeholder = v.name; renderMyName();
     set('accSave', v.accSave); set('upBtn', v.upBtn); set('accNote', v.noSrv);
     const o = $('visSel').options; o[0].textContent = v.vPub; o[1].textContent = v.vFr; o[2].textContent = v.vPri;
@@ -5199,7 +6234,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   function openSettings(){
     if(!myUid) return;
-    fillSettings(); setFrom = document.activeElement;
+    fillSettings(); renderLoc(); setFrom = document.activeElement;
     $('setOv').classList.add('open'); $('setOv').setAttribute('aria-hidden', 'false'); SFX.open();
     setTimeout(() => $('setClose').focus({ preventScroll:true }), 60);
   }
@@ -5265,6 +6300,29 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   $('setSave').addEventListener('click', () => withBusy($('setSave'), saveSettingsProfile));
   ['setName', 'stIn'].forEach(id => $(id).addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('setSave').click(); } }));
   window.addEventListener('sky:lang', e => { if(myUid && e.detail && e.detail.lang && prof.lang !== e.detail.lang){ saveProf({ lang: e.detail.lang }, true); } });   // ganti bahasa lewat menu atas juga ikut tersimpan ke akun
+  // ---------- lokasi perangkat: status, tombol izin, dan permintaan izin sekali ----------
+  function renderLoc(){
+    const S = window.SkyScene; if(!S || !$('locSec')) return;
+    const v = vt(), L = S.loc(), btn = $('locBtn'), note = $('locNote'), gps = L.src === 'gps' && L.perm === 'granted';
+    $('locT').textContent = v.locT;
+    $('locSt').textContent = L.perm === 'unsupported' ? v.locUnsup : gps ? v.locSrcGps : v.locSrcTz.replace('{tz}', L.tz || 'UTC');
+    btn.hidden = L.perm === 'unsupported'; btn.textContent = gps ? v.locRefresh : v.locUse;
+    note.hidden = L.perm !== 'denied'; note.textContent = v.locDenied;
+  }
+  window.addEventListener('sky:loc', renderLoc);
+  $('locBtn').addEventListener('click', async () => {
+    const v = vt(), b = $('locBtn'); b.disabled = true;
+    const r = await window.SkyScene.useDevice(); b.disabled = false; renderLoc();
+    if(r === 'ok'){ toast(v.locDone); SFX.success(); } else { toast(r === 'denied' ? v.locDenied : v.locFail); SFX.error(); }
+  });
+  // izin diminta sekali (dengan penjelasan singkat) setelah masuk ke aplikasi, hanya bila belum pernah ditanya
+  async function maybeAskLoc(){
+    const S = window.SkyScene; if(!S || lsGet('skymeet_loc_asked') || S.loc().perm !== 'prompt') return;
+    const v = vt(); lsSet('skymeet_loc_asked', '1');
+    if(await askConfirm({ title: v.locAskT, msg: v.locAskMsg, ok: v.locAskOk, no: v.locAskNo })) S.useDevice();
+  }
+  { let tries = 0; const iv = setInterval(() => { tries++; if(document.body.classList.contains('ready')){ clearInterval(iv); setTimeout(maybeAskLoc, 2500); } else if(tries > 80) clearInterval(iv); }, 1500); }
+
   $('muteBtn').addEventListener('click', async () => {   // efek suara: berdiri sendiri, tetap minta konfirmasi
     const v = vt();
     if(!(await askConfirm({ title: prof.mute ? v.cfUnmuteT : v.cfMuteT, msg:v.cfSndMsg, ok:v.cfOk, no:v.outNo }))) return;
