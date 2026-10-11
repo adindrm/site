@@ -53,7 +53,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     --star-opacity: 1;
     --ink: #f4f5fb;
     --ink-soft: rgba(244,245,251,0.62);
-    --logo-filter:none; --warn:#ffd9a0; --warn-bg:rgba(255,200,120,0.1); --warn-bd:rgba(255,200,120,0.24); --err:#ff9b9b; --ok:#8fe3a8; --toast-bg:rgba(20,22,45,0.94); --toast-fg:#f4f5fb;
+    --logo-filter:none; --logo-inv:brightness(0); --warn:#ffd9a0; --warn-bg:rgba(255,200,120,0.1); --warn-bd:rgba(255,200,120,0.24); --err:#ff9b9b; --ok:#8fe3a8; --toast-bg:rgba(20,22,45,0.94); --toast-fg:#f4f5fb;
     --panel: rgba(0,0,0,0.34);   /* latar menu dropdown: gelap saat malam, terang saat siang agar teks tetap terbaca */
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
@@ -1432,6 +1432,49 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .pill{ min-height:36px; padding:0 12px; border-radius:12px; border-color:rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#f4f5fb; }
   #fabOv .pill[aria-pressed="true"]{ background:linear-gradient(135deg,#ffe9a8,#ffc86a); color:#2a2140; border-color:transparent; box-shadow:0 0 12px rgba(255,200,100,0.45); }
   @media (prefers-reduced-motion: reduce){ #fab.fly{ transition-duration:.01s !important; } }
+
+  /* ===== ikon ajakan/momen dari aset: warna ikut tema ===== */
+  .ic2{ display:inline-grid; place-items:center; width:1.2em; height:1.2em; margin-right:6px; vertical-align:-.22em; flex:none; }
+  .ic2 svg, .ic2 img.ai{ width:100%; height:100%; display:block; }
+  .ic2 img.ai{ filter:var(--logo-filter); transition:filter .6s linear; animation:none; }
+  .msg.me .ic2 img.ai{ filter:var(--logo-inv); }
+  #momOv .ic2 img.ai, #invSheet .ic2 img.ai{ filter:none; }
+  .inv .ivB button.pri .ic2 img.ai, .mBtn.pri .ic2 img.ai, #momOv .mBtn.pri .ic2 img.ai{ filter:brightness(0) !important; }
+  .inv .ivB button, .mBtn{ display:inline-flex; align-items:center; justify-content:center; }
+  .inv .ivH{ display:flex; align-items:center; } .inv .ivS{ display:flex; align-items:center; }
+  .momH{ display:flex; align-items:center; }
+  .momLock b{ display:grid; place-items:center; } .momLock b .ic2{ width:42px; height:42px; margin:0; vertical-align:baseline; }
+  #chatHead .hb img.ai, #chatAttach img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
+  /* ===== ikon melayang: hiasan hanya saat panel terbuka; panel = lilin putih, ikon = nyala di ujung sumbu ===== */
+  #fab .fabDeco{ opacity:0; transition:opacity .35s ease; }
+  #fab.up .fabDeco{ opacity:1; transition:opacity .9s ease .45s; }
+  #fab.up .fAura{ inset:-22px; }
+  #fab.fly{ transition:left .85s cubic-bezier(.45,.05,.2,1), top .85s cubic-bezier(.45,.05,.2,1), scale .85s cubic-bezier(.45,.05,.2,1); }
+  #fab.up{ scale:1.3; translate:0 0 !important; }
+  #fab.up:not(.gray) .flame{ filter:var(--fx-lit); }
+  #fabOv{ background:rgba(28,18,8,0.5); }
+  #fabOv .fp{ --ink:#3a2f26; --ink-soft:rgba(58,47,38,0.62); --top:#fff8e8; color:#3a2f26; overflow:visible; padding-top:30px;
+    background:radial-gradient(120% 55% at 50% 0%, rgba(255,214,140,0.42), transparent 62%), linear-gradient(180deg,#fffefa,#f8f1e3 68%,#eee3cc);
+    border:1px solid rgba(214,186,140,0.6); border-bottom:0;
+    box-shadow:0 -18px 50px rgba(0,0,0,0.42), 0 -2px 42px rgba(255,205,120,0.38), inset 0 2px 0 rgba(255,255,255,0.95), inset 0 -12px 26px rgba(208,176,126,0.2); }
+  #fabOv .fp::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:linear-gradient(100deg, rgba(255,255,255,0.55) 0, transparent 18%, transparent 80%, rgba(170,130,70,0.1)); }
+  #fabOv .fh, #fabOv .fs, #fabOv .fl{ z-index:2; }
+  #fabOv .wick{ position:absolute; left:50%; top:-26px; width:4px; height:28px; margin-left:-2px; border-radius:3px 3px 1px 1px; z-index:3; pointer-events:none;
+    background:linear-gradient(180deg,#1c1612,#4a3b2f 70%,#7a6450); transform-origin:50% 100%; animation:wickSway 4.2s ease-in-out infinite; }
+  #fabOv .wick::after{ content:''; position:absolute; left:50%; bottom:-4px; width:40px; height:9px; margin-left:-20px; border-radius:50%; background:radial-gradient(closest-side, rgba(204,166,104,0.6), transparent); }
+  @keyframes wickSway{ 0%,100%{ transform:rotate(-2deg); } 50%{ transform:rotate(2deg); } }
+  #fabOv .fh b{ background:linear-gradient(90deg,#8a5a14,#d3912a); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #fabOv .fx{ background:rgba(110,80,40,0.1); color:#3a2f26; }
+  #fabOv .fs::after{ background:rgba(110,80,40,0.14); }
+  #fabOv .fs::before{ background:linear-gradient(90deg,#f0a030,#ffd36a); box-shadow:0 0 10px rgba(240,170,60,0.55); }
+  #fabOv .fdd{ background:linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.45)); border:1px solid rgba(140,100,50,0.18); box-shadow:0 2px 8px rgba(120,86,40,0.08); }
+  #fabOv .fdd.done{ background:linear-gradient(180deg, rgba(255,214,120,0.5), rgba(255,236,190,0.35)); border-color:rgba(214,150,40,0.6); }
+  #fabOv .fdd.open{ border-color:rgba(214,150,40,0.5); }
+  #fabOv .fmb{ background:rgba(110,80,40,0.13); }
+  #fabOv .fmb::after{ background:linear-gradient(90deg,#f0a030,#ffd36a); }
+  #fabOv .pill{ border-color:rgba(110,80,40,0.28); background:rgba(255,255,255,0.7); color:#3a2f26; }
+  #fabOv .pill[aria-pressed="true"]{ background:linear-gradient(135deg,#ffe9a8,#ffbf55); color:#3a2310; border-color:transparent; box-shadow:0 0 12px rgba(240,170,60,0.5); }
+  @media (prefers-reduced-motion: reduce){ #fabOv .wick{ animation:none; } }
 </style>
 </head>
 <body class="notranslate" translate="no">
@@ -2190,7 +2233,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       root.setProperty('--ink-soft', 'rgba(26,33,64,0.62)');
       root.setProperty('--panel', 'rgba(255,255,255,0.62)');
       root.setProperty('--warn', '#7a4300'); root.setProperty('--warn-bg', 'rgba(255,255,255,0.6)'); root.setProperty('--warn-bd', 'rgba(122,67,0,0.32)');
-      root.setProperty('--logo-filter', 'brightness(0)');
+      root.setProperty('--logo-filter', 'brightness(0)'); root.setProperty('--logo-inv', 'brightness(0) invert(1)');
       root.setProperty('--err', '#b3261e'); root.setProperty('--ok', '#1d6f3a');
       root.setProperty('--toast-bg', 'rgba(255,255,255,0.97)'); root.setProperty('--toast-fg', '#1a2140');
     } else {
@@ -2198,7 +2241,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       root.setProperty('--ink-soft', 'rgba(244,245,251,0.62)');
       root.setProperty('--panel', 'rgba(0,0,0,0.34)');
       root.setProperty('--warn', '#ffd9a0'); root.setProperty('--warn-bg', 'rgba(255,200,120,0.1)'); root.setProperty('--warn-bd', 'rgba(255,200,120,0.24)');
-      root.setProperty('--logo-filter', 'none');
+      root.setProperty('--logo-filter', 'none'); root.setProperty('--logo-inv', 'brightness(0)');
       root.setProperty('--err', '#ff9b9b'); root.setProperty('--ok', '#8fe3a8');
       root.setProperty('--toast-bg', 'rgba(20,22,45,0.94)'); root.setProperty('--toast-fg', '#f4f5fb');
     }
@@ -3296,7 +3339,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   { const dc = mkTx('span', 'fabDeco'); dc.setAttribute('aria-hidden', 'true');   // dekorasi: aura, bola kaca, cincin progres, percikan mengorbit
     dc.innerHTML = '<i class="fAura"></i><span class="fOrbit"><i></i></span><span class="fOrbit o2"><i></i></span>';
     fabBtn.insertBefore(dc, fabBtn.firstChild); }
-  const fabOv = mkTx('div'); fabOv.id = 'fabOv'; fabOv.hidden = true; fabOv.innerHTML = '<div class="fp" role="dialog" aria-modal="true"><div class="fh"><b></b><button type="button" class="fx">\u2715</button></div><div class="fs"></div><div class="fl"></div></div>';
+  const fabOv = mkTx('div'); fabOv.id = 'fabOv'; fabOv.hidden = true; fabOv.innerHTML = '<div class="fp" role="dialog" aria-modal="true"><i class="wick" aria-hidden="true"></i><div class="fh"><b></b><button type="button" class="fx">\u2715</button></div><div class="fs"></div><div class="fl"></div></div>';
   document.body.append(fabBtn, fabOv);
   const fabSwitch = mkTx('button', 'pill fabTog'); fabSwitch.type = 'button';
   flameInto(fabSwitch, 'sm'); const swSync = f => { if(fabSwitch.getAttribute('aria-pressed') === 'true') delete f.dataset.hold; else { f.dataset.hold = '1'; setFrame(f, 0); } };   // aktif = animasi api berulang terus; nonaktif = diam di frame awal
@@ -3310,7 +3353,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     if(up){
       fabBtn.classList.add('up');
       fabBtn.style.left = Math.round(innerWidth / 2 - FAB_SZ / 2) + 'px';
-      fabBtn.style.top = Math.max(6, Math.round(innerHeight - fp.offsetHeight - FAB_SZ / 2 - 4)) + 'px';
+      fabBtn.style.top = Math.max(6, Math.round(innerHeight - fp.offsetHeight - 70)) + 'px';   // api duduk di ujung sumbu (sumbu 26px di atas panel; ikon diperbesar 1.3x)
     } else if(fabHome){
       fabBtn.style.left = fabHome.l + 'px'; fabBtn.style.top = fabHome.t + 'px';
       flyT = setTimeout(() => { fabBtn.classList.remove('fly', 'up'); fabHome = null; fabMagArm(); }, 950);
@@ -3326,7 +3369,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !fabOv.hidden) closeFab(); });
   window.addEventListener('sky:page', closeFab);
   let fabPos = null; try{ fabPos = JSON.parse(localStorage.getItem('sky_fab_pos') || 'null'); }catch(e){}
-  const FAB_SZ = 52, FAB_EDGE = 8, FAB_MAG_WAIT = 10000;
+  const FAB_SZ = 52, FAB_EDGE = 8, FAB_MAG_WAIT = 3000;
   const fabSave = () => { try{ localStorage.setItem('sky_fab_pos', JSON.stringify(fabPos)); }catch(e){} };
   const fabPlace = () => {
     const w = innerWidth, h = innerHeight; let x = fabPos ? fabPos.x * w : w - 66, y = fabPos ? fabPos.y * h : h - 170;
@@ -4356,24 +4399,42 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   const leftTxt = (ms, v) => { const m = Math.max(1, Math.ceil(ms / 60000)); return m < 60 ? m + ' ' + v.uMin : Math.floor(m / 60) + ' ' + v.uHr + ' ' + (m % 60) + ' ' + v.uMin; };
   const invErr = c => { const v = vt(); return ({ active:v.invActive, time:v.invTimeBad, late:v.invLate, expired:v.invExpired, state:v.invStale })[c] || v.invFail; };
   function setInv(x){ const k = invList.findIndex(y => y.id === x.id); if(k < 0) invList.push(x); else invList[k] = x; }
+  const ICX = {
+    ajakan:'<path d="M6 8h12a3 3 0 0 1 3 3v2.5a3 3 0 0 1-5.2 2L14.5 14h-5l-1.3 1.5A3 3 0 0 1 3 13.5V11a3 3 0 0 1 3-3Z"/><path d="M8 10.5v2.5M6.8 11.7h2.4M16 11.5h.01M18 12.8h.01"/>',
+    terima:'<path d="M5 12.5l4.5 4.5L19 7.5"/>', tolak:'<path d="M6 6l12 12M18 6L6 18"/>',
+    jam:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    kunci:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    arsip:'<rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5 8.5V18a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 18V8.5M10 12.5h4"/>',
+    bingkai:'<rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9.5" r="1.6"/><path d="M4.5 17l4.5-4.5 3.5 3.5 2.5-2.5 4.5 4.5"/>',
+    kilau:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 16.5v3M17 18h3"/>'
+  };
+  // ikon dari aset (aset/skymeet/<folder>/<nama>); belum ada file = ikon garis bawaan. Warna mengikuti tema lewat CSS (.ic2)
+  const icn = (key) => {
+    const s = mkEl('span', 'ic2'); s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + ICX[key.split('/')[1]] + '</svg>';
+    const A = window.SkyAsset, sv = s.firstChild;
+    if(A){ const u = A.peek(key); if(u) sv.replaceWith(A.mkImg(u)); else A.swap(sv, key); }
+    return s;
+  };
+  const withIc = (el, key) => { el.insertBefore(icn(key), el.firstChild); return el; };
   function fillInv(sp, m, iv, v){
     const i = invById(iv.i), st = invState(i), box = mkEl('div', 'inv'), mine = i ? i.from === myCode : m.from === myCode;
-    sp.textContent = ''; box.append(mkEl('div', 'ivH', '\ud83c\udfae ' + v.invCard));
+    sp.textContent = ''; box.append(withIc(mkEl('div', 'ivH', v.invCard), 'ajakan/ajakan'));
     if(i){
       const later = i.at - i.ts > 120000;
       box.append(mkEl('div', 'ivA', (v['a_' + i.act] || v.a_other) + ' \u00b7 ' + (later ? v.invAt.replace('{t}', clockHM(i.at)) : v.invNowT)));
       if(i.note) box.append(mkEl('div', 'ivN', i.note));
     }
-    let txt = '', cls = '';
-    if(st === 'p') txt = v.invWait.replace('{t}', clockHM(i.exp)).replace('{r}', v.invLeft.replace('{t}', leftTxt(i.exp - srvNow(), v))) + (i.exp >= i.rs ? ' \u00b7 ' + v.invReset : '');
-    else if(st === 'a'){ txt = '\u2713 ' + v.invOk; cls = 'ok'; }
-    else if(st === 'd'){ txt = v.invNo; cls = 'no'; }
+    let txt = '', cls = '', sk = '';
+    if(st === 'p'){ sk = 'ajakan/jam'; } if(st === 'p') txt = v.invWait.replace('{t}', clockHM(i.exp)).replace('{r}', v.invLeft.replace('{t}', leftTxt(i.exp - srvNow(), v))) + (i.exp >= i.rs ? ' \u00b7 ' + v.invReset : '');
+    else if(st === 'a'){ txt = v.invOk; cls = 'ok'; sk = 'ajakan/terima'; }
+    else if(st === 'd'){ txt = v.invNo; cls = 'no'; sk = 'ajakan/tolak'; }
     else if(st === 'c') txt = v.invCan;
     else txt = v.invEnd.replace('{t}', i ? clockHM(i.exp) : '--:--');
-    box.append(mkEl('div', 'ivS ' + cls, txt));
-    const bar = mkEl('div', 'ivB'), add = (label, pri, fn) => { const b = mkEl('button', pri ? 'pri' : '', label); b.type = 'button'; b.addEventListener('click', e => { e.stopPropagation(); b.disabled = true; fn(); }); bar.append(b); };
-    if(i && st === 'p'){ if(mine) add(v.invCancel, false, () => answerInv('cancelInvite', i)); else { add(v.invAcc, true, () => answerInv('respondInvite', i, 1)); add(v.invDec, false, () => answerInv('respondInvite', i, 0)); } }
-    if(i && st === 'a' && i.day === dayNow()) add(v.invMomB, true, () => openMoment(otherOf(i)));
+    { const sd = mkEl('div', 'ivS ' + cls, txt); if(sk) withIc(sd, sk); box.append(sd); }
+    const bar = mkEl('div', 'ivB'), add = (label, pri, fn, ik) => { const b = mkEl('button', pri ? 'pri' : '', label); if(ik) withIc(b, ik); b.type = 'button'; b.addEventListener('click', e => { e.stopPropagation(); b.disabled = true; fn(); }); bar.append(b); };
+    if(i && st === 'p'){ if(mine) add(v.invCancel, false, () => answerInv('cancelInvite', i)); else { add(v.invAcc, true, () => answerInv('respondInvite', i, 1), 'ajakan/terima'); add(v.invDec, false, () => answerInv('respondInvite', i, 0), 'ajakan/tolak'); } }
+    if(i && st === 'a' && i.day === dayNow()) add(v.invMomB, true, () => openMoment(otherOf(i)), 'momen/kilau');
     if(bar.children.length) box.append(bar);
     sp.append(box);
   }
@@ -4460,7 +4521,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     const v = vt(), code = momFor, b = momOv.querySelector('.mb'), sc = b.scrollTop, inv = todayInv(code), m = todayMom(code);
     momOv.querySelector('.mT').textContent = v.momT; momOv.querySelector('.mS').textContent = nameOf(code); b.textContent = '';
     if(!inv && !m){
-      const lk = mkEl('div', 'momLock'); lk.append(mkEl('b', '', '\ud83d\udd12'), mkEl('div', '', v.momLock));
+      const lk = mkEl('div', 'momLock'); lk.append(withIc(mkEl('b', ''), 'momen/kunci'), mkEl('div', '', v.momLock));
       const go = mkEl('button', 'mBtn pri', v.invBtn); go.type = 'button'; go.onclick = () => { closeMom(); if(chatFriend() && chatFriend().code === code) openInvSheet(); };
       lk.append(go); b.append(lk);
     } else {
@@ -4476,7 +4537,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         });
         b.append(g);
       }
-      const add = mkEl('button', 'mBtn pri', momBusy || v.momAdd); add.type = 'button'; add.disabled = !!momBusy || n >= MOM_MAX; add.onclick = () => momFile.click(); b.append(add);
+      const add = withIc(mkEl('button', 'mBtn pri', momBusy || v.momAdd), 'momen/bingkai'); add.type = 'button'; add.disabled = !!momBusy || n >= MOM_MAX; add.onclick = () => momFile.click(); b.append(add);
       if(m && m.by === myCode){
         const lab = mkEl('label', 'momChk'), ck = mkEl('input'); ck.type = 'checkbox'; ck.checked = m.vis === 'friends'; lab.append(ck, document.createTextNode(v.momShare));
         ck.onchange = async () => { const r = await api('setMomentVis', { id: m.id, vis: ck.checked ? 'friends' : 'pair' }); if(!r.ok) toast(v.invFail); kickPoll(); };
@@ -4484,7 +4545,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
         b.append(lab, del);
       }
     }
-    b.append(mkEl('div', 'momH', v.momArch));
+    b.append(withIc(mkEl('div', 'momH', v.momArch), 'momen/arsip'));
     const past = momList.filter(x => x.day !== dayNow() && pairHas(x, myCode, code)).sort((x, y) => y.day < x.day ? -1 : 1);
     if(!past.length) b.append(mkEl('div', 'momInfo', v.momArchNone));
     past.forEach(x => {
