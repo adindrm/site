@@ -2665,7 +2665,7 @@ function closeFlap(t) {
 }
 // Beranda memakai gerak jubah, kaki, dan titik jejak yang sama dengan Closeup.
 const CAPE_REST = (() => { let sx = 0, sy = 0, n = 0; for (let i = 0; i < CAPE.length; i += 2) { sx += CAPE[i]; sy += CAPE[i + 1]; n++; } return [sx / n, sy / n]; })();
-const SWAY = 1.5;   // dasar goyangan kain saat tidak mengepak (sebelumnya .8): besarkan agar goyangan lebih terlihat
+const SWAY = 1;   // dasar goyangan kain saat tidak mengepak (sebelumnya .8): besarkan agar goyangan lebih terlihat
 const HF_GAIN = .16, HF_MAX = 6, HF_RATE = 6;   // kepala/badan ikut bergeser mengikuti jubah: porsi gerak jubah, batas (satuan SVG 300), kehalusan
 function applyCape(f, ct, tau, g, bo, dv = 0) {
   ct *= f.cf || 1;   // tiap kid punya kecepatan riak kain sendiri
