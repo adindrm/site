@@ -44,6 +44,22 @@ if('serviceWorker' in navigator){ window.addEventListener('load', function(){ na
 /* bila skrip utama error saat layar loading masih tampil, tulis pesan errornya di layar agar mudah dilacak */
 window.addEventListener('error', function(e){ var m = document.getElementById('loadMsg'), l = document.getElementById('loadingScreen'); if(m && l && !l.classList.contains('hidden')){ m.style.display = 'block'; m.textContent = 'Error: ' + (e.message || 'script'); } });
 </script>
+<script>
+/* pilihan grafik (per perangkat): high | medium | low. Class gfx-* di <html> dipakai CSS; mesin kanvas membaca SkyGfx.dpr()/scale(). */
+(function(){
+  var KEY = 'sky-gfx', LV = ['high', 'medium', 'low'], d = document.documentElement, lv = null;
+  try{ lv = localStorage.getItem(KEY); }catch(e){}
+  if(LV.indexOf(lv) < 0) lv = ((navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2)) ? 'low' : 'high';
+  function paint(){ LV.forEach(function(l){ d.classList.toggle('gfx-' + l, l === lv); }); }
+  window.SkyGfx = {
+    level: function(){ return lv; },
+    dpr: function(max){ return Math.min(window.devicePixelRatio || 1, lv === 'low' ? 1 : lv === 'medium' ? 1.25 : max); },
+    scale: function(){ return lv === 'low' ? .35 : lv === 'medium' ? .65 : 1; },
+    set: function(l){ if(LV.indexOf(l) < 0 || l === lv) return; lv = l; try{ localStorage.setItem(KEY, l); }catch(e){} paint(); window.dispatchEvent(new CustomEvent('sky:gfx', { detail:{ level:l } })); }
+  };
+  paint();
+})();
+</script>
 <style>
   :root{
     --top: #0b1026;
@@ -214,9 +230,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .profMain{ flex:1; min-width:0; text-align:left; }
   .profCard .idLabel{ font-size:11px; color:var(--ink-soft); letter-spacing:0.04em; text-transform:uppercase; }
   .profCard .idVal{ font-size:18px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .profCard #setOpen{ flex:none; display:grid; place-items:center; width:46px; height:46px; padding:0; border:0; border-radius:50%; background:none; color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:transform .15s ease; }
-  #setOpen svg, #setOpen img.ai{ width:29px; height:29px; } #setOpen img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
-  #setOpen:active{ transform:scale(0.9); } #setOpen:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  #setBox .profCard{ background:rgba(0,0,0,0.15); -webkit-backdrop-filter:none; backdrop-filter:none; border-color:rgba(255,255,255,0.14); }
   .profStatus{ font-size:12px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .profStatus:empty{ display:none; }
   .profUser{ font-size:12px; color:var(--ink-soft); }
   .avBig{ flex:none; width:56px; height:56px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.18); font-size:28px; cursor:pointer; display:grid; place-items:center; }
@@ -486,7 +500,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .arch img{ width:44px; height:44px; border-radius:8px; object-fit:cover; } .arch .at{ flex:1; font-size:13px; }
   .arch button{ background:none; border:none; color:#ff9b9b; cursor:pointer; font-size:16px; }
   #momW{ display:none; position:fixed; right:16px; bottom:calc(env(safe-area-inset-bottom,0px) + 20px); width:116px; height:136px; z-index:20; cursor:pointer; -webkit-tap-highlight-color:transparent; }
-  body.ready:not(.p2):not(.p3):not(.p4) #momW.has{ display:block; animation:momIn .6s cubic-bezier(.2,.9,.3,1) both; }
+  body.ready:not(.p2):not(.p3):not(.p4):not(.p5):not(.p6) #momW.has{ display:block; animation:momIn .6s cubic-bezier(.2,.9,.3,1) both; }
   @keyframes momIn{ from{ opacity:0; transform:translateY(30px) scale(.8) rotate(8deg); } to{ opacity:1; transform:none; } }
   #momW .pol{ position:absolute; left:8px; top:8px; width:96px; padding:5px 5px 18px; background:#f7f2e8; border-radius:4px; box-shadow:0 6px 16px rgba(0,0,0,0.45); transition:transform .7s cubic-bezier(.3,.8,.3,1), opacity .5s; transform-origin:50% 100%; }
   #momW .pol img{ width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#ddd; opacity:0; transition:opacity .4s; } #momW .pol img.ld{ opacity:1; }
@@ -637,12 +651,14 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   /* ===== sistem halaman penuh: tiap halaman = satu layar, scroll sendiri-sendiri ===== */
   #pages{ position:fixed; inset:0; z-index:5; overflow:hidden; }
-  #track{ height:400%; transition: transform 0.85s cubic-bezier(.65,0,.25,1); will-change:transform; }
-  body.p2 #track{ transform: translateY(-25%); }
-  body.p3 #track{ transform: translateY(-50%); }
-  body.p4 #track{ transform: translateY(-75%); }
+  #track{ height:600%; transition: transform 0.85s cubic-bezier(.65,0,.25,1); will-change:transform; }
+  body.p2 #track{ transform: translateY(-16.6667%); }
+  body.p3 #track{ transform: translateY(-33.3333%); }
+  body.p4 #track{ transform: translateY(-50%); }
+  body.p5 #track{ transform: translateY(-66.6667%); }
+  body.p6 #track{ transform: translateY(-83.3333%); }
   .page{
-    position:relative; height:25%;
+    position:relative; height:16.6667%;
     overflow-y:auto; overflow-x:hidden;
     overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
   }
@@ -655,6 +671,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #p1 .page-in{ gap:clamp(12px, 2.2vh, 20px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
   #p2 .page-in{ justify-content:flex-start; padding-top:0; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); }
   #p4 .page-in{ justify-content:flex-start; padding-top:0; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); }   /* Visit: profil tepat di bawah header, daftar teman mengalir ke bawah */
+  .csText{ font-size:clamp(22px, 6vw, 34px); font-weight:300; letter-spacing:0.04em; color:var(--ink); opacity:.85; }
   .p2wrap{ width:100%; max-width:520px; display:flex; flex-direction:column; gap:22px; }
 
   /* elemen halaman 1 muncul saat halaman siap */
@@ -973,6 +990,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   /* tombol lilin abu-abu: ikon saja (tanpa kartu/bingkai bulat), area sentuh 44px */
   button.cap, button.cap[aria-pressed="true"]{ display:inline-grid; place-items:center; width:44px; height:44px; min-width:44px; min-height:44px; padding:0; border:0; border-radius:50%; background:none; box-shadow:none; }
   .cap svg.gc{ fill:#9aa0b4; }   /* sebelumnya kalah oleh .cap svg{fill:kuning} sehingga lilin 'abu-abu' tampak kuning */
+  .capN{ position:absolute; right:-1px; bottom:1px; min-width:16px; padding:0 3px; border-radius:8px; background:var(--panel); color:var(--ink); font:600 10px/16px 'Space Grotesk', sans-serif; text-align:center; font-variant-numeric:tabular-nums; pointer-events:none; }
   .cap span{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
   .hbtns{ display:flex; align-items:center; gap:8px; flex:none; }
   .thL{ display:flex; align-items:center; gap:2px; min-width:0; }
@@ -1202,7 +1220,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #navBtn, #langCurrent{ pointer-events:auto; }
   /* pemutar musik mini di header (tengah, antara Menu dan bahasa): ketuk = buka kontrol (jeda/lanjut + sebelumnya/berikutnya), tekan lama = daftar lagu */
   #musicBox{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 16px); left:50%; transform:translateX(-50%); z-index:10; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s; }
-  body.ready.mz:not(.p2):not(.p3):not(.p4) #musicBox{   /* hanya di beranda */ opacity:1; visibility:visible; transition:opacity .5s ease .2s, visibility 0s; }
+  body.ready.mz:not(.p2):not(.p3):not(.p4):not(.p5):not(.p6) #musicBox{   /* hanya di beranda */ opacity:1; visibility:visible; transition:opacity .5s ease .2s, visibility 0s; }
   /* saat hanya ikon musik: TANPA kartu. Kartu (latar + garis + blur) baru muncul saat jeda/lanjut terbuka atau daftar musik tampil */
   #mzBar{ display:flex; align-items:center; gap:2px; height:56px; padding:0 1px; border-radius:999px; border:1px solid transparent; background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; pointer-events:auto; max-width:calc(100vw - 24px); transition:opacity .3s ease, background-color .3s ease, border-color .3s ease, padding .28s ease; }
   #musicBox.open #mzBar, #musicBox.listOpen #mzBar{ padding:0 5px; border-color:rgba(255,255,255,0.18); background:rgba(0,0,0,0.15); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
@@ -1622,6 +1640,13 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #wxLine svg{ width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
   #wxLine .wt{ color:var(--ink); font-weight:500; }
   @media (max-height:420px) and (orientation:landscape){ #wxLine{ display:none; } }
+  /* grafik: sedang = tanpa partikel debu & hiasan ikon melayang; rendah = juga tanpa kabut, nebula, blur kaca, dan kedip awan */
+  html.gfx-medium #stars .motes, html.gfx-medium #loginStars .motes, html.gfx-low #stars .motes, html.gfx-low #loginStars .motes,
+  html.gfx-low #stars .nebula, html.gfx-low #loginStars .nebula, html.gfx-low .skMist, html.gfx-low .skFog, html.gfx-low #fab .fabDeco{ display:none !important; }
+  html.gfx-medium #fab .fOrbit, html.gfx-medium #fab .fAura{ animation:none; }
+  html.gfx-low .skPuff i{ animation:none !important; }
+  html.gfx-low *, html.gfx-low *::before, html.gfx-low *::after{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+  html.gfx-low #setOv, html.gfx-low #rsOv, html.gfx-low #avOv{ background:rgba(0,0,0,0.62); }
   .setCard .locSt{ font-size:13px; line-height:1.4; color:var(--ink-soft); margin:2px 0 10px; }
 </style>
 </head>
@@ -1644,11 +1669,16 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   <canvas id="skSplash"></canvas>
   <div id="skKid">
     <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="capegrad" gradientUnits="userSpaceOnUse" x1="154" y1="98" x2="128" y2="194">
+          <stop offset="0" stop-color="#CE6C53"/><stop offset=".5" stop-color="#C1614A"/><stop offset="1" stop-color="#A84838"/>
+        </linearGradient>
+      </defs>
       <g fill="#F5F5E0">
-        <path d="M146.4,179.8c-24.7,0-65.1-26-86.3-50.2c-6.4-7-5.4-11.7,4.1-13.7c27.7-6.2,55.9-8.3,84.2-6.3c14.1,0.8,22.3-13.6,34.9-17.2c15.8-5.2,32-9.5,48.1-13.6C259.7,69.2,244,184.8,146.4,179.8z"/>
-        <path d="M121.9,85.2c0-28.6,42.8-28.8,43.3-0.2C164.7,112.9,122.7,113.4,121.9,85.2z"/>
-        <path d="M224,236.4c-6.9-17.4-10.3-35.9-24.1-49.8c-6.1-6.5-5.1-8.4,3.2-11.6c33.2-11.9,26.4,42.6,23.3,61C225.5,236.1,224.8,236.3,224,236.4z"/>
-        <path d="M210.9,229.1c-17.1-1-40.3-22.4-47-42.8c5.9-0.3,23.8-10.1,25.8-2.9C191.1,201.8,204.8,212.7,210.9,229.1z"/>
+        <path d="M124.2,78.5c0-28.6,42.8-28.8,43.3-0.2C167,106.2,125,106.7,124.2,78.5z"/>
+        <path d="M209.7,243c-6.9-17.4-10.3-35.9-24.1-49.8c-6.1-6.5-5.1-8.4,3.2-11.6c33.2-11.9,26.4,42.6,23.3,61C211.2,242.7,210.5,242.9,209.7,243z"/>
+        <path d="M196.6,235.7c-17.1-1-40.3-22.4-47-42.8c5.9-0.3,23.8-10.1,25.8-2.9C176.8,208.4,190.5,219.3,196.6,235.7z"/>
+        <path class="cape" fill="url(#capegrad)" d="M238.3,118.3c-12.5,40.8-59.3,55.5-63,56.6c-45.6,13.5-83.8-11.4-89.6-15.3c-16.4-10.5-42.2-59.6-19-59.8c16.6-0.1,33.4-0.1,50,1c12.6,0.3,23.7,11.2,36.4,8.3c12.7-3.5,17.1-18.7,28-25.1c14-9,28.5-17.3,48.9-26.2C240.3,53.1,245.8,93.9,238.3,118.3z"/>
       </g>
     </svg>
   </div>
@@ -1707,18 +1737,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       <div class="page-in">
         <div class="p2wrap">
           <header class="p2head" id="p4head"></header>
-          <div class="profCard">
-            <div class="profTop">
-              <button type="button" class="avBig" id="avBtn" aria-label="Avatar"></button>
-              <div class="profMain">
-                <div class="idLabel" id="nameLabelT">Your name</div>
-                <div class="idVal nameVal" id="myNameVal"></div>
-                <div class="profUser" id="profUser"></div>
-                <div class="profStatus" id="profStatus"></div>
-              </div>
-              <button type="button" id="setOpen" aria-haspopup="dialog" aria-label="Settings"><svg data-asset="aksi/pengaturan.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
-            </div>
-          </div>
           <div class="fSecT" id="reqT" hidden></div>
           <div id="reqList" hidden></div>
           <div class="fSecT" id="friendsT"></div>
@@ -1728,6 +1746,14 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       </div>
     </section>
 
+    <section class="page" id="p5" inert aria-hidden="true" tabindex="-1">
+      <div class="page-in"><div class="csText" role="status">Coming soon</div></div>
+    </section>
+
+    <section class="page" id="p6" inert aria-hidden="true" tabindex="-1">
+      <div class="page-in"><div class="csText" role="status">Coming soon</div></div>
+    </section>
+
   </div>
 </div>
 
@@ -1735,6 +1761,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   <div id="setBox" role="dialog" aria-modal="true" aria-labelledby="setT">
     <div class="setHd"><h2 id="setT">Settings</h2><button type="button" id="setClose" aria-label="Close">&#10005;</button></div>
     <div class="setScroll">
+      <!-- profil: dulu di halaman Visit, sekarang bisa dibuka dari halaman mana pun lewat menu -->
+            <div class="profCard">
+              <div class="profTop">
+                <button type="button" class="avBig" id="avBtn" aria-label="Avatar"></button>
+                <div class="profMain">
+                  <div class="idLabel" id="nameLabelT">Your name</div>
+                  <div class="idVal nameVal" id="myNameVal"></div>
+                  <div class="profUser" id="profUser"></div>
+                  <div class="profStatus" id="profStatus"></div>
+                </div>
+              </div>
+            </div>
       <!-- satu fungsi simpan: avatar, nama, status, visibilitas progres, bahasa -->
       <section class="setCard" id="setProf">
         <div class="setField"><div class="idLabel" id="nmT">Name</div><input type="text" id="setName" maxlength="10" autocomplete="off"></div>
@@ -1749,6 +1787,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
       <section class="setCard">
         <div class="idLabel" id="sndT"></div>
         <button type="button" class="fBtn" id="muteBtn" aria-pressed="false"></button>
+      </section>
+      <!-- berdiri sendiri: grafik (hanya perangkat ini) -->
+      <section class="setCard">
+        <div class="setField"><div class="idLabel" id="gfxT"></div>
+          <select id="gfxSel"><option value="high"></option><option value="medium"></option><option value="low"></option></select></div>
+        <div class="locSt" id="gfxHint"></div>
       </section>
       <!-- berdiri sendiri: lokasi perangkat (cuaca & senja sesuai tempatmu) -->
       <section class="setCard" id="locSec">
@@ -1947,6 +1991,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     <button class="nav-item" type="button" role="menuitem" data-go="visit">
       <svg data-asset="menu/kunjungi.svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14s4.5-4.4 4.5-7.5a4.5 4.5 0 0 0-9 0C3.5 9.6 8 14 8 14Z"/><circle cx="8" cy="6.5" r="1.6"/></svg>
       <span data-t="visit">Visit</span><i class="udot" id="navDotItem" hidden></i>
+    </button>
+    <button class="nav-item" type="button" role="menuitem" data-go="outfit">
+      <svg data-asset="menu/kosmetik.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+      <span data-t="outfit">Cosmetics</span>
+    </button>
+    <button class="nav-item" type="button" role="menuitem" data-go="map">
+      <svg data-asset="menu/peta.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>
+      <span data-t="map">Map</span>
+    </button>
+    <button class="nav-item" type="button" role="menuitem" data-go="profile" aria-haspopup="dialog">
+      <svg data-asset="aksi/pengaturan.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span data-t="profile">Profile</span>
     </button>
     <button class="nav-item logout" type="button" role="menuitem" data-go="logout">
       <svg data-asset="menu/keluar.svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 2.5H4a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h2.5M10 5l3 3-3 3M13 8H6.5"/></svg>
@@ -2155,7 +2211,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     document.addEventListener('pointerdown', away, true); document.addEventListener('focusin', away);
     document.addEventListener('keydown', e => { if(e.key === 'Escape'){ setList(false); closeBar(); } });
     window.addEventListener('sky:lang', paintLabels);
-    new MutationObserver(() => { const b = document.body.classList; if(b.contains('p2') || b.contains('p3') || b.contains('p4')){ setList(false); closeBar(); } }).observe(document.body, { attributes:true, attributeFilter:['class'] });   // pindah dari beranda = tutup panel/daftar
+    new MutationObserver(() => { const b = document.body.classList; if(b.contains('p2') || b.contains('p3') || b.contains('p4') || b.contains('p5') || b.contains('p6')){ setList(false); closeBar(); } }).observe(document.body, { attributes:true, attributeFilter:['class'] });   // pindah dari beranda = tutup panel/daftar
     paintLabels();
   }
   window.SkyMusic = {
@@ -2207,7 +2263,7 @@ const LOW = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigato
 let night = false;
 let W, H, unit;
 function resize() {
-  const dpr = Math.min(devicePixelRatio || 1, LOW ? 1 : 1.75);
+  const dpr = window.SkyGfx ? SkyGfx.dpr(1.75) : Math.min(devicePixelRatio || 1, LOW ? 1 : 1.75);
   W = scene.clientWidth; H = scene.clientHeight;
   cv.width = W * dpr; cv.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2219,6 +2275,7 @@ function resize() {
   unit = Math.min(1.4, Math.max(.5, Math.min(W, H * .8) / 420));
 }
 addEventListener('resize', resize); resize();
+addEventListener('sky:gfx', () => { resize(); setWx(wx); });   // ganti pilihan grafik: resolusi & jumlah partikel langsung menyesuaikan
 
 // Sprite gumpalan kabut lembut untuk jejak kondensasi
 const sp = document.createElement('canvas'); sp.width = sp.height = 64;
@@ -2261,29 +2318,42 @@ function sample(arr, N, t) { const f = clamp01(t) * N, i = Math.min(N - 1, Math.
 
 
 // Jubah: titik-titik path dalam koordinat absolut. Bentuknya digeser per frame (morph), jadi tidak perlu gambar frame manual.
-const CAPE = [146.4,179.8,121.7,179.8,81.3,153.8,60.1,129.6,53.7,122.6,54.7,117.9,64.2,115.9,91.9,109.7,120.1,107.6,148.4,109.6,162.5,110.4,170.7,96.0,183.3,92.4,199.1,87.2,215.3,82.9,231.4,78.8,259.7,69.2,244,184.8,146.4,179.8];
+const CAPE = [238.3,118.3,225.8,159.1,179.0,173.8,175.3,174.9,129.7,188.4,91.5,163.5,85.7,159.6,69.3,149.1,43.5,100.0,66.7,99.8,83.3,99.7,100.1,99.7,116.7,100.8,129.3,101.1,140.4,112.0,153.1,109.1,165.8,105.6,170.2,90.4,181.1,84.0,195.1,75.0,209.6,66.7,230.0,57.8,240.3,53.1,245.8,93.9,238.3,118.3];
+const NSEG = (CAPE.length / 2 - 1) / 3;   // jumlah segmen kurva jubah
 const AXV = [Math.cos(HEAD_ANGLE), Math.sin(HEAD_ANGLE)], LATV = [-AXV[1], AXV[0]], PIV = [150, 125];
+const PSH = [[147.9, 111], [160.2, 108.8]], SPN = [154.05, 109.9], SPN2 = [.968, -.252];
+const sstep = (a, b, x) => { const q = Math.max(0, Math.min(1, (x - a) / (b - a))); return q * q * (3 - 2 * q); };
 let CAPE_PTS = [];   // titik jubah (pasangan x,y) setelah berubah bentuk
-const CAPE_TIPS = [[53.7, 122.6], [259.7, 69.2]];   // ujung kiri dan kanan jubah setelah berubah bentuk
-function capeD(f, t = 0, amp = 0, sw = 0, nr = 0) {
+const CAPE_TIPS = [[57.5, 110.2], [234.5, 58.8]];   // ujung kiri dan kanan jubah setelah berubah bentuk
+function warpPt(x, y, t, fo, amp) {
+  const lat0 = (x - SPN[0]) * SPN2[0] + (y - SPN[1]) * SPN2[1], rt = lat0 > 0, pv = PSH[rt ? 1 : 0],
+        dx = x - pv[0], dy = y - pv[1], rn = Math.min(1.25, Math.hypot(dx, dy) / 95), ws = sstep(4, 30, Math.abs(lat0));
+  // jeda gerak: dekat bahu langsung ikut, ujung rusuk menyusul belakangan (efek cambuk)
+  const fv = typeof fo === 'function' ? fo(.02 + .1 * Math.min(1, rn)) : fo;
+  // sudut tiap titik diukur dari arah lurus ke bawah dari bahunya (ke arah luar). Saat hentakan sudut itu mengecil: ujung rusuk
+  // menyapu ke bawah dan ke dalam menuju belakang badan, tanpa pernah menyeberang garis tengah badan (sayap kiri dan kanan tidak saling tumpang tindih).
+  const sg = rt ? 1 : -1, an = Math.atan2(sg * dx, dy), lamR = (fv > 0 ? .66 * fv : .3 * fv) * Math.pow(rn, 1.9) * ws, lam = lamR > 0 ? .86 * Math.tanh(lamR / .86) : lamR,   // hanya bagian luar yang melengkung kuat; dibatasi halus agar ujung tidak melewati arah targetnya (terbalik/mengait)
+        an2 = an * (1 - lam), rr = Math.hypot(dx, dy) * (1 - .06 * Math.min(1, rn) * Math.max(0, fv) * ws), bk = 17 * Math.max(0, fv) * (.35 + .65 * Math.min(1, rn)) * ws;
+  // seluruh jubah ikut terdorong ke belakang saat hentakan (arah berlawanan dengan kepala), sehingga ukurannya tetap besar dan hentakan terasa
+  let X = pv[0] + sg * rr * Math.sin(an2) - AXV[0] * bk, Y = pv[1] + rr * Math.cos(an2) - AXV[1] * bk;
+  // riak kain halus: bergerak lebih bebas di tepi yang jauh dari bahu
+  const ux = x - PIV[0], uy = y - PIV[1], lat = ux * LATV[0] + uy * LATV[1], u = ux * AXV[0] + uy * AXV[1],
+        tr = Math.max(0, Math.min(1, (-u + 15) / 75)), kw = Math.pow(Math.min(1.3, Math.abs(lat) / 120), 1.5) * (.62 + .75 * tr),
+        wv = amp * kw * (Math.sin(t * 5.2 - lat * .05 + u * .035) + .55 * Math.sin(t * 8.7 - lat * .09 - u * .02) + .35 * tr * Math.sin(t * 12.3 - u * .08 + lat * .03) + .6 * Math.sin(t * 2.4 - lat * .02 + u * .015)),
+        wa = 40 * Math.tanh(wv * 13 / 40), wl = 28 * Math.tanh(wv * 8.5 / 28);   // goyangan kain: dibuat lebih terlihat
+  return [X + AXV[0] * wa + LATV[0] * wl, Y + AXV[1] * wa + LATV[1] * wl];
+}
+function capeD(fo, t = 0, amp = 0, sw = 0, nr = 0) {
   let d = '';
   const PP = [];
   for (let i = 0; i < CAPE.length; i += 2) {
-    const x = CAPE[i], y = CAPE[i+1], dx = x - PIV[0], dy = y - PIV[1], lat = dx * LATV[0] + dy * LATV[1];
-    const k = Math.pow(Math.min(1.3, Math.abs(lat) / 120), 1.5);   // makin jauh dari badan, makin ikut bergerak
-    const u = dx * AXV[0] + dy * AXV[1];
-    const wv = amp * k * (Math.sin(t * 5.2 - lat * .05 + u * .035) + .55 * Math.sin(t * 8.7 - lat * .09 - u * .02));   // riak kain merambat ke ujung
-    const ax = f * 40 * k + wv * 13, ln = -lat * (.16 * Math.abs(f) + nr) * k + wv * 9;   // nr: jubah menyempit saat tertarik ke belakang
-    let X = x, Y = y;
-    if (sw) { const a = sw * k * (lat / Math.hypot(lat, 25)), ca = Math.cos(a), sa = Math.sin(a); X = PIV[0] + dx * ca - dy * sa; Y = PIV[1] + dx * sa + dy * ca; }       // ujung jubah terayun, dan sedikit menguncup
-    const px = (X + AXV[0] * ax + LATV[0] * ln).toFixed(1), py = (Y + AXV[1] * ax + LATV[1] * ln).toFixed(1);
+    const w = warpPt(CAPE[i], CAPE[i + 1], t, fo, amp), px = w[0].toFixed(1), py = w[1].toFixed(1);
     PP.push([+px, +py]);
     d += (i === 0 ? 'M' : (i % 6 === 2 ? 'C' : ' ')) + px + ',' + py;
-    if (i > 0 && i % 6 !== 2) d += '';
   }
   // Ujung jubah = titik di atas kurva (bukan titik kontrol), dihitung dari bentuk jubah yang sudah berubah
   const bz = (a, b, c, e, q) => { const u = 1 - q; return [u*u*u*a[0] + 3*u*u*q*b[0] + 3*u*q*q*c[0] + q*q*q*e[0], u*u*u*a[1] + 3*u*u*q*b[1] + 3*u*q*q*c[1] + q*q*q*e[1]]; };
-  CAPE_TIPS[0] = bz(PP[3], PP[4], PP[5], PP[6], .5); CAPE_TIPS[1] = bz(PP[15], PP[16], PP[17], PP[18], .12);
+  CAPE_TIPS[0] = bz(PP[6], PP[7], PP[8], PP[9], .71); CAPE_TIPS[1] = bz(PP[21], PP[22], PP[23], PP[24], .16);
   CAPE_PTS = PP;
   return d + 'z';
 }
@@ -2301,10 +2371,28 @@ function devOff(f, t) {
   const d = f.dev; if (!d || t <= d.t0 || t >= d.t0 + d.len) return 0;
   return d.amp * Math.min(W, H) * Math.pow(Math.sin(Math.PI * (t - d.t0) / d.len), 2);
 }
+function cascadeDev(grp, src, tNowOf) {
+  const d0 = src.dev; if (!d0 || grp.length < 2) return;
+  const sg = Math.sign(d0.amp), now = performance.now();
+  for (const j of grp) {
+    if (j === src || j.trk) continue;
+    const dist = Math.hypot((j.gl - src.gl), (j.gt - src.gt));          // jarak dalam satuan lebar jubah
+    const k = .36 / (1 + .8 * Math.max(0, dist - 1));                    // bersebelahan ~36%, makin jauh makin kecil (jarak 6 sekitar 7%)
+    const t0 = tNowOf(j, d0) + .014 * dist;                              // gangguan merambat keluar dengan sedikit jeda
+    if (t0 > .88 || (j.dev && j.dev.t0 <= t0 + .02 && t0 <= j.dev.t0 + j.dev.len)) continue;   // sudah mau keluar layar, atau sedang menyimpang sendiri
+    if (j.dev && Math.abs(j.dev.amp) >= Math.abs(d0.amp) * k) continue;
+    j.dev = { t0, len: Math.min(d0.len * rnd(.85, 1), .95 - t0), amp: sg * Math.abs(d0.amp) * k * rnd(.85, 1.1) };
+    if (j.dev.len < .1) { j.dev = null; continue; }
+    if (k > .15) {   // yang dekat ikut mengepak sesaat saat terganggu
+      const Tj = (now - j.start) / 1000, tf = Math.max(0, t0 * j.dur / 1000 - .1);
+      j.flaps = j.flaps.filter(v => v <= Tj || Math.abs(v - tf) > 2).concat([tf]).sort((a, b) => a - b);
+    }
+  }
+}
 function basePt(f, t) {
   const u = sample(f.prof.u, f.prof.N, t);
   const [a0,b0,a1,b1,a2,b2] = f.P, x0=a0*W, y0=b0*H, x1=a1*W, y1=b1*H, x2=a2*W, y2=b2*H;
-  const h = Math.atan2(dbez(u,y0,y1,y2), dbez(u,x0,x1,x2)), o = f.dev ? devOff(f, t) : 0;
+  const h = Math.atan2(dbez(u,y0,y1,y2), dbez(u,x0,x1,x2)), o = (f.dev ? devOff(f, t) : 0) + (f.lat || 0);
   return { x: bez(u,x0,x1,x2) - Math.sin(h) * o, y: bez(u,y0,y1,y2) + Math.cos(h) * o, h };
 }
 function pose(f, t, now) {
@@ -2327,10 +2415,20 @@ function toScreen(p, lx, ly) {
 }
 
 // Titik pelepasan: kaki (jejak utama) dan dua ujung jubah (jejak tipis)
+// Setiap klon SVG butuh id gradasi/clip sendiri (id ganda akan memakai elemen klon pertama saja)
+let UIDN = 0;
+function uniqIds(el) {
+  const sfx = '_' + (++UIDN);
+  el.querySelectorAll('[id]').forEach(n => {
+    const old = n.id; n.id = old + sfx;
+    el.querySelectorAll('[clip-path],[fill]').forEach(m => { for (const at of ['clip-path', 'fill']) { const v = m.getAttribute(at); if (v && v.includes('#' + old + ')')) m.setAttribute(at, v.replace('#' + old + ')', '#' + old + sfx + ')')); } });
+  });
+}
+
 const EM = [
-  { lx:212, ly:226, r:7, a:1,  life:90 },
-  { lx:62,  ly:128, r:5, a:.8, life:90 },
-  { lx:257, ly:70,  r:5, a:.8, life:90 }
+  { lx:197.7, ly:232.6, r:7, a:1,  life:90 },
+  { lx:57.5, ly:110.2, r:5, a:.8, life:90 },
+  { lx:234.5, ly:58.8, r:5, a:.8, life:90 }
 ];
 let parts = [], last = performance.now(), nextAt = last + 300;
 const flyers = [];
@@ -2346,7 +2444,12 @@ function spawn(now) {
   const x0 = dir > 0 ? rnd(-.1, -.05) : rnd(1.05, 1.1), x2 = dir > 0 ? rnd(1.05, 1.12) : rnd(-.12, -.05);
   const y0 = rnd(.25, .7), y2 = rnd(.15, .6);
   const P = [x0, y0, (x0 + x2) / 2 + rnd(-.1, .1), Math.max(.08, Math.min(y0, y2) - rnd(.05, .25)), x2, y2];
-  const depth = Math.random() < .3 ? 1 : rnd(.4, .95), dur = rnd(13000, 18000) / depth, prof = makeProfile(dur / 1000), gap = rnd(.03, .045) * (Math.random() < .5 ? 1 : -1), stepMs = rnd(300, 600);
+  const depth = Math.random() < .3 ? 1 : rnd(.4, .95), dur = rnd(13000, 18000) / depth, prof = makeProfile(dur / 1000);
+  // ukuran dasar dibagi seluruh kelompok (selisih kecil), supaya jarak antarkid bisa dinyatakan dalam lebar jubah
+  const scB = rnd(.03, .042) * depth * (1 + 1.1 * depth * depth * depth), capePx = 190 * scB * unit;
+  const LAT_K = .62 * rnd(.94, 1.08), TRL_K = .78 * rnd(.94, 1.08);   // jarak samping dan ke belakang per tingkat, dalam lebar jubah
+  let pathPx = 0; { let px_ = P[0] * W, py_ = P[1] * H; for (let q = 1; q <= 24; q++) { const u_ = q / 24, nx = bez(u_, P[0] * W, P[2] * W, P[4] * W), ny = bez(u_, P[1] * H, P[3] * H, P[5] * H); pathPx += Math.hypot(nx - px_, ny - py_); px_ = nx; py_ = ny; } }
+  const speedPx = pathPx / (dur / 1000), grp = [];
   const devIdx = new Set();   // kelompok kadang punya satu (jarang dua) kid yang keluar jalur lalu kembali
   if (Math.random() < (count > 1 ? .5 : .4)) devIdx.add(Math.floor(Math.random() * count));   // kelompok maupun yang sendirian bisa menyimpang lalu kembali
   if (count >= 5 && Math.random() < .4) devIdx.add(Math.floor(Math.random() * count));
@@ -2354,10 +2457,10 @@ function spawn(now) {
   let diveIdx = -1;
   if (!REDUCE && Math.random() < DIVE_P) { const c = []; for (let i = 0; i < count; i++) if (!devIdx.has(i)) c.push(i); if (c.length) diveIdx = c[Math.floor(Math.random() * c.length)]; }
   for (let i = 0; i < count; i++) {
-    const el = kid.cloneNode(true);
+    const el = kid.cloneNode(true); uniqIds(el);
     el.removeAttribute('id'); el.className = 'skKid'; el.style.display = ''; scene.insertBefore(el, veil);
     const rank = (i + 1) >> 1;   // formasi V: pemimpin di depan, lalu berpasangan kiri-kanan makin ke belakang
-    const oy = i ? (i % 2 ? gap : -gap) * rank : 0, ox = i ? -dir * rank * rnd(.01, .02) : 0;
+    const side = i ? (i % 2 ? 1 : -1) : 0, gl = side * rank * LAT_K, gt = rank * TRL_K;   // posisi dalam satuan lebar jubah
     const dev = devIdx.has(i) ? { t0: rnd(.2, .5), len: rnd(.3, .42), amp: rnd(.16, .28) * (Math.random() < .5 ? 1 : -1) } : null;
     let flaps = flapTimes(i, prof, dur / 1000, count);
     const dv = i === diveIdx ? { st: 0, t0: rnd(.14, .3) * dur / 1000 } : null;   // detik sejak kid mulai terbang; sisanya ditentukan saat mulai menyelam
@@ -2365,13 +2468,14 @@ function spawn(now) {
       const dT = [dev.t0 * dur / 1000 - .1, (dev.t0 + dev.len * .5) * dur / 1000 - .1];
       flaps = flaps.filter(v => dT.every(d => Math.abs(v - d) > 3)).concat(dT).sort((a, b) => a - b);
     }
-    flyers.push({ el, depth, cape: el.querySelector('path'), l1: el.querySelectorAll('path')[2], l2: el.querySelectorAll('path')[3], la: 0, tips: [[53.7, 122.6], [259.7, 69.2]], start: now + rank * stepMs, dur, g: 0, flapAt: 0, prof, flaps,
+    flyers.push({ el, depth, cape: el.querySelector('.cape'), hd: el.querySelector('path:not(.cape)'), l1: el.querySelectorAll('path:not(.cape)')[1], l2: el.querySelectorAll('path:not(.cape)')[2], la: 0, tips: [[57.5, 110.2], [234.5, 58.8]], start: now + (gt * capePx / speedPx) * 1000, dur, g: 0, flapAt: 0, prof, flaps,
       dev, dv, cx: rnd(.65, 1.35), cf: rnd(.75, 1.35), fs: rnd(.85, 1.15), lean: rnd(-.12, .12),   // variasi kain per kid: besar ayunan, kecepatan riak, kuat kepakan, kemiringan dasar
-      P: P.map((v, j) => j % 2 ? v + oy : v + ox),
-      sc: rnd(.03, .042) * depth * (1 + .25 * depth),   // makin dekat (depth 1) makin besar: terdekat +25% (maks ±.0525), yang jauh nyaris tak berubah
-      wob: rnd(0, 6.28),
+      P: P.slice(), lat: gl * capePx, gl, gt, grp,   // jalur sama untuk semua; formasi lewat offset samping tetap dan jeda waktu
+      sc: scB * rnd(.97, 1.03), wob: rnd(0, 6.28), far: 1 + .4 * (1 - Math.max(0, Math.min(1, (depth - .4) / .6))),   // yang paling dekat jauh lebih besar (sampai sekitar 2,1 kali)
       em: EM.map((e, idx) => { const L = Math.max(W, H) * (idx ? .38 : .5) * (.45 + .55 * depth); return { ...e, prev: null, s: idx * 97, L, ret: L / 2.5, depth, m: 1 + .25 * (count - 1) }; }) });
+    grp.push(flyers[flyers.length - 1]);
   }
+  for (const k of grp) if (k.dev) cascadeDev(grp, k, (j, d0) => d0.t0);   // rambat dari tiap kid yang menyimpang ke seluruh kelompok
   nextAt = Infinity;
 }
 
@@ -2560,26 +2664,42 @@ function closeFlap(t) {
   return -CF_DEPTH * Math.exp(-3 * w) * Math.cos(Math.PI * 1.1 * w);
 }
 // Beranda memakai gerak jubah, kaki, dan titik jejak yang sama dengan Closeup.
+const CAPE_REST = (() => { let sx = 0, sy = 0, n = 0; for (let i = 0; i < CAPE.length; i += 2) { sx += CAPE[i]; sy += CAPE[i + 1]; n++; } return [sx / n, sy / n]; })();
+const SWAY = 1.5;   // dasar goyangan kain saat tidak mengepak (sebelumnya .8): besarkan agar goyangan lebih terlihat
+const HF_GAIN = .16, HF_MAX = 6, HF_RATE = 6;   // kepala/badan ikut bergeser mengikuti jubah: porsi gerak jubah, batas (satuan SVG 300), kehalusan
 function applyCape(f, ct, tau, g, bo, dv = 0) {
   ct *= f.cf || 1;   // tiap kid punya kecepatan riak kain sendiri
   const fc = (tau >= 0 && tau < CLOSE_FLAP_S ? closeFlap(tau) : 0) * (f.fs || 1), down = Math.max(0, -fc), up = Math.max(0, fc);
   // Semua nilai dibatasi supaya jubah tidak memanjang berlebihan ke belakang saat hentakan
-  const cl = (v, a, b) => Math.max(a, Math.min(b, v)), CX = f.cx || 1,
-        fold = cl(((fc < 0 ? fc * 1.6 : fc * 2.3) - dv * .9 + .1 * Math.sin(ct * 2.3) + .05 * Math.sin(ct * 5.1) + (f.lean || 0)) * 1.1, -2.8, 2.6),
-        amp = Math.min(3.4, (.8 + 1.4 * g + .6 * bo + .7 * dv) * 1.2 * CX), swg = Math.min(1.05, (down * .5 + dv * .22) * 1.25);
-  f.cape.setAttribute('d', capeD(fold, ct, amp, swg, down * NR + dv * .06));
+  const CX = (f.cx || 1) * (f.far || 1), fcAt = lg => (tau >= 0 ? closeFlap(Math.max(0, Math.min(CLOSE_FLAP_S, tau - lg))) : 0) * (f.fs || 1),
+        foldAt = lg => Math.max(-.9, Math.min(1.15, (-fcAt(lg) / CF_DEPTH + dv * .8 + .05 * Math.sin(ct * 2.3) + .03 * Math.sin(ct * 5.1) + (f.lean || 0) * .4) * CX)),
+        amp = Math.min(4.2, (SWAY + 1.4 * g + .6 * bo + .3 * dv + .9 * down) * 1.2 * CX * (1 - .45 * dv)), swg = 0;
+  f.cape.setAttribute('d', capeD(foldAt, ct, amp, swg, down * NR + dv * .06));
   f.tips = [CAPE_TIPS[0].slice(), CAPE_TIPS[1].slice()];
+  // kepala dan badan mengikuti posisi jubah: bergeser ke arah yang sama, hanya sedikit dan dihaluskan (tidak menyentak saat mengepak)
+  let hx = 0, hy = 0;
+  if (CAPE_PTS.length) {
+    let sx = 0, sy = 0; for (const q of CAPE_PTS) { sx += q[0]; sy += q[1]; }
+    let tx = (sx / CAPE_PTS.length - CAPE_REST[0]) * HF_GAIN, ty = (sy / CAPE_PTS.length - CAPE_REST[1]) * HF_GAIN;
+    const mg = Math.hypot(tx, ty); if (mg > HF_MAX) { tx *= HF_MAX / mg; ty *= HF_MAX / mg; }
+    const nw = performance.now(), dtl = Math.min(.05, (nw - (f.hT || nw)) / 1000), kk = 1 - Math.exp(-dtl * HF_RATE); f.hT = nw;
+    f.hx = (f.hx || 0) + (tx - (f.hx || 0)) * kk; f.hy = (f.hy || 0) + (ty - (f.hy || 0)) * kk;
+    hx = f.hx; hy = f.hy;
+  }
+  const hT = `translate(${hx.toFixed(2)} ${hy.toFixed(2)})`;
+  if (f.hd) f.hd.setAttribute('transform', hT);
   const la = Math.sin(ct * 2.1) * 3.5 + Math.sin(ct * 3.7 + 1) * 1.5 + (down + dv * .8) * 10 - up * 5,
         lb = Math.sin(ct * 2.1 + .9) * 4 + Math.sin(ct * 4.1) * 1.5 + (down + dv * .8) * 12 - up * 6;
-  f.l1.setAttribute('transform', `rotate(${(la * 1.5).toFixed(2)} 205 178)`); f.l2.setAttribute('transform', `rotate(${(lb * 1.5).toFixed(2)} 168 186)`);
+  f.l1.setAttribute('transform', `${hT} rotate(${(la * 1.5).toFixed(2)} 190.7 184.6)`); f.l2.setAttribute('transform', `${hT} rotate(${(lb * 1.5).toFixed(2)} 153.7 192.6)`);
   f.la = la;
 }
 function emLocal(f, i) {
   if (i) return f.tips[i - 1];
-  const a = f.la * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a), ox = EM[0].lx - 205, oy = EM[0].ly - 178;
-  return [205 + ox * ca - oy * sa, 178 + ox * sa + oy * ca];
+  const a = f.la * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a), ox = EM[0].lx - 190.7, oy = EM[0].ly - 184.6;
+  return [190.7 + ox * ca - oy * sa + (f.hx || 0), 184.6 + ox * sa + oy * ca + (f.hy || 0)];
 }
 function frame(now) {
+  if (window.SkyGfx && SkyGfx.level() === 'low' && now - last < 30) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // grafik rendah: ~30 fps
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   updateSky(dt, now);
   sx.clearRect(0, 0, W, H); drawBodies();
@@ -2629,7 +2749,7 @@ function frame(now) {
       f.sacc = (f.sacc || 0) + 110 * pulse * dz2 * dt;
       const ns = Math.floor(f.sacc); f.sacc -= ns;
       for (let n = 0; n < ns; n++) {
-        const i0 = 3 * Math.floor(rnd(0, 6)), a = CAPE_PTS[i0], b = CAPE_PTS[i0 + 3], u = rnd(0, 1), kq = rnd(.4, 1),
+        const i0 = 3 * Math.floor(rnd(0, NSEG)), a = CAPE_PTS[i0], b = CAPE_PTS[i0 + 3], u = rnd(0, 1), kq = rnd(.4, 1),
               lx = PIV[0] + (a[0] + (b[0] - a[0]) * u - PIV[0]) * kq, ly = PIV[1] + (a[1] + (b[1] - a[1]) * u - PIV[1]) * kq,
               pos = toScreen(p, lx, ly), ox = pos[0] - p.x, oy = pos[1] - p.y, ol = Math.hypot(ox, oy) || 1, out = rnd(2, 16) * kS * 2.5;
         hsparks.push({ x: pos[0], y: pos[1], vx: ox / ol * out + rnd(-5, 5) * kS * 2.5, vy: oy / ol * out - rnd(0, 7) * kS * 2.5 + rnd(-5, 5) * kS * 2.5,
@@ -2711,7 +2831,7 @@ function triggerFly(f, now) {
   const fl = def.flaps.map(fr => Ts + fr * def.dur);
   if (!f.dev || t < f.dev.t0 || t >= f.dev.t0 + f.dev.len) {   // menyimpang dari titik ini, lalu mengayun kembali (mulus, nol di awal dan akhir)
     const len = Math.min(rnd(.3, .42), 1 - t - .04);
-    if (len >= .12) { f.dev = { t0: t, len, amp: rnd(.16, .28) * (Math.random() < .5 ? 1 : -1) }; fl.push(Ts, Ts + len * .5 * f.dur / 1000); }
+    if (len >= .12) { f.dev = { t0: t, len, amp: rnd(.16, .28) * (Math.random() < .5 ? 1 : -1) }; fl.push(Ts, Ts + len * .5 * f.dur / 1000); if (f.grp) cascadeDev(f.grp, f, j => Math.max(0, (now - j.start) / j.dur)); }
   }
   fl.sort((a, b) => a - b);
   const keep = []; for (const v of fl) if (!keep.length || v - keep[keep.length - 1] > 1.7) keep.push(v);
@@ -2970,9 +3090,9 @@ const flashEl = document.getElementById('skFlash');
 function setWx(type) {
   wx = type;
   for (const k in WXN) scene.classList.toggle('w-' + k, k === type);
-  const rain = (type === 'rain' || type === 'storm') && !REDUCE, n = Math.min(LOW ? 220 : 520, Math.round(W * H / (type === 'storm' ? 3200 : 6000)));
+  const rain = (type === 'rain' || type === 'storm') && !REDUCE, gs = window.SkyGfx ? SkyGfx.scale() : (LOW ? .4 : 1), n = Math.min(Math.round(520 * gs), Math.round(W * H / (type === 'storm' ? 3200 : 6000) * Math.min(1, gs + .15)));
   drops = rain ? Array.from({ length: n }, () => ({ x: rnd(-.2, 1.2) * W, y: rnd(0, H), l: rnd(10, 22), v: rnd(700, 1100) })) : [];
-  flakes = type === 'snow' && !REDUCE ? Array.from({ length: Math.min(LOW ? 90 : 220, Math.round(W * H / 10000)) }, () =>
+  flakes = type === 'snow' && !REDUCE ? Array.from({ length: Math.min(Math.round(220 * gs), Math.round(W * H / 10000)) }, () =>
     ({ x: rnd(0, W), y: rnd(0, H), r: rnd(1, 3), v: rnd(35, 80), w: rnd(.6, 1.6), p: rnd(0, 6.28) })) : [];
 }
 function drawWx(dt, now) {
@@ -3162,10 +3282,10 @@ initPerm(); startLoop();
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Fairy ring', sunset:'Sunset', rainbow:'Forest Brook rainbow', daily:'Daily reset', weekly:'Weekly reset', ts:'Traveling Spirit', seats:'Take your seats', concert:'Concert starts', shardRed:'Red shard', shardBlack:'Black shard' },
       tips:['Don\'t lose track of time, your candles are waiting.', 'Got a spare candle? Light one for someone today.', 'Even a tiny light can help someone find their way.', 'No rush, the sky isn\'t going anywhere.', 'Did you grab your daily candles yet?', 'Take a break, Sky kid. Tomorrow\'s flight will still be here.', 'Hold someone\'s hand and share your light.', 'Drink some water and stretch a bit between flights.', 'Some spirits are still waiting for you to remember them.', 'Sunsets are worth slowing down for.', 'Go to bed on time, the stars will be back tomorrow.', 'Keep shining, wherever you fly.'],
       reward:{ ascended:'Ascended Candle', wax:'Wax' },
-      pg:{ pct:'Manual progress', cls:'Close', cur:'Currency', cons:'Constellations', main:'Main', seas:'Seasons', trk:'Trackers', run:'Candle run', runS:'Resets daily', eden:'Eye of Eden', edenS:'Resets weekly', done:'Done this week', sp:'spirits', nm:'Season name', all:'Complete all areas', cap:'Gray / 20', capL:'Candles turned gray or reached 20 today', add:'Add season', hist:'History', nohist:'No history yet', ar:'areas', wk:'Week of', del:'Remove', n:{ candles:'Candles', hearts:'Hearts', sheart:'Season Hearts', asc:'Ascended Candles', season:'Season Candles', event:'Event Tickets', gift:'Hearts Gifted' } },
+      pg:{ pct:'Manual progress', cls:'Close', cur:'Currency', cons:'Constellations', main:'Main', seas:'Seasons', trk:'Trackers', run:'Candle run', runS:'Resets daily', eden:'Eye of Eden', edenS:'Resets weekly', done:'Done this week', sp:'spirits', nm:'Season name', all:'Complete all areas', cap:'Gray', capL:'Candles turned gray or reached 20 today', add:'Add season', hist:'History', nohist:'No history yet', ar:'areas', wk:'Week of', del:'Remove', n:{ candles:'Candles', hearts:'Hearts', sheart:'Season Hearts', asc:'Ascended Candles', season:'Season Candles', event:'Event Tickets', gift:'Hearts Gifted' } },
       cat:{ candles:'Candles', shards:'Shards', environment:'Environment', reset:'Reset', spirits:'Spirits', aurora:'AURORA concert' },
       act:{ title:'Active now', none:'No active events right now', next:'Next', endsIn:'ends in', live:'Active' },
-      menu:{ label:'Menu', home:'Home', events:'Events', journey:'Progress', visit:'Visit', soon:'Soon', logout:'Log out' },
+      menu:{ label:'Menu', home:'Home', events:'Events', journey:'Progress', visit:'Visit', outfit:'Cosmetics', map:'Map', profile:'Settings', coming:'Coming soon', soon:'Soon', logout:'Log out' },
       date: (d,dd,m,y) => `${d}, ${m} ${dd}, ${y}`
     },
     id: {
@@ -3178,10 +3298,10 @@ initPerm(); startLoop();
       ev:{ geyser:'Geyser', grandma:'Grandma', turtle:'Turtle', eden:'Eden', fairy:'Cincin peri', sunset:'Matahari terbenam', rainbow:'Pelangi Sungai Hutan', daily:'Reset harian', weekly:'Reset mingguan', ts:'Roh pengembara', seats:'Ambil kursi', concert:'Konser dimulai', shardRed:'Shard merah', shardBlack:'Shard hitam' },
       tips:['Jangan lupa waktu ya, lilinmu sudah menunggu.', 'Ada lilin cadangan? Nyalakan satu buat seseorang hari ini.', 'Cahaya sekecil apa pun bisa bantu orang lain menemukan jalan.', 'Santai aja, langitnya nggak ke mana-mana.', 'Sudah ambil lilin harianmu belum?', 'Istirahat dulu, Sky kid. Besok masih bisa terbang lagi.', 'Gandeng tangan temanmu, bagikan cahayamu.', 'Jangan lupa minum air dan regangkan badan di sela-sela terbang.', 'Ada roh yang masih menunggu untuk kamu ingat.', 'Pemandangan sunset layak buat berhenti sebentar.', 'Jangan begadang ya, bintangnya masih ada besok.', 'Terus bersinar, ke mana pun kamu terbang.'],
       reward:{ ascended:'Ascended Candle', wax:'Wax' },
-      pg:{ pct:'Progres manual', cls:'Tutup', cur:'Mata uang', cons:'Rasi bintang', main:'Utama', seas:'Season', trk:'Pelacak', run:'Candle run', runS:'Reset harian', eden:'Eye of Eden', edenS:'Reset mingguan', done:'Selesai minggu ini', sp:'roh', nm:'Nama season', all:'Selesaikan semua area', cap:'Abu-abu / 20', capL:'Lilin sudah abu-abu atau mencapai 20 hari ini', add:'Tambah season', hist:'Riwayat', nohist:'Belum ada riwayat', ar:'area', wk:'Minggu', del:'Hapus', n:{ candles:'Lilin', hearts:'Hati', sheart:'Hati Season', asc:'Lilin Ascended', season:'Lilin Season', event:'Tiket Event', gift:'Hati Dihadiahkan' } },
+      pg:{ pct:'Progres manual', cls:'Tutup', cur:'Mata uang', cons:'Rasi bintang', main:'Utama', seas:'Season', trk:'Pelacak', run:'Candle run', runS:'Reset harian', eden:'Eye of Eden', edenS:'Reset mingguan', done:'Selesai minggu ini', sp:'roh', nm:'Nama season', all:'Selesaikan semua area', cap:'Abu-abu', capL:'Lilin sudah abu-abu atau mencapai 20 hari ini', add:'Tambah season', hist:'Riwayat', nohist:'Belum ada riwayat', ar:'area', wk:'Minggu', del:'Hapus', n:{ candles:'Lilin', hearts:'Hati', sheart:'Hati Season', asc:'Lilin Ascended', season:'Lilin Season', event:'Tiket Event', gift:'Hati Dihadiahkan' } },
       cat:{ candles:'Lilin', shards:'Shard', environment:'Lingkungan', reset:'Reset', spirits:'Roh', aurora:'Konser Aurora' },
       act:{ title:'Aktif sekarang', none:'Tidak ada event aktif saat ini', next:'Berikutnya', endsIn:'berakhir dalam', live:'Aktif' },
-      menu:{ label:'Menu', home:'Beranda', events:'Event', journey:'Progres', visit:'Visit', soon:'Segera', logout:'Keluar' },
+      menu:{ label:'Menu', home:'Beranda', events:'Event', journey:'Progres', visit:'Visit', outfit:'Kosmetik', map:'Peta', profile:'Pengaturan', coming:'Segera hadir', soon:'Segera', logout:'Keluar' },
       date: (d,dd,m,y) => `${d}, ${dd} ${m} ${y}`
     },
     es: {
@@ -3194,10 +3314,10 @@ initPerm(); startLoop();
       ev:{ geyser:'Géiser', grandma:'Abuela', turtle:'Tortuga', eden:'Edén', fairy:'Círculo de hadas', sunset:'Atardecer', rainbow:'Arcoíris del Arroyo del Bosque', daily:'Reinicio diario', weekly:'Reinicio semanal', ts:'Espíritu viajero', seats:'Toma asiento', concert:'Empieza el concierto', shardRed:'Fragmento rojo', shardBlack:'Fragmento negro' },
       tips:['No pierdas la noción del tiempo, tus velas te esperan.', '¿Tienes una vela de sobra? Enciende una por alguien hoy.', 'Hasta una lucecita puede ayudar a alguien a encontrar su camino.', 'Sin prisa, el cielo no se va a ir a ningún lado.', '¿Ya recogiste tus velas de hoy?', 'Tómate un descanso, Sky kid. El vuelo de mañana seguirá ahí.', 'Dale la mano a alguien y comparte tu luz.', 'Toma un poco de agua y estírate entre vuelos.', 'Hay espíritus que todavía esperan que los recuerdes.', 'Un atardecer vale la pena para ir más despacio.', 'Duerme a tu hora, las estrellas vuelven mañana.', 'Sigue brillando, vueles donde vueles.'],
       reward:{ ascended:'Vela ascendida', wax:'Cera' },
-      pg:{ pct:'Progreso manual', cls:'Cerrar', cur:'Moneda', cons:'Constelaciones', main:'Principales', seas:'Temporadas', trk:'Seguimiento', run:'Candle run', runS:'Se reinicia a diario', eden:'Eye of Eden', edenS:'Se reinicia cada semana', done:'Hecho esta semana', sp:'espíritus', nm:'Nombre de la temporada', all:'Completar todas las zonas', cap:'Gris / 20', capL:'Las velas están grises o llegaste a 20 hoy', add:'Añadir temporada', hist:'Historial', nohist:'Aún no hay historial', ar:'zonas', wk:'Semana del', del:'Quitar', n:{ candles:'Velas', hearts:'Corazones', sheart:'Corazones de temporada', asc:'Velas ascendidas', season:'Velas de temporada', event:'Entradas de evento', gift:'Corazones regalados' } },
+      pg:{ pct:'Progreso manual', cls:'Cerrar', cur:'Moneda', cons:'Constelaciones', main:'Principales', seas:'Temporadas', trk:'Seguimiento', run:'Candle run', runS:'Se reinicia a diario', eden:'Eye of Eden', edenS:'Se reinicia cada semana', done:'Hecho esta semana', sp:'espíritus', nm:'Nombre de la temporada', all:'Completar todas las zonas', cap:'Gris', capL:'Las velas están grises o llegaste a 20 hoy', add:'Añadir temporada', hist:'Historial', nohist:'Aún no hay historial', ar:'zonas', wk:'Semana del', del:'Quitar', n:{ candles:'Velas', hearts:'Corazones', sheart:'Corazones de temporada', asc:'Velas ascendidas', season:'Velas de temporada', event:'Entradas de evento', gift:'Corazones regalados' } },
       cat:{ candles:'Velas', shards:'Fragmentos', environment:'Entorno', reset:'Reinicio', spirits:'Espíritus', aurora:'Concierto de AURORA' },
       act:{ title:'Activos ahora', none:'No hay eventos activos ahora', next:'Siguiente', endsIn:'termina en', live:'Activo' },
-      menu:{ label:'Menú', home:'Inicio', events:'Eventos', journey:'Progreso', visit:'Visit', soon:'Pronto', logout:'Cerrar sesión' },
+      menu:{ label:'Menú', home:'Inicio', events:'Eventos', journey:'Progreso', visit:'Visit', outfit:'Cosméticos', map:'Mapa', profile:'Ajustes', coming:'Próximamente', soon:'Pronto', logout:'Cerrar sesión' },
       date: (d,dd,m,y) => `${d}, ${dd} de ${m} de ${y}`
     }
   };
@@ -3669,19 +3789,21 @@ initPerm(); startLoop();
 
   const langBtns = document.querySelectorAll('.lang-btn');
   // --- halaman penuh: halaman 1 (jam) <-> halaman 2 (jam Sky & event), dipindah dengan tombol ---
-  const p1El = document.getElementById('p1'), p2El = document.getElementById('p2'), p3El = document.getElementById('p3'), p4El = document.getElementById('p4');
+  const p1El = document.getElementById('p1'), p2El = document.getElementById('p2'), p3El = document.getElementById('p3'), p4El = document.getElementById('p4'), p5El = document.getElementById('p5'), p6El = document.getElementById('p6');
   let page = 1, rvTimer = null, pushed = false;
-  const hashPage = () => location.hash === '#/events' ? 2 : location.hash === '#/progress' ? 3 : location.hash === '#/visit' ? 4 : 1;
+  const hashPage = () => location.hash === '#/events' ? 2 : location.hash === '#/progress' ? 3 : location.hash === '#/visit' ? 4 : location.hash === '#/outfit' ? 5 : location.hash === '#/map' ? 6 : 1;
   let pendingPage = hashPage();   // dibuka langsung di #events
-  const pgEls = [p1El, p2El, p3El, p4El];
+  const pgEls = [p1El, p2El, p3El, p4El, p5El, p6El];
   function show(n){
-    if(introActive){ pendingPage = n; return; }
+    if(introActive){ pendingPage = n; try{ updateNavCurrent(); }catch(e){} return; }
     if(n === page) return;
     page = n;
     updateNavCurrent();
     document.body.classList.toggle('p2', n === 2);
     document.body.classList.toggle('p3', n === 3);
     document.body.classList.toggle('p4', n === 4);
+    document.body.classList.toggle('p5', n === 5);
+    document.body.classList.toggle('p6', n === 6);
     pgEls.forEach((el, i) => { el.inert = i + 1 !== n; el.setAttribute('aria-hidden', String(i + 1 !== n)); });
     clearTimeout(rvTimer);
     document.body.classList.remove('rvdone');
@@ -3707,7 +3829,7 @@ initPerm(); startLoop();
     if(page === n || introActive) return;
     pushed = page === 1; location.hash = h;        // tombol Back peramban/HP ikut bekerja
   }
-  const goEvents = () => goPage(2, '#/events'), goProgress = () => goPage(3, '#/progress'), goVisit = () => goPage(4, '#/visit');
+  const goEvents = () => goPage(2, '#/events'), goProgress = () => goPage(3, '#/progress'), goVisit = () => goPage(4, '#/visit'), goOutfit = () => goPage(5, '#/outfit'), goMap = () => goPage(6, '#/map');
   function goHome(){
     if(page === 1 || introActive) return;
     if(pushed){ pushed = false; history.back(); } else location.hash = '#/';
@@ -3775,7 +3897,8 @@ initPerm(); startLoop();
     navBtn.setAttribute('aria-expanded', String(open));
   }
   function updateNavCurrent(){
-    const cur = page === 2 ? 'events' : page === 3 ? 'journey' : 'home';
+    const p = introActive ? pendingPage : page;   // saat refresh/intro, tandai halaman yang AKAN tampil (dari URL), bukan 'home'
+    const cur = p === 2 ? 'events' : p === 3 ? 'journey' : p === 4 ? 'visit' : p === 5 ? 'outfit' : p === 6 ? 'map' : 'home';
     navItems.forEach(b => { if(b.dataset.go === cur) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   }
   function renderNav(t){
@@ -3783,6 +3906,7 @@ initPerm(); startLoop();
     navBtn.setAttribute('aria-label', t.menu.label);
     navMenu.setAttribute('aria-label', t.menu.label);
     navMenu.querySelectorAll('[data-t]').forEach(el => { el.textContent = t.menu[el.dataset.t]; });
+    document.querySelectorAll('.csText').forEach(el => { el.textContent = t.menu.coming; });
   }
   navBtn.addEventListener('click', e => {
     e.stopPropagation();
@@ -3797,6 +3921,9 @@ initPerm(); startLoop();
     else if(b.dataset.go === 'events') goEvents();
     else if(b.dataset.go === 'journey') goProgress();
     else if(b.dataset.go === 'visit') goVisit();
+    else if(b.dataset.go === 'outfit') goOutfit();
+    else if(b.dataset.go === 'map') goMap();
+    else if(b.dataset.go === 'profile'){ if(window.SkyProfile) window.SkyProfile.open(); }   // hanya overlay: tidak pindah halaman
     else if(b.dataset.go === 'logout' && (window.SkyLogoutAsk || window.SkyLogout)) (window.SkyLogoutAsk || window.SkyLogout)();
   });
   document.addEventListener('click', e => {
@@ -3808,6 +3935,7 @@ initPerm(); startLoop();
     else { toggleMenu(false); triggerEl.focus(); }
   });
   updateNavCurrent();
+  window.addEventListener('pageshow', updateNavCurrent);   // kembali dari cache peramban: sinkron lagi
 
   // latar malam: bintang digambar di canvas (berpendar, ada kilau silang di bintang besar), plus kabut & debu cahaya.
   // Digambar hanya saat bintang terlihat (malam/senja) dan tab aktif, supaya hemat baterai di siang hari.
@@ -3830,7 +3958,7 @@ initPerm(); startLoop();
     const ctx = cv.getContext('2d'), still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let W = 0, H = 0, stars = [], raf = 0, t0 = 0;
     function resize(){
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = window.SkyGfx ? SkyGfx.dpr(2) : Math.min(window.devicePixelRatio || 1, 2);
       W = container.clientWidth || window.innerWidth; H = container.clientHeight || window.innerHeight;
       cv.width = Math.floor(W * dpr); cv.height = Math.floor(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const cnt = Math.max(n, Math.floor(W * H / 4300));
@@ -3857,6 +3985,7 @@ initPerm(); startLoop();
     window.addEventListener('resize', () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
     document.addEventListener('visibilitychange', kick);
     window.addEventListener('sky:starsvis', kick);
+    window.addEventListener('sky:gfx', () => resize());
     if(o.watch) new MutationObserver(kick).observe(o.watch, { attributes:true, attributeFilter:['class'] });
     resize(); kick();
   }
@@ -3901,6 +4030,7 @@ initPerm(); startLoop();
         document.body.classList.add('ready');
         tick(); // pastikan langit & digit final presisi ke waktu nyata
         if(pendingPage !== page) show(pendingPage);
+        updateNavCurrent();
       }
     }
 
@@ -3973,11 +4103,16 @@ initPerm(); startLoop();
     } else { title = mk('div', 'sec-t rv3', '', rr); sec.append(title, card); pgRoot.appendChild(sec); }
     rr += 2; pgRefs.titles.push(title); return card;
   }
+  const GREY_KEYS = ['matauang/lilin-abu', 'matauang/candles'];
   const GREY_ASSET = 'matauang/lilin-abu';   // aset/skymeet/matauang/lilin-abu.svg|webp; bila tidak ada, dipakai lilin bawaan berwarna abu
+  const CAP_NUM = 20;   // angka yang tampil di tombol lilin abu-abu
   function addGrayCandle(host){
     const w = document.createElement('span'); w.innerHTML = '<svg class="gc" viewBox="0 0 24 24" aria-hidden="true">' + FL + '</svg>';
     const g = w.firstChild; host.appendChild(g);
-    const A = window.SkyAsset; if(A) A.resolve(GREY_ASSET).then(u => { if(u){ if(g.isConnected) g.replaceWith(A.mkImg(u, 'gc')); return null; } return A.resolve('matauang/candles'); }).then(u => { if(u && g.isConnected) g.replaceWith(A.mkImg(u, 'gc gcf')); });
+    const A = window.SkyAsset;
+    if(A) (async () => {   // urutan: lilin-abu -> lilin biasa (diberi filter abu); tak ada satu pun = ikon bawaan
+      for(const k of GREY_KEYS){ const u = await A.resolve(k); if(u){ if(g.isConnected) g.replaceWith(A.mkImg(u, k === 'matauang/candles' ? 'gc gcf' : 'gc')); return; } }
+    })();
     return g;
   }
   // kartu 1: mata uang
@@ -4133,6 +4268,7 @@ initPerm(); startLoop();
   const capBtn = runBox.querySelector('.cap');
   if(window.SkyAsset){ const sv = capBtn.querySelector('svg'); if(sv) window.SkyAsset.swap(sv, 'matauang/candles'); }   // sebelumnya lilin bawaan tidak pernah diganti aset
   addGrayCandle(capBtn); fyInit(capBtn);
+  { const nb = document.createElement('b'); nb.className = 'capN'; nb.setAttribute('aria-hidden', 'true'); nb.textContent = CAP_NUM; capBtn.appendChild(nb); }   // angka di samping ikon lilin abu-abu
   capBtn.onclick = () => pgWrite(d => { const k = dayK(); d.cap = d.cap || {}; if(d.cap[k]) delete d.cap[k]; else d.cap[k] = 1; });
   cardTrk.appendChild(runBox);
   // total wax per realm (wiki Sky); per area dibagi rata. Realm tanpa data tidak ditampilkan
@@ -4642,7 +4778,7 @@ initPerm(); startLoop();
     },
     meta: { nums: NUMS, col: NCOL, icon: NICON, cons: CONI },
     grayCandle: h => addGrayCandle(h),
-    go: n => (n === 2 ? goEvents() : n === 3 ? goProgress() : n === 4 ? goVisit() : goHome())
+    go: n => (n === 2 ? goEvents() : n === 3 ? goProgress() : n === 4 ? goVisit() : n === 5 ? goOutfit() : n === 6 ? goMap() : goHome())
   };
 
   makeStars(window.innerWidth < 600 ? 55 : 90);
@@ -4805,9 +4941,9 @@ initPerm(); startLoop();
       prog:'Progreso', load:'Cargando...', na:'El progreso de este amigo a\u00fan no est\u00e1 disponible. El progreso de cada cuenta se guarda en su propio dispositivo, as\u00ed que solo se podr\u00e1 mostrar aqu\u00ed cuando haya un servidor (backend).', loc:'Le\u00eddo de otra cuenta en este dispositivo.', rm:'\u00bfQuitar a {n} de tus amigos? T\u00fa tambi\u00e9n desaparecer\u00e1s de su lista. El historial del chat se conserva.' }
   };
   const VT2 = {
-    en:{ settings:'Settings', stPh:'Short status (e.g. flying around Prairie)', visT:'Who can see my progress', vPub:'Everyone', vFr:'Friends only', vPri:'Only me', mute:'Sound effects', muteOn:'Off', muteOff:'On', avT:'Choose avatar', uname:'Username', email:'Email', pwOld:'Current password', pwNew:'New password (optional)', accSave:'Save account', accT:'Account', noSrv:'Editing the account needs the server connection (SKY_API).', upT:'Upgrade to a full account (keeps your progress)', upBtn:'Create account', upDone:'Account created. Progress kept.', friendsT:'Friends', online:'Online', offline:'Offline', flame:'Light their flame', flamed:'{n} lit your flame', flameSent:'You lit a flame for {n}. Hope they feel energized today', typing:'typing...', same:'same time', ahead:'{h} h ahead', behind:'{h} h behind', priv:'This friend keeps their progress private.', c100:'{n} reached 100%!', needPw:'Enter your current password.', bEmail:'Invalid email.', accOk:'Account updated.' },
-    id:{ settings:'Pengaturan', stPh:'Status singkat (mis. lagi terbang di Prairie)', visT:'Siapa yang bisa melihat progresku', vPub:'Semua orang', vFr:'Hanya teman', vPri:'Hanya aku', mute:'Efek suara', muteOn:'Mati', muteOff:'Nyala', avT:'Pilih avatar', uname:'Username', email:'Email', pwOld:'Kata sandi saat ini', pwNew:'Kata sandi baru (opsional)', accSave:'Simpan akun', accT:'Akun', noSrv:'Mengubah akun butuh koneksi server (SKY_API).', upT:'Ubah jadi akun penuh (progres tetap terbawa)', upBtn:'Buat akun', upDone:'Akun dibuat. Progres tetap terbawa.', friendsT:'Teman', online:'Online', offline:'Offline', flame:'Nyalakan apinya', flamed:'{n} menyalakan apimu', flameSent:'Kamu telah menyalakan api untuk {n}, semoga dia bersemangat hari ini', typing:'sedang mengetik...', same:'waktu sama', ahead:'{h} jam lebih cepat', behind:'{h} jam lebih lambat', priv:'Teman ini menyembunyikan progresnya.', c100:'{n} mencapai 100%!', needPw:'Masukkan kata sandi saat ini.', bEmail:'Email tidak valid.', accOk:'Akun diperbarui.' },
-    es:{ settings:'Ajustes', stPh:'Estado breve (p. ej. volando por Prairie)', visT:'Qui\u00e9n puede ver mi progreso', vPub:'Todos', vFr:'Solo amigos', vPri:'Solo yo', mute:'Efectos de sonido', muteOn:'Apagado', muteOff:'Activado', avT:'Elige un avatar', uname:'Usuario', email:'Correo', pwOld:'Contrase\u00f1a actual', pwNew:'Nueva contrase\u00f1a (opcional)', accSave:'Guardar cuenta', accT:'Cuenta', noSrv:'Editar la cuenta requiere conexi\u00f3n al servidor (SKY_API).', upT:'Convertir en cuenta completa (conserva tu progreso)', upBtn:'Crear cuenta', upDone:'Cuenta creada. Progreso conservado.', friendsT:'Amigos', online:'En l\u00ednea', offline:'Desconectados', flame:'Encender su llama', flamed:'{n} encendi\u00f3 tu llama', flameSent:'Encendiste una llama para {n}. Ojal\u00e1 tenga mucho \u00e1nimo hoy', typing:'escribiendo...', same:'misma hora', ahead:'{h} h por delante', behind:'{h} h por detr\u00e1s', priv:'Este amigo mantiene su progreso privado.', c100:'\u00a1{n} lleg\u00f3 al 100%!', needPw:'Introduce tu contrase\u00f1a actual.', bEmail:'Correo no v\u00e1lido.', accOk:'Cuenta actualizada.' }
+    en:{ profT:'Profile', gfxT:'Graphics', gfxH:'High', gfxM:'Medium', gfxL:'Low', gfxHint:'Lower settings reduce effects and resolution to save battery and keep things smooth. Saved on this device only.', settings:'Settings', stPh:'Short status (e.g. flying around Prairie)', visT:'Who can see my progress', vPub:'Everyone', vFr:'Friends only', vPri:'Only me', mute:'Sound effects', muteOn:'Off', muteOff:'On', avT:'Choose avatar', uname:'Username', email:'Email', pwOld:'Current password', pwNew:'New password (optional)', accSave:'Save account', accT:'Account', noSrv:'Editing the account needs the server connection (SKY_API).', upT:'Upgrade to a full account (keeps your progress)', upBtn:'Create account', upDone:'Account created. Progress kept.', friendsT:'Friends', online:'Online', offline:'Offline', flame:'Light their flame', flamed:'{n} lit your flame', flameSent:'You lit a flame for {n}. Hope they feel energized today', typing:'typing...', same:'same time', ahead:'{h} h ahead', behind:'{h} h behind', priv:'This friend keeps their progress private.', c100:'{n} reached 100%!', needPw:'Enter your current password.', bEmail:'Invalid email.', accOk:'Account updated.' },
+    id:{ profT:'Profil', gfxT:'Grafik', gfxH:'Tinggi', gfxM:'Sedang', gfxL:'Rendah', gfxHint:'Pengaturan lebih rendah mengurangi efek dan resolusi agar baterai hemat dan tampilan tetap lancar. Hanya tersimpan di perangkat ini.', settings:'Pengaturan', stPh:'Status singkat (mis. lagi terbang di Prairie)', visT:'Siapa yang bisa melihat progresku', vPub:'Semua orang', vFr:'Hanya teman', vPri:'Hanya aku', mute:'Efek suara', muteOn:'Mati', muteOff:'Nyala', avT:'Pilih avatar', uname:'Username', email:'Email', pwOld:'Kata sandi saat ini', pwNew:'Kata sandi baru (opsional)', accSave:'Simpan akun', accT:'Akun', noSrv:'Mengubah akun butuh koneksi server (SKY_API).', upT:'Ubah jadi akun penuh (progres tetap terbawa)', upBtn:'Buat akun', upDone:'Akun dibuat. Progres tetap terbawa.', friendsT:'Teman', online:'Online', offline:'Offline', flame:'Nyalakan apinya', flamed:'{n} menyalakan apimu', flameSent:'Kamu telah menyalakan api untuk {n}, semoga dia bersemangat hari ini', typing:'sedang mengetik...', same:'waktu sama', ahead:'{h} jam lebih cepat', behind:'{h} jam lebih lambat', priv:'Teman ini menyembunyikan progresnya.', c100:'{n} mencapai 100%!', needPw:'Masukkan kata sandi saat ini.', bEmail:'Email tidak valid.', accOk:'Akun diperbarui.' },
+    es:{ profT:'Perfil', gfxT:'Gr\u00e1ficos', gfxH:'Alto', gfxM:'Medio', gfxL:'Bajo', gfxHint:'Un ajuste m\u00e1s bajo reduce efectos y resoluci\u00f3n para ahorrar bater\u00eda. Solo se guarda en este dispositivo.', settings:'Ajustes', stPh:'Estado breve (p. ej. volando por Prairie)', visT:'Qui\u00e9n puede ver mi progreso', vPub:'Todos', vFr:'Solo amigos', vPri:'Solo yo', mute:'Efectos de sonido', muteOn:'Apagado', muteOff:'Activado', avT:'Elige un avatar', uname:'Usuario', email:'Correo', pwOld:'Contrase\u00f1a actual', pwNew:'Nueva contrase\u00f1a (opcional)', accSave:'Guardar cuenta', accT:'Cuenta', noSrv:'Editar la cuenta requiere conexi\u00f3n al servidor (SKY_API).', upT:'Convertir en cuenta completa (conserva tu progreso)', upBtn:'Crear cuenta', upDone:'Cuenta creada. Progreso conservado.', friendsT:'Amigos', online:'En l\u00ednea', offline:'Desconectados', flame:'Encender su llama', flamed:'{n} encendi\u00f3 tu llama', flameSent:'Encendiste una llama para {n}. Ojal\u00e1 tenga mucho \u00e1nimo hoy', typing:'escribiendo...', same:'misma hora', ahead:'{h} h por delante', behind:'{h} h por detr\u00e1s', priv:'Este amigo mantiene su progreso privado.', c100:'\u00a1{n} lleg\u00f3 al 100%!', needPw:'Introduce tu contrase\u00f1a actual.', bEmail:'Correo no v\u00e1lido.', accOk:'Cuenta actualizada.' }
   };
   Object.keys(VT2).forEach(l => Object.assign(VT[l], VT2[l]));
   const VT3 = {
@@ -6104,10 +6240,9 @@ initPerm(); startLoop();
     return uid && uid.indexOf('guest_') === 0 ? vt().guestName : (uid || '');
   }
   function renderMyName(){   // nama hanya tampil di kartu profil; mengubahnya lewat ikon pengaturan
-    const v = vt(), val = $('myNameVal'), btn = $('setOpen');
+    const val = $('myNameVal');
     if(!val) return;
     val.textContent = myUid ? dispName(myUid) : '';
-    btn.title = v.settings; btn.setAttribute('aria-label', v.settings);
   }
 
 
@@ -6211,6 +6346,7 @@ initPerm(); startLoop();
   function applyProfLang(){
     const v = vt(), set = (id, t) => { const e = $(id); if(e) e.textContent = t; };
     renderLoc(); set('setT', v.settings); set('avT', v.avT); set('visT', v.visT); set('lgT', ({ en:'Account language', id:'Bahasa akun', es:'Idioma de la cuenta' })[window.SkyApp.getLang()] || 'Account language'); set('accT', v.accT); set('upT', v.upT); set('friendsT', v.friendsT);
+    set('gfxT', v.gfxT); set('gfxHint', v.gfxHint); { const go = $('gfxSel').options; go[0].textContent = v.gfxH; go[1].textContent = v.gfxM; go[2].textContent = v.gfxL; }
     set('nmT', v.nmT); set('stT', v.stT); set('sndT', v.sndT); set('setSave', v.save); set('avSave', v.save); $('setClose').setAttribute('aria-label', v.closeB); $('avClose').setAttribute('aria-label', v.closeB); $('setName').placeholder = v.name; renderMyName();
     set('accSave', v.accSave); set('upBtn', v.upBtn); set('accNote', v.noSrv);
     const o = $('visSel').options; o[0].textContent = v.vPub; o[1].textContent = v.vFr; o[2].textContent = v.vPri;
@@ -6228,6 +6364,7 @@ initPerm(); startLoop();
   let setFrom = null;
   function setIsOpen(){ return $('setOv').classList.contains('open'); }
   function fillSettings(){
+    if(window.SkyGfx) $('gfxSel').value = window.SkyGfx.level();
     $('setName').value = myUid ? (lsGet('sky_myname_' + myUid) || '') : '';
     $('stIn').value = prof.status || '';
     $('visSel').value = prof.vis; $('lgSel').value = prof.lang || window.SkyApp.getLang();
@@ -6292,7 +6429,8 @@ initPerm(); startLoop();
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && avIsOpen() && $('outOv').hidden) closeAvatar(); });
   window.addEventListener('sky:page', closeAvatar);
   $('avSave').addEventListener('click', () => withBusy($('avSave'), saveAvatar));
-  $('setOpen').addEventListener('click', openSettings);
+  $('gfxSel').addEventListener('change', () => { if(window.SkyGfx) window.SkyGfx.set($('gfxSel').value); SFX.nav && SFX.nav(); });   // langsung berlaku, tanpa tombol simpan
+  window.SkyProfile = { open: openSettings, close: closeSettings };   // dipakai item menu "Profil"
   $('setClose').addEventListener('click', closeSettings);
   $('setOv').addEventListener('click', e => { if(e.target === $('setOv')) closeSettings(); });   // ketuk latar redup = tutup
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && setIsOpen() && $('outOv').hidden) closeSettings(); });
