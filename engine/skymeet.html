@@ -2446,7 +2446,7 @@ function spawn(now) {
   const x0 = dir > 0 ? rnd(-.1, -.05) : rnd(1.05, 1.1), x2 = dir > 0 ? rnd(1.05, 1.12) : rnd(-.12, -.05);
   const y0 = rnd(.25, .7), y2 = rnd(.15, .6);
   const P = [x0, y0, (x0 + x2) / 2 + rnd(-.1, .1), Math.max(.08, Math.min(y0, y2) - rnd(.05, .25)), x2, y2];
-  const depth = Math.random() < .3 ? 1 : rnd(.4, .95), dur = rnd(13000, 18000) / depth, prof = makeProfile(dur / 1000);
+  const depth = rnd(.3, 1.2), dur = Math.min(45000, rnd(13000, 18000) / depth), prof = makeProfile(dur / 1000);   // kedalaman merata dari jauh (.3, kecil) sampai dekat (1.2, besar); durasi dibatasi 45 dtk seperti batas lama
   // ukuran dasar dibagi seluruh kelompok (selisih kecil), supaya jarak antarkid bisa dinyatakan dalam lebar jubah
   const scB = rnd(.03, .042) * depth * (1 + 1.1 * depth * depth * depth), capePx = 190 * scB * unit;
   const LAT_K = .62 * rnd(.94, 1.08), TRL_K = .78 * rnd(.94, 1.08);   // jarak samping dan ke belakang per tingkat, dalam lebar jubah
