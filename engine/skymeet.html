@@ -1327,8 +1327,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .bdgL{ font-size:9.5px; letter-spacing:.02em; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
   .bdg[data-b="dev"] .bdgI{ color:#ffd479; } .bdg[data-b="res"] .bdgI{ color:#8fd3ff; } .bdg[data-b="vet"] .bdgI{ color:#ffb38a; }
   .profTop .bdg{ margin-left:auto; padding-left:6px; }
-  .frWrap .bdg{ min-width:36px; max-width:48px; }
-  @media (max-width:380px){ .frWrap .bdgL{ display:none; } .frWrap .bdg{ min-width:24px; } }
+  .friendRow .bdg{ min-width:36px; max-width:48px; margin-left:4px; }
+  @media (max-width:380px){ .friendRow .bdgL{ display:none; } .friendRow .bdg{ min-width:24px; } }
   .nav-item.devItem{ position:relative; margin-top:9px; }
   .nav-item.devItem[hidden]{ display:none; }
   .nav-item.devItem::before{ content:''; position:absolute; left:12px; right:12px; top:-5px; height:1px; background:rgba(128,128,128,0.45); background:color-mix(in srgb, var(--ink) 34%, transparent); pointer-events:none; }
@@ -5610,7 +5610,7 @@ initPerm(); startLoop();
     { const A = window.SkyAsset; if(A){ const sv = fb.querySelector('svg'), put = u => { if(u && sv.isConnected) sv.replaceWith(A.mkImg(u)); }; const u0 = A.peek('aksi/favorit'); if(u0) put(u0); else A.resolve('aksi/favorit').then(put); } }
     fb.addEventListener('click', e => { e.stopPropagation(); toggleFav(row.code); });
     nl.append(row.nm, fb); tx.append(nl, row.prev, row.hint);
-    row.b.append(row.av, tx, row.ub);
+    row.b.append(row.av, tx, row.ub); /* badge ditambahkan di bawah, paling kanan di dalam kartu */
     row.b.addEventListener('click', e => { if(e.target.closest('.favBtn')) return; openFriend(row.f); });
     row.b.addEventListener('keydown', e => { if(e.target === row.b && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); openFriend(row.f); } });
     // chat: di kanan ikon api. Ikon bisa diganti: aset/skymeet/aksi/chat.svg (atau .webp)
@@ -5621,7 +5621,8 @@ initPerm(); startLoop();
     row.chat = cb;
     row.bg = mkEl('span', 'bdgHost'); row.bg.hidden = true; row.bg.style.display = 'contents';   // badge teman: paling kanan
     row.bgw = mkEl('span'); row.bgw.hidden = true; row.bg.appendChild(row.bgw);
-    row.fav = fb; row.wrap.append(row.b, w, cb, row.bg);
+    row.b.appendChild(row.bg);   // badge: paling kanan DI DALAM kartu teman (bukan di samping ikon chat)
+    row.fav = fb; row.wrap.append(row.b, w, cb);
     return row;
   }
   const PV_ICO = {
