@@ -1363,6 +1363,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .devBody{ padding:6px 16px 16px; overflow:auto; }
   .devBody input[type=search]{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#f4f5fb; font:inherit; font-size:16px; margin-bottom:8px; }
   .devRow{ display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid rgba(255,255,255,.1); }
+  .devRow .dIc{ width:34px; height:34px; flex:none; border-radius:9px; object-fit:contain; background:rgba(255,255,255,.07); }
   .devRow .dI{ flex:1; min-width:0; } .devRow .dN{ font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .devRow .dM{ font-size:11.5px; opacity:.7; } .devRow .bdg{ color:#f4f5fb; }
   .devRow button, .devRow select{ padding:6px 9px; border-radius:9px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#f4f5fb; font:inherit; font-size:12px; }
@@ -6808,9 +6809,9 @@ initPerm(); startLoop();
   }
   // ---- Editor rasi (tab Rasi utama / Season resmi / Saran). Peran dicek ulang di server; ini hanya tampilan. ----
   const ED_T = {
-    en:{ secMain:'Main realms', secSeason:'Official seasons', edit:'Edit', official:'Official', builtin:'Built-in', newSeason:'Add official season', seasonName:'Season name', create:'Create', noSeasons:'No official seasons yet', back:'Back', undo:'Undo', redo:'Redo', multi:'Multi-select', toolSel:'Select', toolLine:'Line', addC:'+ Circle', addS:'+ Star', own:'Owned lines', special:'Special', del:'Delete', dup:'Duplicate', copy:'Copy', paste:'Paste', radius:'Radius', ico:'Icon URL (https)', name:'Name', preview:'Preview', imp:'Import JSON', exp:'Export JSON', impGo:'Apply import', copyTxt:'Copy', lockSp:'The special circle cannot change on an existing constellation (player progress).', lockCnt:'Circle count is locked: this constellation has a special circle and player progress.', lockDel:'Existing circles cannot be deleted (player progress).', max:'Maximum 30 circles.', invalid:'Invalid layout.', apply:'Apply', suggest:'Send suggestion', notePh:'Note for the developer (optional)', force:'Force save', saved:'Saved (v{v}).', conflict:'Someone else changed this. Close and reopen.', shrink:'This removes circles that players may have lit.', big:'Layout too large.', sent:'Suggestion sent.', limit:'Too many pending suggestions.', loading:'Loading…', failLoad:'Could not load the layout.', hint:'Drag on the canvas in Line mode to draw a line.', approve:'Approve', reject:'Reject', st:{ p:'Pending', a:'Accepted', d:'Rejected' }, noSugg:'No suggestions', by:'by', circles:'circles', nolayout:'no layout (?)', shown:'Lines you own are highlighted. Tap a line to toggle.' },
-    id:{ secMain:'Rasi utama', secSeason:'Season resmi', edit:'Edit', official:'Resmi', builtin:'Bawaan', newSeason:'Tambah season resmi', seasonName:'Nama season', create:'Buat', noSeasons:'Belum ada season resmi', back:'Kembali', undo:'Urungkan', redo:'Ulangi', multi:'Pilih banyak', toolSel:'Pilih', toolLine:'Garis', addC:'+ Lingkaran', addS:'+ Bintang', own:'Garis milik', special:'Spesial', del:'Hapus', dup:'Duplikat', copy:'Salin', paste:'Tempel', radius:'Radius', ico:'URL ikon (https)', name:'Nama', preview:'Pratinjau', imp:'Impor JSON', exp:'Ekspor JSON', impGo:'Terapkan impor', copyTxt:'Salin', lockSp:'Lingkaran spesial tidak bisa diubah pada rasi yang sudah ada (progres pemain).', lockCnt:'Jumlah lingkaran dikunci: rasi ini punya lingkaran spesial dan progres pemain.', lockDel:'Lingkaran yang sudah ada tidak bisa dihapus (progres pemain).', max:'Maksimal 30 lingkaran.', invalid:'Tata letak tidak valid.', apply:'Terapkan', suggest:'Kirim saran', notePh:'Catatan untuk Developer (opsional)', force:'Paksa simpan', saved:'Tersimpan (v{v}).', conflict:'Sudah diubah orang lain. Tutup lalu buka lagi.', shrink:'Ini menghapus lingkaran yang mungkin sudah dinyalakan pemain.', big:'Tata letak terlalu besar.', sent:'Saran terkirim.', limit:'Terlalu banyak saran yang menunggu.', loading:'Memuat…', failLoad:'Tata letak tidak bisa dimuat.', hint:'Seret di kanvas pada mode Garis untuk menggambar garis.', approve:'Setujui', reject:'Tolak', st:{ p:'Menunggu', a:'Diterima', d:'Ditolak' }, noSugg:'Belum ada saran', by:'oleh', circles:'lingkaran', nolayout:'belum berlayout (?)', shown:'Garis milik lingkaran ditandai. Ketuk garis untuk mengubah.' },
-    es:{ secMain:'Reinos', secSeason:'Temporadas oficiales', edit:'Editar', official:'Oficial', builtin:'Incluido', newSeason:'Añadir temporada oficial', seasonName:'Nombre de temporada', create:'Crear', noSeasons:'Aún no hay temporadas oficiales', back:'Volver', undo:'Deshacer', redo:'Rehacer', multi:'Selección múltiple', toolSel:'Elegir', toolLine:'Línea', addC:'+ Círculo', addS:'+ Estrella', own:'Líneas propias', special:'Especial', del:'Eliminar', dup:'Duplicar', copy:'Copiar', paste:'Pegar', radius:'Radio', ico:'URL del icono (https)', name:'Nombre', preview:'Vista previa', imp:'Importar JSON', exp:'Exportar JSON', impGo:'Aplicar importación', copyTxt:'Copiar', lockSp:'El círculo especial no se puede cambiar en una constelación existente.', lockCnt:'El número de círculos está bloqueado (círculo especial y progreso de jugadores).', lockDel:'No se pueden eliminar círculos existentes.', max:'Máximo 30 círculos.', invalid:'Diseño no válido.', apply:'Aplicar', suggest:'Enviar sugerencia', notePh:'Nota para el desarrollador (opcional)', force:'Guardar a la fuerza', saved:'Guardado (v{v}).', conflict:'Otra persona lo cambió. Cierra y vuelve a abrir.', shrink:'Esto quita círculos que los jugadores pueden haber encendido.', big:'Diseño demasiado grande.', sent:'Sugerencia enviada.', limit:'Demasiadas sugerencias pendientes.', loading:'Cargando…', failLoad:'No se pudo cargar el diseño.', hint:'Arrastra en el lienzo en modo Línea para dibujar una línea.', approve:'Aprobar', reject:'Rechazar', st:{ p:'Pendiente', a:'Aceptada', d:'Rechazada' }, noSugg:'Sin sugerencias', by:'por', circles:'círculos', nolayout:'sin diseño (?)', shown:'Se resaltan tus líneas. Toca una línea para cambiar.' } };
+    en:{ secMain:'Main realms', secSeason:'Official seasons', notMade:'Not created yet', draft:'Upcoming', seaFail:'Season list unavailable (offline?). You can still add one by name below.', seaOther:'Other official seasons', edit:'Edit', official:'Official', builtin:'Built-in', newSeason:'Add official season', seasonName:'Season name', create:'Create', noSeasons:'No official seasons yet', back:'Back', undo:'Undo', redo:'Redo', multi:'Multi-select', toolSel:'Select', toolLine:'Line', addC:'+ Circle', addS:'+ Star', own:'Owned lines', special:'Special', del:'Delete', dup:'Duplicate', copy:'Copy', paste:'Paste', radius:'Radius', ico:'Icon URL (https)', name:'Name', preview:'Preview', imp:'Import JSON', exp:'Export JSON', impGo:'Apply import', copyTxt:'Copy', lockSp:'The special circle cannot change on an existing constellation (player progress).', lockCnt:'Circle count is locked: this constellation has a special circle and player progress.', lockDel:'Existing circles cannot be deleted (player progress).', max:'Maximum 30 circles.', invalid:'Invalid layout.', apply:'Apply', suggest:'Send suggestion', notePh:'Note for the developer (optional)', force:'Force save', saved:'Saved (v{v}).', conflict:'Someone else changed this. Close and reopen.', shrink:'This removes circles that players may have lit.', big:'Layout too large.', sent:'Suggestion sent.', limit:'Too many pending suggestions.', loading:'Loading…', failLoad:'Could not load the layout.', hint:'Drag on the canvas in Line mode to draw a line.', approve:'Approve', reject:'Reject', st:{ p:'Pending', a:'Accepted', d:'Rejected' }, noSugg:'No suggestions', by:'by', circles:'circles', nolayout:'no layout (?)', shown:'Lines you own are highlighted. Tap a line to toggle.' },
+    id:{ secMain:'Rasi utama', secSeason:'Season resmi', notMade:'Belum dibuat', draft:'Akan datang', seaFail:'Daftar season tidak tersedia (offline?). Kamu tetap bisa menambah lewat nama di bawah.', seaOther:'Season resmi lainnya', edit:'Edit', official:'Resmi', builtin:'Bawaan', newSeason:'Tambah season resmi', seasonName:'Nama season', create:'Buat', noSeasons:'Belum ada season resmi', back:'Kembali', undo:'Urungkan', redo:'Ulangi', multi:'Pilih banyak', toolSel:'Pilih', toolLine:'Garis', addC:'+ Lingkaran', addS:'+ Bintang', own:'Garis milik', special:'Spesial', del:'Hapus', dup:'Duplikat', copy:'Salin', paste:'Tempel', radius:'Radius', ico:'URL ikon (https)', name:'Nama', preview:'Pratinjau', imp:'Impor JSON', exp:'Ekspor JSON', impGo:'Terapkan impor', copyTxt:'Salin', lockSp:'Lingkaran spesial tidak bisa diubah pada rasi yang sudah ada (progres pemain).', lockCnt:'Jumlah lingkaran dikunci: rasi ini punya lingkaran spesial dan progres pemain.', lockDel:'Lingkaran yang sudah ada tidak bisa dihapus (progres pemain).', max:'Maksimal 30 lingkaran.', invalid:'Tata letak tidak valid.', apply:'Terapkan', suggest:'Kirim saran', notePh:'Catatan untuk Developer (opsional)', force:'Paksa simpan', saved:'Tersimpan (v{v}).', conflict:'Sudah diubah orang lain. Tutup lalu buka lagi.', shrink:'Ini menghapus lingkaran yang mungkin sudah dinyalakan pemain.', big:'Tata letak terlalu besar.', sent:'Saran terkirim.', limit:'Terlalu banyak saran yang menunggu.', loading:'Memuat…', failLoad:'Tata letak tidak bisa dimuat.', hint:'Seret di kanvas pada mode Garis untuk menggambar garis.', approve:'Setujui', reject:'Tolak', st:{ p:'Menunggu', a:'Diterima', d:'Ditolak' }, noSugg:'Belum ada saran', by:'oleh', circles:'lingkaran', nolayout:'belum berlayout (?)', shown:'Garis milik lingkaran ditandai. Ketuk garis untuk mengubah.' },
+    es:{ secMain:'Reinos', secSeason:'Temporadas oficiales', notMade:'A\u00fan sin crear', draft:'Pr\u00f3xima', seaFail:'Lista de temporadas no disponible (\u00bfsin conexi\u00f3n?). Aun puedes a\u00f1adir una por nombre abajo.', seaOther:'Otras temporadas oficiales', edit:'Editar', official:'Oficial', builtin:'Incluido', newSeason:'Añadir temporada oficial', seasonName:'Nombre de temporada', create:'Crear', noSeasons:'Aún no hay temporadas oficiales', back:'Volver', undo:'Deshacer', redo:'Rehacer', multi:'Selección múltiple', toolSel:'Elegir', toolLine:'Línea', addC:'+ Círculo', addS:'+ Estrella', own:'Líneas propias', special:'Especial', del:'Eliminar', dup:'Duplicar', copy:'Copiar', paste:'Pegar', radius:'Radio', ico:'URL del icono (https)', name:'Nombre', preview:'Vista previa', imp:'Importar JSON', exp:'Exportar JSON', impGo:'Aplicar importación', copyTxt:'Copiar', lockSp:'El círculo especial no se puede cambiar en una constelación existente.', lockCnt:'El número de círculos está bloqueado (círculo especial y progreso de jugadores).', lockDel:'No se pueden eliminar círculos existentes.', max:'Máximo 30 círculos.', invalid:'Diseño no válido.', apply:'Aplicar', suggest:'Enviar sugerencia', notePh:'Nota para el desarrollador (opcional)', force:'Guardar a la fuerza', saved:'Guardado (v{v}).', conflict:'Otra persona lo cambió. Cierra y vuelve a abrir.', shrink:'Esto quita círculos que los jugadores pueden haber encendido.', big:'Diseño demasiado grande.', sent:'Sugerencia enviada.', limit:'Demasiadas sugerencias pendientes.', loading:'Cargando…', failLoad:'No se pudo cargar el diseño.', hint:'Arrastra en el lienzo en modo Línea para dibujar una línea.', approve:'Aprobar', reject:'Rechazar', st:{ p:'Pendiente', a:'Aceptada', d:'Rechazada' }, noSugg:'Sin sugerencias', by:'por', circles:'círculos', nolayout:'sin diseño (?)', shown:'Se resaltan tus líneas. Toca una línea para cambiar.' } };
   const et = k => (ED_T[(window.SkyApp && window.SkyApp.getLang && window.SkyApp.getLang())] || ED_T.en)[k] || ED_T.en[k];
   const MAIN_REALMS = ['Isle of Dawn', 'Daylight Prairie', 'Hidden Forest', 'Valley of Triumph', 'Golden Wasteland', 'Vault of Knowledge'];
   const ED_MAX = 30, ED_CV = 996.7, SVGNS = 'http://www.w3.org/2000/svg';
@@ -7038,12 +7039,64 @@ initPerm(); startLoop();
     edStart({ key:key, kind:'realm', title:name, layout:lay });
   }
   const edMsgList = t => { const m = document.getElementById('edListMsg'); if(m) m.textContent = t || ''; };
-  function edSlug(n){ const base = String(n).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'season', all = (SKL() && SKL().all()) || {}; let k = 'season:' + base, i = 2; while(all[k]) k = 'season:' + base + '-' + (i++); return k; }
+  function edSlugBase(n){ return String(n).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40).replace(/-+$/, '') || 'season'; }
+  function edSlug(n){ const base = edSlugBase(n), all = (SKL() && SKL().all()) || {}; let k = 'season:' + base, i = 2; while(all[k]) k = 'season:' + base + '-' + (i++); return k; }
   async function edCreateSeason(name){
     const lay = { C:[], S:[], L:[], name:name.slice(0, 40) }, key = edSlug(name), dev = window.SkyRole === 'dev', T = dvT();
     const r = dev ? await api('saveLayout', { key:key, kind:'season', layout:lay, baseVer:0 }) : await api('suggestLayout', { key:key, kind:'season', layout:lay, note:'' });
     if(r && r.ok){ if(dev && SKL()) await SKL().refresh(true); dvPaintBody(); edMsgList(dev ? '' : et('sent')); } else edMsgList(r && r.error === 'forbidden' ? T.denied : T.err);
   }
+  // ---- daftar season dari game (skygame-data), diunduh saat tab dibuka; cadangan di penyimpanan lokal ----
+  const SEA_BASES = ['https://unpkg.com/skygame-data@latest/assets/', 'https://cdn.jsdelivr.net/npm/skygame-data@latest/assets/'];
+  const seaUrl = u => typeof u === 'string' && u.length <= 300 && /^https:\/\/[^\s"'<>\\]+$/.test(u) ? u : '';
+  let seaCache = null, seaP = null;
+  function seaLoad(){
+    if(seaCache) return Promise.resolve(seaCache);
+    if(!seaP) seaP = (async () => {
+      let raw = null;
+      for(const b of SEA_BASES){ try{ const r = await fetch(b + 'seasons.json'); if(!r.ok) throw 0; const d = await r.json(); raw = Array.isArray(d) ? d : (d && d.items) || []; break; }catch(e){} }
+      if(raw){
+        const list = raw.filter(x => x && typeof x.name === 'string' && x.name.trim()).map(x => ({ name:x.name.trim().slice(0, 40), icon:seaUrl(x.iconUrl), date:typeof x.date === 'string' ? x.date.slice(0, 10) : '', draft:!!x.draft }))
+          .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        if(list.length){ seaCache = list; lsSet('sky.seasons.v1', JSON.stringify(list)); return list; }
+      }
+      try{ const c = JSON.parse(lsGet('sky.seasons.v1') || 'null'); if(Array.isArray(c) && c.length){ seaCache = c.filter(x => x && typeof x.name === 'string').map(x => ({ name:x.name.slice(0, 40), icon:seaUrl(x.icon), date:String(x.date || '').slice(0, 10), draft:!!x.draft })); return seaCache; } }catch(e){}
+      return null;
+    })().finally(() => { seaP = null; });
+    return seaP;
+  }
+  function seaKeyOf(name, all){   // kunci layout resmi untuk season ini (cocok lewat slug atau nama di layout), atau ''
+    const sk = 'season:' + edSlugBase(name), nl = name.toLowerCase();
+    return Object.keys(all).find(k => all[k].kind === 'season' && (k === sk || String((all[k].json || {}).name || '').toLowerCase() === nl)) || '';
+  }
+  function seaRow(title, icon, sub, btn){
+    const row = edRow(title, sub, [btn]);
+    let ic;
+    if(icon){ ic = mkEl('img', 'dIc'); ic.alt = ''; ic.loading = 'lazy'; ic.decoding = 'async'; ic.referrerPolicy = 'no-referrer'; ic.addEventListener('error', () => { const p = mkEl('span', 'dIc'); if(ic.isConnected) ic.replaceWith(p); }); ic.src = icon; }
+    else ic = mkEl('span', 'dIc');
+    row.insertBefore(ic, row.firstChild); return row;
+  }
+  async function edPaintSeasons(box){
+    box.appendChild(mkEl('div', 'devEmpty', et('loading')));
+    const list = await seaLoad(); if(!box.isConnected) return; box.textContent = '';
+    const all = (SKL() && SKL().all()) || {}, used = new Set();
+    const info = k => { const j = all[k].json || {}, n = Array.isArray(j.C) ? j.C.length : 0; return (n ? n + ' ' + et('circles') : et('nolayout')) + ' \u00b7 v' + all[k].ver; };
+    if(!list) box.appendChild(mkEl('div', 'devEmpty', et('seaFail')));
+    (list || []).forEach(g => {
+      const k = seaKeyOf(g.name, all); if(k) used.add(k);
+      const sub = [g.date, g.draft ? et('draft') : '', k ? et('official') + ' \u00b7 ' + info(k) : et('notMade')].filter(Boolean).join(' \u00b7 ');
+      let btn;
+      if(k) btn = edBtn(et('edit'), () => { const j = all[k].json || {}; edStart({ key:k, kind:'season', title:j.name || g.name, layout:j }); });
+      else { btn = edBtn(et('create'), () => { btn.disabled = true; edCreateSeason(g.name).finally(() => { btn.disabled = false; }); }); }
+      box.appendChild(seaRow(g.name, g.icon, sub, btn));
+    });
+    const rest = Object.keys(all).filter(k => all[k].kind === 'season' && !used.has(k));
+    if(rest.length){
+      box.appendChild(mkEl('div', 'dM', et('seaOther')));
+      rest.forEach(k => { const j = all[k].json || {}; box.appendChild(seaRow(j.name || k, '', info(k), edBtn(et('edit'), () => edStart({ key:k, kind:'season', title:j.name || k, layout:j })))); });
+    }
+  }
+  // ---- akhir daftar season ----
   function edPaintTab(body, tab){
     if(ED) { edRender(); return; }
     const T = dvT(); const msg = mkEl('div', 'edMsg'); msg.id = 'edListMsg';
@@ -7051,11 +7104,9 @@ initPerm(); startLoop();
       body.appendChild(mkEl('div', 'dSec', et('secMain')));
       MAIN_REALMS.forEach(n => { const info = SKL() && SKL().all()['main:' + n]; body.appendChild(edRow(n, info ? et('official') + ' v' + info.ver : et('builtin'), [edBtn(et('edit'), () => edOpenMain(n))])); });
       body.appendChild(mkEl('div', 'dSec', et('secSeason')));
-      const all = (SKL() && SKL().all()) || {}, ks = Object.keys(all).filter(k => all[k].kind === 'season');
+      const box = mkEl('div'); body.appendChild(box); edPaintSeasons(box);
       const f = mkEl('div', 'edBar'), ni = mkEl('input'); ni.type = 'text'; ni.maxLength = 40; ni.placeholder = et('seasonName'); ni.setAttribute('aria-label', et('seasonName'));
       f.append(ni, edBtn(et('create'), () => { const v = ni.value.trim(); if(v) edCreateSeason(v); })); body.appendChild(mkEl('div', 'dM', et('newSeason'))); body.appendChild(f);
-      if(!ks.length) body.appendChild(mkEl('div', 'devEmpty', et('noSeasons')));
-      ks.forEach(k => { const j = all[k].json || {}, n = Array.isArray(j.C) ? j.C.length : 0; body.appendChild(edRow(j.name || k, (n ? n + ' ' + et('circles') : et('nolayout')) + ' · v' + all[k].ver, [edBtn(et('edit'), () => edStart({ key:k, kind:'season', title:j.name || k, layout:j }))])); });
       body.appendChild(msg); return;
     }
     edLoadSugg(body, T);
