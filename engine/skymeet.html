@@ -13,11 +13,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>
-/* tautan relatif (manifest, ikon, aset, sw.js) harus dihitung dari folder tempat berkas ini berada.
-   URL tanpa "/" di akhir dan tanpa ekstensi (mis. /engine/skymeet) punya dua kemungkinan:
-     (a) FOLDER   : /engine/skymeet/index.html            -> perlu <base href="/engine/skymeet/">
-     (b) URL BERSIH: /engine/skymeet -> /engine/skymeet.html -> JANGAN pakai <base> (aset sejajar dengan berkas ini)
-   Jadi jangan menebak: cek apakah manifest.webmanifest benar-benar ada di dalam folder itu. */
 (function(){
   var p = location.pathname;
   if(/\/$/.test(p) || /\.[A-Za-z0-9]{1,5}$/.test(p.split('/').pop())) return;
@@ -1356,14 +1351,15 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .nav-item.devItem:not([hidden]) + .nav-item.logout::before{ display:none; }   /* satu kelompok: pemisah hanya di atas Developer */
   #devOv{ position:fixed; inset:0; z-index:10030; display:flex; align-items:center; justify-content:center; padding:14px; background:rgba(0,0,0,.55); }
   #devOv[hidden]{ display:none; }
+  #devOv .devRow button.arm{ background:rgba(255,120,120,0.28); border-color:rgba(255,160,160,0.7); }   /* ketuk sekali = siap hapus */
   #devBox{ width:min(560px,100%); max-height:88vh; display:flex; flex-direction:column; border-radius:18px; background:#141a33; color:#f4f5fb; border:1px solid rgba(255,255,255,.16); box-shadow:0 18px 50px rgba(0,0,0,.5); font-family:'Space Grotesk',sans-serif; }
-  #devBox header{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px 6px; font-size:16px; font-weight:600; }
+  #devBox header{ flex:none; display:flex; align-items:center; justify-content:space-between; padding:14px 16px 6px; font-size:16px; font-weight:600; }
   #devBox button{ font-family:inherit; color:#f4f5fb; cursor:pointer; }
   .devX{ width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); font-size:18px; }
-  .devTabs{ display:flex; gap:6px; padding:6px 16px; overflow-x:auto; scrollbar-width:none; } .devTabs::-webkit-scrollbar{ display:none; }
+  .devTabs{ flex:none; display:flex; gap:6px; padding:6px 16px; overflow-x:auto; scrollbar-width:none; } .devTabs::-webkit-scrollbar{ display:none; }
   .devTabs button{ flex:none; padding:7px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:transparent; font-size:13px; }
   .devTabs button[aria-selected="true"]{ background:rgba(255,255,255,.16); }
-  .devBody{ padding:6px 16px 16px; overflow:auto; }
+  .devBody{ flex:1 1 auto; min-height:0; padding:6px 16px 16px; overflow:auto; }
   .devBody input[type=search]{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#f4f5fb; font:inherit; font-size:16px; margin-bottom:8px; }
   .devRow{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; padding:9px 0; border-top:1px solid rgba(255,255,255,.1); }   /* tombol turun ke baris baru bila sempit, tidak memeras nama */
   .devRow .dIc{ width:34px; height:34px; flex:none; border-radius:9px; object-fit:contain; background:rgba(255,255,255,.07); }
@@ -6947,6 +6943,12 @@ initPerm(); startLoop();
       addL:'+ Garis', all:'Pilih semua', pvBtn:'Pratinjau', icoBad:'Ada link ikon yang tidak valid (hanya https, maks 300 karakter).', cvResize:'Seret untuk mengubah ukuran kanvas', addShape:'Tambah bentuk', helpL:'Bantuan' }
   };
   Object.keys(ED_X).forEach(l => Object.assign(ED_T[l], ED_X[l]));
+  const ED_D = {   // hapus season buatan (hanya Developer)
+    en:{ delS:'Delete', delS2:'Tap again to delete', delDone:'Season deleted.' },
+    id:{ delS:'Hapus', delS2:'Ketuk lagi untuk hapus', delDone:'Season dihapus.' },
+    es:{ delS:'Eliminar', delS2:'Toca otra vez para eliminar', delDone:'Temporada eliminada.' }
+  };
+  Object.keys(ED_D).forEach(l => Object.assign(ED_T[l], ED_D[l]));
   const ef = (k, v) => String(et(k)).replace(/\{(\w+)\}/g, (m, n) => (v && v[n] !== undefined ? v[n] : m));
   const edFx = v => Math.round(v * 10) / 10, edHue = i => (i < 0 ? '#8890a8' : 'hsl(' + ((i * 47) % 360) + ' 85% 68%)');
   const edClamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -7945,11 +7947,21 @@ initPerm(); startLoop();
     return Object.keys(all).find(k => all[k].kind === 'season' && (k === sk || String((all[k].json || {}).name || '').toLowerCase() === nl)) || '';
   }
   function seaRow(title, icon, sub, btn){
-    const row = edRow(title, sub, [btn]);
+    const row = edRow(title, sub, [].concat(btn));
     let ic;
     if(icon){ ic = mkEl('img', 'dIc'); ic.alt = ''; ic.loading = 'lazy'; ic.decoding = 'async'; ic.referrerPolicy = 'no-referrer'; ic.addEventListener('error', () => { const p = mkEl('span', 'dIc'); if(ic.isConnected) ic.replaceWith(p); }); ic.src = icon; }
     else ic = mkEl('span', 'dIc');
     row.insertBefore(ic, row.firstChild); return row;
+  }
+  function edDelSeason(k){   // dua ketukan (3 dtk) lalu hapus layout season di server; hanya Developer
+    const b = edBtn(et('delS'), async () => {
+      if(!b.classList.contains('arm')){ b.classList.add('arm'); b.textContent = et('delS2'); clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('arm'); b.textContent = et('delS'); }, 3000); return; }
+      clearTimeout(b._t); b.disabled = true;
+      const r = await api('deleteLayout', { key:k }), T = dvT();
+      if(r && r.ok){ if(SKL()) await SKL().refresh(true); dvPaintBody(); edMsgList(et('delDone')); }
+      else { b.disabled = false; b.classList.remove('arm'); b.textContent = et('delS'); edMsgList(r && r.error === 'forbidden' ? T.denied : T.err); }
+    });
+    return b;
   }
   async function edPaintSeasons(box){
     box.appendChild(mkEl('div', 'devEmpty', et('loading')));
@@ -7961,14 +7973,14 @@ initPerm(); startLoop();
       const k = seaKeyOf(g.name, all); if(k) used.add(k);
       const sub = [g.date, g.draft ? et('draft') : '', k ? et('official') + ' \u00b7 ' + info(k) : et('notMade')].filter(Boolean).join(' \u00b7 ');
       let btn;
-      if(k) btn = edBtn(et('edit'), () => { const j = all[k].json || {}; edStart({ key:k, kind:'season', title:j.name || g.name, layout:j }); });
+      if(k) btn = [edBtn(et('edit'), () => { const j = all[k].json || {}; edStart({ key:k, kind:'season', title:j.name || g.name, layout:j }); })].concat(window.SkyRole === 'dev' ? [edDelSeason(k)] : []);
       else { btn = edBtn(et('create'), () => { btn.disabled = true; edCreateSeason(g.name).finally(() => { btn.disabled = false; }); }); }
       box.appendChild(seaRow(g.name, g.icon, sub, btn));
     });
     const rest = Object.keys(all).filter(k => all[k].kind === 'season' && !used.has(k));
     if(rest.length){
       box.appendChild(mkEl('div', 'dSec', et('seaOther')));
-      rest.forEach(k => { const j = all[k].json || {}; box.appendChild(seaRow(j.name || k, '', info(k), edBtn(et('edit'), () => edStart({ key:k, kind:'season', title:j.name || k, layout:j })))); });
+      rest.forEach(k => { const j = all[k].json || {}; box.appendChild(seaRow(j.name || k, '', info(k), [edBtn(et('edit'), () => edStart({ key:k, kind:'season', title:j.name || k, layout:j }))].concat(window.SkyRole === 'dev' ? [edDelSeason(k)] : []))); });
     }
   }
   // ---- akhir daftar season ----
