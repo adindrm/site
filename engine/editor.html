@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070d20; color: #e6efff; font: 12px/1.5 system-ui, sans-serif; }
+  #pvbox { margin-top: 12px; background: radial-gradient(ellipse at 50% 50%, #142245 0%, #050a1a 80%); border: 1px solid #1c2a52; border-radius: 12px; aspect-ratio: 1; }
+  #pv { width: 100%; height: 100%; display: block; touch-action: none; }
+  .panel { background: #0b1330; border: 1px solid #1c2a52; border-radius: 10px; padding: 8px 10px; }
+  label { display: block; margin: 6px 0; color: #b9c9ec; }
+  input[type=text], select { width: 100%; background: #060b1e; color: #e6efff; border: 1px solid #2a3b6e; border-radius: 8px; padding: 6px 8px; font: inherit; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  button { background: #16224a; color: #e6efff; border: 1px solid #34498a; border-radius: 8px; padding: 6px 10px; font: inherit; cursor: pointer; }
+  button:hover { background: #1f2f66; }
+  button.primary { background: #2c4fae; border-color: #5b86f0; }
+  .stat { color: #9fb4e0; margin: 0 0 6px; }
+  #ltable { max-height: 190px; overflow: auto; }
+  #ltable div { display: grid; grid-template-columns: 52px 1fr; gap: 8px; align-items: center; margin: 4px 0; }
+  .note { color: #8fa6d6; font-size: 12px; margin: 6px 0 0; }
+  .err { color: #ff9a9a; margin-top: 8px; }
+  .hide { display: none; }
+  .icgrid { display: grid; grid-template-columns: repeat(auto-fill, 72px); gap: 8px; margin-top: 10px; }
+  .icgrid figure { margin: 0; text-align: center; font-size: 11px; color: #8fa6d6; }
+  .icgrid img { width: 72px; height: 72px; object-fit: contain; display: block; background: #060b1e; border: 1px solid #2a3b6e; border-radius: 8px; }
+  input[type=range] { width: 100%; accent-color: #6f9bff; }
+  .atrow { display: grid; grid-template-columns: 56px 1fr; gap: 8px; align-items: start; margin: 8px 0; padding-bottom: 8px; border-bottom: 1px solid #1c2a52; }
+  .atrow > img { width: 56px; height: 56px; object-fit: contain; background: #060b1e; border: 1px solid #2a3b6e; border-radius: 8px; }
+  .atc { display: flex; gap: 6px; flex-wrap: wrap; }
+  .atc button { display: flex; flex-direction: column; align-items: center; width: 84px; padding: 4px; font-size: 10px; line-height: 1.25; text-align: center; word-break: break-word; }
+  .atc button img { width: 48px; height: 48px; object-fit: contain; background: #060b1e; border-radius: 6px; }
+  .atc button.on { background: #2c4fae; border-color: #9cc4ff; }
+  .atc button.low { opacity: .6; }
+  .sprow { margin: 8px 0; padding-bottom: 8px; border-bottom: 1px solid #1c2a52; }
+  .sprow .top { display: grid; grid-template-columns: 56px 1fr; gap: 8px; align-items: center; }
+  .sprow img.ic { width: 56px; height: 56px; object-fit: contain; background: #060b1e; border: 1px solid #2a3b6e; border-radius: 8px; }
+  .sprow .nm { font-size: 12px; color: #8fa6d6; margin: 2px 0 4px; }
+  .sprow .tv { width: 100%; overflow: auto; margin-top: 6px; background: #060b1e; border: 1px solid #1c2a52; border-radius: 10px; }
+  .sprow .tv svg { display: block; margin: 0 auto; }
+  .sprow .tv text { fill: #cfe0ff; font-size: 11px; text-anchor: middle; }
+/* ===== Kartu dropdown, form, dan ikon penjelasan ===== */
+  details.panel > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; user-select: none; }
+  details.panel > summary::-webkit-details-marker { display: none; }
+  details.panel[open] > summary { margin-bottom: 10px; }
+  .panel h3 { margin: 16px 0 6px; padding-top: 12px; border-top: 1px solid #1c2a52; font-size: 12px; font-weight: 500; color: #b9c9ec; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .panel h3:first-of-type { margin-top: 4px; padding-top: 0; border-top: 0; }
+  .fld { margin: 10px 0; }
+  .fld > label { margin: 0 0 4px; }
+  .ctl { display: flex; gap: 8px; align-items: center; }
+  .ctl.top { align-items: flex-start; }
+  .ctl.top .inf { margin-top: 5px; }
+  .ctl .grow { flex: 1; min-width: 0; }
+  .stack { display: flex; flex-direction: column; gap: 6px; }
+  .pair { display: flex; gap: 8px; }
+  .pair input { flex: 1; min-width: 0; }
+  .fld.chk { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .fld.chk label { margin: 0; }
+  .btnrow { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .btnrow .inf { margin-left: auto; }
+  .inf { flex: none; width: 20px; height: 20px; padding: 0; border-radius: 50%; border: 1px solid #5b86f0; background: #16224a; color: #9cc4ff; font: 700 12px/1 system-ui, sans-serif; display: grid; place-items: center; cursor: help; }
+  .inf:hover, .inf[aria-expanded=true] { background: #2c4fae; color: #fff; }
+  #tip { position: fixed; z-index: 100; max-width: min(300px, calc(100vw - 24px)); background: #0f1a3d; color: #dce8ff; border: 1px solid #5b86f0; border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.5; box-shadow: 0 8px 24px rgba(0,0,0,.5); display: none; pointer-events: none; }
+  #tip.open { display: block; }
+  #ltable { position: relative; }
+  #ltable div { grid-template-columns: 74px 1fr; padding: 2px 4px; }
+  #ltable div.sel { background: rgba(255,226,122,.12); border-radius: 6px; outline: 1px solid rgba(255,226,122,.5); }
+  #ltable div.own { background: rgba(127,176,255,.09); border-radius: 6px; }
+/* ===== Skala tipografi seragam: judul 13 / label & isi 13 / penjelasan & status 12 / keterangan kecil 11 ===== */
+  :root { --fs-title: 12px; --fs-text: 12px; --fs-note: 11px; --fs-micro: 10px; --c-label: #cfd9f3; --c-note: #8fa6d6; }
+  .panel h3 { font-size: var(--fs-text); font-weight: 600; color: #dbe6ff; }
+  label, input[type=text], select, button, textarea { font-size: var(--fs-text); }
+  label { color: var(--c-label); }
+  .note, .stat, .err, .sprow .nm, #tip { font-size: var(--fs-note); line-height: 1.5; }
+  .stat { color: var(--c-note); margin: 0 0 6px; }
+  .note:empty, .err:empty { display: none; }
+  .atc button, .icgrid figure { font-size: var(--fs-micro); }
+  .row { gap: 6px; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button:disabled:hover { background: #16224a; }
+  button.primary:disabled:hover { background: #2c4fae; }
+  #pvbox { position: relative; }
+  .pvfab { position: absolute; top: 10px; right: 10px; z-index: 2; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+/* ===== Preview gaya halaman rasi ===== */
+  #pvo { position: fixed; inset: 0; z-index: 50; display: none; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 48%, rgba(20,34,69,.55) 0%, rgba(7,13,32,.45) 38%, transparent 70%), linear-gradient(180deg, #030611 0%, #070d20 55%, #02040c 100%); }
+  #pvo.open { display: grid; place-items: center; }
+  #pvs { width: min(86vmin, 900px); height: min(86vmin, 900px); overflow: visible; }
+  #pvt { position: absolute; top: 14px; left: 0; right: 0; text-align: center; font-size: clamp(18px, 4vmin, 34px); font-weight: 300; color: rgba(238,245,255,.94);
+    text-shadow: 0 0 6px rgba(214,232,255,.55), 0 0 18px rgba(150,190,255,.38); pointer-events: none; }
+  #pvh { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; font-size: 12px; color: rgba(214,232,255,.65); pointer-events: none; padding: 0 16px; }
+  #pvx { position: absolute; top: 12px; right: 12px; z-index: 2; }
+  #pso { position: absolute; inset: 0; z-index: 1; display: none; overflow: hidden; align-items: stretch; justify-content: space-between; background: rgba(3,6,17,.6); backdrop-filter: blur(2px); }
+  #pso.open { display: flex; animation: psFade .4s ease-out both; }
+  #pso.closing { animation: psFadeOut .5s ease-in both; pointer-events: none; }
+  @keyframes psFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes psFadeOut { to { opacity: 0; } }
+/* kartu pohon spirit: masuk dari kanan ke kiri, keluar kembali ke kanan */
+  #pso.open .sptree { animation: psTreeIn .55s cubic-bezier(.2, .85, .25, 1) both; }
+  #pso.closing .sptree { animation: psTreeOut .42s cubic-bezier(.5, 0, .85, .4) both; }
+  @keyframes psTreeIn { from { transform: translateX(100%); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes psTreeOut { from { transform: none; opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+/* ikon spirit: setelah dua arus partikel sampai di tengah, ikon perlahan tersusun dari cahaya kuning (kabur+kuning -> jernih); keluar dengan arah sebaliknya */
+  #pso .spimg { position: relative; }
+  #pso.open .spimg img { animation: psImgForm 1.8s cubic-bezier(.3, .6, .3, 1) 1.75s both; }
+  #pso.closing .spimg img { animation: psImgOut .6s ease-in both; }
+  @keyframes psImgForm {
+    0% { opacity: 0; transform: scale(.94); filter: blur(22px) sepia(1) saturate(3.2) brightness(1.9) hue-rotate(-12deg) drop-shadow(0 0 30px rgba(255,200,80,1)); }
+    30% { opacity: .85; }
+    70% { opacity: 1; filter: blur(5px) sepia(.8) saturate(2.4) brightness(1.4) hue-rotate(-8deg) drop-shadow(0 0 26px rgba(255,205,80,.8)); }
+    100% { opacity: 1; transform: none; filter: blur(0px) sepia(0) saturate(1) brightness(1) hue-rotate(0deg) drop-shadow(0 0 18px rgba(255,205,90,.4)); }
+  }
+  @keyframes psImgOut {
+    from { opacity: 1; transform: none; filter: blur(0px) sepia(0) saturate(1) brightness(1) hue-rotate(0deg) drop-shadow(0 0 18px rgba(255,205,90,.4)); }
+    to { opacity: 0; transform: scale(.94); filter: blur(20px) sepia(1) saturate(3.2) brightness(1.9) hue-rotate(-12deg) drop-shadow(0 0 30px rgba(255,200,80,1)); }
+  }
+/* halo kuning tipis di belakang ikon spirit */
+  #pso .psglow { position: absolute; left: 50%; top: 50%; width: min(64vmin, 560px); aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -46%); pointer-events: none; opacity: 0; z-index: -1;
+    background: radial-gradient(circle, rgba(255,212,105,.2) 0, rgba(255,205,90,.08) 45%, transparent 68%); }
+  #pso.open .psglow { animation: psGlowIn 1.8s ease-out 2.2s forwards, psBreath 5s ease-in-out 4s infinite; }
+  @keyframes psGlowIn { to { opacity: 1; } }
+  @keyframes psBreath { 0%, 100% { opacity: 1; } 50% { opacity: .62; } }
+  #pso.closing .psglow { display: none; }
+  #pso.open .spimg span { animation: psNameIn .6s ease-out 2.9s both; }
+  #pso.closing .spimg span { animation: psNameOut .25s ease-in both; }
+  @keyframes psNameIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes psNameOut { to { opacity: 0; } }
+  #pso .psbeam { position: absolute; left: 50%; top: 0; bottom: 18%; width: clamp(60px, 14vmin, 130px); transform: translateX(-50%); pointer-events: none; opacity: 0; filter: blur(7px); z-index: -1;
+    background: linear-gradient(180deg, rgba(255,222,140,0) 0, rgba(255,222,140,.34) 38%, rgba(255,222,140,0) 100%); }
+  #pso.open .psbeam { animation: psBeam 2.4s ease-in-out both; }
+  @keyframes psBeam { 0% { opacity: 0; } 25% { opacity: 1; } 70% { opacity: .75; } 100% { opacity: 0; } }
+  #pso #pspart { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #pso.closing #pspart, #pso.closing .psbeam { display: none; }
+/* garis pohon naik perlahan dari simpul bawah ke atas; simpul muncul menyusul */
+  .rl { stroke-dasharray: 1 2; stroke-dashoffset: 1; animation: psLine 1.1s cubic-bezier(.3, .6, .3, 1) both; }
+  @keyframes psLine { to { stroke-dashoffset: 0; } }
+  .ni.rise { animation: psNodeIn .6s ease-out both; }
+  @keyframes psNodeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+/* item baru diaktifkan: cahaya merambat naik di garis, lalu ikon menyala dengan lingkaran cahaya */
+  .litin { opacity: 0; transform-box: fill-box; transform-origin: center; animation: psLitIn .6s ease-out forwards; pointer-events: none; }
+  @keyframes psLitIn { 0% { opacity: 0; transform: scale(.85); } 55% { opacity: 1; transform: scale(1.18); } 100% { opacity: 1; transform: scale(1); } }
+  .litring { fill: none; stroke: rgba(255,226,140,.95); stroke-width: 1.6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: psRing .85s ease-out forwards; pointer-events: none; }
+  @keyframes psRing { 0% { opacity: .9; transform: scale(.7); } 100% { opacity: 0; transform: scale(2.1); } }
+  .txl { animation: psTxtLit .5s ease-out both; }
+  @keyframes psTxtLit { from { opacity: .42; } to { opacity: 1; } }
+/* ditolak: hanya ikon / tombol yang dipilih yang bergetar */
+  .nd.deny, button.deny { animation: pdeny .5s ease-in-out; }
+  @media (prefers-reduced-motion: reduce) { #pso, #pso * { animation: none !important; } .rl { stroke-dashoffset: 0; } .litin { opacity: 1 !important; } .litring { display: none; } #pso .psglow { opacity: 1; } }
+  #pso .spimg { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px clamp(10px, 4vw, 56px); }
+  #pso .spimg span { color: rgba(238,245,255,.95); font-size: clamp(18px, 3.8vmin, 34px); font-weight: 300; text-align: center; text-shadow: 0 0 6px rgba(214,232,255,.55), 0 0 18px rgba(150,190,255,.38); }
+  #pso .spimg img { max-width: 100%; max-height: calc(100vh - 150px); object-fit: contain; filter: blur(0px) sepia(0) saturate(1) brightness(1) hue-rotate(0deg) drop-shadow(0 0 18px rgba(255,205,90,.4)); }
+  #pso .sptree { flex: 0 0 auto; width: min(420px, 46vw); display: flex; flex-direction: column; overflow: auto; padding: 14px 10px; background: linear-gradient(90deg, rgba(2,5,16,0) 0, rgba(2,5,16,.5) 16%, rgba(2,5,16,.5) 100%); }
+  #pso .sptbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; margin-bottom: 8px; color: #b9c9ec; font-size: 12px; }
+  #pso .sptbar button { padding: 3px 8px; font-size: 12px; }
+  #pso #pstv { margin: auto 0; }
+  #pso .sptree text { fill: #e6efff; font-size: 11px; text-anchor: middle; }
+  @media (max-width: 760px) { #pso { flex-direction: column; justify-content: flex-start; overflow-x: hidden; overflow-y: auto; } #pso .spimg { padding: 20px 12px; flex: none; } #pso .spimg img { max-height: 30vh; } #pso .sptree { width: 100%; flex: none; min-height: 50vh; background: rgba(2,5,16,.5); } }
+  .pst0 { fill: #fff; cursor: pointer; transform-box: fill-box; transform-origin: center;
+    filter: drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 10px rgba(191,220,255,.8));
+    animation: pstar 5.8s ease-in-out infinite; animation-delay: var(--d, 0s); }
+  .pst0.wob { animation: pwob .48s ease-in-out, pstar 5.8s ease-in-out infinite; animation-delay: 0s, var(--d, 0s); }
+  @keyframes pstar { 0%,100% { transform: translateY(0) scale(1); opacity: .78; } 28% { transform: translateY(-8px) scale(1.08); opacity: 1; } 62% { transform: translateY(3px) scale(.96); opacity: .86; } }
+  @keyframes pwob { 0%,100% { rotate: 0deg; scale: 1; } 18% { rotate: -7deg; scale: 1.12; } 38% { rotate: 5deg; scale: .98; } 58% { rotate: -3deg; scale: 1.05; } 78% { rotate: 2deg; } }
+  .pn { cursor: pointer; transform-box: fill-box; transform-origin: center; animation: pfloat 8s ease-in-out infinite; animation-delay: var(--cd, 0s); }
+  .pn.deny { animation: pdeny .5s ease-in-out, pfloat 8s ease-in-out infinite; animation-delay: 0s, var(--cd, 0s); }
+  .pn.locked { opacity: .45; }
+  @keyframes pfloat { 0%,100% { transform: translateY(0); } 32% { transform: translateY(-7px); } 68% { transform: translateY(4px); } }
+  @keyframes pdeny { 0%,100% { translate: 0 0; } 15% { translate: -6px 0; } 35% { translate: 6px 0; } 55% { translate: -4px 0; } 75% { translate: 3px 0; } }
+  .pst1 { fill: rgba(255,255,255,.02); stroke: #fff; stroke-width: 4; transition: stroke-width .35s ease, filter .35s ease, stroke .6s ease;
+    filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px rgba(196,220,255,.95)) drop-shadow(0 0 17px rgba(125,171,255,.5)); }
+  .pn:hover .pst1 { stroke-width: 5; filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 12px #fff) drop-shadow(0 0 24px rgba(150,195,255,.95)); }
+  .pn.lit .pst1 { stroke-width: 5.5; filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 12px #fff) drop-shadow(0 0 25px #fff) drop-shadow(0 0 42px rgba(164,203,255,1)); }
+  #pvs.all .pst1 { stroke: #ffe2a8; }
+  .picon { pointer-events: none; opacity: .88; transition: opacity .35s ease, filter .35s ease; filter: drop-shadow(0 0 2px rgba(255,255,255,.6)); }
+  .pn.lit .picon { opacity: 1; filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 12px rgba(164,203,255,1)); }
+  .pnum { fill: #fff; font-size: 52px; font-weight: 300; text-anchor: middle; dominant-baseline: central; pointer-events: none; opacity: .88; }
+  .pst2 { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: butt; pointer-events: none;
+    stroke-dasharray: var(--len, 1); stroke-dashoffset: var(--len, 1); transition: stroke-dashoffset 1.6s linear var(--dly, 0s); }
+  .pst2.on { stroke-dashoffset: 0; stroke-linecap: round; stroke-opacity: .8;
+    filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 8px rgba(194,220,255,.8)) drop-shadow(0 0 16px rgba(116,164,255,.42)); }
+  @media (prefers-reduced-motion: reduce) { .pst0, .pn { animation: none !important; } .pst2 { transition: none; } }
+
+  /* ===== Tata letak editor ===== */
+  :root { --cv: 520px; }
+  .wrap { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 12px; padding: 12px; }
+  .lcol { width: min(var(--cv), 100%); flex: none; display: flex; flex-direction: column; gap: 8px; }
+  .hdr { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px 5px 12px; }
+  .hdr { position: relative; justify-content: center; min-height: 38px; }
+  .hdr h1 { margin: 0; font-size: 14px; font-weight: 500; text-align: center; text-transform: uppercase; letter-spacing: .12em; }
+  .urlrow { margin: 0; flex-wrap: nowrap; align-items: center; }
+  .err { margin-top: 0; }
+  button, input[type=text], select { padding: 3px 7px; border-radius: 7px; }
+  .inf { width: 16px; height: 16px; font-size: 10px; }
+  .fld { margin: 6px 0; }
+  .panel h3 { margin: 10px 0 4px; padding-top: 8px; }
+  .ic { width: 16px; height: 16px; display: block; }
+  .tb { width: 26px; height: 26px; padding: 0; display: grid; place-items: center; flex: none; }
+  #apanel.hide, #spanel.hide { display: block; opacity: .4; pointer-events: none; }
+  /* kanvas + alat di tepi kiri */
+  #pvbox { margin-top: 0; width: 100%; }
+  .pvfab { top: 8px; right: 8px; }
+  .tools { position: absolute; left: 0; top: 8px; z-index: 3; display: flex; flex-direction: column; gap: 4px; padding: 4px; background: rgba(11,19,48,.92); border: 1px solid #2a3b6e; border-left: 0; border-radius: 0 10px 10px 0; }
+  .tgrp { position: relative; }
+  .tcaret { position: absolute; right: 0; bottom: 0; width: 11px; height: 11px; padding: 0; border: 0; border-radius: 0; background: none; cursor: pointer; }
+  .tcaret::after { content: ''; position: absolute; right: 2px; bottom: 2px; border: 3px solid transparent; border-right-color: #9cc4ff; border-bottom-color: #9cc4ff; }
+  .tcaret:hover::after, .tcaret[aria-expanded=true]::after { border-right-color: #fff; border-bottom-color: #fff; }
+  .tmenu { display: none; position: absolute; left: calc(100% + 8px); top: 0; flex-direction: column; gap: 4px; padding: 4px; background: #0f1a3d; border: 1px solid #5b86f0; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+  .tmenu.open { display: flex; }
+  .tmenu button { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .tmenu button.on { background: #2c4fae; border-color: #9cc4ff; }
+  .cvh { position: absolute; right: 2px; bottom: 2px; width: 16px; height: 16px; z-index: 3; cursor: nwse-resize; touch-action: none;
+    background: linear-gradient(135deg, transparent 0 48%, #5b86f0 48% 56%, transparent 56% 70%, #5b86f0 70% 78%, transparent 78%); }
+  /* baris ikon di bawah kanvas: ukuran ikut kanvas */
+  .ubar { --bx: clamp(34px, calc(var(--cv) * .1), 84px); position: relative; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: calc(var(--bx) * .08); }
+  .ubar .tb, .ubar details.panel > summary { width: var(--bx); height: calc(var(--bx) * .85); border-radius: calc(var(--bx) * .15); }
+  .ubar details.panel { padding: 0; border: 0; border-radius: 0; background: none; }
+  .ubar details.panel > summary { margin: 0; flex-direction: column; justify-content: center; gap: calc(var(--bx) * .07); background: #16224a; border: 1px solid #34498a; }
+  .ubar details.panel > summary:hover { background: #1f2f66; }
+  .ubar details.panel[open] > summary { background: #2c4fae; border-color: #9cc4ff; }
+  .ubar .ic { width: calc(var(--bx) * .32); height: calc(var(--bx) * .32); }
+  .ubar .lb { font-size: calc(var(--bx) * .17); line-height: 1; color: #cfd9f3; white-space: nowrap; }
+  .ubar .inf { width: calc(var(--bx) * .32); height: calc(var(--bx) * .32); min-width: 14px; min-height: 14px; font-size: calc(var(--bx) * .2); margin-left: calc(var(--bx) * .08); align-self: center; }
+  #c1 { margin-left: calc(var(--bx) * .92); }   /* jarak undo/redo ke card = 1 kotak */
+  .ubar details[open] > .pbody { position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%); z-index: 60; width: min(420px, calc(100vw - 24px)); max-height: min(72vh, 560px); overflow: auto;
+    background: #0b1330; border: 1px solid #34498a; border-radius: 12px; padding: 12px; box-shadow: 0 0 0 100vmax rgba(3,6,17,.6), 0 16px 40px rgba(0,0,0,.6); }
+  /* preview: tombol Terapkan */
+  #pva { position: absolute; top: 12px; left: 12px; z-index: 2; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3Q12 12 21 12Q12 12 12 21Q12 12 3 12Q12 12 12 3Z" fill="currentColor"/></symbol>
+<symbol id="i-line" viewBox="0 0 24 24"><path d="M6 18L18 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="6" cy="18" r="2.4" fill="currentColor"/><circle cx="18" cy="6" r="2.4" fill="currentColor"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-paste" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="9" y="3" width="6" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="i-all" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 2.5"/><path d="M8.5 12.5l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5M20 9H10a6 6 0 0 0 0 12h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M4 12h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-4l-2 2M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-tree" viewBox="0 0 24 24"><path d="M12 20v-6M12 14L6 9M12 14l6-5M12 14V9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="6" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="7.5" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="7.5" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="20" r="1.4" fill="currentColor"/></symbol>
+</defs></svg>
+<div class="wrap">
+  <div class="lcol">
+    <div class="panel hdr"><h1>Editor</h1></div>
+    <div class="row urlrow">
+      <input type="text" id="urlIn" placeholder="Link gambar" style="flex:1; min-width:0" aria-label="Link gambar">
+      <button id="urlGo" type="button">Muat</button>
+      <button type="button" class="inf" data-tip="Tempel link langsung ke gambar (SVG, PNG, JPG, atau WebP). Lingkaran, garis, dan bintang kecil dikenali otomatis. Server gambar harus mengizinkan akses dari browser (CORS)." aria-label="Penjelasan">!</button>
+    </div>
+    <div class="err" id="err"></div>
+    <div id="pvbox">
+      <svg id="pv" viewBox="0 0 996.7 996.7"></svg>
+      <button id="pvBtn" type="button" class="primary pvfab">&#9654; Preview</button>
+      <div class="tools">
+        <div class="tgrp">
+          <button id="addB" type="button" class="tb" title="Tambah lingkaran" aria-label="Tambah elemen"><svg class="ic"><use id="addUse" href="#i-circle"/></svg></button>
+          <button id="addMore" type="button" class="tcaret" title="Pilih bentuk" aria-label="Pilih bentuk" aria-haspopup="true" aria-expanded="false"></button>
+          <div id="addMenu" class="tmenu" role="menu">
+            <button type="button" data-k="C" class="on"><svg class="ic"><use href="#i-circle"/></svg>Lingkaran</button>
+            <button type="button" data-k="S"><svg class="ic"><use href="#i-star"/></svg>Bintang</button>
+            <button type="button" data-k="L"><svg class="ic"><use href="#i-line"/></svg>Garis</button>
+          </div>
+        </div>
+        <button id="copyB" type="button" class="tb" title="Salin (Ctrl+C)" aria-label="Salin"><svg class="ic"><use href="#i-copy"/></svg></button>
+        <button id="pasteB" type="button" class="tb" title="Tempel (Ctrl+V)" aria-label="Tempel"><svg class="ic"><use href="#i-paste"/></svg></button>
+        <button id="allB" type="button" class="tb" title="Pilih semua (Ctrl+A)" aria-label="Pilih semua"><svg class="ic"><use href="#i-all"/></svg></button>
+        <button id="del" type="button" class="tb" title="Hapus terpilih (Delete)" aria-label="Hapus terpilih"><svg class="ic"><use href="#i-trash"/></svg></button>
+      </div>
+      <div id="cvh" class="cvh" title="Seret untuk mengubah ukuran kanvas" aria-label="Ubah ukuran kanvas"></div>
+    </div>
+    <div class="ubar">      <button id="undoB" type="button" class="tb" title="Urungkan (Ctrl+Z)" aria-label="Urungkan"><svg class="ic"><use href="#i-undo"/></svg></button>
+      <button id="redoB" type="button" class="tb" title="Ulangi (Ctrl+Y)" aria-label="Ulangi"><svg class="ic"><use href="#i-redo"/></svg></button>
+    <details class="panel" id="c1">
+      <summary title="Pengaturan"><svg class="ic"><use href="#i-set"/></svg><span class="lb">Pengaturan</span></summary>
+      <div class="pbody">
+<h3><span>Identitas rasi</span></h3>
+<div class="fld"><label for="nameSel">Nama rasi</label><div class="ctl top"><div class="stack grow"><select id="nameSel"><option value="">Tulis sendiri…</option></select><input type="text" id="name" value="baru" placeholder="atau tulis nama sendiri"></div><button type="button" class="inf" data-tip="Nama ini menjadi kunci di kode LAYOUTS dan judul preview. Pilih dari daftar rasi utama atau rasi season, atau tulis sendiri. Saat gambar dimuat, nama terisi sementara dari kata kunci nama file atau link." aria-label="Penjelasan">!</button></div></div>
+<p class="note" id="nmnote"></p>
+<p class="note" id="nmhint"></p>
+<div class="fld"><label for="order">Urutan nomor lingkaran</label><div class="ctl"><select id="order" class="grow"><option value="doc">Sesuai urutan di file</option><option value="y">Atas ke bawah</option><option value="x">Kiri ke kanan</option></select><button type="button" class="inf" data-tip="Menentukan penomoran lingkaran 1, 2, 3, ... yang juga dipakai untuk nama ikon (1.svg, 2.svg, ...)." aria-label="Penjelasan">!</button></div></div><div class="fld chk"><label for="norm"><input type="checkbox" id="norm" checked> Skala ke kanvas 996,7</label><button type="button" class="inf" data-tip="Menskalakan koordinat hasil deteksi SVG ke kanvas 996,7 × 996,7 supaya ukurannya sama dengan rasi lain. Matikan bila ingin koordinat asli." aria-label="Penjelasan">!</button></div><h3><span>Lingkaran spesial</span></h3>
+<div class="fld"><label for="special">Nomor lingkaran spesial</label><div class="ctl"><input type="text" id="special" class="grow" placeholder="mis. 9"><button type="button" class="inf" data-tip="Lingkaran yang tidak tersambung ke garis mana pun (mis. lingkaran bendera di tengah) dan baru bisa dibuka setelah semua lingkaran lain selesai. Isi nomornya mulai dari 1, kosongkan bila tidak ada. Terdeteksi otomatis bila hanya ada satu lingkaran tanpa garis. Bila nama rasi dipilih dari daftar, lingkaran ini memakai spirit Elder (rasi utama) atau Guide (season)." aria-label="Penjelasan">!</button></div></div>
+<p class="note" id="spnote"></p>
+<p class="note" id="ldnote"></p>
+<div id="rpanel" class="hide">
+<h3><span>Deteksi gambar</span></h3>
+<div class="fld"><label for="thr">Ambang kecerahan: <span id="thrv">128</span></label><div class="ctl"><input type="range" id="thr" class="grow" min="1" max="254" value="128"><button type="button" class="inf" data-tip="Piksel yang lebih terang dari nilai ini dianggap bagian garis atau lingkaran. Geser bila ada garis yang hilang atau latar ikut terdeteksi. Mengubahnya mengulang deteksi dan menghapus perubahan manual." aria-label="Penjelasan">!</button></div></div><div class="fld chk"><label for="inv"><input type="checkbox" id="inv"> Garis gelap di latar terang (balik warna)</label><button type="button" class="inf" data-tip="Aktifkan bila gambar berupa garis gelap di latar terang. Diatur otomatis saat gambar dimuat." aria-label="Penjelasan">!</button></div><div class="fld"><label for="rmin">Rentang jari-jari lingkaran (min dan maks)</label><div class="ctl"><div class="pair grow"><input type="text" id="rmin" value="45" aria-label="Jari-jari minimum"><input type="text" id="rmax" value="110" aria-label="Jari-jari maksimum"></div><button type="button" class="inf" data-tip="Batas ukuran lingkaran yang dicari, dalam satuan kanvas 996,7. Persempit bila bintang atau ikon salah dikenali sebagai lingkaran, perlebar bila lingkaran terlewat." aria-label="Penjelasan">!</button></div></div><div class="fld chk"><label for="uni"><input type="checkbox" id="uni" checked> Samakan jari-jari semua lingkaran</label><button type="button" class="inf" data-tip="Semua lingkaran diberi jari-jari median, sehingga ukurannya seragam." aria-label="Penjelasan">!</button></div><div class="fld chk"><label for="showimg"><input type="checkbox" id="showimg" checked> Tampilkan gambar asli di pratinjau</label><button type="button" class="inf" data-tip="Menampilkan gambar yang diunggah di belakang hasil deteksi sebagai pembanding." aria-label="Penjelasan">!</button></div>
+<p class="note" id="info"></p>
+</div>
+      </div>
+    </details>
+    <details class="panel">
+      <summary title="Terdeteksi"><svg class="ic"><use href="#i-scan"/></svg><span class="lb">Terdeteksi</span></summary>
+      <div class="pbody">
+<h3><span>Elemen terdeteksi</span><button type="button" class="inf" data-tip="Jumlah lingkaran, bintang, dan garis hasil deteksi. Tombol edit punya pintasan keyboard yang sama (arahkan kursor ke tombolnya untuk melihat). Tombol Preview ada di pojok kanan atas kanvas." aria-label="Penjelasan">!</button></h3>
+<p class="stat" id="stat">Belum ada hasil.</p>
+<h3><span>Pemilik garis</span><button type="button" class="inf" data-tip="Lingkaran yang menyalakan garis itu. Tebakan awal: lingkaran dengan tepi terdekat ke ujung garis. Garis yang sedang dipilih di kanvas ditandai ● dan disorot kuning. Garis milik lingkaran yang dipilih disorot biru, dan lingkaran terpilih bertanda ● di daftar pilihan." aria-label="Penjelasan">!</button></h3>
+<div id="ltable"></div>
+<div id="ipanel" class="hide">
+<h3><span>Ikon dalam lingkaran</span></h3>
+<div class="fld"><label for="icm">Margin dalam</label><div class="ctl"><input type="text" id="icm" class="grow" value="5"><button type="button" class="inf" data-tip="Jarak dari tepi lingkaran ke dalam (satuan kanvas) yang dibuang saat memotong ikon, supaya garis lingkaran tidak ikut terpotong." aria-label="Penjelasan">!</button></div></div><div class="fld"><label for="icf">Format hasil</label><div class="ctl"><select id="icf" class="grow"><option value="svg">SVG berisi PNG (1.svg, 2.svg, ...)</option><option value="png">PNG</option></select><button type="button" class="inf" data-tip="SVG berisi PNG cocok dengan pola nama 1.svg, 2.svg, ... yang dipakai aplikasi. PNG menghasilkan berkas gambar biasa." aria-label="Penjelasan">!</button></div></div><div class="fld chk"><label for="icbg"><input type="checkbox" id="icbg" checked> Buang latar</label><button type="button" class="inf" data-tip="Menghapus warna latar di sekitar ikon agar ikon transparan. Tidak diperlukan bila gambar sudah transparan." aria-label="Penjelasan">!</button></div><div class="row">
+<button id="icGo">Ambil ikon</button>
+<button id="icZip" class="primary" disabled>Unduh ZIP</button>
+</div>
+<div class="icgrid" id="icGrid"></div>
+<p class="note" id="icNote"></p>
+</div>
+      </div>
+    </details>
+    <details class="panel hide" id="apanel">
+      <summary title="Sinkronisasi"><svg class="ic"><use href="#i-sync"/></svg><span class="lb">Sinkronisasi</span></summary>
+      <div class="pbody">
+<div class="btnrow"><button id="atGo" class="primary">Cocokkan</button><button type="button" class="inf" data-tip="Ikon emot diambil otomatis dari internet (skygame-data), karena ikon di rasi adalah emot spirit. Tiap ikon lingkaran dibandingkan dengan semua ikon emot, lalu 3 kandidat terbaik ditampilkan; klik untuk memilih. Butuh koneksi internet, dan sekali jalan sekitar ratusan gambar kecil diunduh." aria-label="Penjelasan">!</button></div>
+<p class="note" id="atNote"></p>
+<div id="atRes"></div>
+      </div>
+    </details>
+    <details class="panel hide" id="spanel">
+      <summary title="Spirit Tree"><svg class="ic"><use href="#i-tree"/></svg><span class="lb">Spirit Tree</span></summary>
+      <div class="pbody">
+<div class="btnrow"><button id="spGo" class="primary">Cari spirit &amp; pohon</button><button type="button" class="inf" data-tip="Nama ikon terpilih (mis. ApplaudingBellmaker-1) dicocokkan dengan nama spirit di data skygame-data (spirit, pohon, simpul, item), lalu pohonnya digambar. Data diunduh dari internet." aria-label="Penjelasan">!</button></div>
+<p class="note" id="spNote"></p>
+<div id="spRes"></div>
+      </div>
+    </details>
+      <button type="button" class="inf" data-tip="Klik untuk memilih. Shift/Ctrl+klik menambah seleksi, seret di area kosong untuk seleksi kotak. Seret kotak biru untuk mengubah ukuran (sudut proporsional, Shift = bebas). Seret sudut kanan bawah kanvas untuk mengubah ukuran kanvas. Pintasan: Delete hapus, Ctrl+C/X/V salin/potong/tempel, Ctrl+D duplikat, Ctrl+A pilih semua, Ctrl+Z / Ctrl+Y urungkan / ulangi, panah geser (Shift = 10), Esc batal pilih." aria-label="Penjelasan">!</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="pvo" role="dialog" aria-label="Preview rasi" aria-hidden="true">
+  <div id="pvt"></div>
+  <button id="pva" type="button" class="primary">Terapkan</button>
+  <button id="pvx" type="button">Tutup</button>
+  <svg id="pvs" viewBox="0 0 996.7 996.7"></svg>
+  <div id="pvh"></div>
+  <div id="pso" aria-hidden="true">
+    <div class="spimg"><div class="psbeam"></div><div class="psglow"></div><canvas id="pspart"></canvas><span id="psname"></span><img id="psimg" alt=""></div>
+    <div class="sptree">
+      <div class="sptbar"><span id="pstp"></span><button id="psAll" type="button">Centang semua</button><button id="psNone" type="button">Kosongkan</button></div>
+      <div id="pstv"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const pv = $('pv'), SVGNS = 'http://www.w3.org/2000/svg';
+  const CANVAS = 996.7;
+  let rawText = '';
+  let spManual = false;   // true bila pengguna mengisi kolom lingkaran spesial sendiri (deteksi otomatis tidak menimpa)
+  let icons = [];   // hasil "Ambil ikon": [{ n, png: Uint8Array, url }]
+  let mode = null, R = null, imgUrl = '';   // mode: 'svg' | 'img' | null ; R = data gambar raster {W,H,M,lum}
+  let C = [], S = [], L = [], owner = [];   // C:[x,y,r]  S:{x,y}  L:[x1,y1,x2,y2]  owner[i]: indeks lingkaran, -1 = tanpa
+  let sel = new Set(), drag = null, hist = [], redoSt = [], clip = null, pasteN = 0, lastNudge = 0, mq = null;   // sel: kunci 'C3' | 'S1' | 'L0'
+  let spSel = [];   // guid spirit per lingkaran
+  let icoNames = [];   // nama ikon atlas terpilih per lingkaran (hasil pencocokan)
+
+  const fx = v => Math.round(v * 10) / 10;
+  const hue = i => i < 0 ? '#8890a8' : `hsl(${(i * 47) % 360} 85% 68%)`;
+
+  // ---------- Deteksi dari SVG ----------
+  function detect(text) {
+    const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+    if (doc.querySelector('parsererror')) throw new Error('File bukan SVG yang valid.');
+    const host = document.createElement('div');
+    host.style.cssText = 'position:absolute;left:-9999px;top:0;width:0;height:0;overflow:hidden';
+    const svg = document.importNode(doc.documentElement, true);
+    host.appendChild(svg); document.body.appendChild(host);
+    try {
+      let vx = 0, vy = 0, vw = 0;
+      const vb = svg.viewBox && svg.viewBox.baseVal;
+      if (vb && vb.width) { vx = vb.x; vy = vb.y; vw = vb.width; }
+      else vw = parseFloat(svg.getAttribute('width')) || CANVAS;
+      const s = $('norm').checked ? CANVAS / vw : 1;
+      const P = (x, y) => [fx((x - vx) * s), fx((y - vy) * s)];
+
+      const circles = [], stars = [], lines = [];
+      svg.querySelectorAll('circle').forEach(el => {
+        const cx = +el.getAttribute('cx'), cy = +el.getAttribute('cy'), r = +el.getAttribute('r');
+        if (!isFinite(cx + cy + r)) return;
+        const [x, y] = P(cx, cy);
+        if (r * s >= 25) circles.push([x, y, fx(r * s)]); else stars.push({ x, y });
+      });
+      svg.querySelectorAll('line').forEach(el => {
+        const a = P(+el.getAttribute('x1'), +el.getAttribute('y1')), b = P(+el.getAttribute('x2'), +el.getAttribute('y2'));
+        if (isFinite(a[0] + a[1] + b[0] + b[1])) lines.push([a[0], a[1], b[0], b[1]]);
+      });
+      svg.querySelectorAll('path, polygon').forEach(el => {
+        let bb; try { bb = el.getBBox(); } catch (e) { return; }
+        if (!bb.width || !bb.height || bb.width > 60 || bb.height > 60) return;
+        const [x, y] = P(bb.x + bb.width / 2, bb.y + bb.height / 2);
+        stars.push({ x, y });
+      });
+      return { circles, stars, lines };
+    } finally { host.remove(); }
+  }
+
+  // ---------- Deteksi dari gambar raster (PNG/JPG/WebP) ----------
+  // Alur: ambang terang -> Hough (gradien) untuk lingkaran -> hapus area lingkaran -> komponen terhubung:
+  // gumpalan kecil = bintang, gumpalan memanjang = garis (ujung dari sumbu utama PCA).
+  function otsu(lum) {
+    const h = new Uint32Array(256); for (let i = 0; i < lum.length; i++) h[lum[i]]++;
+    const tot = lum.length; let sum = 0; for (let i = 0; i < 256; i++) sum += i * h[i];
+    let sB = 0, wB = 0, best = -1, bt = 128;
+    for (let t = 0; t < 256; t++) {
+      wB += h[t]; if (!wB) continue;
+      const wF = tot - wB; if (!wF) break;
+      sB += t * h[t];
+      const mB = sB / wB, mF = (sum - sB) / wF, v = wB * wF * (mB - mF) * (mB - mF);
+      if (v > best) { best = v; bt = t; }
+    }
+    return bt;
+  }
+  function blur3(src, W, H) {
+    const dst = new Float32Array(src.length);
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      const i = y * W + x;
+      dst[i] = (src[i - W - 1] + src[i - W] + src[i - W + 1] + src[i - 1] + src[i] + src[i + 1] + src[i + W - 1] + src[i + W] + src[i + W + 1]) / 9;
+    }
+    return dst;
+  }
+  function boxSum5(src, W, H) {   // jumlah di jendela 5x5 (dua lintasan)
+    const tmp = new Int32Array(src.length), dst = new Int32Array(src.length);
+    for (let y = 0; y < H; y++) for (let x = 2; x < W - 2; x++) { const i = y * W + x; tmp[i] = src[i - 2] + src[i - 1] + src[i] + src[i + 1] + src[i + 2]; }
+    for (let y = 2; y < H - 2; y++) for (let x = 0; x < W; x++) { const i = y * W + x; dst[i] = tmp[i - 2 * W] + tmp[i - W] + tmp[i] + tmp[i + W] + tmp[i + 2 * W]; }
+    return dst;
+  }
+  function detectRaster() {
+    const { W, H, M, lum } = R, N = W * H;
+    const thr = +$('thr').value, inv = $('inv').checked;
+    const k = M / CANVAS, s = $('norm').checked ? CANVAS / M : 1;
+    const mask = new Uint8Array(N);
+    for (let i = 0; i < N; i++) mask[i] = ((inv ? 255 - lum[i] : lum[i]) >= thr) ? 1 : 0;
+    const rmin = Math.max(6, (parseFloat($('rmin').value) || 45) * k);
+    const rmax = Math.max(rmin + 2, (parseFloat($('rmax').value) || 110) * k);
+
+    // 1) tepi + arah gradien dari mask yang diburamkan
+    const f = new Float32Array(N); for (let i = 0; i < N; i++) f[i] = mask[i];
+    const a = blur3(blur3(f, W, H), W, H);
+    const ex = [], ey = [], eux = [], euy = [];
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      const i = y * W + x;
+      const gx = (a[i - W + 1] + 2 * a[i + 1] + a[i + W + 1]) - (a[i - W - 1] + 2 * a[i - 1] + a[i + W - 1]);
+      const gy = (a[i + W - 1] + 2 * a[i + W] + a[i + W + 1]) - (a[i - W - 1] + 2 * a[i - W] + a[i - W + 1]);
+      const m = Math.hypot(gx, gy);
+      if (m > 0.9) { ex.push(x); ey.push(y); eux.push(gx / m); euy.push(gy / m); }
+    }
+
+    // 2) pemungutan suara pusat lingkaran sepanjang arah gradien, pada semua jari-jari
+    const acc = new Int32Array(N), r0 = Math.floor(rmin), r1 = Math.ceil(rmax);
+    for (let e = 0; e < ex.length; e++) {
+      const x = ex[e], y = ey[e], ux = eux[e], uy = euy[e];
+      for (let r = r0; r <= r1; r++) {
+        let cx = Math.round(x + ux * r), cy = Math.round(y + uy * r);
+        if (cx >= 0 && cx < W && cy >= 0 && cy < H) acc[cy * W + cx]++;
+        cx = Math.round(x - ux * r); cy = Math.round(y - uy * r);
+        if (cx >= 0 && cx < W && cy >= 0 && cy < H) acc[cy * W + cx]++;
+      }
+    }
+    const sm = boxSum5(acc, W, H), minVotes = 0.2 * 4 * Math.PI * rmin;
+
+    // 3) periksa kandidat: jari-jari dari histogram, kelengkapan keliling, lalu fit lingkaran halus
+    function verify(cx0, cy0) {
+      const lo = Math.max(0, Math.floor(rmin - 6)), hi = Math.ceil(rmax + 8), hist = new Float32Array(hi + 2);
+      const x0 = Math.max(0, cx0 - hi), x1 = Math.min(W - 1, cx0 + hi), y0 = Math.max(0, cy0 - hi), y1 = Math.min(H - 1, cy0 + hi);
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+        if (!mask[y * W + x]) continue;
+        const d = Math.hypot(x - cx0, y - cy0);
+        if (d >= lo && d <= hi) hist[Math.round(d)]++;
+      }
+      let rEst = -1, hm = 0;
+      for (let d = lo + 1; d < hi; d++) { const v = hist[d - 1] + hist[d] + hist[d + 1]; if (v > hm) { hm = v; rEst = d; } }
+      if (rEst < 0 || hm < 2 * Math.PI * rEst * 0.9) return null;
+      let l = rEst, h = rEst; const pk = hist[rEst] * 0.25;
+      while (l > lo && hist[l - 1] >= pk) l--;
+      while (h < hi && hist[h + 1] >= pk) h++;
+      const hw = Math.max(rEst - l, h - rEst, 1.5);
+      const bins = new Uint8Array(36), tol = Math.max(2.5, hw), pts = [];
+      let hits = 0;
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+        if (!mask[y * W + x]) continue;
+        const d = Math.hypot(x - cx0, y - cy0);
+        if (Math.abs(d - rEst) > tol) continue;
+        const b = Math.min(35, Math.floor((Math.atan2(y - cy0, x - cx0) + Math.PI) / (2 * Math.PI) * 36));
+        if (!bins[b]) { bins[b] = 1; hits++; }
+        pts.push(x - cx0, y - cy0);
+      }
+      if (hits < 27) return null;
+      // Kasa: u^2+v^2 = A u + B v + C
+      let su = 0, sv = 0, suu = 0, svv = 0, suv = 0, sz = 0, suz = 0, svz = 0; const n = pts.length / 2;
+      for (let i = 0; i < pts.length; i += 2) {
+        const u = pts[i], v = pts[i + 1], z = u * u + v * v;
+        su += u; sv += v; suu += u * u; svv += v * v; suv += u * v; sz += z; suz += u * z; svz += v * z;
+      }
+      const det3 = (m) => m[0] * (m[4] * m[8] - m[5] * m[7]) - m[1] * (m[3] * m[8] - m[5] * m[6]) + m[2] * (m[3] * m[7] - m[4] * m[6]);
+      const Mx = [suu, suv, su, suv, svv, sv, su, sv, n], D = det3(Mx);
+      let cx = cx0, cy = cy0, r = rEst;
+      if (Math.abs(D) > 1e-6) {
+        const A = det3([suz, suv, su, svz, svv, sv, sz, sv, n]) / D;
+        const B = det3([suu, suz, su, suv, svz, sv, su, sz, n]) / D;
+        const Cc = det3([suu, suv, suz, suv, svv, svz, su, sv, sz]) / D;
+        const rr = Math.sqrt(Math.max(0, Cc + (A * A + B * B) / 4));
+        if (rr > 0 && Math.abs(rr - rEst) <= rEst * 0.12 && Math.hypot(A / 2, B / 2) <= 8) { cx = cx0 + A / 2; cy = cy0 + B / 2; r = rr; }
+      }
+      return [cx, cy, r, hw];
+    }
+    const circles = [];
+    for (let it = 0; it < 80; it++) {
+      let bi = -1, bv = minVotes;
+      for (let i = 0; i < N; i++) if (sm[i] > bv) { bv = sm[i]; bi = i; }
+      if (bi < 0) break;
+      const px = bi % W, py = (bi / W) | 0;
+      const c = verify(px, py);
+      let sr = Math.ceil(rmin * 0.9), scx = px, scy = py;
+      if (c && !circles.some(o => Math.hypot(o[0] - c[0], o[1] - c[1]) < Math.max(o[2], c[2]) * 1.2)) {
+        circles.push(c); sr = Math.ceil(c[2] * 0.9); scx = Math.round(c[0]); scy = Math.round(c[1]);
+      }
+      for (let y = Math.max(0, scy - sr); y <= Math.min(H - 1, scy + sr); y++)
+        for (let x = Math.max(0, scx - sr); x <= Math.min(W - 1, scx + sr); x++) sm[y * W + x] = 0;
+    }
+    if ($('uni').checked && circles.length > 1) {
+      const rs = circles.map(c => c[2]).sort((p, q) => p - q), med = rs[rs.length >> 1];
+      circles.forEach(c => { c[2] = med; });
+    }
+
+    // 4) hapus lingkaran (cincin + isinya + sedikit tepi) dari mask
+    for (const [cx, cy, r, hw] of circles) {
+      const rr = r + hw + 3;
+      for (let y = Math.max(0, Math.floor(cy - rr)); y <= Math.min(H - 1, Math.ceil(cy + rr)); y++)
+        for (let x = Math.max(0, Math.floor(cx - rr)); x <= Math.min(W - 1, Math.ceil(cx + rr)); x++)
+          if (Math.hypot(x - cx, y - cy) <= rr) mask[y * W + x] = 0;
+    }
+
+    // 5) komponen terhubung (8 arah): bintang vs garis
+    const stars = [], lines = [], seen = new Uint8Array(N), queue = new Int32Array(N);
+    const starMax = 62 * k; let tail = 0, bad = 0;
+    for (let p = 0; p < N; p++) {
+      if (!mask[p] || seen[p]) continue;
+      const start = tail; queue[tail++] = p; seen[p] = 1;
+      let minx = W, maxx = 0, miny = H, maxy = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+      for (let h = start; h < tail; h++) {
+        const q = queue[h], x = q % W, y = (q / W) | 0;
+        if (x < minx) minx = x; if (x > maxx) maxx = x; if (y < miny) miny = y; if (y > maxy) maxy = y;
+        sx += x; sy += y; sxx += x * x; syy += y * y; sxy += x * y;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+          const nq = ny * W + nx;
+          if (mask[nq] && !seen[nq]) { seen[nq] = 1; queue[tail++] = nq; }
+        }
+      }
+      const n = tail - start; if (n < 6) continue;
+      const bw = maxx - minx + 1, bh = maxy - miny + 1, big = Math.max(bw, bh);
+      const mx = sx / n, my = sy / n;
+      const cxx = sxx / n - mx * mx, cyy = syy / n - my * my, cxy = sxy / n - mx * my;
+      const half = (cxx + cyy) / 2, disc = Math.sqrt(Math.max(0, half * half - (cxx * cyy - cxy * cxy)));
+      const elong = Math.sqrt((half + disc) / Math.max(half - disc, 1e-6));   // ~1 = bulat/bintang, besar = memanjang (garis)
+      if (big <= starMax && (elong < 1.8 || big < 9 * k)) {
+        if (big >= 7 * k) stars.push({ x: mx, y: my });
+        continue;
+      }
+      const th = 0.5 * Math.atan2(2 * cxy, cxx - cyy), co = Math.cos(th), si = Math.sin(th);
+      let tmin = 1e9, tmax = -1e9, pmax = 0;
+      for (let h = start; h < tail; h++) {
+        const q = queue[h], dx = (q % W) - mx, dy = ((q / W) | 0) - my;
+        const t = dx * co + dy * si, pp = Math.abs(-dx * si + dy * co);
+        if (t < tmin) tmin = t; if (t > tmax) tmax = t; if (pp > pmax) pmax = pp;
+      }
+      const len = tmax - tmin; if (len < 9 * k) continue;
+      const thick = n / len;
+      if (pmax > Math.max(6 * k, 0.1 * len)) bad++;
+      const e0 = tmin + thick / 2, e1 = tmax - thick / 2;
+      lines.push([mx + e0 * co, my + e0 * si, mx + e1 * co, my + e1 * si]);
+    }
+
+    if ($('info')) $('info').textContent = 'Ambang ' + thr + ': ' + circles.length + ' lingkaran, ' + stars.length + ' bintang, ' + lines.length + ' garis' + (bad ? '. ' + bad + ' bentuk tidak lurus atau menyambung, cek manual.' : '.');
+    return {
+      circles: circles.map(c => [fx(c[0] * s), fx(c[1] * s), fx(c[2] * s)]),
+      stars: stars.map(p => ({ x: fx(p.x * s), y: fx(p.y * s) })),
+      lines: lines.map(l => l.map(v => fx(v * s)))
+    };
+  }
+  function bgImage() {
+    if (mode !== 'img' || !R || !imgUrl || !$('showimg').checked) return '';
+    const s = $('norm').checked ? CANVAS / R.M : 1;
+    return `<image href="${imgUrl}" x="0" y="0" width="${R.W * s}" height="${R.H * s}" opacity=".35" style="pointer-events:none"/>`;
+  }
+
+  // ---------- Menyusun model + tebakan pemilik garis ----------
+  function build() {
+    const d = mode === 'img' ? detectRaster() : detect(rawText);
+    const ord = $('order').value;
+    let cs = d.circles.slice();
+    if (ord === 'y') cs.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+    else if (ord === 'x') cs.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    C = cs; S = d.stars; L = d.lines;
+    owner = L.map(guessOwner);
+    sel = new Set(); hist = []; redoSt = [];
+    autoSpecial();
+  }
+  // Lingkaran spesial = satu-satunya lingkaran yang tidak tersambung ke garis mana pun (mis. lingkaran bendera di tengah).
+  function autoSpecial() {
+    if (spManual) return;
+    const iso = C.map((_, i) => i).filter(i => !L.some(l => [0, 2].some(k => Math.hypot(l[k] - C[i][0], l[k + 1] - C[i][1]) - C[i][2] <= C[i][2] * 0.8)));
+    $('special').value = iso.length === 1 ? String(iso[0] + 1) : '';
+    $('spnote').textContent = iso.length === 1 ? 'Terdeteksi otomatis: lingkaran ' + (iso[0] + 1) + ', satu-satunya yang tidak tersambung ke garis.'
+      : iso.length > 1 ? iso.length + ' lingkaran tanpa garis (' + iso.map(i => i + 1).join(', ') + '). Isi nomor yang spesial secara manual.' : '';
+  }
+  function guessOwner(l) {
+    let best = -1, bd = Infinity;
+    C.forEach(([cx, cy, r], i) => {
+      for (const [px, py] of [[l[0], l[1]], [l[2], l[3]]]) {
+        const dd = Math.hypot(px - cx, py - cy) - r;
+        if (dd < bd) { bd = dd; best = i; }
+      }
+    });
+    return best;
+  }
+
+  // ---------- Render pratinjau ----------
+  function render() {
+    let h = bgImage();
+    L.forEach((l, i) => {
+      const on = isSel('L', i);
+      h += `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" stroke="${on ? '#ffe27a' : hue(owner[i])}" stroke-width="${on ? 6 : 4}" stroke-linecap="round" opacity=".85"/>`;
+    });
+    L.forEach((l, i) => { h += `<line data-kind="L" data-i="${i}" data-k="b" x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" stroke="transparent" stroke-width="18" stroke-linecap="round" style="cursor:move"/>`; });   // area klik badan garis
+    S.forEach((p, i) => {
+      const on = isSel('S', i);
+      h += `<path d="M${p.x},${p.y - 16}Q${p.x},${p.y} ${p.x + 16},${p.y}Q${p.x},${p.y} ${p.x},${p.y + 16}Q${p.x},${p.y} ${p.x - 16},${p.y}Q${p.x},${p.y} ${p.x},${p.y - 16}Z" fill="${on ? '#ffe27a' : '#fff'}" style="pointer-events:none"/>`;
+      h += `<circle data-kind="S" data-i="${i}" cx="${p.x}" cy="${p.y}" r="18" fill="transparent" style="cursor:grab"/>`;
+    });
+    C.forEach(([x, y, r], i) => {
+      const on = isSel('C', i);
+      h += `<circle data-kind="C" data-i="${i}" cx="${x}" cy="${y}" r="${r}" fill="rgba(255,255,255,.03)" stroke="${on ? '#ffe27a' : hue(i)}" stroke-width="${on ? 6 : 4}" style="cursor:grab"/>`;
+      h += `<text x="${x}" y="${y}" fill="#fff" font-size="${Math.round(r * .75)}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none;opacity:.9">${i + 1}</text>`;
+    });
+    L.forEach((l, i) => {
+      [0, 1].forEach(k => {
+        h += `<circle data-kind="L" data-i="${i}" data-k="${k}" cx="${l[k * 2]}" cy="${l[k * 2 + 1]}" r="8" fill="${hue(owner[i])}" stroke="#050a1a" stroke-width="2" style="cursor:grab"/>`;
+      });
+    });
+    if (mq) h += `<rect x="${mq.x0}" y="${mq.y0}" width="${mq.x1 - mq.x0}" height="${mq.y1 - mq.y0}" fill="rgba(127,176,255,.15)" stroke="#7fb0ff" stroke-width="1.5" stroke-dasharray="5 3" style="pointer-events:none"/>`;
+    h += boxSvg();
+    pv.innerHTML = h;
+    renderPanel();
+  }
+  function renderPanel() {
+    const any = C.length + S.length + L.length;
+    $('stat').textContent = any ? C.length + ' lingkaran, ' + S.length + ' bintang, ' + L.length + ' garis.' + (sel.size ? ' ' + sel.size + ' dipilih.' : '') : 'Belum ada hasil.';
+    $('pvBtn').disabled = !C.length; $('del').disabled = !sel.size; $('copyB').disabled = !sel.size;
+    $('pasteB').disabled = !clip; $('allB').disabled = !any; $('undoB').disabled = !hist.length; $('redoB').disabled = !redoSt.length;
+    const selC = new Set(selIdx('C')), selL = new Set(selIdx('L'));   // elemen terpilih di kanvas
+    const opts = ['<option value="-1">tanpa pemilik</option>'].concat(C.map((_, i) => `<option value="${i}">${selC.has(i) ? '● ' : ''}lingkaran ${i + 1}${selC.has(i) ? ' (dipilih)' : ''}</option>`)).join('');
+    const box = $('ltable'), st = box.scrollTop; box.innerHTML = '';
+    L.forEach((l, i) => {
+      const row = document.createElement('div'), isL = selL.has(i);
+      if (isL) row.className = 'sel'; else if (owner[i] >= 0 && selC.has(owner[i])) row.className = 'own';
+      const lab = document.createElement('span'); lab.textContent = (isL ? '● ' : '') + 'Garis ' + (i + 1); lab.style.color = hue(owner[i]);
+      const sl = document.createElement('select'); sl.innerHTML = opts; sl.value = String(owner[i]);
+      sl.addEventListener('change', () => { pushUndo(); owner[i] = +sl.value; render(); });
+      row.append(lab, sl); box.appendChild(row);
+    });
+    box.scrollTop = st;
+    const first = box.querySelector('.sel');
+    if (first && (first.offsetTop < box.scrollTop || first.offsetTop + first.offsetHeight > box.scrollTop + box.clientHeight)) box.scrollTop = Math.max(0, first.offsetTop - 6);
+   
+  }
+
+  // ---------- Editor: seleksi banyak, geser, ubah ukuran, salin/tempel, urungkan ----------
+  const PAD = 10, tagIn = () => /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
+  const isSel = (k, i) => sel.has(k + i);
+  const selIdx = k => [...sel].filter(x => x[0] === k).map(x => +x.slice(1)).sort((a, b) => a - b);
+  const toSvg = e => {
+    const pt = pv.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const m = pv.getScreenCTM(); return m ? pt.matrixTransform(m.inverse()) : { x: 0, y: 0 };
+  };
+  // -- urungkan / ulangi (snapshot) --
+  const snapNow = () => ({ C: C.map(c => c.slice()), S: S.map(p => ({ x: p.x, y: p.y })), L: L.map(l => l.slice()), owner: owner.slice(), icons: icons.slice(), ico: icoNames.slice(), sp: spSel.slice(), special: $('special').value });
+  function restore(z) { C = z.C.map(c => c.slice()); S = z.S.map(p => ({ x: p.x, y: p.y })); L = z.L.map(l => l.slice()); owner = z.owner.slice(); icons = z.icons.slice(); icoNames = z.ico.slice(); spSel = z.sp.slice(); $('special').value = z.special; sel = new Set(); render(); }
+  function pushUndo() { hist.push(snapNow()); if (hist.length > 100) hist.shift(); redoSt = []; }
+  function histUndo() { if (!hist.length) return; redoSt.push(snapNow()); restore(hist.pop()); }
+  function histRedo() { if (!redoSt.length) return; hist.push(snapNow()); restore(redoSt.pop()); }
+  // -- geometri seleksi --
+  function selBBox() {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    const add = (x, y, r = 0) => { x0 = Math.min(x0, x - r); y0 = Math.min(y0, y - r); x1 = Math.max(x1, x + r); y1 = Math.max(y1, y + r); };
+    selIdx('C').forEach(i => C[i] && add(C[i][0], C[i][1], C[i][2]));
+    selIdx('S').forEach(i => S[i] && add(S[i].x, S[i].y));
+    selIdx('L').forEach(i => { if (L[i]) { add(L[i][0], L[i][1]); add(L[i][2], L[i][3]); } });
+    return x0 === Infinity ? null : { x0, y0, x1, y1 };
+  }
+  const grab = () => ({ C: selIdx('C').map(i => [i, C[i].slice()]), S: selIdx('S').map(i => [i, { x: S[i].x, y: S[i].y }]), L: selIdx('L').map(i => [i, L[i].slice()]) });
+  function applyMove(o, dx, dy) {
+    o.C.forEach(([i, c]) => { C[i][0] = fx(c[0] + dx); C[i][1] = fx(c[1] + dy); });
+    o.S.forEach(([i, q]) => { S[i].x = fx(q.x + dx); S[i].y = fx(q.y + dy); });
+    o.L.forEach(([i, l]) => { L[i] = [fx(l[0] + dx), fx(l[1] + dy), fx(l[2] + dx), fx(l[3] + dy)]; });
+  }
+  function applyScale(o, ax, ay, sx, sy, rs) {
+    o.C.forEach(([i, c]) => { C[i][0] = fx(ax + (c[0] - ax) * sx); C[i][1] = fx(ay + (c[1] - ay) * sy); C[i][2] = Math.max(6, fx(c[2] * rs)); });
+    o.S.forEach(([i, q]) => { S[i].x = fx(ax + (q.x - ax) * sx); S[i].y = fx(ay + (q.y - ay) * sy); });
+    o.L.forEach(([i, l]) => { L[i] = [fx(ax + (l[0] - ax) * sx), fx(ay + (l[1] - ay) * sy), fx(ax + (l[2] - ax) * sx), fx(ay + (l[3] - ay) * sy)]; });
+  }
+  function inBox(r) {
+    const ins = (x, y) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1, out = [];
+    C.forEach((c, i) => { if (ins(c[0], c[1])) out.push('C' + i); });
+    S.forEach((q, i) => { if (ins(q.x, q.y)) out.push('S' + i); });
+    L.forEach((l, i) => { if (ins(l[0], l[1]) || ins(l[2], l[3]) || ins((l[0] + l[2]) / 2, (l[1] + l[3]) / 2)) out.push('L' + i); });
+    return out;
+  }
+  // -- kotak ubah ukuran --
+  function boxSvg() {
+    const b = selBBox(); if (!b || mq) return '';
+    const x0 = b.x0 - PAD, y0 = b.y0 - PAD, x1 = b.x1 + PAD, y1 = b.y1 + PAD, xm = (x0 + x1) / 2, ym = (y0 + y1) / 2;
+    let h = `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="none" stroke="#7fb0ff" stroke-width="1.5" stroke-dasharray="6 4" style="pointer-events:none"/>`;
+    [['nw', x0, y0, 'nwse'], ['n', xm, y0, 'ns'], ['ne', x1, y0, 'nesw'], ['e', x1, ym, 'ew'], ['se', x1, y1, 'nwse'], ['s', xm, y1, 'ns'], ['sw', x0, y1, 'nesw'], ['w', x0, ym, 'ew']].forEach(([n, x, y, c]) => {
+      h += `<rect data-h="${n}" x="${x - 6}" y="${y - 6}" width="12" height="12" rx="2" fill="#fff" stroke="#3b6fd8" stroke-width="2" style="cursor:${c}-resize"/>`;
+    });
+    return h;
+  }
+  function resizeTo(d, p, shift) {
+    const { x0, y0, x1, y1 } = d.bb, w = x1 - x0, hh = y1 - y0, h = d.h;
+    const hx = h.includes('e') ? 1 : h.includes('w') ? -1 : 0, hy = h.includes('s') ? 1 : h.includes('n') ? -1 : 0;
+    const ax = hx > 0 ? x0 : hx < 0 ? x1 : (x0 + x1) / 2, ay = hy > 0 ? y0 : hy < 0 ? y1 : (y0 + y1) / 2;   // jangkar = sisi berlawanan
+    const ex = hx > 0 ? p.x - PAD : p.x + PAD, ey = hy > 0 ? p.y - PAD : p.y + PAD;
+    let sx = 1, sy = 1;
+    if (hx && w > .5) sx = hx > 0 ? (ex - x0) / w : (x1 - ex) / w;
+    if (hy && hh > .5) sy = hy > 0 ? (ey - y0) / hh : (y1 - ey) / hh;
+    sx = Math.max(.05, sx); sy = Math.max(.05, sy);
+    const corner = hx && hy, onlyC = d.o.C.length === 1 && !d.o.S.length && !d.o.L.length;
+    let rs;
+    if ((corner && !shift) || onlyC) { const k = corner ? (Math.abs(sx - 1) >= Math.abs(sy - 1) ? sx : sy) : (hx ? sx : sy); sx = sy = rs = k; }   // proporsional
+    else rs = Math.sqrt(sx * sy);   // lingkaran tetap bulat
+    applyScale(d.o, ax, ay, sx, sy, rs);
+  }
+  // -- pointer --
+  pv.addEventListener('pointerdown', e => {
+    const p = toSvg(e), multi = e.shiftKey || e.ctrlKey || e.metaKey;
+    const hd = e.target.closest('[data-h]');
+    if (hd) { e.preventDefault(); drag = { type: 'size', h: hd.dataset.h, o: grab(), bb: selBBox(), p0: p, moved: false }; return; }
+    const t = e.target.closest('[data-kind]');
+    if (!t) { drag = { type: 'box', p0: p, base: multi ? new Set(sel) : new Set(), moved: false }; if (!multi) sel = new Set(); render(); return; }
+    e.preventDefault();
+    const kind = t.dataset.kind, i = +t.dataset.i, k = t.dataset.k, key = kind + i, was = sel.has(key);
+    if (kind === 'L' && (k === '0' || k === '1')) { if (!was) sel = new Set([key]); drag = { type: 'ep', i, k: +k, p0: p, moved: false }; render(); return; }   // ujung garis: geser satu titik
+    if (multi) { if (was) { sel.delete(key); render(); return; } sel.add(key); }
+    else if (!was) sel = new Set([key]);
+    drag = { type: 'move', p0: p, o: grab(), moved: false, collapse: (!multi && was && sel.size > 1) ? key : null };
+    render();
+  });
+  window.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const p = toSvg(e);
+    if (drag.type === 'box') {
+      if (!drag.moved && Math.hypot(p.x - drag.p0.x, p.y - drag.p0.y) < 4) return;
+      drag.moved = true; mq = { x0: Math.min(p.x, drag.p0.x), y0: Math.min(p.y, drag.p0.y), x1: Math.max(p.x, drag.p0.x), y1: Math.max(p.y, drag.p0.y) };
+      sel = new Set(drag.base); inBox(mq).forEach(k => sel.add(k)); render(); return;
+    }
+    if (!drag.moved) { if (Math.hypot(p.x - drag.p0.x, p.y - drag.p0.y) < 2) return; drag.moved = true; pushUndo(); }
+    if (drag.type === 'move') applyMove(drag.o, p.x - drag.p0.x, p.y - drag.p0.y);
+    else if (drag.type === 'ep') { const l = L[drag.i]; l[drag.k * 2] = fx(p.x); l[drag.k * 2 + 1] = fx(p.y); }
+    else if (drag.type === 'size') resizeTo(drag, p, e.shiftKey);
+    render();
+  });
+  window.addEventListener('pointerup', () => {
+    if (!drag) return;
+    if (drag.collapse && !drag.moved) sel = new Set([drag.collapse]);   // klik biasa pada anggota seleksi = pilih dia saja
+    mq = null; drag = null; render();
+  });
+  // -- hapus / salin / tempel / duplikat --
+  function removeCircle(i) {
+    C.splice(i, 1); owner = owner.map(o => o === i ? -1 : (o > i ? o - 1 : o));
+    [icons, icoNames, spSel].forEach(a => { if (a.length > i) a.splice(i, 1); });   // data per-lingkaran ikut bergeser
+    const sp = parseInt($('special').value, 10);
+    if (sp >= 1) { if (sp - 1 === i) $('special').value = ''; else if (sp - 1 > i) $('special').value = String(sp - 1); }
+  }
+  function delSel() {
+    if (!sel.size) return; pushUndo();
+    selIdx('L').reverse().forEach(i => { L.splice(i, 1); owner.splice(i, 1); });
+    selIdx('S').reverse().forEach(i => S.splice(i, 1));
+    selIdx('C').reverse().forEach(i => removeCircle(i));
+    sel = new Set(); render();
+  }
+  function copySel() {
+    if (!sel.size) return false;
+    const al = [icons, icoNames, spSel].map(a => a.length === C.length);
+    clip = {
+      C: selIdx('C').map(i => ({ c: C[i].slice(), src: i, ic: al[0] ? icons[i] : null, ico: al[1] ? icoNames[i] : '', sp: al[2] ? spSel[i] : '' })),
+      S: selIdx('S').map(i => ({ x: S[i].x, y: S[i].y })),
+      L: selIdx('L').map(i => ({ l: L[i].slice(), o: owner[i] }))
+    };
+    pasteN = 0; return true;
+  }
+  function pasteClip() {
+    if (!clip || !(clip.C.length + clip.S.length + clip.L.length)) return;
+    pushUndo(); pasteN++;
+    const off = 24 * pasteN, al = [icons, icoNames, spSel].map(a => C.length > 0 && a.length === C.length), nm = new Map();
+    sel = new Set();
+    clip.C.forEach(it => {
+      nm.set(it.src, C.length);
+      C.push([fx(it.c[0] + off), fx(it.c[1] + off), it.c[2]]); sel.add('C' + (C.length - 1));
+      if (al[0]) { if (it.ic) icons.push({ ...it.ic }); else { icons.length = 0; al[0] = false; } }
+      if (al[1]) icoNames.push(it.ico || '');
+      if (al[2]) spSel.push(it.sp || '');
+    });
+    clip.S.forEach(q => { S.push({ x: fx(q.x + off), y: fx(q.y + off) }); sel.add('S' + (S.length - 1)); });
+    clip.L.forEach(it => {
+      const l = it.l.map(v => fx(v + off));
+      L.push(l); owner.push(nm.has(it.o) ? nm.get(it.o) : (it.o >= 0 && it.o < C.length ? it.o : (C.length ? guessOwner(l) : -1))); sel.add('L' + (L.length - 1));
+    });
+    render();
+  }
+  function dupSel() { const keep = clip, kn = pasteN; if (copySel()) pasteClip(); clip = keep; pasteN = kn; }
+  function selAll() { sel = new Set([...C.map((_, i) => 'C' + i), ...S.map((_, i) => 'S' + i), ...L.map((_, i) => 'L' + i)]); render(); }
+  function nudge(dx, dy) {
+    if (!sel.size) return;
+    const now = Date.now(); if (now - lastNudge > 700) pushUndo(); lastNudge = now;
+    applyMove(grab(), dx, dy); render();
+  }
+  window.addEventListener('keydown', e => {
+    if (tagIn() || pvo.classList.contains('open')) return;
+    const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+    if (e.key === 'Delete' || e.key === 'Backspace') { if (sel.size) { e.preventDefault(); delSel(); } }
+    else if (mod && k === 'c') { if (copySel()) e.preventDefault(); }
+    else if (mod && k === 'x') { if (copySel()) { e.preventDefault(); delSel(); } }
+    else if (mod && k === 'v') { if (clip) { e.preventDefault(); pasteClip(); } }
+    else if (mod && k === 'd') { if (sel.size) { e.preventDefault(); dupSel(); } }
+    else if (mod && k === 'a') { if (C.length + S.length + L.length) { e.preventDefault(); selAll(); } }
+    else if (mod && k === 'z') { e.preventDefault(); if (e.shiftKey) histRedo(); else histUndo(); }
+    else if (mod && k === 'y') { e.preventDefault(); histRedo(); }
+    else if (e.key === 'Escape') { if (sel.size) { sel = new Set(); render(); } }
+    else if (e.key.startsWith('Arrow') && sel.size) {
+      e.preventDefault(); const st = e.shiftKey ? 10 : 1;
+      nudge(e.key === 'ArrowLeft' ? -st : e.key === 'ArrowRight' ? st : 0, e.key === 'ArrowUp' ? -st : e.key === 'ArrowDown' ? st : 0);
+    }
+  });
+  $('del').addEventListener('click', delSel);
+  $('undoB').addEventListener('click', histUndo); $('redoB').addEventListener('click', histRedo);
+  $('copyB').addEventListener('click', copySel); $('pasteB').addEventListener('click', pasteClip);
+  $('allB').addEventListener('click', selAll);
+  // ---------- Tambah elemen (tombol alat di tepi kiri kanvas) ----------
+  let addKind = 'C';
+  const ADD_ICON = { C: 'circle', S: 'star', L: 'line' }, ADD_NAME = { C: 'lingkaran', S: 'bintang', L: 'garis' };
+  function addEl(k) {
+    pushUndo();
+    if (k === 'C') { C.push([fx(CANVAS / 2), fx(CANVAS / 2), 73.8]); sel = new Set(['C' + (C.length - 1)]); }
+    else if (k === 'S') { S.push({ x: fx(CANVAS / 2 + 80), y: fx(CANVAS / 2) }); sel = new Set(['S' + (S.length - 1)]); }
+    else {
+      const l = [fx(CANVAS / 2 - 60), fx(CANVAS / 2 + 120), fx(CANVAS / 2 + 60), fx(CANVAS / 2 + 120)];
+      L.push(l); owner.push(C.length ? guessOwner(l) : -1); sel = new Set(['L' + (L.length - 1)]);
+    }
+    render();
+  }
+  const closeAddMenu = () => { $('addMenu').classList.remove('open'); $('addMore').setAttribute('aria-expanded', 'false'); };
+  function setAddKind(k) {
+    addKind = k;
+    $('addUse').setAttribute('href', '#i-' + ADD_ICON[k]);
+    $('addB').title = 'Tambah ' + ADD_NAME[k];
+    $('addMenu').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+  }
+  $('addB').addEventListener('click', () => addEl(addKind));
+  $('addMore').addEventListener('click', () => {
+    const open = !$('addMenu').classList.contains('open');
+    $('addMenu').classList.toggle('open', open); $('addMore').setAttribute('aria-expanded', String(open));
+  });
+  $('addMenu').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b) return; setAddKind(b.dataset.k); closeAddMenu(); });
+
+  // ---------- Upload ----------
+  function loadImage(file) {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(url); $('err').textContent = 'Gambar tidak bisa dibuka oleh browser.'; };
+    img.onload = () => {
+      try {
+        const nw = img.naturalWidth, nh = img.naturalHeight, sc = Math.min(1, 1000 / Math.max(nw, nh));
+        const W = Math.max(1, Math.round(nw * sc)), H = Math.max(1, Math.round(nh * sc));
+        const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+        const cx = cv.getContext('2d', { willReadFrequently: true });
+        cx.drawImage(img, 0, 0, W, H);
+        const px = cx.getImageData(0, 0, W, H).data, lum = new Uint8ClampedArray(W * H);
+        let sum = 0, clear = 0;
+        for (let j = 3; j < px.length; j += 4) if (px[j] < 200) clear++;
+        const useAlpha = clear > W * H * 0.02;   // gambar transparan: bentuk = bagian yang buram, warnanya diabaikan
+        for (let i = 0, j = 0; i < lum.length; i++, j += 4) {
+          const v = useAlpha ? px[j + 3] : .2126 * px[j] + .7152 * px[j + 1] + .0722 * px[j + 2];
+          lum[i] = v; sum += v;
+        }
+        if (imgUrl) URL.revokeObjectURL(imgUrl);
+        imgUrl = url; mode = 'img'; rawText = ''; R = { W, H, M: Math.max(W, H), lum, img, alpha: useAlpha };
+        icons = []; $('icGrid').innerHTML = ''; $('icZip').disabled = true; $('icNote').textContent = '';
+        const inv = !useAlpha && sum / lum.length >= 128, t = otsu(lum);   // rata-rata terang = garis gelap di latar terang
+        $('inv').checked = inv;
+        $('thr').value = String(Math.max(20, Math.min(235, inv ? 255 - t : t)));
+        $('thrv').textContent = $('thr').value;
+        $('rpanel').classList.remove('hide'); $('ipanel').classList.remove('hide'); $('apanel').classList.remove('hide'); $('spanel').classList.remove('hide'); spSel = []; $('spRes').innerHTML = ''; icoNames = []; $('atRes').innerHTML = '';
+        build(); render(); applyLeader();
+        if (useAlpha) $('info').textContent += ' Gambar transparan: bentuk dibaca dari alpha.';
+        if (!C.length) $('err').textContent = 'Tidak ada lingkaran terdeteksi. Coba geser ambang terang atau ubah rentang jari-jari.';
+      } catch (err) { $('err').textContent = err.message; }
+    };
+    img.src = url;
+  }
+  function load(file) {
+    $('err').textContent = '';
+    if (!file) return;
+    spManual = false;
+    const isSvg = /\.svg$/i.test(file.name) || file.type === 'image/svg+xml';
+    const isImg = /\.(png|jpe?g|webp)$/i.test(file.name) || /^image\/(png|jpeg|webp)$/.test(file.type);
+    if (!isSvg && !isImg) { $('err').textContent = 'Format belum didukung. Pakai SVG, PNG, JPG, atau WebP.'; return; }
+    $('name').value = file.name.replace(/\.[^.]+$/, '').replace(/[^\w]+/g, '_') || 'baru'; syncNameSel();
+    nameHint = (srcHint + ' ' + file.name).trim(); srcHint = ''; nameTouched = false; $('nmhint').textContent = ''; pickNameFromHint();
+    if (!isSvg) { loadImage(file); return; }
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        rawText = String(rd.result); mode = 'svg';
+        $('rpanel').classList.add('hide'); $('ipanel').classList.add('hide'); $('apanel').classList.add('hide'); $('spanel').classList.add('hide'); $('info').textContent = '';
+        build(); render(); applyLeader();
+        if (!C.length) $('err').textContent = 'Tidak ada lingkaran terdeteksi (butuh elemen <circle> dengan r ≥ 25).';
+      } catch (err) { $('err').textContent = err.message; }
+    };
+    rd.readAsText(file);
+  }
+  // ---------- Muat dari link ----------
+  // Browser hanya mengizinkan membaca gambar dari situs lain bila server gambarnya mengirim header CORS.
+  async function loadUrl() {
+    const u = $('urlIn').value.trim(), btn = $('urlGo');
+    $('err').textContent = '';
+    let parsed;
+    try { parsed = new URL(u); if (!/^https?:$/.test(parsed.protocol)) throw 0; }
+    catch (e) { $('err').textContent = 'Masukkan link lengkap yang diawali http:// atau https://'; return; }
+    btn.disabled = true; btn.textContent = 'Memuat...';
+    try {
+      const res = await fetch(parsed.href, { mode: 'cors' });
+      if (!res.ok) throw new Error('Server membalas HTTP ' + res.status + '.');
+      const blob = await res.blob(), type = (blob.type || '').split(';')[0];
+      let name = '';
+      try { name = decodeURIComponent(parsed.pathname.split('/').pop() || ''); } catch (e) { name = parsed.pathname.split('/').pop() || ''; }
+      if (!/\.(svg|png|jpe?g|webp)$/i.test(name)) {
+        const ext = /svg/.test(type) ? '.svg' : /png/.test(type) ? '.png' : /webp/.test(type) ? '.webp' : /jpe?g/.test(type) ? '.jpg' : '';
+        if (!ext) throw new Error('Link ini bukan gambar langsung (jenis berkas: ' + (type || 'tidak diketahui') + '). Pakai link ke berkas gambarnya, bukan ke halaman web.');
+        name = (name.replace(/\.[^.]*$/, '') || 'gambar') + ext;
+      }
+      try { srcHint = decodeURIComponent(parsed.pathname); } catch (e) { srcHint = parsed.pathname; }
+      load(new File([blob], name, { type }));
+    } catch (err) {
+      $('err').textContent = err instanceof TypeError
+        ? 'Link tidak bisa dibaca dari browser: alamatnya salah, atau server gambar tidak mengizinkan akses dari situs lain (CORS).'
+        : err.message;
+    } finally { btn.disabled = false; btn.textContent = 'Muat'; }
+  }
+  $('urlGo').addEventListener('click', loadUrl);
+  $('urlIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); loadUrl(); } });
+
+  // ---------- Ambil ikon dari tiap lingkaran ----------
+  // Tiap lingkaran (sesuai nomor di editor) dipotong persegi dari gambar asli, dibatasi lingkaran bagian dalam.
+  // Gambar transparan: dipakai apa adanya. Gambar tidak transparan: latar dibuang dengan ambang yang sama seperti deteksi.
+  const crcTable = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = u8 => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = crcTable[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function makeZip(files) {   // tanpa kompresi (PNG sudah terkompresi), cukup untuk puluhan berkas kecil
+    const enc = new TextEncoder(), parts = [], cen = []; let off = 0;
+    files.forEach(f => {
+      const nm = enc.encode(f.name), crc = crc32(f.data), sz = f.data.length;
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+      lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true); lh.setUint32(14, crc, true); lh.setUint32(18, sz, true);
+      lh.setUint32(22, sz, true); lh.setUint16(26, nm.length, true); lh.setUint16(28, 0, true);
+      parts.push(new Uint8Array(lh.buffer), nm, f.data);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+      ch.setUint16(10, 0, true); ch.setUint16(12, 0, true); ch.setUint16(14, 0x21, true); ch.setUint32(16, crc, true);
+      ch.setUint32(20, sz, true); ch.setUint32(24, sz, true); ch.setUint16(28, nm.length, true); ch.setUint32(42, off, true);
+      cen.push(new Uint8Array(ch.buffer), nm);
+      off += 30 + nm.length + sz;
+    });
+    let cs = 0; cen.forEach(p => { cs += p.length; });
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+    end.setUint32(12, cs, true); end.setUint32(16, off, true);
+    return new Blob([...parts, ...cen, new Uint8Array(end.buffer)], { type: 'application/zip' });
+  }
+  const b64ToU8 = b64 => { const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; };
+
+  function extractIcons() {
+    if (mode !== 'img' || !R || !R.img || !C.length) { $('icNote').textContent = 'Upload gambar raster dan deteksi lingkaran dulu.'; return; }
+    const img = R.img, nw = img.naturalWidth, s = $('norm').checked ? CANVAS / R.M : 1;
+    const toNat = v => v / s * (nw / R.W);   // satuan kanvas -> piksel gambar asli
+    const margin = Math.max(0, parseFloat($('icm').value) || 0);
+    const thr = +$('thr').value, inv = $('inv').checked, dropBg = $('icbg').checked && !R.alpha;
+    icons = [];
+    const grid = $('icGrid'); grid.innerHTML = '';
+    C.forEach(([x, y, r], i) => {
+      const ri = Math.max(4, r - margin), cx = toNat(x), cy = toNat(y), rn = toNat(ri);
+      const D = Math.max(16, Math.min(512, Math.round(rn * 2)));
+      const cv = document.createElement('canvas'); cv.width = cv.height = D;
+      const g = cv.getContext('2d', { willReadFrequently: true });
+      g.save(); g.beginPath(); g.arc(D / 2, D / 2, D / 2, 0, Math.PI * 2); g.clip();
+      g.drawImage(img, cx - rn, cy - rn, rn * 2, rn * 2, 0, 0, D, D);
+      g.restore();
+      if (dropBg) {
+        const id = g.getImageData(0, 0, D, D), p = id.data;
+        for (let j = 0; j < p.length; j += 4) {
+          const l = .2126 * p[j] + .7152 * p[j + 1] + .0722 * p[j + 2], v = inv ? 255 - l : l;
+          p[j + 3] = p[j + 3] * Math.max(0, Math.min(1, (v - (thr - 40)) / 40));
+        }
+        g.putImageData(id, 0, 0);
+      }
+      const url = cv.toDataURL('image/png');
+      icons.push({ n: i + 1, D, png: b64ToU8(url.split(',')[1]), url, cv });
+      const fig = document.createElement('figure'), im = document.createElement('img'), cap = document.createElement('figcaption');
+      im.src = url; im.alt = 'ikon ' + (i + 1); cap.textContent = String(i + 1);
+      fig.append(im, cap); grid.appendChild(fig);
+    });
+    $('icZip').disabled = !icons.length;
+    const rs = C.map(c => c[2]).sort((a, b) => a - b), rm = rs[rs.length >> 1];
+    $('icNote').textContent = icons.length + ' ikon diambil. Tiap ikon memenuhi persegi selebar ' + fx(2 * (rm - margin)) +
+      ' satuan kanvas di tengah lingkaran. Di halaman rasi, ubah ukuran ikon dari r * 1.46 menjadi r * ' + (2 * (rm - margin) / rm).toFixed(2) + ' agar sama dengan gambar asli.';
+  }
+  function downloadIcons() {
+    if (!icons.length) return;
+    const key = ($('name').value || 'baru').trim().replace(/[^\w]+/g, '_') || 'baru', enc = new TextEncoder(), asSvg = $('icf').value === 'svg';
+    const files = icons.map(ic => ({
+      name: key + '/' + ic.n + (asSvg ? '.svg' : '.png'),
+      data: asSvg
+        ? enc.encode(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${ic.D} ${ic.D}" width="${ic.D}" height="${ic.D}"><image width="${ic.D}" height="${ic.D}" href="${ic.url}" xlink:href="${ic.url}"/></svg>`)
+        : ic.png
+    }));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(makeZip(files)); a.download = key + '-ikon.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  $('icGo').addEventListener('click', extractIcons);
+  $('icZip').addEventListener('click', downloadIcons);
+
+  // ---------- Cocokkan ikon lingkaran dengan atlas ikon emot (dari internet) ----------
+  // Tiap ikon (dipotong dari lingkaran) dan tiap sel atlas 128x128 diubah jadi vektor 24x24 RGB di atas latar hitam,
+  // dinormalkan (rata-rata nol), lalu dibandingkan dengan korelasi. Ikon lingkaran dicoba pada 3 zoom (ikon bisa lebih kecil dari lingkaran).
+  const AF = 24;
+  let atlas = null;
+  const atCv = document.createElement('canvas'); atCv.width = atCv.height = AF;
+  const atG = atCv.getContext('2d', { willReadFrequently: true });
+  function feat(src, sx, sy, sw, sh, z) {
+    atG.globalCompositeOperation = 'source-over'; atG.fillStyle = '#000'; atG.fillRect(0, 0, AF, AF);
+    const w = sw * z, h = sh * z;
+    atG.drawImage(src, sx + (sw - w) / 2, sy + (sh - h) / 2, w, h, 0, 0, AF, AF);
+    const p = atG.getImageData(0, 0, AF, AF).data, v = new Float32Array(AF * AF * 3);
+    let m = 0, k = 0;
+    for (let i = 0; i < p.length; i += 4) { v[k++] = p[i]; v[k++] = p[i + 1]; v[k++] = p[i + 2]; }
+    for (let i = 0; i < v.length; i++) m += v[i];
+    m /= v.length; let n = 0;
+    for (let i = 0; i < v.length; i++) { v[i] -= m; n += v[i] * v[i]; }
+    n = Math.sqrt(n); if (n < 1e-3) return null;   // sel kosong / polos
+    for (let i = 0; i < v.length; i++) v[i] /= n;
+    return v;
+  }
+  const nameOf = u => { let s = u.split('/').pop().split('?')[0]; try { s = decodeURIComponent(s); } catch (e) {} return s.replace(/\.\w+$/, ''); };
+  const thumbUrl = u => u + '/revision/latest/scale-to-width-down/128';   // wiki mengecilkan gambar di server: unduhan ringan
+  function matchIcon(cv) {
+    const vs = [1, 0.8, 0.64].map(z => feat(cv, 0, 0, cv.width, cv.height, z)).filter(Boolean);
+    if (!vs.length) return [];
+    const sc = atlas.ents.map((e, idx) => { let b = -1; for (const v of vs) { let d = 0; for (let i = 0; i < v.length; i++) d += v[i] * e.v[i]; if (d > b) b = d; } return [b, idx]; });
+    sc.sort((a, b) => b[0] - a[0]);
+    return sc.slice(0, 3).map(([s, idx]) => ({ s, e: atlas.ents[idx] }));
+  }
+  function cellUrl(e, sz) {
+    sz = sz || 64;
+    const c = document.createElement('canvas'); c.width = c.height = sz;
+    c.getContext('2d').drawImage(e.sheet, e.x, e.y, 128, 128, 0, 0, sz, sz);
+    return c.toDataURL('image/png');
+  }
+  // ikon atlas dipangkas ke isi yang terlihat lalu ditaruh tepat di tengah persegi, supaya rata tengah di dalam lingkaran
+  function centeredUrl(e) {
+    const S = 128, c = document.createElement('canvas'); c.width = c.height = S;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(e.sheet, e.x, e.y, 128, 128, 0, 0, S, S);
+    const p = g.getImageData(0, 0, S, S).data;
+    let x0 = S, y0 = S, x1 = -1, y1 = -1;
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) if (p[(y * S + x) * 4 + 3] > 24) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return c.toDataURL('image/png');
+    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    if (w > S * .96 && h > S * .96) return c.toDataURL('image/png');   // gambar penuh (tanpa transparansi): tidak dipangkas
+    const o = document.createElement('canvas'); o.width = o.height = S;
+    const sc = Math.min(S / w, S / h), dw = w * sc, dh = h * sc;
+    o.getContext('2d').drawImage(c, x0, y0, w, h, (S - dw) / 2, (S - dh) / 2, dw, dh);
+    return o.toDataURL('image/png');
+  }
+  function paintMatches(res) {
+    const box = $('atRes'); box.innerHTML = '';
+    res.forEach((cands, i) => {
+      const row = document.createElement('div'); row.className = 'atrow';
+      const im = document.createElement('img'); im.src = icons[i].url; im.alt = 'lingkaran ' + (i + 1);
+      const col = document.createElement('div');
+      const head = document.createElement('div'); head.className = 'note'; head.style.margin = '0 0 4px'; head.textContent = 'Lingkaran ' + (i + 1) + (parseInt($('special').value, 10) === i + 1 ? ' · leader (elder / guide)' : '');
+      const cc = document.createElement('div'); cc.className = 'atc';
+      cands.forEach(c => {
+        const b = document.createElement('button'); b.type = 'button';
+        if (c.s < 0.5) b.classList.add('low');
+        if (icoNames[i] === c.e.url) b.classList.add('on');
+        const t = document.createElement('img'); t.src = cellUrl(c.e);
+        const l = document.createElement('span'); l.title = c.e.url; l.textContent = c.e.name + ' · ' + Math.round(Math.max(0, c.s) * 100) + '%';
+        b.append(t, l);
+        b.addEventListener('click', () => { icoNames[i] = icoNames[i] === c.e.url ? '' : c.e.url; cc.querySelectorAll('button').forEach(x => x.classList.remove('on')); if (icoNames[i]) b.classList.add('on'); });
+        cc.appendChild(b);
+      });
+      col.append(head, cc); row.append(im, col); box.appendChild(row);
+    });
+  }
+  $('atGo').addEventListener('click', async () => {
+    const note = $('atNote'); note.textContent = '';
+    try {
+      if (mode !== 'img' || !C.length) throw new Error('Upload gambar rasi dan deteksi lingkaran dulu.');
+      if (!atlas) {
+        note.textContent = 'Memuat atlas...'; await new Promise(r => setTimeout(r, 20));
+        const prog = (d, n) => { note.textContent = 'Mengunduh ikon dari link: ' + d + ' / ' + n + '...'; };
+        atlas = await loadAtlasFromEmotes(prog);   // ikon emot dari skygame-data (internet), seperti bagian spirit tree
+        if (!atlas.ents.length) { const f = atlas.fail; atlas = null; throw new Error(f ? 'Ikon tidak bisa diunduh dari link (' + f + ' gagal). Periksa koneksi internet, atau server wiki menolak akses dari halaman ini (CORS). Coba lagi nanti.' : 'Tidak ada ikon terbaca.'); }
+      }
+      extractIcons();
+      icoNames = new Array(C.length).fill('');
+      const res = icons.map(ic => matchIcon(ic.cv));
+      res.forEach((c, i) => { if (c[0] && c[0].s >= 0.6) icoNames[i] = c[0].e.url; });
+      // Ikon elder/guide bukan emot, jadi kecocokannya paling rendah: lingkaran dengan persen terendah = leader (lingkaran spesial).
+      let lowNote = '';
+      if (!spManual && res.length > 1) {
+        const sc = res.map(c => c[0] ? c[0].s : -1);
+        let low = 0; sc.forEach((v, i) => { if (v < sc[low]) low = i; });
+        $('special').value = String(low + 1);
+        icoNames[low] = '';   // bukan emot: jangan dipasangkan ke ikon emot yang salah
+        lowNote = ' Lingkaran ' + (low + 1) + ' punya kecocokan emot terendah (' + Math.round(Math.max(0, sc[low]) * 100) + '%), jadi otomatis dijadikan leader (elder / guide).';
+        $('spnote').textContent = 'Terdeteksi otomatis: lingkaran ' + (low + 1) + ', kecocokan emot paling rendah = leader (elder / guide).';
+      }
+      paintMatches(res); applyLeader();
+      note.textContent = atlas.ents.length + ' ikon atlas dipakai' + (atlas.fromLink ? ' (' + atlas.fromLink + ' dari link' + (atlas.fail ? ', ' + atlas.fail + ' gagal diunduh' : '') + ')' : '') + '. Kandidat pertama dipilih otomatis bila kemiripan ≥ 60%; periksa dan ubah bila salah.' + lowNote;
+    } catch (err) { note.textContent = err.message; }
+  });
+
+  // ---------- Spirit & Spirit Tree dari nama ikon ----------
+  // Nama berkas ikon (mis. ApplaudingBellmaker-1.png) -> huruf kecil tanpa simbol -> dicari sebagai awalan/isi dari nama spirit
+  // (spirits.json). Pohon: spirit.tree -> spirit-trees.json (node akar) -> nodes.json (anak n/nw/ne, item, harga) -> items.json.
+  const DATA_BASES = ['https://unpkg.com/skygame-data@latest/assets/', 'https://cdn.jsdelivr.net/npm/skygame-data@latest/assets/'];
+  let SD = null;
+  async function getJson(name) {
+    for (const b of DATA_BASES) { try { const r = await fetch(b + name + '.json'); if (!r.ok) throw 0; const d = await r.json(); return Array.isArray(d) ? d : (d.items || []); } catch (e) {} }
+    throw new Error('Gagal mengunduh ' + name + '.json');
+  }
+  async function loadSD() {
+    if (SD) return SD;
+    const [spirits, trees, nodes, items] = await Promise.all([getJson('spirits'), getJson('spirit-trees'), getJson('nodes'), getJson('items')]);
+    const by = a => { const m = new Map(); a.forEach(x => m.set(x.guid, x)); return m; };
+    const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+    SD = { spirits, trees: by(trees), nodes: by(nodes), items: by(items), sn: spirits.map(s => ({ s, k: norm(s.name) })).filter(x => x.k.length >= 5), norm };
+    return SD;
+  }
+  // Sumber ikon dari skygame-data (internet): ikon EMOT. Ikon di lingkaran rasi adalah emot spirit, dan tiap emot ada di simpul pohon
+  // satu spirit (items.json type "Emote" -> nodes.json -> spirit-trees.json -> spirits.json), jadi hasil cocok langsung menunjuk ke spiritnya.
+  function emoteSpirits() {   // guid item -> spirit (dari semua pohon)
+    if (SD.itemSp) return SD.itemSp;
+    const m = new Map();
+    SD.spirits.forEach(sp => { const cells = treeCells(sp); if (cells) cells.forEach(c => { const cur = c.n.item && m.get(c.n.item); if (c.n.item && (!cur || (cur.type === 'Guide' && sp.type !== 'Guide'))) m.set(c.n.item, sp); }); });   // emot yang dipakai bersama: utamakan spirit biasa daripada Guide
+    return SD.itemSp = m;
+  }
+  async function loadAtlasFromEmotes(onProgress) {
+    await loadSD();
+    const ms = emoteSpirits();
+    const list = [...SD.items.values()].filter(it => it.type === 'Emote' && /^https?:/.test(it.icon || '') && ms.has(it.guid));
+    const ents = []; let done = 0, fail = 0, cursor = 0;
+    const one = async it => {
+      try {
+        const r = await fetch(thumbUrl(it.icon), { mode: 'cors' });
+        if (!r.ok) throw new Error(r.status);
+        const bmp = await createImageBitmap(await r.blob()), cv = document.createElement('canvas');
+        cv.width = cv.height = 128;
+        const sc = Math.min(128 / bmp.width, 128 / bmp.height), w = bmp.width * sc, hh = bmp.height * sc;
+        cv.getContext('2d').drawImage(bmp, (128 - w) / 2, (128 - hh) / 2, w, hh);
+        const v = feat(cv, 0, 0, 128, 128, 1);
+        if (v) ents.push({ name: it.name + ' (' + ms.get(it.guid).name + ')', url: it.icon, sheet: cv, x: 0, y: 0, v });
+      } catch (e) { fail++; }
+      done++; if (onProgress && done % 10 === 0) onProgress(done, list.length);
+    };
+    await Promise.all(Array.from({ length: 12 }, async () => { while (cursor < list.length) await one(list[cursor++]); }));
+    return { ents, fail, fromLink: list.length, total: list.length, src: 'emote' };
+  }
+  function spiritFromIcon(url) {
+    if (!url || !SD) return null;
+    if (SD.itemSp) {   // ikon emot -> spirit pemilik simpulnya (ikon sama bisa dipakai beberapa item: utamakan spirit biasa daripada Guide)
+      let g = null;
+      for (const it of SD.items.values()) if (it.icon === url && SD.itemSp.has(it.guid)) { const c = SD.itemSp.get(it.guid); if (!g || (g.type === 'Guide' && c.type !== 'Guide')) g = c; }
+      if (g) return g;
+    }
+    const file = nameOf(url), fk = SD.norm(file);
+    const img = SD.spirits.find(s => s.imageUrl && nameOf(s.imageUrl) === file);   // gambar spirit persis sama
+    if (img) return img;
+    let best = null, bl = 0;
+    for (const { s, k } of SD.sn) if (fk.startsWith(k) || fk.includes(k)) { const sc = k.length + (fk.startsWith(k) ? 100 : 0); if (sc > bl) { bl = sc; best = s; } }
+    return best;
+  }
+  const COST = [['c', 'C'], ['h', 'H'], ['ac', 'AC'], ['sc', 'SC'], ['sh', 'SH'], ['ec', 'EC']];
+  const costOf = n => COST.filter(([k]) => n[k]).map(([k, l]) => n[k] + l).join(' ');
+  const chk = new Set();   // guid simpul pohon yang dicentang
+  // Logika pohon bawah -> atas: simpul hanya bisa dinyalakan bila simpul di bawahnya (induk, ke arah akar) sudah menyala; akar selalu bebas.
+  // Mematikan satu simpul ikut mematikan semua simpul di atasnya (turunannya).
+  let parMap = null;
+  const parentOf = g => {
+    if (!parMap) { parMap = new Map(); for (const nd of SD.nodes.values()) ['nw', 'n', 'ne'].forEach(k => { if (nd[k]) parMap.set(nd[k], nd.guid); }); }
+    return parMap.get(g);
+  };
+  const canCheck = g => { const p = parentOf(g); return !p || chk.has(p); };
+  function uncheckUp(g) {
+    if (!chk.delete(g)) return;
+    const nd = SD.nodes.get(g); if (!nd) return;
+    ['nw', 'n', 'ne'].forEach(k => { if (nd[k]) uncheckUp(nd[k]); });
+  }
+  function treeCells(spirit) {
+    const tr = spirit && SD.trees.get(spirit.tree), root = tr && SD.nodes.get(tr.node);
+    if (!root) return null;
+    const cells = [], seen = new Set(), taken = new Set();
+    const q = [{ n: root, x: 0, y: 0 }];
+    while (q.length) {
+      const { n, x, y } = q.shift();
+      if (!n || seen.has(n.guid)) continue; seen.add(n.guid);
+      let cx = x; while (taken.has(cx + ',' + y)) cx += (x >= 0 ? 1 : -1);
+      taken.add(cx + ',' + y); cells.push({ n, x: cx, y });
+      [['nw', -1], ['n', 0], ['ne', 1]].forEach(([k, dx]) => { const c = n[k] && SD.nodes.get(n[k]); if (c) q.push({ n: c, x: cx + dx, y: y + 1 }); });
+    }
+    return cells;
+  }
+  // progres pohon spirit: {done, total}; pohon dianggap selesai bila semua simpulnya dicentang
+  function treeProg(guid) {
+    const cells = SD && guid ? treeCells(SD.spirits.find(x => x.guid === guid)) : null;
+    return cells ? { done: cells.filter(c => chk.has(c.n.guid)).length, total: cells.length, cells } : null;
+  }
+  const treeDone = guid => { const p = treeProg(guid); return !!p && p.total > 0 && p.done === p.total; };
+  function treeSvg(spirit, hl, game) {
+    const cells = treeCells(spirit);
+    if (!cells) return null;
+    const pos = new Map(cells.map(c => [c.n.guid, c]));
+    const xs = cells.map(c => c.x), minX = Math.min(...xs), maxX = Math.max(...xs), maxY = Math.max(...cells.map(c => c.y));
+    const G = 84, R = 24, W = (maxX - minX + 1) * G + 24, H = (maxY + 1) * G + 24;
+    const px = c => 12 + (c.x - minX) * G + G / 2, py = c => 12 + (maxY - c.y) * G + G / 2 - 6;   // akar di bawah, tumbuh ke atas
+    let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+    cells.forEach(c => ['nw', 'n', 'ne'].forEach(k => { const t = c.n[k] && pos.get(c.n[k]); if (t) s += `<line x1="${px(c)}" y1="${py(c)}" x2="${px(t)}" y2="${py(t)}" stroke="${game ? 'rgba(255,255,255,.85)' : '#5b86f0'}" stroke-width="2"/>`; }));
+    cells.forEach(c => {
+      const it = SD.items.get(c.n.item), x = px(c), y = py(c), nm = (it && it.name) || '?', ic = it && it.icon;
+      const on = chk.has(c.n.guid), lvl = it && it.type === 'Emote' && it.level, hi = !!hl && c.n.item === hl;
+      s += `<g class="nd" data-g="${c.n.guid}" style="cursor:pointer"><title>${nm.replace(/[<>&]/g, '')}${lvl ? ' (Lv ' + lvl + ')' : ''}</title><circle cx="${x}" cy="${y}" r="${R}" fill="${on ? '#14391f' : game ? 'rgba(10,20,56,.7)' : '#0b1330'}" stroke="${on ? '#8fe3a8' : hi ? '#ffd36b' : game ? 'rgba(255,255,255,.5)' : '#8fb0ff'}" stroke-width="${on || hi ? 3 : 2}"/>`;
+      if (ic && /^https?:/.test(ic)) s += `<image href="${ic}" x="${x - R + 4}" y="${y - R + 4}" width="${(R - 4) * 2}" height="${(R - 4) * 2}"/>`;
+      if (on) s += `<circle cx="${x + R - 5}" cy="${y - R + 5}" r="9" fill="#8fe3a8"/><path d="M${x + R - 9},${y - R + 5} l3,3 l6,-6" stroke="#06210f" stroke-width="2.2" fill="none"/>`;
+      if (lvl && game) s += `<text x="${x + R - 4}" y="${y - R + 8}" style="font-size:10px;fill:#fff;text-anchor:start;opacity:.9">Lv ${lvl}</text>`;
+      else if (lvl) s += `<rect x="${x - R - 2}" y="${y - R - 3}" width="26" height="14" rx="7" fill="#2c4fae" stroke="#9cc4ff" stroke-width="1"/><text x="${x - R + 11}" y="${y - R + 7}" style="font-size:9px;font-weight:600;fill:#fff">Lv ${lvl}</text>`;
+      s += `<text x="${x}" y="${y + R + 13}">${costOf(c.n) || (c === cells[0] ? 'gratis' : '')}</text></g>`;
+    });
+    return { svg: s + '</svg>', count: cells.length };
+  }
+  // Pohon spirit untuk overlay (meniru tampilan di game): tanpa lingkaran, batang di tengah, cabang miring 45 derajat,
+  // semua garis sama panjang (jarak pusat-ke-pusat E) dan berhenti sedikit sebelum tepi item.
+  // Semua ikon abu-abu; yang sudah dicentang menyala putih (tanpa kotak). Biaya = glyph kecil + angka.
+  function treeSvgGame(spirit, hl, anim, fresh) {
+    const tr = spirit && SD.trees.get(spirit.tree), root = tr && SD.nodes.get(tr.node);
+    if (!root) return null;
+    const E = 150, DX = E * Math.SQRT1_2, S = 44, R = S / 2, CL = R + 17;   // cabang miring 45 derajat: dx = dy = E / akar 2, jadi panjangnya tetap E
+    const cells = [], pos = new Map(), q = [{ n: root, x: 0, y: 0, d: 1 }];
+    while (q.length) {
+      const { n, x, y, d } = q.shift();
+      if (!n || pos.has(n.guid)) continue;
+      let cx = x; while (cells.some(p => Math.hypot(p.x - cx, p.y - y) < E * 0.6)) cx += d * DX;   // hindari item bertumpuk
+      const c = { n, x: cx, y }; pos.set(n.guid, c); cells.push(c);
+      [['nw', -1, DX], ['n', 0, E], ['ne', 1, DX]].forEach(([k, dx, dy]) => { const ch = n[k] && SD.nodes.get(n[k]); if (ch) q.push({ n: ch, x: cx + dx * DX, y: y + dy, d: dx || d }); });
+    }
+    const maxY = Math.max(...cells.map(c => c.y)), half = Math.max(...cells.map(c => Math.abs(c.x)));
+    const padX = R + 58, padT = R + 30, padB = R + 36;
+    const W = 2 * (half + padX), H = padT + maxY + padB;   // simetris terhadap akar: batang pohon selalu tepat di tengah panel
+    const sx = c => W / 2 + c.x, sy = c => padT + (maxY - c.y);   // akar di bawah, tumbuh ke atas
+    const glyph = (k, gx, gy, on) => k === 'h' || k === 'sh'
+      ? `<path transform="translate(${gx} ${gy})" d="M0 6C-9 0-6-7 0-3C6-7 9 0 0 6Z" fill="#fff" opacity="${on ? .95 : .4}"/>`
+      : k === 'ec'
+        ? `<path transform="translate(${gx} ${gy})" d="M0-7L6 0L0 7L-6 0Z" fill="#fff" opacity="${on ? .95 : .4}"/>`
+        : `<g transform="translate(${gx} ${gy})" fill="#fff" opacity="${on ? .95 : .4}"><rect x="-4" y="-1" width="8" height="8" rx="2"/><path d="M0-8C3-5 3-4 0-2C-3-4-3-5 0-8Z"/></g>`;
+    // simpul yang baru saja diaktifkan: cahaya merambat naik dari simpul di bawahnya (bila banyak sekaligus, berurutan dari bawah ke atas)
+    const fr = fresh && fresh.size ? cells.filter(c => fresh.has(c.n.guid)) : [], fy0 = fr.length ? Math.min(...fr.map(c => c.y)) : 0;
+    const fd = c => (((c.y - fy0) / E) * .8).toFixed(2);
+    let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="display:block;margin:0 auto;width:${Math.round(W)}px;max-width:100%;height:auto">`
+;
+    cells.forEach(c => ['nw', 'n', 'ne'].forEach(k => {
+      const t = c.n[k] && pos.get(c.n[k]); if (!t) return;
+      const x1 = sx(c), y1 = sy(c), x2 = sx(t), y2 = sy(t), len = Math.hypot(x2 - x1, y2 - y1);
+      if (len <= 2 * CL + 4) return;
+      const ux = (x2 - x1) / len, uy = (y2 - y1) / len;
+      const lit = chk.has(c.n.guid) && chk.has(c.n[k]);   // garis menyala bila kedua ujungnya sudah menyala
+      const ld = (.45 + (c.y / E) * .55).toFixed(2);   // makin tinggi simpul asal, makin lambat mulainya: garis merambat naik
+      const grow = lit && !anim && !!fresh && fresh.has(c.n[k]);   // simpul tujuan baru menyala: cahaya naik di garis ini
+      const lc = `x1="${x1 + ux * CL}" y1="${y1 + uy * CL}" x2="${x2 - ux * CL}" y2="${y2 - uy * CL}" stroke="#fff" stroke-width="1.6" stroke-linecap="round"`;
+      s += `<line${anim ? ` class="rl" pathLength="1" style="animation-delay:${ld}s"` : ''} ${lc} opacity="${lit && !grow ? .9 : .28}"/>`;
+      if (grow) s += `<line class="rl" pathLength="1" style="animation-duration:.7s;animation-delay:${fd(t)}s" ${lc} opacity=".9"/>`;
+    }));
+    cells.forEach(c => {
+      const it = SD.items.get(c.n.item), x = sx(c), y = sy(c), nm = (it && it.name) || '?', ic = it && it.icon;
+      const on = chk.has(c.n.guid), lvl = it && it.type === 'Emote' && it.level, hi = !!hl && c.n.item === hl, cost = costOf(c.n);
+      const isF = on && !anim && !!fresh && fresh.has(c.n.guid), dl = isF ? (parseFloat(fd(c)) + .55).toFixed(2) : 0;   // menyala setelah cahaya sampai
+      s += `<g class="nd" data-g="${c.n.guid}" style="cursor:pointer"><title>${nm.replace(/[<>&]/g, '')}${lvl ? ' (Lv ' + lvl + ')' : ''}${cost ? ' · ' + cost : ''}</title>`
+        + `<rect x="${x - R - 10}" y="${y - R - 10}" width="${S + 20}" height="${S + 20}" rx="14" fill="rgba(0,0,0,0)"/>`
+        + `<g class="ni${anim ? ' rise' : ''}"${anim ? ` style="animation-delay:${c.y === 0 ? .3 : (.6 + (c.y / E) * .55).toFixed(2)}s"` : ''}>`;
+      if (ic && /^https?:/.test(ic)) {
+        const LIT = 'filter:drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 10px rgba(191,220,255,.8))', GRAY = 'filter:brightness(.5) grayscale(1)', at = `href="${ic}" x="${x - R}" y="${y - R}" width="${S}" height="${S}"`;
+        s += isF ? `<image ${at} style="${GRAY}"/><image class="litin" ${at} style="${LIT};animation-delay:${dl}s"/>` : `<image ${at} style="${on ? LIT : GRAY}"/>`;
+      }
+      else s += `<text x="${x}" y="${y + 5}" style="font-size:16px">?</text>`;
+      if (isF) s += `<g class="txl" style="animation-delay:${dl}s">`;
+      if (lvl) s += `<text x="${x + R - 6}" y="${y - R - 3}" style="font-size:11px;fill:#fff;text-anchor:start;opacity:${on ? .95 : .4}">Lv${lvl}</text>`;
+      COST.filter(([k]) => c.n[k]).forEach(([k], j) => {
+        const gx = x + R - 2 + j * 34, gy = y + R + 12;
+        s += glyph(k, gx, gy, on) + `<text x="${gx + 8}" y="${gy + 13}" style="font-size:11px;text-anchor:start;opacity:${on ? .95 : .4}">${c.n[k]}</text>`;
+      });
+      if (isF) s += `</g><circle class="litring" cx="${x}" cy="${y}" r="${R + 2}" style="animation-delay:${dl}s"/>`;
+      s += '</g></g>';
+    });
+    return { svg: s + '</svg>', count: cells.length };
+  }
+  let spDraws = [];
+  function paintSpirits() {
+    const box = $('spRes'); box.innerHTML = ''; spDraws = [];
+    const opts = ['<option value="">(tidak ada)</option>'].concat(SD.spirits.slice().sort((a, b) => a.name.localeCompare(b.name)).map(s => `<option value="${s.guid}">${s.name.replace(/[<>&"]/g, '')} (${s.type})</option>`)).join('');
+    C.forEach((_, i) => {
+      const row = document.createElement('div'); row.className = 'sprow';
+      const top = document.createElement('div'); top.className = 'top';
+      const im = document.createElement('img'); im.className = 'ic'; im.src = icons[i] ? icons[i].url : ''; im.alt = '';
+      const col = document.createElement('div');
+      const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = 'Lingkaran ' + (i + 1) + (icoNames[i] ? ' · ikon: ' + nameOf(icoNames[i]) : '');
+      const sel = document.createElement('select'); sel.innerHTML = opts; sel.value = spSel[i] || '';
+      const tv = document.createElement('div'); tv.className = 'tv';
+      const bar = document.createElement('div'); bar.className = 'row'; bar.style.margin = '6px 0 0';
+      const prog = document.createElement('span'); prog.className = 'note'; prog.style.margin = '0 4px 0 0';
+      const bAll = document.createElement('button'), bNone = document.createElement('button');
+      bAll.type = bNone.type = 'button'; bAll.textContent = 'Centang semua'; bNone.textContent = 'Kosongkan';
+      bar.append(prog, bAll, bNone);
+      const setAll = on => { const p = treeProg(spSel[i]); if (!p) return; p.cells.forEach(c => on ? chk.add(c.n.guid) : chk.delete(c.n.guid)); refresh(); };
+      bAll.addEventListener('click', () => setAll(true)); bNone.addEventListener('click', () => setAll(false));
+      tv.addEventListener('click', e => { const g = e.target.closest('.nd'); if (!g) return; const id = g.dataset.g; if (chk.has(id)) uncheckUp(id); else if (canCheck(id)) chk.add(id); else { denyEl(g); return; } refresh(); });
+      const refresh = () => { draw(); if (pvo.classList.contains('open')) pvSync(); };
+      const draw = () => {
+        const s = SD.spirits.find(x => x.guid === spSel[i]); tv.innerHTML = '';
+        const pr = treeProg(spSel[i]); bar.style.display = pr ? '' : 'none';
+        if (pr) prog.textContent = 'Pohon: ' + pr.done + '/' + pr.total + (pr.done === pr.total ? ' · selesai, lingkaran menyala' : '');
+        if (!s) return;
+        const t = treeSvg(s);
+        if (!t) { tv.textContent = 'Pohon spirit ini tidak ada di data.'; tv.style.padding = '8px'; return; }
+        tv.style.padding = '0'; tv.innerHTML = t.svg;
+      };
+      sel.addEventListener('change', () => { spSel[i] = sel.value; draw(); });
+      col.append(nm, sel); top.append(im, col); row.append(top, bar, tv); box.appendChild(row); spDraws.push(draw); draw();
+    });
+  }
+  $('spGo').addEventListener('click', async () => {
+    const note = $('spNote'); note.textContent = 'Mengunduh data spirit...';
+    try {
+      if (mode !== 'img' || !C.length) throw new Error('Upload gambar rasi dan deteksi lingkaran dulu.');
+      await loadSD(); emoteSpirits();   // peta emot -> spirit harus siap walau "Cocokkan" belum dijalankan
+      spSel = C.map((_, i) => { const s = spiritFromIcon(icoNames[i]); return s ? s.guid : ''; });
+      await loadAreaRealm(); const ld = leaderForSpecial(); if (ld) { spSel[ld.idx] = ld.s.guid; $('ldnote').textContent = ldText(ld); }
+      paintSpirits();
+      const ok = spSel.filter(Boolean).length;
+      note.textContent = ok + ' dari ' + C.length + ' lingkaran cocok dengan spirit.' + (icoNames.some(Boolean) ? '' : ' Jalankan "Cocokkan" ikon dulu agar nama ikon terisi, atau pilih spirit manual.') + ' Periksa dan ubah lewat daftar bila salah.';
+    } catch (err) { note.textContent = err.message; }
+  });
+
+  // ---------- Preview gaya halaman rasi (disederhanakan: tanpa suara, intro, dan efek api) ----------
+  const pvo = $('pvo'), pvs = $('pvs');
+  let pst = { own: [], sp: -1 };
+  function openPreview() {
+    $('err').textContent = '';
+    if (!C.length) { $('err').textContent = 'Belum ada lingkaran untuk dipratinjau.'; return; }
+    if (mode === 'img' && R && R.img) extractIcons();   // ikon selalu mengikuti posisi lingkaran terbaru
+    const margin = Math.max(0, parseFloat($('icm').value) || 0);
+    const spN = parseInt($('special').value, 10), sp = spN >= 1 && spN <= C.length ? spN - 1 : -1;
+    pst = { sp, own: C.map((_, i) => L.map((__, j) => owner[j] === i ? j : -1).filter(j => j >= 0)) };
+    let h = '<g transform="translate(498.35 498.35) scale(.9) translate(-498.35 -498.35)">';
+    S.forEach((p, i) => {
+      h += `<path class="pst0" style="--d:${(-(i * 1.7) % 5.8).toFixed(1)}s" d="M${p.x},${p.y - 16}Q${p.x},${p.y} ${p.x + 16},${p.y}Q${p.x},${p.y} ${p.x},${p.y + 16}Q${p.x},${p.y} ${p.x - 16},${p.y}Q${p.x},${p.y} ${p.x},${p.y - 16}Z"/>`;
+    });
+    L.forEach((l, j) => {
+      const o = owner[j] >= 0 ? C[owner[j]] : null;
+      let [a, b, c, d] = l;
+      if (o && Math.hypot(a - o[0], b - o[1]) > Math.hypot(c - o[0], d - o[1])) [a, b, c, d] = [c, d, a, b];   // cahaya mulai dari ujung terdekat lingkaran pemilik
+      h += `<line class="pst2" x1="${a}" y1="${b}" x2="${c}" y2="${d}" style="--len:${Math.hypot(c - a, d - b).toFixed(1)}"/>`;
+    });
+    C.forEach(([x, y, r], i) => {
+      const ri = Math.max(4, r - margin), ic = icons[i];
+      h += `<clipPath id="pc${i}"><circle cx="${x}" cy="${y}" r="${Math.max(2, ri - 2)}"/></clipPath>`;
+      h += `<g class="pn" data-i="${i}" style="--cd:${(-(i * 2.3) % 8).toFixed(1)}s"><circle class="pst1" cx="${x}" cy="${y}" r="${r}"/>`;
+      const lk = icoNames[i] || '', en = lk && atlas ? atlas.ents.find(e => e.url === lk) : null;
+      const src = en ? centeredUrl(en) : lk ? thumbUrl(lk) : (ic ? ic.url : '');   // hasil pencocokan: ikon emot dari internet; belum dicocokkan: potongan gambar asli
+      h += src ? `<image class="picon" href="${src}" data-fb="${ic ? ic.url : ''}" clip-path="url(#pc${i})" x="${x - ri * .85}" y="${y - ri * .85}" width="${ri * 1.7}" height="${ri * 1.7}"/>`
+              : `<text class="pnum" x="${x}" y="${y}">${i + 1}</text>`;
+      h += '</g>';
+    });
+    pvs.classList.remove('all');
+    pvs.innerHTML = h + '</g>';
+    pvs.querySelectorAll('image.picon').forEach(im => im.addEventListener('error', () => { const fb = im.dataset.fb; if (fb && im.getAttribute('href') !== fb) im.setAttribute('href', fb); }, { once: true }));   // link gagal dimuat: pakai potongan gambar asli
+    $('pvt').textContent = ($('name').value || 'baru').trim();
+    $('pvh').textContent = (SD && spSel.some(Boolean) ? 'Klik lingkaran untuk melihat spirit dan pohonnya; lingkaran menyala bila semua simpul pohon tercentang.' : 'Klik lingkaran untuk menyalakan cahaya.') + (sp >= 0 ? ' Lingkaran ' + (sp + 1) + ' terkunci sampai semua lingkaran lain menyala.' : '') + ' Esc untuk menutup.';
+    pvo.classList.add('open'); pvo.setAttribute('aria-hidden', 'false');
+    pvSync();
+  }
+  // Lingkaran menyala bila SEMUA simpul pohon spirit-nya dicentang; garis milik lingkaran itu ikut menyala.
+  // Lingkaran spesial hanya menyala bila semua lingkaran lain sudah menyala.
+  const pvHasTree = i => !!(SD && spSel[i] && treeProg(spSel[i]));
+  const pvDone = i => { if (pvHasTree(i)) return treeDone(spSel[i]); const n = pvs.querySelectorAll('.pn')[i]; return !!n && n.classList.contains('lit'); };
+  // Lingkaran spesial terkunci selama masih ada rasi utama (lingkaran lain) yang belum selesai.
+  const pvLocked = i => i === pst.sp && !C.every((_, k) => k === pst.sp || pvDone(k));
+  function pvSync() {
+    const nodes = [...pvs.querySelectorAll('.pn')]; if (!nodes.length) return;
+    nodes.forEach((n, i) => {
+      const was = n.classList.contains('lit'), on = (pvHasTree(i) ? treeDone(spSel[i]) : was) && !pvLocked(i);   // tanpa pohon: nyala/padam manual
+      if (was !== on) pvSet(i, on);
+    });
+    pvs.classList.toggle('all', nodes.every(n => n.classList.contains('lit')));
+    nodes.forEach((n, i) => n.classList.toggle('locked', pvLocked(i)));
+  }
+  function closePreview() { closeSpirit(true); pvo.classList.remove('open'); pvo.setAttribute('aria-hidden', 'true'); pvs.innerHTML = ''; }
+  function pvSet(i, on) {
+    const nodes = pvs.querySelectorAll('.pn'), lines = pvs.querySelectorAll('.pst2');
+    nodes[i].classList.toggle('lit', on);
+    pst.own[i].forEach((j, k) => { const l = lines[j]; if (!l) return; l.style.setProperty('--dly', on ? (k * .9) + 's' : '0s'); l.classList.toggle('on', on); });
+  }
+  // ---------- Overlay spirit: gambar spirit (kiri, tanpa kartu) + pohon spirit dari emotnya (kanan) ----------
+  const pso = $('pso'); let psI = -1;
+  const emoteItemOf = i => { const u = icoNames[i]; if (!u || !SD) return ''; for (const it of SD.items.values()) if (it.icon === u && (!SD.itemSp || SD.itemSp.has(it.guid))) return it.guid; return ''; };
+  const psLocked = () => psI >= 0 && pvLocked(psI);
+  function denyEl(el) { if (!el) return; el.classList.remove('deny'); void el.getBoundingClientRect(); el.classList.add('deny'); setTimeout(() => el.classList.remove('deny'), 540); }   // getar hanya elemen yang dipilih
+  let psPrev = new Set();   // simpul yang sudah menyala pada gambar sebelumnya: yang bertambah = baru diaktifkan (cahayanya dianimasikan naik)
+  function psDraw(anim) {
+    if (psI < 0 || !SD) return;
+    const fresh = anim ? null : new Set([...chk].filter(g => !psPrev.has(g))); psPrev = new Set(chk);
+    const sp = SD.spirits.find(x => x.guid === spSel[psI]), t = sp && treeSvgGame(sp, emoteItemOf(psI), anim, fresh), pr = treeProg(spSel[psI]);
+    $('pstv').innerHTML = t ? t.svg : '<p class="note" style="text-align:center">Pohon spirit ini tidak ada di data.</p>';
+    $('pstp').textContent = pr ? 'Pohon: ' + pr.done + '/' + pr.total + (pr.done === pr.total ? ' · selesai, lingkaran menyala' : '') + (psLocked() ? ' · terkunci sampai lingkaran lain menyala' : '') : '';
+  }
+  function openSpirit(i) {
+    const sp = SD && SD.spirits.find(x => x.guid === spSel[i]); if (!sp) return;
+    psI = i;
+    const src = sp.imageUrl || (icons[i] && icons[i].url) || '', im = $('psimg');   // tanpa gambar spirit: pakai ikon lingkaran
+    im.src = src; im.style.display = src ? '' : 'none';
+    $('psname').textContent = sp.name || '';
+    clearTimeout(psCloseT); pso.classList.remove('closing');
+    pso.classList.add('open'); pso.setAttribute('aria-hidden', 'false');
+    psDraw(true);   // pohon tampil dengan garis naik perlahan
+    const card = pso.querySelector('.sptree'); card.scrollTop = card.scrollHeight;   // tampilkan akar pohon di bawah
+    psParticles();
+  }
+  let psCloseT = 0;
+  const reduceMotion = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  function closeSpirit(instant) {
+    psI = -1; pso.setAttribute('aria-hidden', 'true');
+    cancelAnimationFrame(pRaf); clearTimeout(psCloseT);
+    if (instant === true || reduceMotion() || !pso.classList.contains('open')) { pso.classList.remove('open', 'closing'); return; }
+    pso.classList.add('closing');   // kartu keluar ke kanan, ikon spirit naik mengecil
+    psCloseT = setTimeout(() => pso.classList.remove('open', 'closing'), 520);
+  }
+  // ---------- Partikel kuning: dua arus kontras berputar seperti DNA turun ke tengah, lalu ikon spirit tersusun dari cahaya kuning ----------
+  const pcv = $('pspart'), pctx = pcv.getContext('2d'); let pRaf = 0, psPts = null, psPtsSrc = '';
+  function psSample(src) {   // titik-titik siluet ikon (piksel tidak transparan); gagal (mis. CORS) = pakai bentuk oval
+    psPts = null; psPtsSrc = src; if (!src) return;
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const k = 90 / Math.max(img.naturalWidth, img.naturalHeight), cw = Math.max(1, Math.round(img.naturalWidth * k)), ch = Math.max(1, Math.round(img.naturalHeight * k));
+        const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.drawImage(img, 0, 0, cw, ch);
+        const d = g.getImageData(0, 0, cw, ch).data, pts = [];
+        for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) if (d[(y * cw + x) * 4 + 3] > 40) pts.push([(x + .5) / cw, (y + .5) / ch]);
+        if (psPtsSrc === src && pts.length > 30) psPts = pts;
+      } catch (e) {}
+    };
+    img.src = src;
+  }
+  function psParticles() {
+    cancelAnimationFrame(pRaf);
+    const box = pcv.parentElement, im = $('psimg'), dpr = Math.min(2, window.devicePixelRatio || 1), w = box.clientWidth, h = box.clientHeight;
+    pcv.width = Math.max(1, w * dpr); pcv.height = Math.max(1, h * dpr); pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (reduceMotion() || w < 10 || h < 10) return;
+    psSample(im.getAttribute('src') || '');
+    const HT0 = .05, HT = 1.75, TEND = HT0 + HT, TURNS = 3.5, TRAIL = .5, A0 = Math.min(62, w * .11);   // arus turun: mulai, lama (detik), jumlah putaran, panjang ekor
+    const tg = () => im.offsetHeight > 20 ? { x: im.offsetLeft + im.offsetWidth / 2, y: im.offsetTop + im.offsetHeight / 2, w: im.offsetWidth, h: im.offsetHeight }
+      : { x: w / 2, y: h / 2, w: Math.min(w * .6, 320), h: Math.min(h * .6, 420) };
+    const dust = Array.from({ length: 34 }, () => ({ x0: w / 2 + (Math.random() - .5) * w * .5, dx: (Math.random() - .5) * 110, dy: (Math.random() - .5) * 140,
+      d: Math.random() * 1.2, life: 1 + Math.random() * .9, r: 1 + Math.random() * 2.2, ph: Math.random() * 6.28 }));
+    let asm = null;
+    const dot = (x, y, r, a) => { pctx.fillStyle = 'rgba(255,226,130,' + a.toFixed(3) + ')'; pctx.beginPath(); pctx.arc(x, y, r, 0, 6.2832); pctx.fill(); };
+    const t0 = performance.now();
+    const frame = now => {
+      const t = (now - t0) / 1000, T = tg();
+      pctx.clearRect(0, 0, w, h); pctx.globalCompositeOperation = 'lighter';
+      // debu cahaya lembut yang ikut turun
+      pctx.shadowColor = 'rgba(255,205,80,.9)'; pctx.shadowBlur = 8;
+      for (const p of dust) {
+        const k = (t - p.d) / p.life; if (k <= 0 || k >= 1) continue;
+        const e = 1 - Math.pow(1 - k, 2.2), x = p.x0 + (T.x + p.dx - p.x0) * e + Math.sin(t * 4 + p.ph) * 5, y = -10 + (T.y + p.dy + 10) * e;
+        dot(x, y, p.r, .55 * Math.min(1, k * 6) * (1 - Math.pow(k, 2.5)) * (.65 + .35 * Math.sin(t * 13 + p.ph)));
+      }
+      // dua arus berputar (heliks ganda): fase beda setengah putaran, makin ke bawah makin merapat sampai bertemu di tengah.
+      // Posisi dihitung langsung dari rumus waktu, jadi jejaknya tetap halus walau frame jarang.
+      const hp = (tt, i) => {
+        const u = Math.min(1, Math.max(0, (tt - HT0) / HT)), e = 1 - Math.pow(1 - u, 1.35), ph = TURNS * 6.2832 * e + i * Math.PI, A = A0 * Math.min(1, e * 7) * (1 - Math.pow(e, 3));
+        return { x: T.x + A * Math.cos(ph), y: -12 + (T.y + 12) * e, z: Math.sin(ph) };
+      };
+      if (t > HT0 && t < TEND + TRAIL) {
+        pctx.shadowBlur = 0; pctx.lineCap = 'round'; pctx.lineWidth = 1;
+        for (let tau = .05; tau < TRAIL; tau += .05) {   // anak tangga DNA tipis di antara kedua arus
+          const tt = t - tau; if (tt < HT0 || tt > TEND) continue;
+          const p0 = hp(tt, 0), p1 = hp(tt, 1);
+          pctx.strokeStyle = 'rgba(255,214,110,' + (.28 * (1 - tau / TRAIL)).toFixed(3) + ')'; pctx.beginPath(); pctx.moveTo(p0.x, p0.y); pctx.lineTo(p1.x, p1.y); pctx.stroke();
+        }
+        pctx.shadowColor = 'rgba(255,196,60,1)'; pctx.shadowBlur = 14;
+        for (let i = 0; i < 2; i++) {
+          let prev = hp(t, i);
+          for (let tau = .02; tau <= TRAIL; tau += .02) {
+            const tt = t - tau; if (tt < HT0) break;
+            const q = hp(tt, i), f = 1 - tau / TRAIL, dz = (q.z + 1) / 2;   // dz: 1 = di depan, 0 = di belakang
+            pctx.strokeStyle = 'rgba(255,214,100,' + (f * (.45 + .45 * dz)).toFixed(3) + ')'; pctx.lineWidth = (1 + 3.4 * f) * (.7 + .3 * dz);
+            pctx.beginPath(); pctx.moveTo(prev.x, prev.y); pctx.lineTo(q.x, q.y); pctx.stroke(); prev = q;
+          }
+          if (t < TEND + .12) {   // kepala arus: inti putih kekuningan yang kontras
+            const q = hp(t, i), r = 3.4 + 1.6 * (q.z + 1) / 2, fa = Math.min(1, 1 - (t - TEND) / .12);
+            pctx.fillStyle = 'rgba(255,205,70,' + (.95 * fa).toFixed(3) + ')'; pctx.beginPath(); pctx.arc(q.x, q.y, r + 2.2, 0, 6.2832); pctx.fill();
+            pctx.fillStyle = 'rgba(255,252,225,' + fa.toFixed(3) + ')'; pctx.beginPath(); pctx.arc(q.x, q.y, r * .62, 0, 6.2832); pctx.fill();
+          }
+        }
+      }
+      // kedua arus bertemu di tengah: kilatan cahaya, lalu ikon mulai tersusun
+      const fk = (t - TEND) / .9;
+      if (fk > 0 && fk < 1) {
+        const rad = 14 + 130 * (1 - Math.pow(1 - fk, 2)), a = .6 * (1 - fk), g = pctx.createRadialGradient(T.x, T.y, 0, T.x, T.y, rad);
+        g.addColorStop(0, 'rgba(255,240,190,' + a.toFixed(3) + ')'); g.addColorStop(.4, 'rgba(255,205,80,' + (a * .5).toFixed(3) + ')'); g.addColorStop(1, 'rgba(255,190,60,0)');
+        pctx.shadowBlur = 0; pctx.fillStyle = g; pctx.beginPath(); pctx.arc(T.x, T.y, rad, 0, 6.2832); pctx.fill();
+      }
+      // percik cahaya berkumpul membentuk siluet ikon spirit
+      if (!asm && t >= TEND - .05) {
+        asm = [];
+        for (let i = 0; i < 72; i++) {
+          let q; if (psPts) q = psPts[(Math.random() * psPts.length) | 0]; else { const an = Math.random() * 6.2832, rr = Math.sqrt(Math.random()); q = [.5 + Math.cos(an) * .5 * rr, .5 + Math.sin(an) * .5 * rr]; }
+          const tx = T.x - T.w / 2 + q[0] * T.w, ty = T.y - T.h / 2 + q[1] * T.h, an = Math.random() * 6.2832, dist = 60 + Math.random() * 130;
+          asm.push({ x0: tx + Math.cos(an) * dist, y0: ty + Math.sin(an) * dist, x1: tx, y1: ty, d: TEND + Math.random() * 1.5, life: .8 + Math.random() * .7, r: 1.2 + Math.random() * 2.2, ph: Math.random() * 6.28 });
+        }
+      }
+      if (asm) {
+        pctx.shadowColor = 'rgba(255,205,80,.9)'; pctx.shadowBlur = 8;
+        for (const p of asm) {
+          const k = (t - p.d) / p.life; if (k <= 0 || k >= 1) continue;
+          const e = 1 - Math.pow(1 - k, 2.4);
+          dot(p.x0 + (p.x1 - p.x0) * e, p.y0 + (p.y1 - p.y0) * e, p.r, Math.min(1, k * 5) * (1 - Math.pow(k, 4)) * (.7 + .3 * Math.sin(t * 15 + p.ph)));
+        }
+      }
+      if (t < TEND + 3.4) pRaf = requestAnimationFrame(frame); else pctx.clearRect(0, 0, w, h);
+    };
+    pRaf = requestAnimationFrame(frame);
+  }
+  function psChanged() { psDraw(); spDraws.forEach(f => f()); pvSync(); }
+  $('pstv').addEventListener('click', e => {
+    const g = e.target.closest('.nd'); if (!g) return;
+    const id = g.dataset.g;
+    if (chk.has(id)) uncheckUp(id);
+    else { if (psLocked() || !canCheck(id)) { denyEl(g); return; } chk.add(id); }   // terkunci / simpul di bawahnya belum menyala: tolak
+    psChanged();
+  });
+  $('psAll').addEventListener('click', () => { const p = treeProg(spSel[psI]); if (!p) return; if (psLocked()) { denyEl($('psAll')); return; } p.cells.forEach(c => chk.add(c.n.guid)); psChanged(); });
+  $('psNone').addEventListener('click', () => { const p = treeProg(spSel[psI]); if (!p) return; p.cells.forEach(c => chk.delete(c.n.guid)); psChanged(); });
+  pso.addEventListener('click', e => { if (!e.composedPath().includes(pso.querySelector('.sptree'))) closeSpirit(); });   // ketuk di luar card = kembali (composedPath: target lama boleh sudah terlepas karena render ulang)
+  pvs.addEventListener('click', e => {
+    const star = e.target.closest('.pst0');
+    if (star) { star.classList.remove('wob'); void star.getBoundingClientRect(); star.classList.add('wob'); setTimeout(() => star.classList.remove('wob'), 520); return; }
+    const n = e.target.closest('.pn'); if (!n) return;
+    const i = +n.dataset.i, nodes = [...pvs.querySelectorAll('.pn')], lit = x => x.classList.contains('lit');
+    if (pvLocked(i)) { n.classList.remove('deny'); void n.getBoundingClientRect(); n.classList.add('deny'); setTimeout(() => n.classList.remove('deny'), 540); return; }   // spesial: tidak bisa dibuka sebelum semua rasi utama selesai
+    if (SD && spSel[i] && treeProg(spSel[i])) { openSpirit(i); return; }   // spirit terpasang: buka overlay spirit + pohonnya
+    pvSet(i, !lit(n));
+    pvSync();   // spesial ikut padam bila ada rasi utama yang padam; perbarui status 'all' dan tampilan terkunci
+  });
+  $('pvBtn').addEventListener('click', openPreview);
+  $('pvx').addEventListener('click', closePreview);
+  window.addEventListener('keydown', e => { if (e.key === 'Escape' && pvo.classList.contains('open')) { if (pso.classList.contains('open')) closeSpirit(); else closePreview(); } });
+
+  // ---------- Pengaturan ----------
+  $('order').addEventListener('change', () => { if (mode) { build(); render(); } });
+  $('norm').addEventListener('change', () => { if (mode) { build(); render(); } });
+  let redoT = 0;
+  const redo = () => { clearTimeout(redoT); redoT = setTimeout(() => { if (mode === 'img') { build(); render(); } }, 160); };
+  ['thr', 'rmin', 'rmax'].forEach(id => $(id).addEventListener('input', redo));
+  ['inv', 'uni'].forEach(id => $(id).addEventListener('change', redo));
+  $('thr').addEventListener('input', () => { $('thrv').textContent = $('thr').value; });
+  $('showimg').addEventListener('change', render);
+  $('name').addEventListener('input', () => { nameTouched = true; syncNameSel(); });
+  $('special').addEventListener('input', () => { spManual = true; $('spnote').textContent = ''; applyLeader(); });
+  // ---------- Pilihan nama rasi: rasi utama (realm) + rasi season dari skygame-data, atau tulis sendiri ----------
+  const REALM_FALLBACK = ['Isle of Dawn', 'Daylight Prairie', 'Hidden Forest', 'Valley of Triumph', 'Golden Wasteland', 'Vault of Knowledge'];   // dipakai bila realms.json gagal diunduh
+  const nmKey = v => String(v || '').trim().replace(/[^\w]+/g, '_');
+  function syncNameSel() {
+    const sel = $('nameSel'), cur = nmKey($('name').value);
+    const hit = [...sel.options].find(o => o.value && nmKey(o.value) === cur);
+    sel.value = hit ? hit.value : '';
+  }
+  function fillNameSel(realms, seasons) {
+    const sel = $('nameSel'); sel.innerHTML = '<option value="">Tulis sendiri…</option>';
+    const group = (label, names) => {
+      if (!names.length) return;
+      const g = document.createElement('optgroup'); g.label = label;
+      names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; g.appendChild(o); });
+      sel.appendChild(g);
+    };
+    group('Rasi utama', realms); group('Rasi season', seasons);
+    syncNameSel();
+  }
+  const namesOf = a => [...new Set(a.map(x => String((x && (x.name || x.shortName)) || '').trim()).filter(Boolean))];
+  async function loadNames() {
+    let realms = REALM_FALLBACK, seasons = [], note = '';
+    fillNameSel(realms, seasons);
+    try { const raw = await getJson('realms'), r = namesOf(raw); if (r.length) { realms = r; raw.forEach(x => nmAdd('realm', x)); } else note = 'Data realm kosong, memakai daftar bawaan.'; } catch (e) { note = 'Daftar realm gagal diunduh, memakai daftar bawaan.'; }
+    try { const raw = await getJson('seasons'); seasons = namesOf(raw); raw.forEach(x => nmAdd('season', x)); if (!seasons.length) note += ' Daftar season kosong.'; } catch (e) { note += ' Daftar season gagal diunduh.'; }
+    fillNameSel(realms, seasons); $('nmnote').textContent = note.trim();
+    if (!nameTouched) pickNameFromHint();
+  }
+  $('nameSel').addEventListener('change', () => {
+    nameTouched = true;
+    const v = $('nameSel').value;
+    if (v) { $('name').value = v; applyLeader(); } else { $('name').focus(); $('name').select(); }
+  });
+  // ---------- Lingkaran spesial = spirit Elder (rasi utama) atau Guide (rasi season) sesuai nama rasi ----------
+  const nameMap = new Map();   // kunci nama -> { kind: 'realm' | 'season', ent, name }
+  function nmAdd(kind, ent) { const n = String((ent && (ent.name || ent.shortName)) || '').trim(); if (n) nameMap.set(nmKey(n), { kind, ent, name: n }); }
+  const refGuid = v => (v && typeof v === 'object') ? v.guid : v;
+  const typeIs = (sp, re) => re.test(String(sp.type || ''));
+  const tokensOf = n => String(n || '').toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length >= 4);
+  let areaRealm = null;   // guid area -> guid realm
+  async function loadAreaRealm() {
+    if (areaRealm) return;
+    areaRealm = new Map();
+    try { (await getJson('areas')).forEach(a => areaRealm.set(a.guid, refGuid(a.realm))); } catch (e) {}
+  }
+  function leaderOf(hit) {
+    if (!SD) return null;
+    const L = SD.spirits, ent = hit.ent;
+    if (hit.kind === 'season') {
+      const guides = L.filter(x => typeIs(x, /guide/i)), list = Array.isArray(ent.spirits) ? ent.spirits.map(refGuid) : [];
+      return guides.find(x => refGuid(x.season) === ent.guid) || guides.find(x => x.guid === refGuid(ent.guide)) || guides.find(x => list.includes(x.guid)) || null;
+    }
+    const elders = L.filter(x => typeIs(x, /elder/i)), tk = tokensOf(hit.name).concat(tokensOf(ent.shortName));
+    return elders.find(x => refGuid(x.realm) === ent.guid)
+      || elders.find(x => areaRealm && areaRealm.get(refGuid(x.area)) === ent.guid)
+      || elders.find(x => tk.some(w => String(x.name || '').toLowerCase().includes(w))) || null;
+  }
+  function leaderForSpecial() {
+    const spN = parseInt($('special').value, 10), idx = spN >= 1 && spN <= C.length ? spN - 1 : -1;
+    const hit = nameMap.get(nmKey($('name').value));
+    if (idx < 0 || !hit) return null;   // tanpa lingkaran spesial, atau nama tulis sendiri: tidak diubah
+    const sp = leaderOf(hit);
+    return sp ? { idx, s: sp, hit } : { idx, s: null, hit };
+  }
+  const ldText = ld => ld.s ? 'Lingkaran spesial ' + (ld.idx + 1) + ': ' + (ld.hit.kind === 'season' ? 'guide season ' : 'elder ') + ld.hit.name + ' = ' + ld.s.name + '.'
+    : 'Spirit ' + (ld.hit.kind === 'season' ? 'guide' : 'elder') + ' untuk "' + ld.hit.name + '" tidak ditemukan di data; pilih spirit lingkaran spesial secara manual.';
+  // CATATAN: ikon lingkaran spesial (lambang/bendera di tengah) sengaja belum otomatis. Sumber gambarnya akan disambungkan nanti
+  // ke direktori web pemilik (kondisi khusus), jadi sementara dipakai potongan gambar asli atau gambar spirit Elder/Guide di atas.
+  async function applyLeader() {
+    const note = $('ldnote'); note.textContent = '';
+    if (!parseInt($('special').value, 10) || !nameMap.has(nmKey($('name').value))) return;
+    try {
+      await loadSD(); await loadAreaRealm();
+      const ld = leaderForSpecial(); if (!ld) return;
+      note.textContent = ldText(ld);
+      if (!ld.s) return;
+      spSel[ld.idx] = ld.s.guid;
+      if (mode === 'img') paintSpirits();
+     
+    } catch (err) { note.textContent = 'Gagal memuat data spirit: ' + err.message; }
+  }
+  $('name').addEventListener('change', applyLeader);
+  // ---------- Nama sementara dari kata kunci nama file / link gambar ----------
+  let nameHint = '', srcHint = '', nameTouched = false;
+  const HINT_STOP = new Set(['of', 'the', 'and', 'season', 'seasons', 'rasi', 'realm', 'constellation', 'icon', 'image', 'img', 'png', 'jpg', 'jpeg', 'webp', 'svg', 'file', 'new', 'baru', 'revision', 'latest']);
+  const splitWords = t => String(t || '').replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  function pickNameFromHint() {
+    if (!nameHint || !nameMap.size) return false;
+    const all = splitWords(nameHint), flat = all.join(''), hw = new Set(all.filter(w => !HINT_STOP.has(w)));
+    const near = w => w.length >= 5 && [...hw].some(h => h.length >= 5 && (h.startsWith(w) || w.startsWith(h)));
+    let best = null, bs = 0;
+    nameMap.forEach(v => {
+      [v.name, v.ent && v.ent.shortName].forEach(label => {
+        const words = splitWords(label), ew = words.filter(w => !HINT_STOP.has(w));
+        if (!ew.length) return;
+        const phrase = words.join('').length >= 5 && flat.includes(words.join(''));
+        const hit = ew.filter(w => hw.has(w) || near(w)), hl = hit.reduce((a, w) => a + w.length, 0);
+        if (!phrase && !hit.some(w => w.length >= 4)) return;   // butuh kata khas (>= 4 huruf) atau frasa utuh
+        const sc = (phrase ? 10 : 0) + hl / ew.reduce((a, w) => a + w.length, 0);
+        if (sc > bs) { bs = sc; best = v; }
+      });
+    });
+    if (!best) return false;
+    $('name').value = best.name; syncNameSel();
+    $('nmhint').textContent = 'Nama dipilih sementara dari kata kunci file/link: ' + best.name + (best.kind === 'season' ? ' (season)' : ' (rasi utama)') + '. Ganti lewat dropdown bila salah.';
+    applyLeader();
+    return true;
+  }
+  // ---------- Tampilan editor: dropdown dan ukuran kanvas ----------
+  // kartu dropdown dan menu bentuk menutup sendiri saat area lain ditekan
+  document.addEventListener('pointerdown', e => {
+    const path = e.composedPath();
+    document.querySelectorAll('details.panel[open]').forEach(d => { if (!path.includes(d)) d.removeAttribute('open'); });
+    if (!path.includes($('addMenu')) && !path.includes($('addMore'))) closeAddMenu();
+  });
+  // ukuran kanvas: seret sudut kanan bawah, selalu tetap kotak
+  const setCv = px => document.documentElement.style.setProperty('--cv', Math.max(260, Math.min(1100, Math.round(px))) + 'px');
+  $('cvh').addEventListener('pointerdown', e => {
+    e.preventDefault();
+    const h = $('cvh'), x0 = e.clientX, y0 = e.clientY, w0 = $('pvbox').getBoundingClientRect().width;
+    h.setPointerCapture(e.pointerId);
+    const mv = ev => setCv(w0 + ((ev.clientX - x0) + (ev.clientY - y0)) / 2);
+    const up = () => { h.removeEventListener('pointermove', mv); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up); };
+    h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+  });
+  render();
+  loadNames();
+})();
+</script>
+<script>
+(() => {
+  // Ikon "!" di samping tiap field: tooltip tunggal, hover di perangkat dengan mouse, ketuk di layar sentuh.
+  const tip = document.createElement('div'); tip.id = 'tip'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip);
+  const canHover = matchMedia('(hover: hover)').matches;
+  let cur = null, pinned = false;
+  function show(b) {
+    if (cur && cur !== b) cur.setAttribute('aria-expanded', 'false');
+    cur = b; pinned = false; b.setAttribute('aria-expanded', 'true');
+    tip.textContent = b.dataset.tip; tip.classList.add('open');
+    const r = b.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + 'px';
+    tip.style.top = (r.bottom + 8 + h > innerHeight - 8 ? Math.max(8, r.top - h - 8) : r.bottom + 8) + 'px';
+  }
+  function hide() { if (cur) cur.setAttribute('aria-expanded', 'false'); cur = null; pinned = false; tip.classList.remove('open'); }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.inf');
+    if (!b) { hide(); return; }
+    e.preventDefault(); e.stopPropagation();
+    if (cur === b && pinned) hide(); else { show(b); pinned = true; }
+  });
+  document.addEventListener('mouseover', e => { if (!canHover) return; const b = e.target.closest('.inf'); if (b && !pinned) show(b); });
+  document.addEventListener('mouseout', e => { if (canHover && !pinned && e.target.closest('.inf')) hide(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+  addEventListener('scroll', hide, true); addEventListener('resize', hide);
+})();
+</script>
+</body>
+</html>
