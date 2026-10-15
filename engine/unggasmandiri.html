@@ -579,8 +579,8 @@ function prn(no,w){
 
 /* ---------- Mulai ---------- */
 try{const c=JSON.parse(localStorage.getItem('D'));if(c){c.nota.forEach(norm);D=c;go(page)}}catch(e){}
-Promise.all([load().catch(()=>{LD.err=true;go(page)}),new Promise(r=>document.readyState=='complete'?r():addEventListener('load',r))]).finally(()=>{
+Promise.all([load().catch(e=>{LD.err=(e&&e.message)||String(e)||true;go(page)}),new Promise(r=>document.readyState=='complete'?r():addEventListener('load',r))]).finally(()=>{
   QUIET=false;LD.ready=true;
-  if(LD.err)$('#v').insertAdjacentHTML('afterbegin','<div class="card" style="border-color:#e0b4b4;color:#9b2c2c">Data terbaru belum bisa dimuat. Yang tampil adalah salinan terakhir.</div>');
+  if(LD.err)$('#v').insertAdjacentHTML('afterbegin','<div class="card" style="border-color:#e0b4b4;color:#9b2c2c">Data terbaru belum bisa dimuat. Yang tampil adalah salinan terakhir.<br><small>Penyebab: '+esc(LD.err===true?'tidak diketahui':LD.err)+'</small><div style="margin-top:8px"><button class="s sm" onclick="load().then(()=>toast(\'Data berhasil dimuat.\')).catch(()=>toast(\'Masih gagal memuat data.\'))">Coba lagi</button></div></div>');
 });
 </script></body></html>
