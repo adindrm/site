@@ -409,7 +409,6 @@ nota(){
       <label>Nama</label><div class="fl"><b>:</b><input id="nm" list="lp" value="${esc(n.Nama)}" oninput="pick()" autocomplete="off"></div>
       <label>Alamat</label><div class="fl"><b>:</b><input id="al" value="${esc(n.Alamat)}"></div>
       <label>Tanggal</label><div class="fl"><b>:</b><input type="date" id="tg" value="${n.Tanggal}"></div>
-      <label>U.Kandang</label><div class="fl"><b>:</b><input id="uk" value="${esc(n.UKandang)}" placeholder="opsional, mis. 10X44"></div>
       <label>Telepon</label><div class="fl"><b>:</b><input id="tl" value="${esc(n.Telepon)}" placeholder="untuk data pelanggan, tidak dicetak"></div>
     </div>
     <div id="pp"></div>
@@ -534,7 +533,7 @@ function openPW(){
 async function sv(pr){
   const it=cur().filter(r=>r.n.trim());
   if(!$('#nm').value.trim()||!it.length)return toast('Isi nama pelanggan dan minimal satu barang.');
-  const o={No:E?E.No:'',Format:FM,Tanggal:$('#tg').value||today(),Nama:$('#nm').value.trim(),Alamat:$('#al').value,Telepon:$('#tl').value,UKandang:$('#uk').value,Ket:$('#ket').value,Catatan:$('#cat').value,Items:JSON.stringify(it),Dp:E?0:DPV};
+  const o={No:E?E.No:'',Format:FM,Tanggal:$('#tg').value||today(),Nama:$('#nm').value.trim(),Alamat:$('#al').value,Telepon:$('#tl').value,Ket:$('#ket').value,Catatan:$('#cat').value,Items:JSON.stringify(it),Dp:E?0:DPV};
   const w=pr?openPW():null;
   if(E&&!await askc('Simpan perubahan pada nota '+E.No+'? Harga yang diubah dan barang baru juga akan masuk ke daftar Barang.','Simpan')){if(w)try{w.close()}catch(_){}return}
   let no;try{no=await api('nota',o)}catch(e){if(w)try{w.close()}catch(_){}return}
@@ -672,7 +671,7 @@ function pdoc(n){
   const s=D.set,F=n.Format||'sederhana',Gs=grp(n),all=n.items;
   const A=v=>`<div class="ac"><i style="font-style:normal">Rp</i><span>${nc(v)}</span></div>`;
   const hd=`<div class="hd">${LG('lgp')}<div class="lt">UNGGAS MANDIRI</div><h1>${esc(s.nama)}</h1><div class="sb">${subH(s.sub)}</div><div class="ad">${esc(s.alamat)}</div><div class="ad">${esc(s.telp)}</div></div>`;
-  const mt=`<table class="mt"><tr><td>Nama<td>: ${esc(n.Nama)}</tr><tr><td>Alamat<td>: ${esc(n.Alamat)}</tr><tr><td>Tanggal<td>: ${tgl(n.Tanggal)}</tr>${n.UKandang?`<tr><td>U.Kandang<td>: ${esc(n.UKandang)}</tr>`:''}</table>`;
+  const mt=`<table class="mt"><tr><td>Nama<td>: ${esc(n.Nama)}</tr><tr><td>Alamat<td>: ${esc(n.Alamat)}</tr><tr><td>Tanggal<td>: ${tgl(n.Tanggal)}</tr></table>`;
   const cg=w=>'<colgroup>'+w.map(x=>`<col style="width:${x}%">`).join('')+'</colgroup>';
   let b='';
   if(F=='sederhana'){
