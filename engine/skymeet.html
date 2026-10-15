@@ -13,11 +13,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>
-/* tautan relatif (manifest, ikon, aset, sw.js) harus dihitung dari folder tempat berkas ini berada.
-   URL tanpa "/" di akhir dan tanpa ekstensi (mis. /engine/skymeet) punya dua kemungkinan:
-     (a) FOLDER   : /engine/skymeet/index.html            -> perlu <base href="/engine/skymeet/">
-     (b) URL BERSIH: /engine/skymeet -> /engine/skymeet.html -> JANGAN pakai <base> (aset sejajar dengan berkas ini)
-   Jadi jangan menebak: cek apakah manifest.webmanifest benar-benar ada di dalam folder itu. */
 (function(){
   var p = location.pathname;
   if(/\/$/.test(p) || /\.[A-Za-z0-9]{1,5}$/.test(p.split('/').pop())) return;
@@ -6955,9 +6950,9 @@ initPerm(); startLoop();
   };
   Object.keys(ED_X).forEach(l => Object.assign(ED_T[l], ED_X[l]));
   const ED_D = {   // hapus season buatan (hanya Developer)
-    en:{ urlBig:'Image is larger than 2.5 MB.', urlOld:'Server is outdated: deploy the new Code.gs version (and grant the permission) first.', urlProxy:'The server could not open this link either. Check the address.', delS:'Delete', delS2:'Tap again to delete', delDone:'Season deleted.', delOld:'Server is outdated: deploy the new Code.gs version first.', delAuth:'Session expired. Log in again.' },
-    id:{ urlBig:'Gambar lebih besar dari 2,5 MB.', urlOld:'Server belum diperbarui: deploy Code.gs versi baru (dan izinkan permintaannya) dulu.', urlProxy:'Server juga tidak bisa membuka link ini. Periksa alamatnya.', delS:'Hapus', delS2:'Ketuk lagi untuk hapus', delDone:'Season dihapus.', delOld:'Server belum diperbarui: deploy Code.gs versi baru dulu.', delAuth:'Sesi habis. Masuk lagi.' },
-    es:{ urlBig:'La imagen supera 2,5 MB.', urlOld:'Servidor desactualizado: despliega la nueva versi\u00f3n de Code.gs (y concede el permiso).', urlProxy:'El servidor tampoco pudo abrir este enlace. Revisa la direcci\u00f3n.', delS:'Eliminar', delS2:'Toca otra vez para eliminar', delDone:'Temporada eliminada.', delOld:'Servidor desactualizado: despliega la nueva versi\u00f3n de Code.gs.', delAuth:'Sesi\u00f3n caducada. Inicia sesi\u00f3n de nuevo.' }
+    en:{ urlHttpP:'The link was also refused when the server opened it (HTTP {s}). The image site may block outside access; download the image and use "Choose file".', urlBig:'Image is larger than 2.5 MB.', urlOld:'Server is outdated: deploy the new Code.gs version (and grant the permission) first.', urlProxy:'The server could not open this link either. Check the address.', delS:'Delete', delS2:'Tap again to delete', delDone:'Season deleted.', delOld:'Server is outdated: deploy the new Code.gs version first.', delAuth:'Session expired. Log in again.' },
+    id:{ urlHttpP:'Link juga ditolak saat dibuka oleh server (HTTP {s}). Situs gambar mungkin memblokir akses dari luar; unduh gambarnya lalu pakai "Pilih file".', urlBig:'Gambar lebih besar dari 2,5 MB.', urlOld:'Server belum diperbarui: deploy Code.gs versi baru (dan izinkan permintaannya) dulu.', urlProxy:'Server juga tidak bisa membuka link ini. Periksa alamatnya.', delS:'Hapus', delS2:'Ketuk lagi untuk hapus', delDone:'Season dihapus.', delOld:'Server belum diperbarui: deploy Code.gs versi baru dulu.', delAuth:'Sesi habis. Masuk lagi.' },
+    es:{ urlHttpP:'El enlace tambi\u00e9n fue rechazado al abrirlo el servidor (HTTP {s}). Descarga la imagen y usa "Elegir archivo".', urlBig:'La imagen supera 2,5 MB.', urlOld:'Servidor desactualizado: despliega la nueva versi\u00f3n de Code.gs (y concede el permiso).', urlProxy:'El servidor tampoco pudo abrir este enlace. Revisa la direcci\u00f3n.', delS:'Eliminar', delS2:'Toca otra vez para eliminar', delDone:'Temporada eliminada.', delOld:'Servidor desactualizado: despliega la nueva versi\u00f3n de Code.gs.', delAuth:'Sesi\u00f3n caducada. Inicia sesi\u00f3n de nuevo.' }
   };
   Object.keys(ED_D).forEach(l => Object.assign(ED_T[l], ED_D[l]));
   const ef = (k, v) => String(et(k)).replace(/\{(\w+)\}/g, (m, n) => (v && v[n] !== undefined ? v[n] : m));
@@ -7498,10 +7493,10 @@ initPerm(); startLoop();
         if(!res.ok) throw new Error(ef('urlHttp', { s:res.status }));
         blob = await res.blob(); type = (blob.type || '').split(';')[0];
       }catch(e0){
-        if(!(e0 instanceof TypeError)) throw e0;   // bukan CORS (mis. HTTP 404): tampilkan apa adanya
+        // CORS (TypeError) atau server menolak permintaan browser (mis. HTTP 404/403 karena Referer/bot): coba lewat server
         const r = await api('fetchImage', { url:parsed.href }, undefined, { timeout:30000 }), er = r && r.error;   // CORS: minta server Apps Script yang mengambil gambarnya
         if(!r || !r.ok){
-          throw new Error(er === 'http' ? ef('urlHttp', { s:r.status }) : er === 'type' ? ef('urlNotImg', { t:'?' }) : er === 'big' ? et('urlBig') : er === 'bad' ? et('urlBad') : er === 'forbidden' ? dvT().denied : er === 'bad_action' ? et('urlOld') : er === 'net' || er === 'server' ? et('urlProxy') : et('urlCors'));
+          throw new Error(er === 'http' ? ef('urlHttpP', { s:r.status }) : er === 'type' ? ef('urlNotImg', { t:'?' }) : er === 'big' ? et('urlBig') : er === 'bad' ? et('urlBad') : er === 'forbidden' ? dvT().denied : er === 'bad_action' ? et('urlOld') : er === 'net' || er === 'server' ? et('urlProxy') : et('urlCors'));
         }
         type = r.mime; blob = new Blob([edB64(r.data)], { type:type });
       }
