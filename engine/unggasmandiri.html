@@ -147,6 +147,9 @@ dialog[open]::backdrop{animation:bf .25s}
 .ft th{padding:3px 4px;text-align:center;font-size:13px;color:#000;font-weight:700}
 .ft td.c input{text-align:center}.ft td.rt input,.ft td.rt{text-align:right}
 .ft td.rt:not(:has(input)){padding:0 6px}
+.ft td.rt{white-space:nowrap}
+.paper input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.paper input[type=number]::-webkit-inner-spin-button,.paper input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .ft td.no{text-align:center;padding:0 4px}
 .ft td.gj{text-align:center;padding:0 6px;font-weight:600}
 .ft .dl{border:0!important;width:44px;text-align:right;padding-left:4px}
@@ -168,7 +171,7 @@ header nav{display:none}
 .ovh{padding-top:calc(12px + env(safe-area-inset-top))}.ovf{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .ovf button{flex:1}
 .ovh h2{flex:1}.ovh .sp{display:none}.ovh .seg{order:3;flex:1 0 100%}.ovh .seg button{flex:1}
-.row.dn h2{flex:1 0 100%}.row.dn .sp{display:none}.row.dn input{flex:1 1 0;min-width:0}
+.row.dn h2{flex:1 0 100%}.row.dn .seg{flex:1 0 100%}.row.dn .seg button{flex:1}.row.dn .sp{display:none}.row.dn input{flex:1 1 0;min-width:0}
 main{margin:12px auto 90px;padding:0 12px}
 input,select,textarea{font-size:16px;min-height:42px}
 button.p,button.s{min-height:42px}button.sm{min-height:34px}
@@ -183,24 +186,9 @@ button.p,button.s{min-height:42px}button.sm{min-height:34px}
 .rs td.r{text-align:left}.rs td:last-child{grid-column:1/-1;text-align:right}.rs td.empty::before{display:none}
 .rs input{width:100%!important;min-width:0!important}
 .row input{max-width:none;flex:1 1 100%}
-/* form nota di HP */
-.paper{padding:16px 14px}
-.pm{grid-template-columns:76px 1fr}
-.ft thead{display:none}
-.ft,.ft tbody{display:block}
-.ft tr{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 8px;padding:10px 8px;border:1px solid #555;margin-bottom:8px;position:relative}
-.ft td{border:0;display:block;min-width:0}
-.ft td[data-l]:not([data-l=""])::before{content:attr(data-l);display:block;font-size:11px;color:var(--m)}
-.ft td input{border:1px solid var(--b);border-radius:6px;min-height:38px}
-.ft td.no,.ft td.gj{display:none}
-.ft td.nm{grid-column:1/-1}
-.ft td.rt:not(:has(input)){padding:0}
-.ft td.dl{grid-column:1/-1;width:auto}
-.gsm{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;font-weight:600}
-.gsm input{width:140px;text-align:right;border:1px solid var(--b)}
-.pk{grid-template-columns:1fr}
-.sr{justify-content:space-between}
-.yb{flex:1;max-width:240px}
+/* form nota di HP: tampilan tetap seperti layar besar, ukurannya mengecil otomatis (lihat fitPaper) */
+.paper input,.paper textarea{min-height:0;font-size:16px}
+.paper button.sm{min-height:0}
 }
 
 /* ---------- Cetak ---------- */
@@ -236,7 +224,7 @@ let QUIET=true;
 const api=(a,p)=>!navigator.onLine?Promise.reject(QUIET||toast('Tidak ada koneksi internet. Data yang tampil adalah salinan terakhir.')):new Promise((ok,er)=>google.script.run.withSuccessHandler(ok).withFailureHandler(e=>{QUIET||toast('Terjadi kesalahan: '+e.message);er(e)}).api(a,p));
 const LP='M58,65c2.5,8.4,10.3,14.4,11.6,23.4c0.3,1.8,0.4,3.5,0.4,5.3c0,0.3-0.5,0.6-0.8,1c-0.3-0.3-0.8-0.7-0.8-1 c0-6.2-2.4-11.6-5.9-16.6c-2.5-3.8-5.6-7.4-6.2-12c-0.1-1-0.7-1.5-1.5-1.9c-4.2-2.2-7.7-5.2-10.5-9.2C33.6,39.8,54.1,21.3,66,34 c2,1.7,4.1-0.1,3.6-2.6c-0.4-2.1-1.5-3.8-3.1-5.2c-10-8.1-24.6-2.8-32.7,5.5C23.4,41.7,22,56.4,18.4,69.6c-1,3.5-2.4,6.9-5.3,9.5 c-1.2,0.8-2.5,2.3-4,1.5c0.1-0.4,0.2-1.1,0.4-1.2c4.1-2,5.8-5.7,6.9-9.6c4.6-19.3,8.3-40.1,29.4-47.8c-7.6-2.1-9.1-15.3-1.2-13.3 c1.9,0.6,3.7,1.6,5.6,2.2c4,1.6-2.6-7.1,5.6-5.3c8.1,1.8,10.2,13,11.7,5.8c2.8-4.7,6.1,2.5,7.3,5c3.7,6.2,8.9,8.4,5.4,16.4 c-1.5,2.3,8.8,2.8,10.6,13.1c1.2,6.6-16.2-5.8-29.3,8.3c-1.7,1.7-4.4,6.4-3.3,8.7c3.5,1.7,8.3,2.7,12.1,0c7.4-5.6,3.2-11.3,5.5-13.9 c0.3,0.3,0.9,0.5,0.9,0.8c2,11.4-7.5,19.9-18.4,15C58.2,64.9,58.1,64.9,58,65z M85.6,45.5c-4-2.5-8.6-2.7-13.1-2.3 c-1.7-0.1-4.1,1.2-5.3-0.4c-0.1-4.1,9.8-5.7,11.4-10.6c1.5-3.2,1.6-7.2-1.6-9.8c-2.8-1.1-6.9-14-8.1-9.9c-0.3,1.9-1.6,4.4-3.7,2.8 c-3.6-2.8-5.9-7.9-10.9-8.2c-2.1-0.1-0.7,2.3-0.8,3.5c-0.2,6.7-10.9-4-12.1,1c-1.4,5.1,3.5,9.4,8.4,9.1c6.7-0.3,14-0.3,18.8,5.1 C74.9,32.6,70,41.2,62,33c-0.4,8.2-9.8,3.8-5.7-1.6c-8.3,0.6-15,8.9-12.6,16.9c1.8,6.3,7,10.1,12.3,13.6 C58.3,48.2,73.4,43.8,85.6,45.5z M89,45.6c-1.2-5.2-5.1-8.1-9.7-10.1c-0.3-0.1-0.8-0.1-0.9,0.1c-2.4,2.7-5.9,3.6-8.6,5.8 c0,0.1,0.1,0.2,0.1,0.3C76.7,40.8,83.1,41.1,89,45.6z';
 const DEF={nama:'CV. UNGGAS MANDIRI',sub:'DISTRIBUTOR PERALATAN TERNAK DAN VENDOR|PEMBANGUNAN PETERNAKAN',alamat:"Alamat : Ruko Perumahan Btn D'QUEEN 2 Blok M. Jln Poros Kostrad-Carangki, Kab. Maros Sulawesi Selatan",telp:'No Telepon / No. WA : 0813 5469 5559 / 0813 4007 2559',prefix:'PS',catatan:''};
-let D={barang:[],pel:[],nota:[],bayar:[],set:DEF},page='dash',E=null,I=[],G=[],FM='sederhana',DPV=0,q='';
+let D={barang:[],pel:[],nota:[],bayar:[],set:DEF},page='dash',E=null,CP=null,I=[],G=[],FM='sederhana',DPV=0,q='',FJ=new Set();
 
 /* ---------- Efek suara (disintesis, tanpa file) ---------- */
 const SFX=(()=>{
@@ -370,11 +358,11 @@ dash(){
   <div class="card"><h2>Nota Terbaru</h2>${rc.length?`<table>${rc.map(n=>`<tr><td>${esc(n.No)}<br><span class="mu">${esc(n.Nama)}</span><td class="r">${rp(n.Total)}</tr>`).join('')}</table>`:'<div class="empty">Belum ada nota. Mulai dari Daftar Nota.</div>'}</div></div>`},
 
 nota(){
-  const s=D.set,n=E||{Format:'sederhana',Tanggal:today(),Nama:'',Alamat:'',Telepon:'',UKandang:'',Dp:0,Ket:'',Catatan:s.catatan||''};
+  const s=D.set,n=E||(CP&&Object.assign({},CP,{Tanggal:today(),Dp:0}))||{Format:'sederhana',Tanggal:today(),Nama:'',Alamat:'',Telepon:'',UKandang:'',Dp:0,Ket:'',Catatan:s.catatan||''};
   FM=n.Format||'sederhana';DPV=0;
-  if(E){const gg=grp(E);G=gg.map(g=>({name:g.name,gt:g.gt}));I=[];gg.forEach((g,k)=>g.items.forEach(r=>I.push(Object.assign({},r,{gi:k}))))}
-  if(!E||!I.length){G=[{name:'',gt:0}];I=[{gi:0,n:'',s:'',q:1,h:0}]}
-  return `<div class="ovh"><h2>${E?'Edit Nota '+esc(E.No):'Buat Nota Baru'}</h2><span class="sp"></span>
+  const SRC=E||CP;if(SRC){const gg=grp(SRC);G=gg.map(g=>({name:g.name,gt:g.gt}));I=[];gg.forEach((g,k)=>g.items.forEach(r=>I.push(Object.assign({},r,{gi:k}))))}
+  if(!SRC||!I.length){G=[{name:'',gt:0}];I=[{gi:0,n:'',s:'',q:1,h:0}]}
+  return `<div class="ovh"><h2>${E?'Edit Nota '+esc(E.No):CP?'Salin Nota '+esc(CP.No):'Buat Nota Baru'}</h2><span class="sp"></span>
   <div class="seg" id="sg">${[['sederhana','Nota'],['kelompok','Nota KL'],['paket','Nota ND']].map(([k,l])=>`<button data-f="${k}" class="${FM==k?'on':''}" onclick="setF('${k}')">${l}</button>`).join('')}</div><button class="s" onclick="closeOv(1)">✕ Tutup</button></div>
   <div class="ovb"><div class="mu" id="fh" style="margin:8px 0 4px;text-align:center">${FH[FM]}</div>
   <div class="paper">
@@ -396,7 +384,7 @@ nota(){
   </div>
   <div class="ovf"><button class="s" onclick="sv(0)">Simpan</button><button class="p" onclick="sv(1)">Simpan &amp; Cetak PDF</button></div>`},
 
-daftar(){return `<div class="card"><div class="row dn"><h2 style="margin:0">Daftar Nota</h2><span class="sp"></span><input id="q" placeholder="Cari nomor, nama, atau tanggal" value="${esc(q)}" oninput="q=this.value;$('#dl').innerHTML=lst()"><button class="p" onclick="openNota()">+ Buat Nota</button></div><div class="tw"><table class="rs" id="dt"><thead><tr><th>No. Nota<th>Tanggal<th>Pelanggan<th>Jenis<th class="r">Total<th class="r">Sisa<th>Status<th></tr></thead><tbody id="dl">${lst()}</tbody></table></div></div>`},
+daftar(){return `<div class="card"><div class="row dn"><h2 style="margin:0">Daftar Nota</h2><div class="seg" id="fj">${[['sederhana','Nota'],['kelompok','Nota KL'],['paket','Nota ND']].map(([k,l])=>`<button data-j="${k}" class="${FJ.has(k)?'on':''}" onclick="togJ('${k}')">${l}</button>`).join('')}</div><span class="sp"></span><input id="q" placeholder="Cari nomor, nama, atau tanggal" value="${esc(q)}" oninput="q=this.value;$('#dl').innerHTML=lst()"><button class="p" onclick="openNota()">+ Buat Nota</button></div><div class="tw"><table class="rs" id="dt"><thead><tr><th>No. Nota<th>Tanggal<th>Pelanggan<th>Jenis<th class="r">Total<th class="r">Sisa<th>Status<th></tr></thead><tbody id="dl">${lst()}</tbody></table></div></div>`},
 
 bayar(){
   const pu=D.nota.filter(n=>num(n.Sisa)>0).sort((a,b)=>a.Tanggal.localeCompare(b.Tanggal));
@@ -457,13 +445,20 @@ function addG(){G.push({name:'',gt:0});I.push(blank(G.length-1));draw()}
 async function delG(k){if(I.some(r=>r.gi==k&&r.n.trim())&&!await askc('Hapus kelompok ini beserta barangnya?','Hapus'))return;G.splice(k,1);I=I.filter(r=>r.gi!=k);I.forEach(r=>{if(r.gi>k)r.gi--});if(!I.length)I.push(blank(0));draw()}
 function pk(i,v){const b=D.barang.find(x=>x.Nama==v);if(b){I[i].h=num(b.Harga);I[i].s=b.Satuan||I[i].s;const h=$('#h'+i),s=$('#s'+i);if(h)h.value=I[i].h;if(s)s.value=I[i].s;calc()}}
 function pick(){const p=D.pel.find(x=>x.Nama==$('#nm').value);if(p){if(!$('#al').value)$('#al').value=p.Alamat||'';if(!$('#tl').value)$('#tl').value=p.Telepon||''}}
-function openNota(no){
-  E=no?D.nota.find(n=>n.No==no):null;
-  $('#ov').innerHTML=R.nota();SFX.p('open');$('#ovw').classList.add('on');document.body.style.overflow='hidden';draw();$('#ov .ovb').scrollTop=0;
+/* form nota: lebar rancangan 640px; di layar lebih sempit seluruh form diperkecil proporsional */
+function fitPaper(){
+  const p=document.querySelector('#ov .paper'),b=document.querySelector('#ov .ovb');if(!p||!b)return;
+  const W=640,av=b.clientWidth-32;p.style.width=p.style.maxWidth=p.style.zoom='';
+  if(av<W){p.style.width=W+'px';p.style.maxWidth='none';p.style.zoom=av/W}
+}
+addEventListener('resize',fitPaper);
+function openNota(no,cp){
+  CP=no&&cp?D.nota.find(n=>n.No==no):null;E=no&&!cp?D.nota.find(n=>n.No==no):null;
+  $('#ov').innerHTML=R.nota();SFX.p('open');$('#ovw').classList.add('on');document.body.style.overflow='hidden';draw();fitPaper();$('#ov .ovb').scrollTop=0;
 }
 async function closeOv(ask){
   if(ask&&!await askc('Tutup tanpa menyimpan perubahan?','Tutup'))return;if(ask)SFX.p('close');
-  $('#ovw').classList.remove('on');$('#ov').innerHTML='';document.body.style.overflow='';E=null;
+  $('#ovw').classList.remove('on');$('#ov').innerHTML='';document.body.style.overflow='';E=null;CP=null;
 }
 addEventListener('keydown',e=>{if(e.key=='Escape'&&$('#ovw').classList.contains('on')&&!document.querySelector('dialog[open]')){e.preventDefault();closeOv(1)}});
 /* tab cetak dibuka saat tombol diklik (sebelum simpan) agar tidak diblokir pop-up blocker */
@@ -484,9 +479,12 @@ async function sv(pr){
 /* ---------- Daftar nota ---------- */
 function lst(){
   const k=q.toLowerCase();
-  const Ls=D.nota.filter(n=>!k||[n.No,n.Nama,tgl(n.Tanggal),JN[n.Format]].join(' ').toLowerCase().includes(k)).sort((a,b)=>(b.Tanggal+b.No).localeCompare(a.Tanggal+a.No));
+  const act=FJ.size>0&&FJ.size<3;
+  const Ls=D.nota.filter(n=>(!act||FJ.has(n.Format||'sederhana'))&&(!k||[n.No,n.Nama,tgl(n.Tanggal),JN[n.Format]].join(' ').toLowerCase().includes(k))).sort((a,b)=>(b.Tanggal+b.No).localeCompare(a.Tanggal+a.No));
   return Ls.map(n=>`<tr><td>${esc(n.No)}<td>${tgl(n.Tanggal)}<td>${esc(n.Nama)}<td><span class="tag jn">${JN[n.Format]||'Sederhana'}</span><td class="r">${rp(n.Total)}<td class="r">${rp(n.Sisa)}<td>${st(n)}
-  <td class="r" style="white-space:nowrap"><button class="p sm" onclick="prn('${esc(n.No)}')">Cetak</button> <button class="s sm" onclick="ed('${esc(n.No)}')">Ubah</button> <button class="s sm x" onclick="dn('${esc(n.No)}')">Hapus</button></tr>`).join('')||'<tr><td colspan="8" class="empty">Belum ada nota.</tr>'}
+  <td class="r" style="white-space:nowrap"><button class="p sm" onclick="prn('${esc(n.No)}')">Cetak</button> <button class="s sm" onclick="ed('${esc(n.No)}')">Ubah</button> <button class="s sm" onclick="openNota('${esc(n.No)}',1)">Salin</button> <button class="s sm x" onclick="dn('${esc(n.No)}')">Hapus</button></tr>`).join('')||'<tr><td colspan="8" class="empty">Belum ada nota.</tr>'}
+/* filter jenis: tidak ada yang aktif atau semua aktif = tampilkan semua */
+function togJ(k){FJ.has(k)?FJ.delete(k):FJ.add(k);document.querySelectorAll('#fj button').forEach(b=>b.classList.toggle('on',FJ.has(b.dataset.j)));$('#dl').innerHTML=lst()}
 function ed(no){openNota(no)}
 async function dn(no){if(await askc('Hapus nota '+no+' beserta riwayat pembayarannya?','Hapus')){await api('delNota',no);SFX.p('del');load()}}
 function pay(no){const n=D.nota.find(x=>x.No==no);form('Catat Pembayaran '+no,[{k:'Tanggal',l:'Tanggal',t:'date'},{k:'Jumlah',l:'Jumlah (Rp) — sisa '+rp(n.Sisa),t:'number'},{k:'Catatan',l:'Catatan'}],{Tanggal:today(),Jumlah:num(n.Sisa)},o=>o.Jumlah>0?api('bayar',Object.assign(o,{No:no})):Promise.reject(toast('Isi jumlah pembayaran.')))}
