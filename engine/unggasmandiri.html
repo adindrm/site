@@ -4,9 +4,14 @@
 <style>
 :root{--c:#0f766e;--bg:#f6f7f8;--b:#e4e7ea;--t:#1c2024;--m:#6b7480;--y:#ffd966}
 *{box-sizing:border-box}
+/* sembunyikan semua scrollbar (tetap bisa di-scroll) */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar,::-webkit-scrollbar{display:none;width:0;height:0}
 body{margin:0;font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--t)}
 header{background:#fff;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:5}
-.brand{font-weight:700;padding:12px 16px 0;font-size:15px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;font-weight:700;font-size:15px}
+.brand .bt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bm{width:30px;height:30px;flex:none;fill:var(--c)}
 nav{display:flex;gap:2px;overflow-x:auto;padding:0 10px}
 nav button{border:0;background:none;padding:10px 12px;color:var(--m);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;font:inherit}
 nav button.on{color:var(--c);border-color:var(--c);font-weight:600}
@@ -37,9 +42,11 @@ button.x{border-color:#d9a0a0;color:#a33}button.sm{padding:4px 9px;font-size:12p
 dialog{border:0;border-radius:12px;padding:20px;width:min(440px,92vw);box-shadow:0 10px 40px #0003}
 dialog::backdrop{background:#0006}
 #pr{display:none}
-.hd1{display:flex;align-items:center;justify-content:space-between}
-.ib{border:0;background:none;cursor:pointer;color:var(--m);padding:8px;margin:6px 10px 0 0;border-radius:8px;display:flex}
-.ib:hover{background:var(--bg);color:var(--c)}.ib svg{width:22px;height:22px}
+.hd1{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px 2px 16px}
+.ib{flex:none;width:40px;height:40px;border:1px solid var(--b);background:var(--bg);cursor:pointer;color:var(--m);padding:0;margin:0;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s,border-color .2s,transform .12s}
+.ib:hover{background:#e6f4f2;color:var(--c);border-color:var(--c)}
+.ib svg{width:20px;height:20px;transition:transform .6s cubic-bezier(.3,1.3,.5,1)}
+.ib:hover svg{transform:rotate(90deg)}.ib:active{transform:scale(.92)}
 #ovw{position:fixed;inset:0;z-index:30;background:#0007;display:none;padding:2vh 2vw}
 #ovw.on{display:flex}
 #ov{background:var(--bg);border-radius:12px;width:100%;height:100%;display:flex;flex-direction:column;box-shadow:0 10px 40px #0004;overflow:hidden}
@@ -58,19 +65,62 @@ dialog::backdrop{background:#0006}
 /* ---------- Loading screen ---------- */
 #ld{position:fixed;inset:0;z-index:99;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .5s,visibility .5s}
 #ld.out{opacity:0;visibility:hidden}
-#ld .lg{width:96px;height:96px;overflow:visible}
-.lg path{fill:var(--c);fill-opacity:0;stroke:var(--c);stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:dr 2.6s cubic-bezier(.5,0,.3,1) forwards,fl .7s 2.4s ease forwards}
-@keyframes dr{to{stroke-dashoffset:0}}
-@keyframes fl{to{fill-opacity:1;stroke-opacity:0}}
-.ring{position:relative;width:128px;height:128px}
-.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.ring circle{fill:none;stroke-width:5}
+.ring{position:relative;width:176px;height:176px}
+.ring .rg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:3}
 .ring .bg{stroke:var(--b)}.ring .fg{stroke:var(--c);stroke-linecap:round}
-.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;font-variant-numeric:tabular-nums}
-.ring b small{font-size:14px;margin-left:2px;color:var(--m);font-weight:600}
+#ld .lg{position:absolute;left:50%;top:50%;width:108px;height:108px;margin:-54px 0 0 -54px;overflow:visible}
+.lg path{fill:none;stroke:var(--c);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:var(--L);stroke-dashoffset:var(--L);animation:dr var(--u) linear var(--d) forwards,so .6s ease var(--f) forwards}
+.lg path.lf{fill:var(--c);fill-opacity:0;stroke:none;stroke-dasharray:none;stroke-dashoffset:0;animation:fi .8s ease var(--f) forwards}
+@keyframes dr{to{stroke-dashoffset:0}}
+@keyframes so{to{stroke-opacity:0}}
+@keyframes fi{to{fill-opacity:1}}
 #ld .nm{font-weight:700;font-size:21px;line-height:1.25;text-align:center;margin-top:2px}
-#ld .ln{font-size:13px;color:var(--m);min-height:20px}
-@media(prefers-reduced-motion:reduce){.lg path{animation:none;stroke-dashoffset:0;fill-opacity:1;stroke-opacity:0}#ld{transition:none}}
+#ld .ln{font-size:13px;color:var(--m);min-height:20px;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){.lg path{animation:none;stroke-dashoffset:0;stroke-opacity:0}.lg path.lf{animation:none;fill-opacity:1}#ld{transition:none}}
+
+/* ---------- Animasi ---------- */
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes gr{from{transform:scaleY(0)}}
+@keyframes bf{from{opacity:0}}
+@keyframes dz{from{opacity:0;transform:translateY(16px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes sl{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes tin{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translateX(-50%)}}
+@keyframes hd{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:none}}
+@keyframes bp{0%{transform:scale(.75)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+header{animation:hd .55s cubic-bezier(.2,.9,.3,1) both}
+.bm{animation:pop .6s cubic-bezier(.3,1.5,.5,1) .15s both}
+nav button{transition:color .2s,border-color .2s,background .2s}
+nav button:hover{color:var(--c);background:#f1f9f8;border-radius:8px 8px 0 0}
+#bt button svg{transition:transform .2s}#bt button.on svg{animation:bp .45s ease}
+button{transition:transform .12s,background .2s,box-shadow .2s,color .2s,border-color .2s}
+button:active{transform:scale(.96)}
+button.p:hover{box-shadow:0 4px 14px #0f766e55;transform:translateY(-1px)}
+button.s:hover{background:#f1f9f8}
+button.x:hover{background:#fdeaea}
+input,select,textarea{transition:border-color .2s,box-shadow .2s,background .2s}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px #0f766e22}
+.card{transition:box-shadow .25s,transform .25s}
+.grid .card:hover{box-shadow:0 6px 20px #0f766e1a;transform:translateY(-2px)}
+tbody tr{transition:background .15s}tbody tr:hover{background:#f6fbfa}
+.bar i{transform-origin:bottom;transition:filter .2s}.bar div:hover i{filter:brightness(1.2)}
+#v.fr .card{animation:up .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*45ms)}
+#v.fr tbody tr{animation:up .4s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*28ms + 120ms)}
+#v.fr .tag{animation:pop .4s cubic-bezier(.3,1.5,.5,1) both .35s}
+#v.fr .bar i{animation:gr .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--k,0)*80ms + 250ms)}
+dialog[open]{animation:dz .3s cubic-bezier(.2,.9,.3,1.1)}
+dialog[open]::backdrop{animation:bf .25s}
+#ovw.on{animation:bf .25s}#ovw.on #ov{animation:sl .38s cubic-bezier(.2,.9,.3,1)}
+#ov .paper{animation:up .5s cubic-bezier(.2,.8,.2,1) .1s both}
+#ov .ovh{animation:up .4s ease both}
+#toast:popover-open,#toast[style*="block"]{animation:tin .3s cubic-bezier(.2,.9,.3,1.2)}
+.seg button{transition:background .2s,color .2s}
+.tg{display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px;font-size:14px;color:var(--t);cursor:pointer}
+.tg input{width:42px;height:24px;min-height:0;appearance:none;-webkit-appearance:none;background:#cfd6db;border:0;border-radius:99px;position:relative;cursor:pointer;padding:0;flex:none}
+.tg input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0003;transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
+.tg input:checked{background:var(--c)}.tg input:checked::after{transform:translateX(18px)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
 
 /* ---------- Form nota (meniru tampilan cetak) ---------- */
 .seg{display:inline-flex;border:1px solid var(--b);border-radius:8px;overflow:hidden;background:#fff}
@@ -158,12 +208,11 @@ button.p,button.s{min-height:42px}button.sm{min-height:34px}
 </style></head>
 <body>
 <div id="ld" role="status" aria-live="polite">
-  <svg class="lg" viewBox="0 0 100 100" aria-hidden="true"><path pathLength="1" d="M58,65c2.5,8.4,10.3,14.4,11.6,23.4c0.3,1.8,0.4,3.5,0.4,5.3c0,0.3-0.5,0.6-0.8,1c-0.3-0.3-0.8-0.7-0.8-1 c0-6.2-2.4-11.6-5.9-16.6c-2.5-3.8-5.6-7.4-6.2-12c-0.1-1-0.7-1.5-1.5-1.9c-4.2-2.2-7.7-5.2-10.5-9.2C33.6,39.8,54.1,21.3,66,34 c2,1.7,4.1-0.1,3.6-2.6c-0.4-2.1-1.5-3.8-3.1-5.2c-10-8.1-24.6-2.8-32.7,5.5C23.4,41.7,22,56.4,18.4,69.6c-1,3.5-2.4,6.9-5.3,9.5 c-1.2,0.8-2.5,2.3-4,1.5c0.1-0.4,0.2-1.1,0.4-1.2c4.1-2,5.8-5.7,6.9-9.6c4.6-19.3,8.3-40.1,29.4-47.8c-7.6-2.1-9.1-15.3-1.2-13.3 c1.9,0.6,3.7,1.6,5.6,2.2c4,1.6-2.6-7.1,5.6-5.3c8.1,1.8,10.2,13,11.7,5.8c2.8-4.7,6.1,2.5,7.3,5c3.7,6.2,8.9,8.4,5.4,16.4 c-1.5,2.3,8.8,2.8,10.6,13.1c1.2,6.6-16.2-5.8-29.3,8.3c-1.7,1.7-4.4,6.4-3.3,8.7c3.5,1.7,8.3,2.7,12.1,0c7.4-5.6,3.2-11.3,5.5-13.9 c0.3,0.3,0.9,0.5,0.9,0.8c2,11.4-7.5,19.9-18.4,15C58.2,64.9,58.1,64.9,58,65z M85.6,45.5c-4-2.5-8.6-2.7-13.1-2.3 c-1.7-0.1-4.1,1.2-5.3-0.4c-0.1-4.1,9.8-5.7,11.4-10.6c1.5-3.2,1.6-7.2-1.6-9.8c-2.8-1.1-6.9-14-8.1-9.9c-0.3,1.9-1.6,4.4-3.7,2.8 c-3.6-2.8-5.9-7.9-10.9-8.2c-2.1-0.1-0.7,2.3-0.8,3.5c-0.2,6.7-10.9-4-12.1,1c-1.4,5.1,3.5,9.4,8.4,9.1c6.7-0.3,14-0.3,18.8,5.1 C74.9,32.6,70,41.2,62,33c-0.4,8.2-9.8,3.8-5.7-1.6c-8.3,0.6-15,8.9-12.6,16.9c1.8,6.3,7,10.1,12.3,13.6 C58.3,48.2,73.4,43.8,85.6,45.5z M89,45.6c-1.2-5.2-5.1-8.1-9.7-10.1c-0.3-0.1-0.8-0.1-0.9,0.1c-2.4,2.7-5.9,3.6-8.6,5.8 c0,0.1,0.1,0.2,0.1,0.3C76.7,40.8,83.1,41.1,89,45.6z"/></svg>
-  <div class="ring"><svg viewBox="0 0 128 128" aria-hidden="true"><circle class="bg" cx="64" cy="64" r="58"/><circle class="fg" id="ldr" cx="64" cy="64" r="58" stroke-dasharray="364.42" stroke-dashoffset="364.42"/></svg><b><span id="ldn">0</span><small>%</small></b></div>
+  <div class="ring"><svg class="rg" viewBox="0 0 128 128" aria-hidden="true"><circle class="bg" cx="64" cy="64" r="58"/><circle class="fg" id="ldr" cx="64" cy="64" r="58" stroke-dasharray="364.42" stroke-dashoffset="364.42"/></svg><svg class="lg" id="lgl" viewBox="0 0 100 100" aria-hidden="true"></svg></div>
   <div class="nm">Administrasi<br>Unggas Mandiri</div>
-  <div class="ln" id="ldt">Menyiapkan aplikasi…</div>
+  <div class="ln"><span id="ldt">Menyiapkan aplikasi…</span> <b id="ldn">0</b>%</div>
 </div>
-<header><div class="hd1"><div class="brand" id="bn">Administrasi Unggas Mandiri</div><button class="ib" onclick="openSet()" aria-label="Pengaturan" title="Pengaturan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
+<header><div class="hd1"><div class="brand" id="bn"><span class="bt">Administrasi Unggas Mandiri</span></div><button class="ib" onclick="openSet()" aria-label="Pengaturan" title="Pengaturan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
 <nav>
 <button data-p="dash">Dashboard</button><button data-p="daftar">Daftar Nota</button>
 <button data-p="bayar">Tagihan</button><button data-p="barang">Barang</button><button data-p="pel">Pelanggan</button>
@@ -189,8 +238,44 @@ const LP='M58,65c2.5,8.4,10.3,14.4,11.6,23.4c0.3,1.8,0.4,3.5,0.4,5.3c0,0.3-0.5,0
 const DEF={nama:'CV. UNGGAS MANDIRI',sub:'DISTRIBUTOR PERALATAN TERNAK DAN VENDOR|PEMBANGUNAN PETERNAKAN',alamat:"Alamat : Ruko Perumahan Btn D'QUEEN 2 Blok M. Jln Poros Kostrad-Carangki, Kab. Maros Sulawesi Selatan",telp:'No Telepon / No. WA : 0813 5469 5559 / 0813 4007 2559',prefix:'PS',catatan:''};
 let D={barang:[],pel:[],nota:[],bayar:[],set:DEF},page='dash',E=null,I=[],G=[],FM='sederhana',DPV=0,q='';
 
+/* ---------- Efek suara (disintesis, tanpa file) ---------- */
+const SFX=(()=>{
+  let c,on=true,last=0;try{on=localStorage.getItem('snd')!=='0'}catch(e){}
+  const ctx=()=>{if(!c){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;c=new A()}if(c.state==='suspended')c.resume();return c};
+  function tone(f,t,d,type,v,f2){
+    const a=ctx();if(!a)return;const o=a.createOscillator(),g=a.createGain(),s=a.currentTime+t;
+    o.type=type||'sine';o.frequency.setValueAtTime(f,s);if(f2)o.frequency.exponentialRampToValueAtTime(f2,s+d);
+    g.gain.setValueAtTime(.0001,s);g.gain.exponentialRampToValueAtTime(v||.06,s+.012);g.gain.exponentialRampToValueAtTime(.0001,s+d);
+    o.connect(g);g.connect(a.destination);o.start(s);o.stop(s+d+.03);
+  }
+  const P={
+    tap:()=>tone(900,0,.05,'sine',.05),
+    nav:()=>{tone(520,0,.07,'triangle',.06);tone(780,.05,.09,'triangle',.05)},
+    open:()=>tone(330,0,.15,'sine',.06,660),
+    close:()=>tone(660,0,.12,'sine',.05,330),
+    ok:()=>{tone(660,0,.12,'sine',.07);tone(880,.09,.12,'sine',.07);tone(1320,.18,.24,'sine',.06)},
+    err:()=>{tone(220,0,.2,'square',.035,140);tone(200,.12,.2,'square',.03,120)},
+    del:()=>tone(440,0,.2,'triangle',.07,160),
+    done:()=>[523,659,784,1047].forEach((f,i)=>tone(f,i*.09,.28,'sine',.06))
+  };
+  return{p(n){if(!on)return;if(n!=='close')last=Date.now();try{P[n]()}catch(e){}},get on(){return on},get last(){return last},set(v){on=v;try{localStorage.setItem('snd',v?'1':'0')}catch(e){}}};
+})();
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;SFX.p(b.dataset.p||b.closest('.seg')?'nav':'tap')},true);
+document.addEventListener('close',()=>setTimeout(()=>{if(Date.now()-SFX.last>250)SFX.p('close')},60),true);
+(function(){const sm=HTMLDialogElement.prototype.showModal;HTMLDialogElement.prototype.showModal=function(){SFX.p('open');return sm.apply(this,arguments)}})();
+
 /* ---------- Loading screen ---------- */
 const LD={t0:Date.now(),v:0,ready:false,err:false};
+/* Logo: tiap subpath digambar berurutan dengan kecepatan pena tetap, lalu diisi warna */
+(function(){
+  $('#bn').insertAdjacentHTML('afterbegin','<svg class="bm" viewBox="0 0 100 100" aria-hidden="true"><path d="'+LP+'"/></svg>');
+  const s=$('#lgl'),NS='http://www.w3.org/2000/svg',T=2.8,GAP=.06;
+  const ps=LP.split(/(?=M)/).map(x=>x.trim()).filter(Boolean).map(d=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);s.appendChild(p);return[p,p.getTotalLength()]});
+  const tl=ps.reduce((a,x)=>a+x[1],0);let t=0;
+  ps.forEach(([p,l])=>{const u=l/tl*T;p.style.cssText='--L:'+l.toFixed(1)+';--d:'+t.toFixed(2)+'s;--u:'+u.toFixed(2)+'s';t+=u+GAP});
+  const f=document.createElementNS(NS,'path');f.setAttribute('d',LP);f.setAttribute('class','lf');s.appendChild(f);const b=f.getBBox(),z=Math.max(b.width,b.height)+6;s.setAttribute('viewBox',(b.x+b.width/2-z/2)+' '+(b.y+b.height/2-z/2)+' '+z+' '+z);
+  s.style.setProperty('--f',(t+.05).toFixed(2)+'s');
+})();
 (function tick(){
   const el=Date.now()-LD.t0;
   if(el>25000)LD.ready=true;
@@ -199,12 +284,26 @@ const LD={t0:Date.now(),v:0,ready:false,err:false};
   $('#ldr').style.strokeDashoffset=364.42*(1-LD.v/100);
   $('#ldn').textContent=Math.floor(LD.v);
   $('#ldt').textContent=LD.v>=99.9?'Siap':el>=3000&&!LD.ready?'Menunggu data…':LD.v<35?'Menyiapkan aplikasi…':'Mengambil data…';
-  if(LD.v>=99.9){$('#ldn').textContent=100;setTimeout(()=>{$('#ld').classList.add('out');setTimeout(()=>$('#ld').remove(),600)},350);return}
+  if(LD.v>=99.9){$('#ldn').textContent=100;SFX.p('done');setTimeout(()=>{$('#ld').classList.add('out');setTimeout(()=>$('#ld').remove(),600)},350);return}
   requestAnimationFrame(tick);
 })();
 
+/* ---------- Efek tampilan halaman ---------- */
+function fx(){
+  const v=$('#v');v.querySelectorAll('.card,tbody tr').forEach((e,i)=>e.style.setProperty('--i',Math.min(i,14)));
+  v.classList.remove('fr');void v.offsetWidth;v.classList.add('fr');
+  clearTimeout(fx.h);fx.h=setTimeout(()=>v.classList.remove('fr'),1500);cu();
+}
+function cu(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  document.querySelectorAll('.st b').forEach(e=>{
+    const t=e.textContent,pf=/^Rp/.test(t)?'Rp ':'',n=+t.replace(/\D/g,'');if(!n)return;
+    const t0=performance.now();(function f(now){const k=Math.min(1,(now-t0)/750);e.textContent=pf+Math.round(n*(1-Math.pow(1-k,3))).toLocaleString('id-ID');if(k<1)requestAnimationFrame(f)})(t0);
+  });
+}
+
 /* ---------- Navigasi & data ---------- */
-function go(p){page=p;document.querySelectorAll('nav button,#bt button').forEach(b=>b.classList.toggle('on',b.dataset.p==p));$('#v').innerHTML=R[p]();window.scrollTo(0,0)}
+function go(p){page=p;document.querySelectorAll('nav button,#bt button').forEach(b=>b.classList.toggle('on',b.dataset.p==p));$('#v').innerHTML=R[p]();window.scrollTo(0,0);fx()}
 function norm(n){
   let it=[];try{it=JSON.parse(n.Items||'[]')}catch(e){it=n.items||[]}
   const m={};let c=0;it.forEach(r=>{if(r.gi==null){const k=r.g||'';if(!(k in m))m[k]=c++;r.gi=m[k]}});
@@ -216,7 +315,7 @@ $('#bt').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.p)};
 function lab(){document.querySelectorAll('.rs').forEach(t=>{const h=[...t.tHead.rows[0].cells].map(c=>c.textContent);[...t.tBodies[0].rows].forEach(r=>[...r.cells].forEach((c,i)=>c.dataset.l=h[i]||''))})}
 new MutationObserver(lab).observe($('#v'),{childList:true,subtree:true});
 const nk=(L,k,pf)=>pf+String(Math.max(0,...L.map(x=>+String(x[k]).slice(pf.length)||0))+1).padStart(3,'0');
-const JN={sederhana:'Sederhana',kelompok:'Per Kelompok',paket:'Paket'};
+const JN={sederhana:'Nota',kelompok:'Nota KL',paket:'Nota ND'};
 const st=n=>num(n.Sisa)>0?'<span class="tag no">Belum lunas</span>':'<span class="tag ok">Lunas</span>';
 const subH=s=>{let t=String(s||'');if(!t.includes('|'))t=t.replace(/ VENDOR /i,m=>m.trimEnd()+'|');return t.split('|').map(x=>esc(x.trim())).join('<br>')};
 const LG=c=>`<svg class="${c}" viewBox="0 0 100 100" aria-hidden="true"><path d="${LP}"/></svg>`;
@@ -228,7 +327,7 @@ const tot=(it,f)=>{if(f=='paket'){const m={};it.forEach(r=>{if(!(r.gi in m))m[r.
 
 /* ---------- Pengganti alert/confirm (tidak jalan di iframe Apps Script) ---------- */
 function toast(m){
-  const t=$('#toast');t.textContent=m;
+  SFX.p(/^(Isi|Terjadi|Tidak ada)/.test(m)?'err':'ok');const t=$('#toast');t.textContent=m;
   try{t.hidePopover()}catch(e){}
   try{t.showPopover()}catch(e){t.style.display='block'}
   clearTimeout(toast.h);toast.h=setTimeout(()=>{try{t.hidePopover()}catch(e){}t.style.display=''},3200);
@@ -246,7 +345,7 @@ function form(t,F,v,cb){
   `<div style="text-align:right"><button class="s" onclick="$('#dg').close()">Batal</button> <button class="p" id="ok">Simpan</button></div>`;
   F.forEach(f=>$('#f_'+f.k).value=v[f.k]==null?'':v[f.k]);
   d.showModal();
-  $('#ok').onclick=async()=>{const o={};F.forEach(f=>o[f.k]=f.t=='number'?num($('#f_'+f.k).value):$('#f_'+f.k).value);$('#ok').disabled=true;try{await cb(o);d.close();load()}catch(e){$('#ok').disabled=false}};
+  $('#ok').onclick=async()=>{const o={};F.forEach(f=>o[f.k]=f.t=='number'?num($('#f_'+f.k).value):$('#f_'+f.k).value);$('#ok').disabled=true;try{await cb(o);SFX.p('ok');d.close();load()}catch(e){$('#ok').disabled=false}};
 }
 
 /* ---------- Halaman ---------- */
@@ -264,7 +363,7 @@ dash(){
   <div class="card st"><span>Nota Bulan Ini</span><b>${bm.length}</b></div>
   <div class="card st"><span>Sisa Tagihan</span><b>${rp(N.reduce((s,n)=>s+num(n.Sisa),0))}</b></div>
   <div class="card st"><span>Nota Belum Lunas</span><b>${N.filter(n=>num(n.Sisa)>0).length}</b></div></div>
-  <div class="card"><h2>Penjualan 6 Bulan Terakhir</h2><div class="bar">${tot.map((t,i)=>`<div title="${rp(t)}"><i style="height:${t/mx*100}%"></i></div>`).join('')}</div>
+  <div class="card"><h2>Penjualan 6 Bulan Terakhir</h2><div class="bar">${tot.map((t,i)=>`<div title="${rp(t)}"><i style="height:${t/mx*100}%;--k:${i}"></i></div>`).join('')}</div>
   <div class="bar" style="height:auto;margin-top:4px">${ms.map(k=>`<div style="height:auto">${bl[+k.slice(5)-1]}</div>`).join('')}</div></div>
   <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
   <div class="card"><h2>Barang Terlaris</h2>${tp.length?`<table>${tp.map(([n,v])=>`<tr><td>${esc(n)}<td class="r">${rp(v)}</tr>`).join('')}</table>`:'<div class="empty">Belum ada penjualan.</div>'}</div>
@@ -276,7 +375,7 @@ nota(){
   if(E){const gg=grp(E);G=gg.map(g=>({name:g.name,gt:g.gt}));I=[];gg.forEach((g,k)=>g.items.forEach(r=>I.push(Object.assign({},r,{gi:k}))))}
   if(!E||!I.length){G=[{name:'',gt:0}];I=[{gi:0,n:'',s:'',q:1,h:0}]}
   return `<div class="ovh"><h2>${E?'Edit Nota '+esc(E.No):'Buat Nota Baru'}</h2><span class="sp"></span>
-  <div class="seg" id="sg">${[['sederhana','Sederhana'],['kelompok','Per Kelompok'],['paket','Paket']].map(([k,l])=>`<button data-f="${k}" class="${FM==k?'on':''}" onclick="setF('${k}')">${l}</button>`).join('')}</div><button class="s" onclick="closeOv(1)">✕ Tutup</button></div>
+  <div class="seg" id="sg">${[['sederhana','Nota'],['kelompok','Nota KL'],['paket','Nota ND']].map(([k,l])=>`<button data-f="${k}" class="${FM==k?'on':''}" onclick="setF('${k}')">${l}</button>`).join('')}</div><button class="s" onclick="closeOv(1)">✕ Tutup</button></div>
   <div class="ovb"><div class="mu" id="fh" style="margin:8px 0 4px;text-align:center">${FH[FM]}</div>
   <div class="paper">
     <div class="ph">${LG('lgp')}<div class="lt">UNGGAS MANDIRI</div><h3>${esc(s.nama)}</h3><b>${subH(s.sub)}</b><small>${esc(s.alamat)}</small><small>${esc(s.telp)}</small></div>
@@ -360,10 +459,10 @@ function pk(i,v){const b=D.barang.find(x=>x.Nama==v);if(b){I[i].h=num(b.Harga);I
 function pick(){const p=D.pel.find(x=>x.Nama==$('#nm').value);if(p){if(!$('#al').value)$('#al').value=p.Alamat||'';if(!$('#tl').value)$('#tl').value=p.Telepon||''}}
 function openNota(no){
   E=no?D.nota.find(n=>n.No==no):null;
-  $('#ov').innerHTML=R.nota();$('#ovw').classList.add('on');document.body.style.overflow='hidden';draw();$('#ov .ovb').scrollTop=0;
+  $('#ov').innerHTML=R.nota();SFX.p('open');$('#ovw').classList.add('on');document.body.style.overflow='hidden';draw();$('#ov .ovb').scrollTop=0;
 }
 async function closeOv(ask){
-  if(ask&&!await askc('Tutup tanpa menyimpan perubahan?','Tutup'))return;
+  if(ask&&!await askc('Tutup tanpa menyimpan perubahan?','Tutup'))return;if(ask)SFX.p('close');
   $('#ovw').classList.remove('on');$('#ov').innerHTML='';document.body.style.overflow='';E=null;
 }
 addEventListener('keydown',e=>{if(e.key=='Escape'&&$('#ovw').classList.contains('on')&&!document.querySelector('dialog[open]')){e.preventDefault();closeOv(1)}});
@@ -379,7 +478,7 @@ async function sv(pr){
   const o={No:E?E.No:'',Format:FM,Tanggal:$('#tg').value||today(),Nama:$('#nm').value.trim(),Alamat:$('#al').value,Telepon:$('#tl').value,UKandang:$('#uk').value,Ket:$('#ket').value,Catatan:$('#cat').value,Items:JSON.stringify(it),Dp:E?0:DPV};
   const w=pr?openPW():null;
   let no;try{no=await api('nota',o)}catch(e){if(w)try{w.close()}catch(_){}return}
-  closeOv();page='daftar';await load();if(pr)prn(no,w)
+  closeOv();SFX.p('ok');page='daftar';await load();if(pr)prn(no,w)
 }
 
 /* ---------- Daftar nota ---------- */
@@ -389,7 +488,7 @@ function lst(){
   return Ls.map(n=>`<tr><td>${esc(n.No)}<td>${tgl(n.Tanggal)}<td>${esc(n.Nama)}<td><span class="tag jn">${JN[n.Format]||'Sederhana'}</span><td class="r">${rp(n.Total)}<td class="r">${rp(n.Sisa)}<td>${st(n)}
   <td class="r" style="white-space:nowrap"><button class="p sm" onclick="prn('${esc(n.No)}')">Cetak</button> <button class="s sm" onclick="ed('${esc(n.No)}')">Ubah</button> <button class="s sm x" onclick="dn('${esc(n.No)}')">Hapus</button></tr>`).join('')||'<tr><td colspan="8" class="empty">Belum ada nota.</tr>'}
 function ed(no){openNota(no)}
-async function dn(no){if(await askc('Hapus nota '+no+' beserta riwayat pembayarannya?','Hapus')){await api('delNota',no);load()}}
+async function dn(no){if(await askc('Hapus nota '+no+' beserta riwayat pembayarannya?','Hapus')){await api('delNota',no);SFX.p('del');load()}}
 function pay(no){const n=D.nota.find(x=>x.No==no);form('Catat Pembayaran '+no,[{k:'Tanggal',l:'Tanggal',t:'date'},{k:'Jumlah',l:'Jumlah (Rp) — sisa '+rp(n.Sisa),t:'number'},{k:'Catatan',l:'Catatan'}],{Tanggal:today(),Jumlah:num(n.Sisa)},o=>o.Jumlah>0?api('bayar',Object.assign(o,{No:no})):Promise.reject(toast('Isi jumlah pembayaran.')))}
 
 /* ---------- Barang & pelanggan ---------- */
@@ -397,16 +496,17 @@ function bl(){const k=q.toLowerCase();return D.barang.filter(b=>!k||(b.Nama+b.Ko
 function eB(kode){const b=D.barang.find(x=>x.Kode==kode)||{Kode:nk(D.barang,'Kode','B')};form(kode?'Ubah Barang':'Barang Baru',[{k:'Kode',l:'Kode',r:1},{k:'Nama',l:'Nama barang'},{k:'Harga',l:'Harga (Rp)',t:'number'},{k:'Satuan',l:'Satuan (Pcs, Unit, Batang…)'},{k:'Kategori',l:'Kategori'}],b,o=>o.Nama.trim()?api('save',{n:'Barang',o,k:'Kode'}):Promise.reject(toast('Isi nama barang.')))}
 function impB(){form('Impor Barang dari Excel',[{k:'t',l:'Salin kolom dari Excel lalu tempel di sini. Urutan kolom: Nama, Harga, Satuan, Kategori (Satuan dan Kategori boleh kosong). Barang yang sudah ada dilewati.',t:'area',ph:'Adjuster\t2500\nBaby Chick\t20000'}],{},async o=>{const r=o.t.split('\n').map(l=>l.split('\t')).filter(c=>c[0].trim()&&c[0].trim().toUpperCase()!='NAMA BARANG').map(c=>[c[0].trim(),id(c[1]),(c[2]||'').trim(),(c[3]||'').trim()]);if(!r.length)return Promise.reject(toast('Tidak ada data yang bisa dibaca.'));const n=await api('imp',r);toast(n+' barang ditambahkan.')})}
 function eP(i){const p=i==null?{ID:nk(D.pel,'ID','C')}:D.pel[i];form(i==null?'Pelanggan Baru':'Ubah Pelanggan',[{k:'Nama',l:'Nama'},{k:'Alamat',l:'Alamat'},{k:'Telepon',l:'Telepon / WA'}],p,o=>o.Nama.trim()?api('save',{n:'Pelanggan',o:Object.assign({ID:p.ID},o),k:'ID'}):Promise.reject(toast('Isi nama pelanggan.')))}
-async function dl(n,k,v){if(await askc('Hapus data ini?','Hapus')){await api('del',{n,k,v});load()}}
+async function dl(n,k,v){if(await askc('Hapus data ini?','Hapus')){await api('del',{n,k,v});SFX.p('del');load()}}
 function openSet(){
   const s=D.set,F=[['nama','Nama usaha'],['sub','Keterangan usaha (tanda | = pindah baris)'],['alamat','Alamat'],['telp','Telepon / WA'],['prefix','Awalan nomor nota']];
   const d=$('#ds');
   d.innerHTML=`<h2>Pengaturan</h2>`+F.map(([k,l])=>`<div style="margin-bottom:10px"><label>${l}</label><input id="s_${k}" value="${esc(s[k])}"></div>`).join('')+
   `<div style="margin-bottom:12px"><label>Catatan bawaan untuk nota baru (mis. syarat pelunasan)</label><textarea id="s_catatan" rows="3">${esc(s.catatan)}</textarea></div>
+  <label class="tg"><span>Efek suara</span><input type="checkbox" id="s_snd" ${SFX.on?'checked':''} onchange="SFX.set(this.checked);SFX.p('ok')"></label>
   <div style="text-align:right"><button class="s" onclick="$('#ds').close()">Batal</button> <button class="p" onclick="ss_()">Simpan</button></div>`;
   d.showModal();
 }
-async function ss_(){const o={};['nama','sub','alamat','telp','prefix','catatan'].forEach(k=>o[k]=$('#s_'+k).value);await api('set',o);$('#ds').close();load()}
+async function ss_(){const o={};['nama','sub','alamat','telp','prefix','catatan'].forEach(k=>o[k]=$('#s_'+k).value);await api('set',o);SFX.p('ok');$('#ds').close();load()}
 
 /* ---------- Cetak PDF: 3 format sesuai contoh ---------- */
 const PCSS=`
