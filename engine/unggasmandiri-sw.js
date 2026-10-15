@@ -2,7 +2,7 @@
    Isi aplikasi tetap dimuat dari Google Apps Script dan butuh internet.
    Hanya file yang tercantum di FILES yang ditangani; halaman lain di folder ini tidak disentuh.
    Ubah angka VERSI setiap kali file di folder ini diperbarui. */
-const VERSI = 'v5';
+const VERSI = 'v6';
 const CACHE = 'unggasmandiri-' + VERSI;
 const FILES = ['./unggasmandiri.html', './unggasmandiri.json', './unggasmandiriicons/icon-192.png', './unggasmandiriicons/icon-512.png', './unggasmandiriicons/apple-touch-icon.png'];
 const URLS = new Set(FILES.map(f => new URL(f, self.location).href));
