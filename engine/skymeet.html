@@ -13,6 +13,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>
+/* tautan relatif (manifest, ikon, aset, sw.js) harus dihitung dari folder tempat berkas ini berada.
+   URL tanpa "/" di akhir dan tanpa ekstensi (mis. /engine/skymeet) punya dua kemungkinan:
+     (a) FOLDER   : /engine/skymeet/index.html            -> perlu <base href="/engine/skymeet/">
+     (b) URL BERSIH: /engine/skymeet -> /engine/skymeet.html -> JANGAN pakai <base> (aset sejajar dengan berkas ini)
+   Jadi jangan menebak: cek apakah manifest.webmanifest benar-benar ada di dalam folder itu. */
 (function(){
   var p = location.pathname;
   if(/\/$/.test(p) || /\.[A-Za-z0-9]{1,5}$/.test(p.split('/').pop())) return;
@@ -1409,11 +1414,16 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .edBar .edNote{ flex:1 1 140px; margin:0 0 0 4px; }
   .edErr{ color:#ff9a9a; font-size:12.5px; }
   .edErr:empty{ display:none; }
-  .edPn{ border:1px solid rgba(255,255,255,.16); border-radius:12px; margin:8px 0; background:rgba(255,255,255,.03); }
-  .edPn > summary{ display:flex; align-items:center; gap:8px; padding:9px 12px; cursor:pointer; font-weight:600; font-size:13.5px; list-style:none; }
+  .edUbar{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:8px 0; }   /* kartu panel = ikon saja (seperti editor.html); isinya membuka overlay */
+  .edUbar > div[hidden]{ display:none; }
+  .edPn{ border:0; margin:0; background:none; }
+  .edPn > summary{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-width:54px; height:50px; padding:0 8px; box-sizing:border-box; border-radius:11px; cursor:pointer; list-style:none; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.22); user-select:none; }
   .edPn > summary::-webkit-details-marker{ display:none; }
-  .edPn > summary::after{ content:''; margin-left:auto; border:5px solid transparent; border-top-color:rgba(255,255,255,.7); margin-top:5px; }
-  .edPn[open] > summary::after{ transform:rotate(180deg); margin-top:-5px; }
+  .edPn > summary:hover{ background:rgba(255,255,255,.15); }
+  .edPn > summary .edIc{ width:21px; height:21px; }
+  .edPn > summary .edLb{ font-size:10px; line-height:1; color:#cfd9f3; white-space:nowrap; font-weight:500; }
+  .edPn[open] > summary{ background:rgba(255,178,107,.3); border-color:#ffb26b; }
+  .edPn[open] > .edPb{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:5; width:min(440px,calc(100vw - 24px)); max-height:min(76vh,600px); overflow:auto; box-sizing:border-box; padding:12px; border-radius:14px; background:#141a33; border:1px solid rgba(255,255,255,.22); box-shadow:0 0 0 100vmax rgba(3,6,17,.62), 0 16px 40px rgba(0,0,0,.6); }
   .edPb{ padding:2px 12px 12px; }
   .edPb h4{ margin:10px 0 4px; font-size:12.5px; opacity:.85; }
   .edFld{ margin:8px 0; }
@@ -6827,7 +6837,8 @@ initPerm(); startLoop();
     const body = mkEl('div', 'devBody'); body.id = 'devBody';
     box.append(hd, tabs, body); dvOv.appendChild(box); document.body.appendChild(dvOv);
     dvOv.addEventListener('click', e => { if(e.target === dvOv) dvClose(); });
-    document.addEventListener('keydown', e => { if(dvOv && !dvOv.hidden && e.key === 'Escape'){ e.stopPropagation(); if(ED && ED.sel && ED.sel.size && document.getElementById('edSvg')){ ED.sel = new Set(); edDraw(); edSide(); return; } dvClose(); } }, true);
+    document.addEventListener('click', e => { document.querySelectorAll('#devBody .edPn[open]').forEach(d => { if(!d.contains(e.target)) d.removeAttribute('open'); }); }, true);   // klik di luar overlay panel (atau ikon panel lain) = tutup
+    document.addEventListener('keydown', e => { if(dvOv && !dvOv.hidden && e.key === 'Escape'){ e.stopPropagation(); const opn = document.querySelector('#devBody .edPn[open]'); if(opn){ opn.removeAttribute('open'); return; } if(ED && ED.sel && ED.sel.size && document.getElementById('edSvg')){ ED.sel = new Set(); edDraw(); edSide(); return; } dvClose(); } }, true);
   }
   function dvClose(){ if(!dvOv) return; if(window.SkyRasi) window.SkyRasi.closePreview(); ED = null; dvOv.hidden = true; dvGen++; if(dvBack && dvBack.isConnected) try{ dvBack.focus({ preventScroll:true }); }catch(e){} }
   function dvPaintTabs(){
@@ -6903,7 +6914,7 @@ initPerm(); startLoop();
   }
   // ===== Editor rasi setara editor.html: kanvas (seleksi kotak, ubah ukuran, geser panah), deteksi gambar/SVG, ikon, sinkronisasi atlas, spirit tree =====
   const ED_X = {
-    en:{ pSet:'Settings', pDet:'Detected', pSync:'Sync', pTree:'Spirit Tree', pData:'JSON data', chooseFile:'Choose file', urlPh:'Image link (SVG, PNG, JPG, WebP)', load:'Load', loadBusy:'Loading…',
+    en:{ pSet:'Settings', pDet:'Detected', pSync:'Sync', pTree:'Spirit Tree', chooseFile:'Choose file', urlPh:'Image link (SVG, PNG, JPG, WebP)', load:'Load', loadBusy:'Loading…',
       fmtBad:'Unsupported format. Use SVG, PNG, JPG or WebP.', urlBad:'Enter a full link starting with http:// or https://', urlHttp:'Server replied HTTP {s}.', urlNotImg:'This link is not a direct image (file type: {t}). Use a link to the image file itself.',
       urlCors:'The link cannot be read from the browser: wrong address, or the image server does not allow access from other sites (CORS).', imgFail:'The browser could not open this image.', svgBad:'Not a valid SVG file.',
       noCirc:'No circles detected. For raster images adjust the brightness threshold or the radius range; SVG needs <circle> elements with r of 25 or more.', loadLock:'Circle numbers must stay the same as the existing layout (player progress). Use Undo if the order differs.',
@@ -6922,7 +6933,7 @@ initPerm(); startLoop();
       ldElder:'Special circle {n}: elder {name} = {sp}.', ldGuide:'Special circle {n}: season guide {name} = {sp}.', ldMiss:'The {kind} spirit for "{name}" was not found in the data; choose the special circle spirit manually.', kElder:'elder', kGuide:'guide',
       tip:'Click to select; Shift/Ctrl+click or "Multi-select" adds; drag on empty space for box selection; drag the squares to resize (corners keep proportions, Shift = free); arrows nudge (Shift = 10); Delete, Ctrl+C/X/V/D/A/Z/Y, Esc.',
       addL:'+ Line', all:'Select all', pvBtn:'Preview', icoBad:'Some icon links are invalid (https only, max 300 characters).', cvResize:'Drag to resize the canvas', addShape:'Add shape', helpL:'Help' },
-    id:{ pSet:'Pengaturan', pDet:'Terdeteksi', pSync:'Sinkronisasi', pTree:'Spirit Tree', pData:'Data JSON', chooseFile:'Pilih file', urlPh:'Link gambar (SVG, PNG, JPG, WebP)', load:'Muat', loadBusy:'Memuat…',
+    id:{ pSet:'Pengaturan', pDet:'Terdeteksi', pSync:'Sinkronisasi', pTree:'Spirit Tree', chooseFile:'Pilih file', urlPh:'Link gambar (SVG, PNG, JPG, WebP)', load:'Muat', loadBusy:'Memuat…',
       fmtBad:'Format belum didukung. Pakai SVG, PNG, JPG, atau WebP.', urlBad:'Masukkan link lengkap yang diawali http:// atau https://', urlHttp:'Server membalas HTTP {s}.', urlNotImg:'Link ini bukan gambar langsung (jenis berkas: {t}). Pakai link ke berkas gambarnya, bukan ke halaman web.',
       urlCors:'Link tidak bisa dibaca dari browser: alamatnya salah, atau server gambar tidak mengizinkan akses dari situs lain (CORS).', imgFail:'Gambar tidak bisa dibuka oleh browser.', svgBad:'File bukan SVG yang valid.',
       noCirc:'Tidak ada lingkaran terdeteksi. Untuk gambar raster geser ambang kecerahan atau ubah rentang jari-jari; SVG butuh elemen <circle> dengan r 25 atau lebih.', loadLock:'Nomor lingkaran harus tetap sama dengan layout yang sudah ada (progres pemain). Pakai Urungkan bila urutannya berbeda.',
@@ -6944,9 +6955,9 @@ initPerm(); startLoop();
   };
   Object.keys(ED_X).forEach(l => Object.assign(ED_T[l], ED_X[l]));
   const ED_D = {   // hapus season buatan (hanya Developer)
-    en:{ delS:'Delete', delS2:'Tap again to delete', delDone:'Season deleted.' },
-    id:{ delS:'Hapus', delS2:'Ketuk lagi untuk hapus', delDone:'Season dihapus.' },
-    es:{ delS:'Eliminar', delS2:'Toca otra vez para eliminar', delDone:'Temporada eliminada.' }
+    en:{ urlBig:'Image is larger than 2.5 MB.', urlOld:'Server is outdated: deploy the new Code.gs version (and grant the permission) first.', urlProxy:'The server could not open this link either. Check the address.', delS:'Delete', delS2:'Tap again to delete', delDone:'Season deleted.', delOld:'Server is outdated: deploy the new Code.gs version first.', delAuth:'Session expired. Log in again.' },
+    id:{ urlBig:'Gambar lebih besar dari 2,5 MB.', urlOld:'Server belum diperbarui: deploy Code.gs versi baru (dan izinkan permintaannya) dulu.', urlProxy:'Server juga tidak bisa membuka link ini. Periksa alamatnya.', delS:'Hapus', delS2:'Ketuk lagi untuk hapus', delDone:'Season dihapus.', delOld:'Server belum diperbarui: deploy Code.gs versi baru dulu.', delAuth:'Sesi habis. Masuk lagi.' },
+    es:{ urlBig:'La imagen supera 2,5 MB.', urlOld:'Servidor desactualizado: despliega la nueva versi\u00f3n de Code.gs (y concede el permiso).', urlProxy:'El servidor tampoco pudo abrir este enlace. Revisa la direcci\u00f3n.', delS:'Eliminar', delS2:'Toca otra vez para eliminar', delDone:'Temporada eliminada.', delOld:'Servidor desactualizado: despliega la nueva versi\u00f3n de Code.gs.', delAuth:'Sesi\u00f3n caducada. Inicia sesi\u00f3n de nuevo.' }
   };
   Object.keys(ED_D).forEach(l => Object.assign(ED_T[l], ED_D[l]));
   const ef = (k, v) => String(et(k)).replace(/\{(\w+)\}/g, (m, n) => (v && v[n] !== undefined ? v[n] : m));
@@ -7481,9 +7492,20 @@ initPerm(); startLoop();
     let parsed; try{ parsed = new URL(u); if(!/^https?:$/.test(parsed.protocol)) throw 0; }catch(e){ edErr(et('urlBad')); return; }
     btn.disabled = true; btn.textContent = et('loadBusy');
     try{
-      const res = await fetch(parsed.href, { mode:'cors' });
-      if(!res.ok) throw new Error(ef('urlHttp', { s:res.status }));
-      const blob = await res.blob(), type = (blob.type || '').split(';')[0]; let name = '';
+      let blob, type;
+      try{
+        const res = await fetch(parsed.href, { mode:'cors' });
+        if(!res.ok) throw new Error(ef('urlHttp', { s:res.status }));
+        blob = await res.blob(); type = (blob.type || '').split(';')[0];
+      }catch(e0){
+        if(!(e0 instanceof TypeError)) throw e0;   // bukan CORS (mis. HTTP 404): tampilkan apa adanya
+        const r = await api('fetchImage', { url:parsed.href }, undefined, { timeout:30000 }), er = r && r.error;   // CORS: minta server Apps Script yang mengambil gambarnya
+        if(!r || !r.ok){
+          throw new Error(er === 'http' ? ef('urlHttp', { s:r.status }) : er === 'type' ? ef('urlNotImg', { t:'?' }) : er === 'big' ? et('urlBig') : er === 'bad' ? et('urlBad') : er === 'forbidden' ? dvT().denied : er === 'bad_action' ? et('urlOld') : er === 'net' || er === 'server' ? et('urlProxy') : et('urlCors'));
+        }
+        type = r.mime; blob = new Blob([edB64(r.data)], { type:type });
+      }
+      let name = '';
       try{ name = decodeURIComponent(parsed.pathname.split('/').pop() || ''); }catch(e){ name = parsed.pathname.split('/').pop() || ''; }
       if(!/\.(svg|png|jpe?g|webp)$/i.test(name)){
         const ext = /svg/.test(type) ? '.svg' : /png/.test(type) ? '.png' : /webp/.test(type) ? '.webp' : /jpe?g/.test(type) ? '.jpg' : '';
@@ -7780,29 +7802,14 @@ initPerm(); startLoop();
     try{ await edLoadSD(); if(ED !== E) return; E.treeOn = true; edPaintSpirits(); }catch(err){ const n = $('edSpNote2'); if(n) n.textContent = ef('spFail', { m:err.message }); }
   }
 
-  // ---------- panel JSON, kerangka tampilan ----------
-  function edPanelIO(){
-    const io = $('edIO'); if(!io) return; io.textContent = '';
-    if(ED.panel !== 'imp' && ED.panel !== 'exp') return;
-    const ta = mkEl('textarea'); ta.rows = 6; ta.spellcheck = false; io.appendChild(ta);
-    if(ED.panel === 'exp'){ ta.readOnly = true; ta.value = JSON.stringify({ kind:ED.kind, key:ED.key, layout:edBuild() }); io.appendChild(edBtn(et('copyTxt'), () => { try{ ta.select(); navigator.clipboard.writeText(ta.value); }catch(e){} })); return; }
-    io.appendChild(edBtn(et('impGo'), () => {
-      let o; try{ o = JSON.parse(ta.value); }catch(e){ edMsg(et('invalid')); return; }
-      const res = edCheck(o && o.layout && typeof o.layout === 'object' ? o.layout : o);
-      if(!res.ok){ edMsg(res.error === 'big' ? et('big') : et('invalid')); return; }
-      const sp = typeof res.layout.special === 'number' ? res.layout.special : -1;
-      if(ED.baseCount > 0 && (res.layout.C.length < ED.baseCount || sp !== ED.baseSpecial || (ED.baseSpecial >= 0 && res.layout.C.length !== ED.baseCount))){ edMsg(et('lockCnt')); return; }
-      edPush(); const m = edModelFrom(res.layout), keep = ED.name;
-      Object.assign(ED, m, { name:res.layout.name || keep, sel:new Set(), icons:[], matchRes:null, panel:'', spNote:'' }); edAll(); edPanelIO(); edMsg('');
-    }));
-  }
+  // ---------- kerangka tampilan ----------
   const ED_SYM = "<svg width=\"0\" height=\"0\" style=\"position:absolute\" aria-hidden=\"true\"><defs><symbol id=\"ei-circle\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></symbol><symbol id=\"ei-star\" viewBox=\"0 0 24 24\"><path d=\"M12 3Q12 12 21 12Q12 12 12 21Q12 12 3 12Q12 12 12 3Z\" fill=\"currentColor\"/></symbol><symbol id=\"ei-line\" viewBox=\"0 0 24 24\"><path d=\"M6 18L18 6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><circle cx=\"6\" cy=\"18\" r=\"2.4\" fill=\"currentColor\"/><circle cx=\"18\" cy=\"6\" r=\"2.4\" fill=\"currentColor\"/></symbol><symbol id=\"ei-copy\" viewBox=\"0 0 24 24\"><rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M5 15V6a2 2 0 0 1 2-2h8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></symbol><symbol id=\"ei-paste\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"5\" width=\"14\" height=\"16\" rx=\"2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><rect x=\"9\" y=\"3\" width=\"6\" height=\"4\" rx=\"1\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></symbol><symbol id=\"ei-all\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-dasharray=\"3 2.5\"/><path d=\"M8.5 12.5l2.5 2.5 4.5-5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></symbol><symbol id=\"ei-trash\" viewBox=\"0 0 24 24\"><path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></symbol><symbol id=\"ei-undo\" viewBox=\"0 0 24 24\"><path d=\"M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></symbol><symbol id=\"ei-redo\" viewBox=\"0 0 24 24\"><path d=\"M15 14l5-5-5-5M20 9H10a6 6 0 0 0 0 12h3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></symbol><symbol id=\"ei-set\" viewBox=\"0 0 24 24\"><path d=\"M4 7h10M18 7h2M4 17h2M10 17h10M4 12h16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><circle cx=\"16\" cy=\"7\" r=\"2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"8\" cy=\"17\" r=\"2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></symbol><symbol id=\"ei-scan\" viewBox=\"0 0 24 24\"><path d=\"M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><circle cx=\"12\" cy=\"12\" r=\"3.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></symbol><symbol id=\"ei-sync\" viewBox=\"0 0 24 24\"><path d=\"M20 11a8 8 0 0 0-14-4l-2 2M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></symbol><symbol id=\"ei-tree\" viewBox=\"0 0 24 24\"><path d=\"M12 20v-6M12 14L6 9M12 14l6-5M12 14V9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><circle cx=\"12\" cy=\"6\" r=\"2.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"6\" cy=\"7.5\" r=\"2.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"18\" cy=\"7.5\" r=\"2.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"12\" cy=\"20\" r=\"1.4\" fill=\"currentColor\"/></symbol></defs></svg>";
   function edBack(){ if(window.SkyRasi) window.SkyRasi.closePreview(); if(ED && ED.imgUrl) URL.revokeObjectURL(ED.imgUrl); ED = null; dvPaintBody(); }
   function edRender(){
     const body = document.getElementById('devBody'); if(!body || !ED) return; const E = ED;
     $('devBox').classList.add('wide'); body.textContent = '';
     const tb = (id, ic, title) => '<button id="' + id + '" type="button" class="edTb" title="' + title + '" aria-label="' + title + '"><svg class="edIc"><use href="#ei-' + ic + '"/></svg></button>';
-    const pn = (ic, label, inner, extra) => '<details class="edPn"' + (extra || '') + '><summary><svg class="edIc"><use href="#ei-' + ic + '"/></svg><span>' + label + '</span></summary><div class="edPb">' + inner + '</div></details>';
+    const pn = (ic, label, inner, extra) => '<details class="edPn"' + (extra || '') + '><summary title="' + label + '" aria-label="' + label + '"><svg class="edIc"><use href="#ei-' + ic + '"/></svg><span class="edLb">' + label + '</span></summary><div class="edPb" role="dialog" aria-label="' + label + '">' + inner + '</div></details>';
     const chk = (id, label) => '<label class="edChk"><input type="checkbox" id="' + id + '"> ' + label + '</label>';
     const opt = (v, t) => '<option value="' + v + '">' + t + '</option>';
     body.innerHTML = ED_SYM +
@@ -7815,7 +7822,7 @@ initPerm(); startLoop();
       '<div id="edCvh" class="edCvh" title="' + et('cvResize') + '" aria-label="' + et('cvResize') + '"></div></div>' +
       '<div class="edBar">' + tb('edUndo', 'undo', et('undo')) + tb('edRedo', 'redo', et('redo')) + '<button id="edMulti" type="button" class="edTxtB">' + et('multi') + '</button><span class="edNote" id="edStat"></span></div>' +
       '<div class="edErr" id="edErr" role="alert"></div><div class="edMsg" id="edMsg" role="status"></div>' +
-      pn('set', et('pSet'),
+      '<div class="edUbar" id="edUbar">' + pn('set', et('pSet'),
         '<div class="edFld"><div class="edRow"><input type="text" id="edUrl" placeholder="' + et('urlPh') + '" aria-label="' + et('urlPh') + '"><button id="edUrlGo" type="button" class="edTxtB">' + et('load') + '</button></div>' +
         '<div class="edRow"><button id="edFileB" type="button" class="edTxtB">' + et('chooseFile') + '</button><input type="file" id="edFile" accept=".svg,.png,.jpg,.jpeg,.webp,image/svg+xml,image/png,image/jpeg,image/webp" hidden></div></div>' +
         '<div class="edFld"><label for="edNameSel">' + et('name') + '</label><select id="edNameSel"><option value="">' + et('nameOpt') + '</option></select><input type="text" id="edName" maxlength="40" placeholder="' + et('name') + '"></div><p class="edNote" id="edNmNote"></p>' +
@@ -7823,14 +7830,14 @@ initPerm(); startLoop();
         '<div class="edFld"><label for="edSpecial">' + et('spL') + '</label><input type="text" id="edSpecial" inputmode="numeric" placeholder="' + et('spPh') + '"></div><p class="edNote" id="edSpNote"></p><p class="edNote" id="edLdNote"></p>' +
         '<div id="edRpanel" hidden><div class="edFld"><label for="edThr">' + et('thrL') + ': <span id="edThrV">128</span></label><input type="range" id="edThr" min="1" max="254" value="128"></div>' + chk('edInv', et('invL')) +
         '<div class="edFld"><label>' + et('rangeL') + '</label><div class="edRow"><input type="text" id="edRmin" inputmode="numeric" aria-label="min"><input type="text" id="edRmax" inputmode="numeric" aria-label="max"></div></div>' + chk('edUni', et('uniL')) + chk('edShowImg', et('showImgL')) + '<p class="edNote" id="edInfo"></p></div>' +
-        '<p class="edNote">' + et('tip') + '</p>', ' open') +
+        '<p class="edNote">' + et('tip') + '</p>') +
       pn('scan', et('pDet'), '<h4>' + et('ownersH') + '</h4><div id="edLtable" class="edLtable"></div>' +
         '<div id="edIpanel" hidden><h4>' + et('icH') + '</h4><div class="edFld"><label for="edIcm">' + et('icmL') + '</label><input type="text" id="edIcm" inputmode="decimal"></div>' +
         '<div class="edFld"><label for="edIcf">' + et('icfL') + '</label><select id="edIcf">' + opt('svg', et('icfSvg')) + opt('png', et('icfPng')) + '</select></div>' + chk('edIcbg', et('icbgL')) +
         '<div class="edRow"><button id="edIcGo" type="button" class="edTxtB">' + et('icGo') + '</button><button id="edIcZip" type="button" class="edTxtB" disabled>' + et('icZip') + '</button></div><div class="edIcGrid" id="edIcGrid"></div><p class="edNote" id="edIcNote"></p></div>') +
       '<div id="edSyncP">' + pn('sync', et('pSync'), '<div class="edRow"><button id="edAtGo" type="button" class="edTxtB">' + et('atGo') + '</button></div><p class="edNote" id="edAtNote"></p><div id="edAtRes"></div>') + '</div>' +
       pn('tree', et('pTree'), '<div class="edRow"><button id="edSpGo" type="button" class="edTxtB">' + et('spGo') + '</button></div><p class="edNote" id="edSpNote2"></p><div id="edSpRes"></div>').replace('<details class="edPn">', '<details class="edPn" id="edTreeD">') +
-      pn('set', et('pData'), '<div class="edRow"><button id="edImp" type="button" class="edTxtB">' + et('imp') + '</button><button id="edExp" type="button" class="edTxtB">' + et('exp') + '</button></div><div id="edIO"></div>');
+      '</div>';
     $('edTitle').textContent = E.title;
     const svg = $('edSvg'); edBind(svg); edGlobal(); if(!edKeyOn){ edKeyOn = true; document.addEventListener('keydown', edKeys); }
     // alat kanvas
@@ -7868,14 +7875,12 @@ initPerm(); startLoop();
     $('edInv').addEventListener('change', () => { E.inv = $('edInv').checked; if(E.mode === 'img') edRedetect(); });
     $('edUni').addEventListener('change', () => { E.uni = $('edUni').checked; if(E.mode === 'img') edRedetect(); });
     $('edShowImg').addEventListener('change', () => { E.showImg = $('edShowImg').checked; edDraw(); });
-    // ikon, sinkronisasi, spirit, JSON
+    // ikon, sinkronisasi, spirit
     $('edIcm').value = E.icm; $('edIcf').value = E.icf; $('edIcbg').checked = E.icbg;
     $('edIcm').addEventListener('input', () => { E.icm = $('edIcm').value; }); $('edIcf').addEventListener('change', () => { E.icf = $('edIcf').value; }); $('edIcbg').addEventListener('change', () => { E.icbg = $('edIcbg').checked; });
     $('edIcGo').addEventListener('click', edExtractIcons); $('edIcZip').addEventListener('click', edDownloadIcons);
     $('edAtGo').addEventListener('click', edMatch); $('edSpGo').addEventListener('click', edFindSpirits);
     $('edTreeD').addEventListener('toggle', () => { if($('edTreeD').open) edOpenTree(); });
-    $('edImp').addEventListener('click', () => { E.panel = E.panel === 'imp' ? '' : 'imp'; edPanelIO(); });
-    $('edExp').addEventListener('click', () => { E.panel = E.panel === 'exp' ? '' : 'exp'; edPanelIO(); });
     edSetAddKind(E.addKind); edDraw(); edSide(); edFields(); edPaintIcons(); edMsg(E.msg); edLoadNames();
     if(E.treeOn) edPaintSpirits();
   }
@@ -7958,8 +7963,12 @@ initPerm(); startLoop();
       if(!b.classList.contains('arm')){ b.classList.add('arm'); b.textContent = et('delS2'); clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('arm'); b.textContent = et('delS'); }, 3000); return; }
       clearTimeout(b._t); b.disabled = true;
       const r = await api('deleteLayout', { key:k }), T = dvT();
-      if(r && r.ok){ if(SKL()) await SKL().refresh(true); dvPaintBody(); edMsgList(et('delDone')); }
-      else { b.disabled = false; b.classList.remove('arm'); b.textContent = et('delS'); edMsgList(r && r.error === 'forbidden' ? T.denied : T.err); }
+      if(r && (r.ok || r.error === 'nf')){ if(SKL()) await SKL().refresh(true); dvPaintBody(); toast(et('delDone')); }   // 'nf' = sudah tidak ada di server: cukup segarkan daftar
+      else {
+        b.disabled = false; b.classList.remove('arm'); b.textContent = et('delS');
+        const e = r && r.error, m = e === 'forbidden' ? T.denied : e === 'bad_action' ? et('delOld') : e === 'auth' ? et('delAuth') : T.err + ' (' + (e || '?') + ')';
+        toast(m); edMsgList(m);
+      }
     });
     return b;
   }
