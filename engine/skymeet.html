@@ -1345,6 +1345,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .friendRow .bdg{ margin-left:2px; }
   #devBody .dSec{ font-weight:600; font-size:12px; letter-spacing:.06em; text-transform:uppercase; margin:14px 0 4px; opacity:.8; }
   #devBody .dSec:first-child{ margin-top:0; }
+  #devBody .dSec{ padding-top:2px; }
+  #devBody .dSec + .devRow, #devBody .dSec + div > .devRow:first-child{ border-top:0; }   /* tidak ada garis ganda tepat di bawah judul kategori */
+  #devBody .dM{ font-size:11.5px; opacity:.7; }
   @media (max-width:380px){ .frWrap .bdgL{ display:none; } .frWrap .bdg{ min-width:24px; } }
   .nav-item.devItem{ position:relative; margin-top:9px; }
   .nav-item.devItem[hidden]{ display:none; }
@@ -1357,16 +1360,16 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #devBox header{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px 6px; font-size:16px; font-weight:600; }
   #devBox button{ font-family:inherit; color:#f4f5fb; cursor:pointer; }
   .devX{ width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); font-size:18px; }
-  .devTabs{ display:flex; gap:6px; padding:6px 16px; overflow-x:auto; }
+  .devTabs{ display:flex; gap:6px; padding:6px 16px; overflow-x:auto; scrollbar-width:none; } .devTabs::-webkit-scrollbar{ display:none; }
   .devTabs button{ flex:none; padding:7px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:transparent; font-size:13px; }
   .devTabs button[aria-selected="true"]{ background:rgba(255,255,255,.16); }
   .devBody{ padding:6px 16px 16px; overflow:auto; }
   .devBody input[type=search]{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#f4f5fb; font:inherit; font-size:16px; margin-bottom:8px; }
-  .devRow{ display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid rgba(255,255,255,.1); }
+  .devRow{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; padding:9px 0; border-top:1px solid rgba(255,255,255,.1); }   /* tombol turun ke baris baru bila sempit, tidak memeras nama */
   .devRow .dIc{ width:34px; height:34px; flex:none; border-radius:9px; object-fit:contain; background:rgba(255,255,255,.07); }
-  .devRow .dI{ flex:1; min-width:0; } .devRow .dN{ font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .devRow .dM{ font-size:11.5px; opacity:.7; } .devRow .bdg{ color:#f4f5fb; }
-  .devRow button, .devRow select{ padding:6px 9px; border-radius:9px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#f4f5fb; font:inherit; font-size:12px; }
+  .devRow .dI{ flex:1 1 140px; min-width:0; } .devRow .dN{ font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .devRow .dM{ font-size:11.5px; opacity:.7; overflow-wrap:anywhere; } .devRow .bdg{ color:#f4f5fb; }
+  .devRow button, .devRow select{ white-space:nowrap; padding:6px 9px; border-radius:9px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#f4f5fb; font:inherit; font-size:12px; }
   .devRow select option{ color:#111; }
   .devPg{ display:flex; align-items:center; justify-content:space-between; padding-top:10px; font-size:12.5px; }
   .devPg button{ padding:7px 12px; border-radius:9px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); }
@@ -1514,7 +1517,13 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .fIcoBtn img.ai{ filter:var(--logo-filter); }
   .fIcoBtn[aria-expanded="true"]{ opacity:.55; }   /* tanpa kartu bulat: tanda terbuka = ikon meredup */
   .fSep{ border:0; height:1px; background:rgba(255,255,255,0.12); margin:2px 0 4px; }
-  .pgCurRow{ margin-top:2px; }
+  .pgCurRow{ margin-top:2px; display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); column-gap:2px; align-items:center; justify-items:center; }   /* 8 ikon (7 mata uang + rasi) di kolom sama lebar: jarak antar ikon selalu sama */
+  .pgCurRow .fCu{ width:100%; max-width:50px; }
+  .pgCurRow .curSep{ display:none; }   /* pemisah tidak lagi menjadi kolom/penyebab jarak: digambar lewat .pgRasi::before di celah antar ikon */
+  .pgCurRow .pgRasi::before{ content:''; position:absolute; left:-2px; top:50%; width:1px; height:28px; margin-top:-14px; pointer-events:none; background:rgba(128,128,128,0.45); background:color-mix(in srgb, var(--ink) 34%, transparent); }
+  .pgCurRow .pgRasi .fCuChev{ right:auto; left:50%; bottom:0; transform:translateX(-50%); min-width:0; padding:0; background:none; -webkit-backdrop-filter:none; backdrop-filter:none; color:var(--ink-soft); }   /* panah di bawah ikon (tidak menimpa ikon seperti angka) */
+  .pgCurRow .pgRasi .fCuChev svg{ width:9px; height:9px; }
+  .pgCurRow .pgRasi .fIc{ margin-top:-5px; }
   .curSep{ flex:none; align-self:center; width:1px; height:28px; margin:0 3px; background:rgba(128,128,128,0.45); background:color-mix(in srgb, var(--ink) 34%, transparent); }
   .conBox{ padding-top:12px; }
   button.fCu.pgCu:active{ transform:none; }
@@ -7092,7 +7101,7 @@ initPerm(); startLoop();
     });
     const rest = Object.keys(all).filter(k => all[k].kind === 'season' && !used.has(k));
     if(rest.length){
-      box.appendChild(mkEl('div', 'dM', et('seaOther')));
+      box.appendChild(mkEl('div', 'dSec', et('seaOther')));
       rest.forEach(k => { const j = all[k].json || {}; box.appendChild(seaRow(j.name || k, '', info(k), edBtn(et('edit'), () => edStart({ key:k, kind:'season', title:j.name || k, layout:j })))); });
     }
   }
@@ -7106,7 +7115,7 @@ initPerm(); startLoop();
       body.appendChild(mkEl('div', 'dSec', et('secSeason')));
       const box = mkEl('div'); body.appendChild(box); edPaintSeasons(box);
       const f = mkEl('div', 'edBar'), ni = mkEl('input'); ni.type = 'text'; ni.maxLength = 40; ni.placeholder = et('seasonName'); ni.setAttribute('aria-label', et('seasonName'));
-      f.append(ni, edBtn(et('create'), () => { const v = ni.value.trim(); if(v) edCreateSeason(v); })); body.appendChild(mkEl('div', 'dM', et('newSeason'))); body.appendChild(f);
+      f.append(ni, edBtn(et('create'), () => { const v = ni.value.trim(); if(v) edCreateSeason(v); })); body.appendChild(mkEl('div', 'dSec', et('newSeason'))); body.appendChild(f);
       body.appendChild(msg); return;
     }
     edLoadSugg(body, T);
