@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<title>Administrasi Unggas Mandiri</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Administrasi">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="unggasmandiri.json">
+<link rel="icon" href="unggasmandiriicons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="unggasmandiriicons/apple-touch-icon.png">
+<style>
+html,body{margin:0;height:100%;background:#fff;overflow:hidden}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);box-sizing:border-box}
+iframe{display:block;width:100%;height:100%;border:0}
+#off{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;font:15px system-ui,sans-serif;color:#1c2024;text-align:center;padding:24px}
+#off.on{display:flex}
+#off button{padding:10px 18px;border-radius:8px;border:0;background:#0f766e;color:#fff;font:inherit;cursor:pointer}
+</style></head>
+<body>
+<iframe id="app" src="https://script.google.com/macros/s/AKfycbyKO_DdxY5S45RUmmnw0-S_wVUD_eRsH-EXTj1DSBL5ogzxj8IztD13MEJqqVvEpP1Zmg/exec" title="Administrasi Unggas Mandiri" allow="clipboard-write; fullscreen"></iframe>
+<div id="off" role="alert"><b>Tidak ada koneksi internet</b><span>Aplikasi membutuhkan internet untuk membuka data nota.</span><button id="rt">Coba lagi</button></div>
+<script>
+var f=document.getElementById('app'),off=document.getElementById('off'),src=f.src;
+function chk(){if(navigator.onLine){off.classList.remove('on');if(!f.src||f.dataset.dead){f.src=src;f.dataset.dead=''}}else{off.classList.add('on');f.dataset.dead='1'}}
+addEventListener('online',chk);addEventListener('offline',chk);
+document.getElementById('rt').onclick=function(){chk();if(navigator.onLine)f.src=src};
+chk();
+if('serviceWorker' in navigator)addEventListener('load',function(){navigator.serviceWorker.register('./unggasmandiri-sw.js').catch(function(){})});
+</script></body></html>
