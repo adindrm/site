@@ -8611,7 +8611,7 @@ initPerm(); startLoop();
     const w1 = document.getElementById('ldW1'), w2 = document.getElementById('ldW2');
     const COLORS = ['#ffffff', '#ffe9a8', '#9fd0ff'];
     const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-    let W, H_, dpr, parts = [], logoImg, logoBox, cx, cy, sc, sx;
+    let W, H_, dpr, parts = [], logoImg, logoBox, cx, cy, sc, sx, glowCv = null, glowGp = 32, ringPx = 58;
 
     // ---- progres memuat yang asli ----
     const loaded = { dom: document.readyState !== 'loading', fonts: false, win: document.readyState === 'complete' };
@@ -8619,6 +8619,8 @@ initPerm(); startLoop();
       Promise.all([document.fonts.ready, document.fonts.load('400 16px "Space Grotesk"').catch(() => {})]).then(() => { loaded.fonts = true; }, () => { loaded.fonts = true; });
     } else loaded.fonts = true;
     if(!loaded.win) addEventListener('load', () => { loaded.win = true; });
+    setTimeout(() => { loaded.fonts = true; }, 3500);                     // font lambat/tertahan jaringan: jangan menahan loading
+    setTimeout(() => { if(loaded.dom) loaded.win = true; }, 9000);        // sumber luar yang menggantung: jangan menahan event 'load' selamanya
     if(!loaded.dom) document.addEventListener('DOMContentLoaded', () => { loaded.dom = true; });
 
     // ---- sprite bintang 4 sudut ----
@@ -8686,7 +8688,8 @@ initPerm(); startLoop();
       W = innerWidth; H_ = innerHeight;
       cvs.width = W * dpr; cvs.height = H_ * dpr;
       const hb = hud.getBoundingClientRect();
-      ring = { x: hb.left + hb.width / 2, y: hb.top + hb.height / 2, r: ringEl.offsetWidth * .45 + 4 };
+      ringPx = ringEl.offsetWidth || 58;
+      ring = { x: hb.left + hb.width / 2, y: hb.top + hb.height / 2, r: ringPx * .45 + 4 };
       ring0 = { x: ring.x, y: ring.y };
     }
     function build(){
@@ -8695,6 +8698,8 @@ initPerm(); startLoop();
       cx = W / 2; cy = H_ * .44;
       logoBox = { x: cx - lw / 2, y: cy - lh / 2, w: lw, h: lh };
       sc = document.createElement('canvas'); sc.width = Math.ceil(lw * dpr); sc.height = Math.ceil(lh * dpr); sx = sc.getContext('2d');
+      glowCv = document.createElement('canvas'); glowCv.width = Math.ceil((lw + 2 * glowGp) * dpr); glowCv.height = Math.ceil((lh + 2 * glowGp) * dpr);   // lapisan cahaya logo dibuat sekali
+      { const gx = glowCv.getContext('2d'); gx.shadowColor = '#ffe9a8'; gx.shadowBlur = 24; gx.drawImage(logoImg, glowGp * dpr, glowGp * dpr, lw * dpr, lh * dpr); }
       const off = document.createElement('canvas'); off.width = Math.ceil(lw); off.height = Math.ceil(lh);
       const o = off.getContext('2d', { willReadFrequently: true });
       o.drawImage(logoImg, 0, 0, lw, lh);
@@ -8706,7 +8711,7 @@ initPerm(); startLoop();
         const tx = logoBox.x + x + rnd(0, step), ty = logoBox.y + y + rnd(0, step);
         const ang = Math.random() * Math.PI * 2, rad = Math.max(W, H_) * rnd(.55, .9), ci = (Math.random() * 3) | 0;
         parts.push({
-          tx, ty, sx: cx + Math.cos(ang) * rad, sy: cy + Math.sin(ang) * rad,
+          i: parts.length, tx, ty, sx: cx + Math.cos(ang) * rad, sy: cy + Math.sin(ang) * rad,
           delay: Math.random() * .45, curve: rnd(-.6, .6),
           size: rnd(step * 1.2, step * 2.8), ci, spr: sprites[ci], hx: new Float32Array(TN), hy: new Float32Array(TN), hn: 0,
           rot: Math.random() * 6.28, spin: rnd(-1.5, 1.5), ph: Math.random() * 6.28,
@@ -8763,9 +8768,8 @@ initPerm(); startLoop();
     }
     function logoGlow(a){
       if(a <= 0) return;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'source-over';
-      ctx.globalAlpha = a; ctx.shadowColor = '#ffe9a8'; ctx.shadowBlur = 24;
-      ctx.drawImage(logoImg, logoBox.x, logoBox.y, logoBox.w, logoBox.h); ctx.shadowBlur = 0;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = a;
+      if(glowCv) ctx.drawImage(glowCv, logoBox.x - glowGp, logoBox.y - glowGp, logoBox.w + 2 * glowGp, logoBox.h + 2 * glowGp);
     }
 
     // ---- letusan titik bulat kecil dari tengah layar: menyebar ke seluruh layar, pecah saat menyentuh tepi ----
@@ -8830,8 +8834,23 @@ initPerm(); startLoop();
       return alive + pops.length + frags.length;
     }
 
+    function drawRingSpark(time, alpha, x0, y0, R){   // kepala percikan di ujung busur progres + ekor + percikan yang terus mengorbit
+      if(alpha <= .02) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter';
+      if(shown < .995){
+        const head = -Math.PI / 2 + shown * Math.PI * 2;
+        for(let k = 9; k >= 1; k--){ const a = head - k * .12, f = 1 - k / 10, sz = 4 + 6 * f; ctx.globalAlpha = alpha * f * .8; ctx.drawImage(DOTS[1], x0 + Math.cos(a) * R - sz / 2, y0 + Math.sin(a) * R - sz / 2, sz, sz); }
+        drawStar(sprites[1], x0 + Math.cos(head) * R, y0 + Math.sin(head) * R, 15, time * 3, alpha);
+      }
+      for(let i = 0; i < 4; i++){   // posisi dihitung dari waktu dinding: tetap berputar mulus walau frame tersendat
+        const dir = i % 2 ? -1 : 1, a = time * (1.6 + i * .37) * dir + i * 1.57, rr = R + 4 + (i % 2) * 5 + Math.sin(time * 2 + i) * 1.5, sz = 6 + (i % 2) * 2;
+        ctx.globalAlpha = alpha * (.5 + .4 * Math.sin(time * 5 + i * 2)); ctx.drawImage(DOTS[i % 3], x0 + Math.cos(a) * rr - sz / 2, y0 + Math.sin(a) * rr - sz / 2, sz, sz);
+      }
+    }
+
     // ---- alur utama ----
     let t0 = performance.now();
+    let fpsAvg = 16.7, stride = 1, prevPending = -1, lastAbsorb = 0;
     let last = t0, raf = 0, bursting = false, BS = 0, tBurst = Infinity, realP = 0, shown = 0, realDoneAt = -1, revealed = false, finished = false, rmAt = 0, popAt = 0, popAlive = 1, dots = [], pops = [], frags = [], popC = { x: 0, y: 0 };
     function reveal(){
       if(revealed) return; revealed = true;
@@ -8850,7 +8869,9 @@ initPerm(); startLoop();
     function frame(now){
       if(finished) return;
       const t = now - t0, time = t / 1000;
-      const dt = Math.min(.033, Math.max(0, (now - last) / 1000)); last = now;
+      const rdt = Math.max(0, (now - last) / 1000), dt = Math.min(.033, rdt), sdt = Math.min(.09, rdt); last = now;   // sdt: simulasi partikel mengejar waktu nyata setelah tersendat (tidak merayap lambat)
+      if(rdt < .25){ fpsAvg += (rdt * 1000 - fpsAvg) * .05; if(t > 1500 && fpsAvg > 30 && stride < 3){ stride++; fpsAvg = 16.7; } }   // perangkat lambat: gambar lebih sedikit partikel, bukan membeku
+      const ns = Math.min(6, Math.max(2, Math.ceil(sdt / .0125)));
 
       // persen = yang lebih lambat antara waktu (5 detik) dan proses memuat asli
       const rt = (loaded.dom ? .3 : 0) + (loaded.fonts ? .35 : 0) + (loaded.win ? .35 : 0);
@@ -8896,7 +8917,8 @@ initPerm(); startLoop();
       let pending = 0;
       const tails = Array.from({ length: 9 }, () => new Path2D());
       for(const p of parts){
-        let x, y, a = 1, sz = p.size, rot = p.rot + time * p.spin;
+        if(!bursting && stride > 1 && (p.i % stride)) continue;
+        let x, y, a = 1, sz = p.size * (!bursting && stride > 1 ? 1 + .3 * (stride - 1) : 1), rot = p.rot + time * p.spin;
         if(t < G){   // berkumpul membentuk logo
           p.sim = false; p.done = false;
           const g = clamp((t / G - p.delay) / .55), e = outQuart(g);
@@ -8916,7 +8938,7 @@ initPerm(); startLoop();
               const v0 = p.bd * DRAG * 1.25;
               p.vx = Math.cos(p.ba) * v0; p.vy = Math.sin(p.ba) * v0;
             }
-            step(p, dt / 2); step(p, dt / 2);
+            for(let k = 0; k < ns; k++) step(p, sdt / ns);
             x = p.x; y = p.y;
             if(p.done || y > H_ + 200){ p.done = true; continue; }
             sz *= .35 + .65 * clamp((p.d - 24 * Math.max(ringK, .2)) / 60);
@@ -8938,6 +8960,11 @@ initPerm(); startLoop();
         ringT = clamp((1 - pending / Math.max(1, parts.length) - .2) / .8);
         ro = 1 - clamp((ringU - .8) / .2);
       }
+      if(bursting){   // anti-macet: bila tak ada lagi bintang yang terserap selama 2 dtk, sisanya langsung dianggap masuk
+        if(prevPending < 0 || pending < prevPending) lastAbsorb = t;
+        prevPending = pending;
+        if(pending > 0 && t - Math.max(lastAbsorb, BS + 2500) > 2000) for(const p of parts) p.done = true;
+      }
       const sh = 1 - ringU * .85;   // goyangan & denyut mereda saat lingkaran sedang bergerak ke tengah
       ringEl.style.opacity = ro.toFixed(3);
       whitehole(time, shown >= .995, false);
@@ -8945,17 +8972,18 @@ initPerm(); startLoop();
       if(Math.abs(rk.hit - lastHit) > .015){ lastHit = rk.hit; ringEl.style.setProperty('--hit', rk.hit.toFixed(2)); }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.lineCap = 'round';
       for(let i = 0; i < 9; i++){ ctx.globalAlpha = TA[i % 3]; ctx.lineWidth = TW[i % 3]; ctx.strokeStyle = COLORS[(i / 3) | 0]; ctx.stroke(tails[i]); }
+      drawRingSpark(time, ro, ring.x + rk.x * sh, ring.y + rk.y * sh, 34 / 84 * ringPx * ringK * (1 + rk.hit * .1 * sh));
 
       if(isFinite(tBurst) && t > tBurst - 800 && t < tBurst + 150){ const k = (t - (tBurst - 800)) / 950; drawShine(k * k * (3 - 2 * k)); }
       let la = 0;
       if(!bursting){ if(t > G * .85) la = clamp((t - G * .85) / 1100) * .55; }
       else if(t < BS + 350) la = .55 * (1 - (t - BS) / 350);
       logoGlow(la);
-      if(popAt) popAlive = drawPop(t, time, dt);
+      if(popAt) popAlive = drawPop(t, time, sdt);
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
 
       // semua partikel logo sudah terhisap & lingkaran tepat di tengah -> langsung pecah jadi titik bulat kecil, dan form login muncul
-      if(bursting && !popAt && t > BS + 300 && ((pending === 0 && ringU > .985) || t > BS + 15000)){ popAt = t; spawnPop(); reveal(); }
+      if(bursting && !popAt && t > BS + 300 && ((pending === 0 && ringU > .985) || t > BS + 9000)){ popAt = t; spawnPop(); reveal(); }
       if(popAt && t > popAt + 900 && popAlive === 0){ finish(); return; }
       raf = requestAnimationFrame(frame);
     }
