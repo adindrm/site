@@ -7586,7 +7586,10 @@ initPerm(); startLoop();
   const edNorm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
   const edNmKey = v => String(v || '').trim().replace(/[^\w]+/g, '_');
   const edNameOf = u => { let s = String(u).split('/').pop().split('?')[0]; try{ s = decodeURIComponent(s); }catch(e){} return s.replace(/\.\w+$/, ''); };
-  const edThumb = u => u + '/revision/latest/scale-to-width-down/128';
+  const edThumb = u => {
+    const m = String(u).match(/^(.*?\/images\/[^?]*?\.(?:png|jpe?g|webp|gif))/i);
+    return m ? m[1] + '/revision/latest/scale-to-width-down/128' : String(u);
+  };
   async function edLoadSD(){
     if(edSD) return edSD;
     const r = await Promise.all([edJson('spirits'), edJson('spirit-trees'), edJson('nodes'), edJson('items')]), by = a => { const m = new Map(); a.forEach(x => m.set(x.guid, x)); return m; };
@@ -7718,8 +7721,18 @@ initPerm(); startLoop();
     let done = 0, fail = 0, cursor = 0;
     const one = async it => {
       try{
-        const r = await fetch(edThumb(it.icon), { mode:'cors' }); if(!r.ok) throw new Error(r.status);
-        const bmp = await createImageBitmap(await r.blob()), cv = document.createElement('canvas'); cv.width = cv.height = 128;
+        let blob = null;
+        for(const u of [edThumb(it.icon), it.icon]){
+          try{ const r = await fetch(u, { mode:'cors' }); if(!r.ok) throw new Error(r.status); blob = await r.blob(); break; }catch(e0){}
+        }
+        if(!blob){   // CORS: minta server Apps Script yang mengambil gambarnya
+          for(const u of [edThumb(it.icon), it.icon]){
+            const p = await api('fetchImage', { url:u }, undefined, { timeout:30000 });
+            if(p && p.ok){ blob = new Blob([edB64(p.data)], { type:p.mime }); break; }
+          }
+        }
+        if(!blob) throw new Error('fail');
+        const bmp = await createImageBitmap(blob), cv = document.createElement('canvas'); cv.width = cv.height = 128;
         const sc = Math.min(128 / bmp.width, 128 / bmp.height), w = bmp.width * sc, hh = bmp.height * sc;
         cv.getContext('2d').drawImage(bmp, (128 - w) / 2, (128 - hh) / 2, w, hh);
         const v = edFeat(cv, 0, 0, 128, 128, 1);
@@ -7727,7 +7740,7 @@ initPerm(); startLoop();
       }catch(e){ fail++; }
       done++; if(onProgress && done % 10 === 0) onProgress(done, list.length);
     };
-    await Promise.all(Array.from({ length:12 }, async () => { while(cursor < list.length) await one(list[cursor++]); }));
+    await Promise.all(Array.from({ length:4 }, async () => { while(cursor < list.length) await one(list[cursor++]); }));
     return { ents:ents, fail:fail, fromLink:list.length };
   }
   function edCellUrl(e, sz){ const c = document.createElement('canvas'); c.width = c.height = sz || 64; c.getContext('2d').drawImage(e.sheet, 0, 0, 128, 128, 0, 0, c.width, c.height); return c.toDataURL('image/png'); }
