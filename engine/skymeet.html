@@ -1447,6 +1447,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #devBox .edAtC button{ display:flex; flex-direction:column; align-items:center; width:88px; padding:4px; border-radius:8px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.05); font-size:10px; }
   #devBox .edAtC button img{ width:48px; height:48px; object-fit:contain; }
   #devBox .edAtC button.on{ border-color:#7cf0b0; background:rgba(124,240,176,.18); } #devBox .edAtC button.low{ opacity:.6; }
+  .edAtDd{ position:relative; margin-left:auto; }
+  #devBox .edAtC button.edAtDt{ justify-content:center; min-height:74px; border-style:dashed; border-color:rgba(255,255,255,.4); cursor:pointer; color:inherit; }
+  #devBox .edAtC button.edAtDt.on{ border-style:solid; border-color:#7cf0b0; background:rgba(124,240,176,.18); }
+  #devBox .edAtC button.edAtDt span{ max-width:80px; overflow-wrap:anywhere; } #devBox .edAtC button.edAtDt .car{ font-size:13px; line-height:1; opacity:.8; }
+  .edAtDp{ position:absolute; right:0; top:calc(100% + 4px); z-index:8; width:min(320px,78vw); max-height:300px; display:flex; flex-direction:column; background:#0b1230; border:1px solid rgba(255,255,255,.28); border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.5); overflow:hidden; }
+  .edAtDp[hidden]{ display:none; }
+  .edAtDp input{ margin:6px; padding:6px 8px; border-radius:8px; border:1px solid rgba(255,255,255,.25); background:rgba(0,0,0,.35); color:#eaf3ff; font:inherit; font-size:13px; }
+  .edAtDl{ overflow-y:auto; padding:0 4px 6px; }
+  #devBox .edAtC .edAtDl button{ flex-direction:row; justify-content:flex-start; gap:8px; width:100%; padding:4px 6px; border:0; background:none; color:#eaf3ff; font-size:12px; text-align:left; cursor:pointer; }
+  #devBox .edAtC .edAtDl button img{ width:36px; height:36px; flex:none; background:#060b1e; border-radius:6px; }
+  #devBox .edAtC .edAtDl button span{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  #devBox .edAtC .edAtDl button:hover{ background:rgba(255,255,255,.1); } #devBox .edAtC .edAtDl button.on{ background:rgba(124,240,176,.18); }
   .edSpRow{ border-top:1px solid rgba(255,255,255,.1); padding:8px 0; }
   .edSpTop{ display:grid; grid-template-columns:48px 1fr; gap:8px; align-items:center; }
   .edSpIc{ width:48px; height:48px; object-fit:contain; background:#060b1e; border-radius:8px; }
@@ -6927,6 +6939,7 @@ initPerm(); startLoop();
       icNeed:'Load a raster image and detect circles first.', icDone:'{n} icons extracted.',
       atGo:'Match', atLoad:'Loading atlas…', atProg:'Downloading icons: {d} / {n}…', atFail:'Icons could not be downloaded ({f} failed). Check your connection, or the wiki server refuses access (CORS). Try again later.', atEmpty:'No icons could be read.',
       atDone:'{n} atlas icons used ({k} from the link{f}). The first candidate is picked automatically when similarity is 60% or more; check and change it if wrong.', atFailPart:', {f} failed',
+      atMore:'More icons\u2026', atSrch:'Search icon name', atNoRes:'No icons found.', atTop:'Showing {n} of {t}; type to filter.',
       atLow:' Circle {n} has the lowest emote match ({p}%), so it became the leader (elder / guide).', atLeader:' · leader (elder / guide)', atAuto:'Auto-detected: circle {n}, lowest emote match = leader (elder / guide).',
       spGo:'Find spirit & tree', spLoad:'Downloading spirit data…', spNeed:'Add circles first.', spDone:'{k} of {n} circles matched a spirit.{h} Check and change them in the list if wrong.', spHintIco:' Run "Match" first so icons are filled, or choose a spirit manually.',
       spNone:'(none)', spNoTree:'This spirit has no tree in the data.', spFail:'Failed to load spirit data: {m}', circIcon:' · icon: {n}',
@@ -6946,6 +6959,7 @@ initPerm(); startLoop();
       icNeed:'Upload gambar raster dan deteksi lingkaran dulu.', icDone:'{n} ikon diambil.',
       atGo:'Cocokkan', atLoad:'Memuat atlas…', atProg:'Mengunduh ikon dari link: {d} / {n}…', atFail:'Ikon tidak bisa diunduh dari link ({f} gagal). Periksa koneksi internet, atau server wiki menolak akses dari halaman ini (CORS). Coba lagi nanti.', atEmpty:'Tidak ada ikon terbaca.',
       atDone:'{n} ikon atlas dipakai ({k} dari link{f}). Kandidat pertama dipilih otomatis bila kemiripan 60% atau lebih; periksa dan ubah bila salah.', atFailPart:', {f} gagal diunduh',
+      atMore:'Ikon lain\u2026', atSrch:'Cari nama ikon', atNoRes:'Ikon tidak ditemukan.', atTop:'Menampilkan {n} dari {t}; ketik untuk menyaring.',
       atLow:' Lingkaran {n} punya kecocokan emot terendah ({p}%), jadi otomatis dijadikan leader (elder / guide).', atLeader:' · leader (elder / guide)', atAuto:'Terdeteksi otomatis: lingkaran {n}, kecocokan emot paling rendah = leader (elder / guide).',
       spGo:'Cari spirit & pohon', spLoad:'Mengunduh data spirit…', spNeed:'Tambahkan lingkaran dulu.', spDone:'{k} dari {n} lingkaran cocok dengan spirit.{h} Periksa dan ubah lewat daftar bila salah.', spHintIco:' Jalankan "Cocokkan" dulu agar ikon terisi, atau pilih spirit manual.',
       spNone:'(tidak ada)', spNoTree:'Pohon spirit ini tidak ada di data.', spFail:'Gagal memuat data spirit: {m}', circIcon:' · ikon: {n}',
@@ -7708,13 +7722,13 @@ initPerm(); startLoop();
     for(let i = 0; i < v.length; i++) v[i] /= n;
     return v;
   }
-  function edMatchIcon(cv){
+  function edMatchAll(cv){   // semua ikon atlas, urut dari yang paling mirip
     const vs = [1, 0.8, 0.64].map(z => edFeat(cv, 0, 0, cv.width, cv.height, z)).filter(Boolean);
-    if(!vs.length) return [];
-    const sc = edAtlas.ents.map((e, idx) => { let b = -1; for(const v of vs){ let d = 0; for(let i = 0; i < v.length; i++) d += v[i] * e.v[i]; if(d > b) b = d; } return [b, idx]; });
-    sc.sort((a, b) => b[0] - a[0]);
-    return sc.slice(0, 3).map(a => ({ s:a[0], e:edAtlas.ents[a[1]] }));
+    if(!vs.length || !edAtlas) return [];
+    const sc = edAtlas.ents.map(e => { let b = -1; for(const v of vs){ let d = 0; for(let i = 0; i < v.length; i++) d += v[i] * e.v[i]; if(d > b) b = d; } return { s:b, e:e }; });
+    sc.sort((x, y) => y.s - x.s); return sc;
   }
+  function edMatchIcon(cv){ return edMatchAll(cv).slice(0, 3); }
   async function edLoadAtlas(onProgress){
     await edLoadSD(); const ms = edEmoteSpirits();
     const list = [...edSD.items.values()].filter(it => it.type === 'Emote' && /^https?:/.test(it.icon || '') && ms.has(it.guid)), ents = [];
@@ -7744,18 +7758,57 @@ initPerm(); startLoop();
     return { ents:ents, fail:fail, fromLink:list.length };
   }
   function edCellUrl(e, sz){ const c = document.createElement('canvas'); c.width = c.height = sz || 64; c.getContext('2d').drawImage(e.sheet, 0, 0, 128, 128, 0, 0, c.width, c.height); return c.toDataURL('image/png'); }
+  function edUrlOf(e){ return e._u || (e._u = edCellUrl(e)); }   // thumbnail dibuat sekali per ikon atlas
   function edPaintMatches(){
     const box = $('edAtRes'); if(!box || !ED) return; box.textContent = ''; const E = ED, res = E.matchRes; if(!res || res.length !== E.C.length || E.icons.length !== E.C.length) return;
     res.forEach((cands, i) => {
       const row = mkEl('div', 'edAtRow'), im = mkEl('img'), col = mkEl('div'), cc = mkEl('div', 'edAtC');
       im.src = E.icons[i].url; im.alt = '';
       col.appendChild(mkEl('div', 'edNote', ef('circN', { n:i + 1 }) + (E.special === i ? et('atLeader') : '')));
-      cands.forEach(c => {
-        const b = mkEl('button', (c.s < 0.5 ? 'low ' : '') + (E.ico[i] === c.e.url ? 'on' : '')), t = mkEl('img'), l = mkEl('span', '', c.e.name + ' · ' + Math.round(Math.max(0, c.s) * 100) + '%');
-        b.type = 'button'; t.src = edCellUrl(c.e); t.alt = ''; l.title = c.e.url; b.append(t, l);
-        b.addEventListener('click', () => { E.ico[i] = E.ico[i] === c.e.url ? '' : c.e.url; [...cc.querySelectorAll('button')].forEach(x => x.classList.remove('on')); if(E.ico[i]) b.classList.add('on'); });
+      const shown = cands.slice(0, 2), sbtn = [];   // dua saran teratas; tempat ketiga diganti dropdown semua ikon
+      // dropdown: tombol (ikon terpilih + nama) + daftar semua ikon hasil scan, bisa dicari
+      const dd = mkEl('div', 'edAtDd'), tg = mkEl('button', 'edAtDt'), tImg = mkEl('img'), tLb = mkEl('span'), car = mkEl('span', 'car', '\u25be');
+      const pop = mkEl('div', 'edAtDp'), q = mkEl('input'), ls = mkEl('div', 'edAtDl');
+      tg.type = 'button'; tg.setAttribute('aria-haspopup', 'listbox'); tg.setAttribute('aria-expanded', 'false'); tImg.alt = ''; q.type = 'text'; q.placeholder = et('atSrch'); q.setAttribute('aria-label', et('atSrch')); pop.hidden = true;
+      tg.append(tImg, tLb, car); pop.append(q, ls); dd.append(tg, pop);
+      const paintTg = () => {   // ikon terpilih yang bukan salah satu saran ditampilkan di tombol dropdown
+        const u = E.ico[i], inShown = shown.some(c => c.e.url === u), ent = u && edAtlas ? edAtlas.ents.find(x => x.url === u) : null;
+        tg.classList.toggle('on', !!u && !inShown);
+        if(u && !inShown){ tImg.src = ent ? edUrlOf(ent) : edThumb(u); tImg.style.display = ''; tLb.textContent = ent ? ent.name : edNameOf(u); tLb.title = u; }
+        else { tImg.removeAttribute('src'); tImg.style.display = 'none'; tLb.textContent = et('atMore'); tLb.title = ''; }
+      };
+      const sync = () => { sbtn.forEach(([b, c]) => b.classList.toggle('on', E.ico[i] === c.e.url)); paintTg(); };
+      shown.forEach(c => {
+        const b = mkEl('button', (c.s < 0.5 ? 'low ' : '') + (E.ico[i] === c.e.url ? 'on' : '')), t = mkEl('img'), l = mkEl('span', '', c.e.name + ' \u00b7 ' + Math.round(Math.max(0, c.s) * 100) + '%');
+        b.type = 'button'; t.src = edCellUrl(c.e); t.alt = ''; l.title = c.e.url; b.append(t, l); sbtn.push([b, c]);
+        b.addEventListener('click', () => { E.ico[i] = E.ico[i] === c.e.url ? '' : c.e.url; sync(); });
         cc.appendChild(b);
       });
+      let all = null, onDoc = null;
+      const close = () => { pop.hidden = true; tg.setAttribute('aria-expanded', 'false'); if(onDoc){ document.removeEventListener('click', onDoc, true); document.removeEventListener('keydown', onKey, true); onDoc = null; } };
+      const onKey = e => { if(e.key === 'Escape'){ e.stopPropagation(); close(); tg.focus(); } };
+      const fill = () => {
+        const f = q.value.trim().toLowerCase(), LIM = 120; ls.textContent = '';
+        const hit = all.filter(c => !f || c.e.name.toLowerCase().indexOf(f) >= 0);
+        hit.slice(0, LIM).forEach(c => {
+          const b = mkEl('button', E.ico[i] === c.e.url ? 'on' : ''), t = mkEl('img'), l = mkEl('span', '', c.e.name + ' \u00b7 ' + Math.round(Math.max(0, c.s) * 100) + '%');
+          b.type = 'button'; b.setAttribute('role', 'option'); t.src = edUrlOf(c.e); t.alt = ''; b.append(t, l);
+          b.addEventListener('click', () => { E.ico[i] = E.ico[i] === c.e.url ? '' : c.e.url; sync(); close(); });
+          ls.appendChild(b);
+        });
+        if(!hit.length) ls.appendChild(mkEl('div', 'edNote', et('atNoRes')));
+        else if(hit.length > LIM) ls.appendChild(mkEl('div', 'edNote', ef('atTop', { n:LIM, t:hit.length })));
+      };
+      tg.addEventListener('click', () => {
+        if(!pop.hidden){ close(); return; }
+        if(!all) all = edMatchAll(E.icons[i].cv);
+        q.value = ''; fill(); pop.hidden = false; tg.setAttribute('aria-expanded', 'true');
+        onDoc = e => { if(!dd.contains(e.target)) close(); };
+        document.addEventListener('click', onDoc, true); document.addEventListener('keydown', onKey, true);
+        setTimeout(() => { try{ q.focus({ preventScroll:true }); }catch(e){} }, 0);
+      });
+      q.addEventListener('input', fill);
+      paintTg(); cc.appendChild(dd);
       col.appendChild(cc); row.append(im, col); box.appendChild(row);
     });
   }
