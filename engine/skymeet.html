@@ -2486,13 +2486,14 @@ function resize() {
   bodySig = '';
   const dpr = window.SkyGfx ? SkyGfx.dpr(1.75) : Math.min(devicePixelRatio || 1, LOW ? 1 : 1.75);
   W = scene.clientWidth; H = scene.clientHeight;
-  cv.width = W * dpr; cv.height = H * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  sv.width = cv.width; sv.height = cv.height; sx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  wxc.width = cv.width; wxc.height = cv.height; wx2.setTransform(dpr, 0, 0, dpr, 0, 0);
-  seaC.width = cv.width; seaC.height = cv.height; seaX.setTransform(dpr, 0, 0, dpr, 0, 0);
-  hsv.width = cv.width; hsv.height = cv.height; hsx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  spc.width = cv.width; spc.height = cv.height; spx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const dpr1 = Math.min(dpr, 1);   // asap & laut lembut: dpr 1 cukup
+  cv.width = W * dpr1; cv.height = H * dpr1;
+  ctx.setTransform(dpr1, 0, 0, dpr1, 0, 0);
+  sv.width = W * dpr; sv.height = H * dpr; sx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  wxc.width = W * dpr; wxc.height = H * dpr; wx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  seaC.width = W * dpr1; seaC.height = H * dpr1; seaX.setTransform(dpr1, 0, 0, dpr1, 0, 0);
+  hsv.width = W * dpr; hsv.height = H * dpr; hsx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  spc.width = W * dpr; spc.height = H * dpr; spx.setTransform(dpr, 0, 0, dpr, 0, 0);
   unit = Math.min(1.4, Math.max(.5, Math.min(W, H * .8) / 420));
 }
 addEventListener('resize', resize); resize();
@@ -2735,7 +2736,7 @@ let fxDrawn = false;
 function drawFx(dt) {
   if (!fxs.length && !fxDrawn) return;
   spx.clearRect(0, 0, W, H);
-  fxDrawn = fxs.length > 0;
+  fxDrawn = fxs.length > 0; showCv(spc, fxDrawn);
   if (!fxs.length) return;
   let j = 0;
   for (const q of fxs) {
@@ -2922,6 +2923,7 @@ function emLocal(f, i) {
   const a = f.la * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a), ox = EM[0].lx - 190.7, oy = EM[0].ly - 184.6;
   return [190.7 + ox * ca - oy * sa + (f.hx || 0), 184.6 + ox * sa + oy * ca + (f.hy || 0)];
 }
+const showCv = (c, on) => { if (c._v !== on) { c._v = on; c.style.visibility = on ? 'visible' : 'hidden'; } };   // kanvas kosong disembunyikan: tidak ikut dikomposisi GPU tiap frame
 let ovEls = null;
 const ovOpen = () => { if (!ovEls) ovEls = ['rsOv', 'setOv', 'avOv', 'addOverlay'].map(id => document.getElementById(id)); return ovEls.some(e => e && e.classList.contains('open')); };
 function frame(now) {
@@ -2983,10 +2985,11 @@ function frame(now) {
           r: rnd(.08, .17) * dz2, k: kS, age: 0, life: rnd(.6, 1.3), ph: rnd(0, 6.28), sw: rnd(2, 4.5) });
       }
     }
-    f.el.style.opacity = .85;   // sedikit transparan agar tidak mengganggu teks di depannya
+    if (f.op !== .85) { f.el.style.opacity = f.op = .85; }   // sedikit transparan agar tidak mengganggu teks di depannya
     const kk = 1 / (p.s * unit), dz = .5 + .5 * f.depth;
     const gn = night ? .3 + .7 * g : g;   // malam: karakter selalu sedikit berpendar
-    { const flt = `drop-shadow(0 0 ${((1 + 6*gn) * dz * kk).toFixed(1)}px rgba(255,244,190,${(.03 + .97*gn).toFixed(2)})) drop-shadow(0 0 ${((.5 + 2.5*gn) * dz * kk).toFixed(1)}px rgba(255,255,255,${(.06 + .84*gn).toFixed(2)}))`;
+    { const q2 = v => (Math.round(v * 20) / 20).toFixed(2), q1 = v => (Math.round(v * 2) / 2).toFixed(1), gq = Math.round(gn * 12) / 12;
+      const flt = `drop-shadow(0 0 ${q1((1 + 6*gq) * dz * kk)}px rgba(255,244,190,${q2(.03 + .97*gq)})) drop-shadow(0 0 ${q1((.5 + 2.5*gq) * dz * kk)}px rgba(255,255,255,${q2(.06 + .84*gq)}))`;
       if (flt !== f.flt) { f.el.style.filter = flt; f.flt = flt; } }
     let rs = Math.cos(TR.roll); if (Math.abs(rs) < .05) rs = rs < 0 ? -.05 : .05;
     f.el.style.transform = `translate(${p.x}px,${p.y}px) rotate(${p.rot}rad) scale(${p.s * unit})` + (TR.roll ? ` rotate(${HEAD_ANGLE}rad) scale(1,${rs.toFixed(3)}) rotate(${-HEAD_ANGLE}rad)` : '');
@@ -3027,7 +3030,7 @@ function frame(now) {
       hsx.globalAlpha = al; hsx.drawImage(spk, q.x - rr * .55, q.y - rr * .55, rr * 1.1, rr * 1.1);
       hsparks[m++] = q;
     }
-    hsparks.length = m; hsx.globalAlpha = 1; hsx.globalCompositeOperation = 'source-over'; }
+    hsparks.length = m; hsx.globalAlpha = 1; hsx.globalCompositeOperation = 'source-over'; showCv(hsv, m > 0); }
   if (parts.length) ctx.clearRect(0, 0, W, H);
   let j = 0;
   for (const q of parts) {
@@ -3046,7 +3049,7 @@ function frame(now) {
     ctx.drawImage(sp, q.x + ox + q.jx * sp2 - rr, q.y + oy + q.jy * sp2 - rr, rr * 2, rr * 2);
     parts[j++] = q;
   }
-  parts.length = j;
+  parts.length = j; showCv(cv, j > 0);
   applyWob(now); drawFx(dt);
   raf = document.hidden ? 0 : requestAnimationFrame(frame);
 }
@@ -3258,22 +3261,24 @@ function drawSea(now, a) {
   const inten = clamp01((a + 1) / 3) * clamp01((18 - a) / 16) * wf, col = mix([255, 245, 215], [255, 165, 85], clamp01((8 - a) / 8)).map(Math.round).join(',');
   // riak gelombang halus (makin dekat makin lebar)
   const light = mix(skyH, [255, 255, 255], .5).map(Math.round).join(',');
+  seaX.fillStyle = `rgb(${light})`;
   for (let j = 0; j < 46; j++) {
     const f = j / 46, y = yh + Math.pow(f, 1.7) * (H - yh) + 2;
     for (let q = 0; q < 5; q++) {
       const x = ((hash(j, q) * W * 1.2 + t * (4 + 30 * f) * (q % 2 ? 1 : -1)) % (W * 1.2) + W * 1.2) % (W * 1.2) - W * .1, len = (16 + 150 * f) * (.5 + hash(q, j));
-      seaX.fillStyle = `rgba(${light},${(.04 + .1 * f) * (.5 + .5 * Math.sin(t * 1.2 + j + q * 2))})`; seaX.fillRect(x, y, len, 1 + f * 1.5);
+      seaX.globalAlpha = (.04 + .1 * f) * (.5 + .5 * Math.sin(t * 1.2 + j + q * 2)); seaX.fillRect(x, y, len, 1 + f * 1.5);
     }
   }
   // pantulan matahari: kilauan memanjang tepat di bawah matahari
-  if (inten > .02) for (let j = 0; j < 70; j++) {
+  seaX.globalAlpha = 1;
+  if (inten > .02) { seaX.fillStyle = `rgb(${col})`; for (let j = 0; j < 70; j++) {
     const f = j / 70, y = yh + Math.pow(f, 1.5) * (H - yh), spread = 8 + (y - yh) * .22;
     for (let q = 0; q < 5; q++) {
       const x = xs + (hash(j, q + 9) - .5) * 2 * spread * (1 + .3 * Math.sin(t * .6 + j)), w = (4 + (y - yh) * .06) * (.4 + hash(q, j * 3));
-      seaX.fillStyle = `rgba(${col},${inten * (1 - f * .7) * (.35 + .65 * Math.max(0, Math.sin(t * 2 + j * 1.7 + q * 4.1))) * .8})`;
+      seaX.globalAlpha = inten * (1 - f * .7) * (.35 + .65 * Math.max(0, Math.sin(t * 2 + j * 1.7 + q * 4.1))) * .8;
       seaX.fillRect(x - w / 2, y, w, 1.5 + f * 2.5);
     }
-  }
+  } seaX.globalAlpha = 1; }
   // cahaya hangat di cakrawala dan kabut tipis di garis pertemuan laut-langit
   if (inten > .02) { seaX.save(); seaX.translate(xs, yh); seaX.scale(1, .1);
     const hg = seaX.createRadialGradient(0, 0, 0, 0, 0, W * .45); hg.addColorStop(0, `rgba(${col},${.5 * inten})`); hg.addColorStop(1, `rgba(${col},0)`);
@@ -3338,7 +3343,7 @@ function setWx(type) {
 }
 let wxDrawn = false;
 function drawWx(dt, now) {
-  { const has = drops.length > 0 || flakes.length > 0; if (has || wxDrawn) wx2.clearRect(0, 0, W, H); wxDrawn = has; }
+  { const has = drops.length > 0 || flakes.length > 0; if (has || wxDrawn) wx2.clearRect(0, 0, W, H); wxDrawn = has; showCv(wxc, has); }
   if (drops.length) {
     wx2.strokeStyle = night ? 'rgba(170,190,235,.5)' : 'rgba(225,238,255,.55)'; wx2.lineWidth = 1; wx2.beginPath();
     for (const d of drops) {
@@ -4232,7 +4237,7 @@ initPerm(); startLoop();
       }
       ctx.globalAlpha = 1;
     }
-    function loop(t){ raf = 0; if(!isOn() || document.hidden) return; if(!lastT || t - lastT >= 48){ lastT = t; draw(t); } if(!still) raf = requestAnimationFrame(loop); }   // siang/tab tersembunyi: berhenti total
+    function loop(t){ raf = 0; if(!isOn() || document.hidden) return; const gap = (window.SkyGfx && SkyGfx.level() === 'high') ? 0 : (window.SkyGfx && SkyGfx.level() === 'medium') ? 30 : 48; if(!lastT || t - lastT >= gap){ lastT = t; draw(t); } if(!still) raf = requestAnimationFrame(loop); }   // siang/tab tersembunyi: berhenti total
     function kick(){ if(!raf && !still && isOn() && !document.hidden) raf = requestAnimationFrame(loop); }
     window.addEventListener('resize', () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
     document.addEventListener('visibilitychange', kick);
