@@ -11491,9 +11491,11 @@ const d='M'+pts.join('L')+'Z';ps.forEach(p=>p.setAttribute('d',d))})})();
       document.querySelectorAll('#snj .sj-gate').forEach(g => g.setAttribute('aria-label', nm(CL_NAME, GATE_CL[+g.dataset.i])));
       if(foc >= 0){ gh.textContent = nm(CL_NAME, curCl); renderSubs(); info(); }
     }
+    let isOn = false;   // animasi keluar hanya boleh jalan bila sebelumnya benar-benar sedang di halaman kosmetik
     function active(on){
+      const was = isOn; isOn = on;
       starsRun(on);
-      if(!on){ outro(); closeG(true); }
+      if(!on){ if(was){ outro(); if(noteE) noteE.classList.remove('show'); } closeG(true); }
       else { cancelOut(); cam = foc < 0 ? overview() : focusCam(foc); draw(); if(foc < 0){ mdE.classList.remove('sj-off'); paintMode(); introMode(300); } introPage(); }
     }
     return { filter, info, lang, active, refresh, reload };
@@ -11578,6 +11580,7 @@ const d='M'+pts.join('L')+'Z';ps.forEach(p=>p.setAttribute('d',d))})})();
   window.addEventListener('sky:page', e => {
     const n = e.detail && e.detail.page;
     SJ.active(n === 5);
+    if(n !== 5) closeModal();
     if(n === 5) loadItems();
     if(n === 6) setTimeout(loadMap, 150);
   });
