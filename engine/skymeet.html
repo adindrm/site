@@ -3028,6 +3028,7 @@ const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;   // gera
 const LOW = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);   // perangkat ringan: resolusi & partikel dikurangi
 let night = false;
 let W, H, unit;
+let seaKc = 1;   // [perf] skala kanvas laut (dideklarasikan di sini karena resize() dipanggil sebelum bagian bawah skrip dijalankan)
 let bodySig = '';
 function resize() {
   bodySig = '';
@@ -3776,7 +3777,7 @@ function moonFrac(ms) {
 }
 const WXF = { clear: 1, cloudy: .6, rain: .25, storm: .08, snow: .35, fog: .3 };   // cuaca meredupkan matahari/bulan
 // ---- Sunset: langit berubah warna menurut tinggi matahari, dan pandangan "turun" ke dataran rendah dengan lautan ----
-let seaKc = 1;   // [perf] skala kanvas laut: 1 normal, .5 di halaman kosmetik (laut lembut; CSS meregangkan ke 100%)
+seaKc = 1;   // [perf] skala kanvas laut: 1 normal, .5 di halaman kosmetik (laut lembut; CSS meregangkan ke 100%)
 let seaFlip = 0, lastSkyV = null;   // [perf] pencacah frame laut; nilai warna langit terakhir yang ditulis
 let lastBg = '', lastFog = '', lastMist = '', lastFogOp = '', lastWindOp = '';
 let cam = 0, sjOn = false, SP = null, MP = null, starK = 0, skyTick = 0, skyOwn = false;   // cam: 0 = pandangan tinggi, 1 = turun ke permukaan laut
