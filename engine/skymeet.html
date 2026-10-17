@@ -49,13 +49,13 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 (function(){
   var KEY = 'sky-gfx', LV = ['high', 'medium', 'low'], d = document.documentElement, lv = null;
   try{ lv = localStorage.getItem(KEY); }catch(e){}
-  if(LV.indexOf(lv) < 0) lv = ((navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2)) ? 'low' : 'high';
+  if(LV.indexOf(lv) < 0){ var weak = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2); lv = weak ? 'low' : ((window.matchMedia && matchMedia('(pointer:coarse)').matches) ? 'medium' : 'high'); }
   function paint(){ LV.forEach(function(l){ d.classList.toggle('gfx-' + l, l === lv); }); }
   window.SkyGfx = {
     level: function(){ return lv; },
     dpr: function(max){ return Math.min(window.devicePixelRatio || 1, lv === 'low' ? 1 : lv === 'medium' ? 1.25 : max); },
     scale: function(){ return lv === 'low' ? .35 : lv === 'medium' ? .65 : 1; },
-    set: function(l){ if(LV.indexOf(l) < 0 || l === lv) return; lv = l; try{ localStorage.setItem(KEY, l); }catch(e){} paint(); window.dispatchEvent(new CustomEvent('sky:gfx', { detail:{ level:l } })); }
+    set: function(l, temp){ if(LV.indexOf(l) < 0 || l === lv) return; lv = l; if(!temp){ try{ localStorage.setItem(KEY, l); }catch(e){} } paint(); window.dispatchEvent(new CustomEvent('sky:gfx', { detail:{ level:l } })); }
   };
   paint();
 })();
@@ -2066,7 +2066,7 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
 #snj .sj-sc{flex:none;width:var(--sj-q,96px);height:var(--sj-q,96px);min-height:0;padding:9px 9px}
 #snj .sj-sc{flex-direction:column;justify-content:flex-end;align-items:stretch}
 #snj .sj-sc b{flex:none;padding-right:0;font-size:11.5px;overflow-wrap:break-word}
-#snj .sj-lp{position:relative;display:flex;flex:none;width:100%;height:calc(var(--sj-s,52px)*3 + 28px);padding:8px}
+#snj .sj-lp{position:relative;display:flex;flex:none;width:100%;height:calc(var(--sj-s,52px)*3 + 28px);padding:8px 0}
 #snj .sj-list{flex:1;min-width:0;justify-content:safe center;display:grid;height:calc(var(--sj-s,52px)*3 + 12px);grid-template-rows:repeat(3,var(--sj-s,52px));grid-auto-columns:var(--sj-s,52px);grid-auto-flow:column;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
 #snj .sj-it{width:var(--sj-s,52px);height:var(--sj-s,52px);padding:0;display:grid;place-items:center;border-radius:12px;color:var(--sj-ink);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14)}
 #snj .sj-it .sj-th{width:calc(100% - 10px);height:calc(100% - 10px);border-radius:8px;border:1px dashed rgba(255,255,255,.3);display:grid;place-items:center;overflow:hidden}
@@ -2179,6 +2179,25 @@ body.p5 #skKid{display:none!important}   /* anak Sky bawaan disembunyikan di hal
 #snj #pvi{transform-box:fill-box;transform-origin:50% 100%}
 #sjTip{transition:opacity .2s ease}
 @media (prefers-reduced-motion: reduce){ #snj *{transition-duration:.01s !important} }
+
+/* ===== pintu: tanpa animasi goyang / filter hover ===== */
+#snj .sj-wd{animation:none!important;transform:none!important}
+#snj .sj-gate,#snj .sj-gate *{animation:none!important;transition:none!important}
+#snj .sj-gate:hover,#snj .sj-gate:focus-visible{filter:none!important}
+/* [fix goyang pintu] `[role="button"]:active` global (scale .92 + brightness) ikut mengenai pintu (role=button). Pada SVG, scale berpusat di titik asal SVG,
+   jadi pintu melompat/menyusut saat tombol mouse ditahan. Di HP sentuhan terlalu singkat sehingga tidak terlihat. */
+#snj .sj-gate:active,#snj .sj-gate:focus{scale:none!important;filter:none!important;box-shadow:none!important}
+/* ===== progres koleksi kosmetik (mobile-first) ===== */
+#snj .sj-pg{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;padding:11px 14px 10px;border-radius:16px;background:rgba(14,8,30,.72);border:1px solid rgba(255,255,255,.14)}
+#snj .sj-pg[hidden]{display:none}
+#snj .sj-pg .ph{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:600;margin-bottom:3px}
+#snj .sj-pg .ph span{font-size:11px;font-weight:500;opacity:.8;font-variant-numeric:tabular-nums}
+#snj button.pr{display:grid;grid-template-columns:minmax(60px,76px) 1fr 62px;align-items:center;gap:8px;width:100%;min-height:30px;padding:3px 0;border:0;border-radius:8px;background:none;color:var(--sj-ink);font-size:11.5px;text-align:left}
+#snj button.pr .pb{height:6px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
+#snj button.pr .pb i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffd98a,#ffb85c)}
+#snj button.pr em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;opacity:.82;font-size:11px}
+#snj button.pr:active{background:rgba(255,255,255,.08)}
+@media (max-height:560px){#snj .sj-pg{display:none}}
 </style>
 <style id="ovPauseCss">
 /* [ovpause] saat overlay menutup latar, animasi CSS adegan dijeda. Ikon melayang (#fab) sengaja tidak ikut dijeda. */
@@ -2788,16 +2807,16 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 
 
 <!-- rumput & titik cahaya -->
-<g class="sj-t-ledge"><g transform="translate(62 0)"><ellipse cx="262" cy="220.5" rx="39" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(0 3.6)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(0 1.8)" fill="#2e2c46"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="262" cy="206.5" rx="26.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="262" cy="209.5" rx="21.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M237.0 213.5Q262 217.0 287.0 213.5" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="262" cy="218.9" rx="30" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(31 0)"><ellipse cx="383" cy="220" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(0 3.6)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(0 1.8)" fill="#2e2c46"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="383" cy="206.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="383" cy="209.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M357.0 213.0Q383 216.5 409.0 213.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="383" cy="218.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(0 0)"><ellipse cx="504" cy="222" rx="39" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 3.6)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 1.8)" fill="#2e2c46"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="504" cy="208.0" rx="26.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="504" cy="211.0" rx="21.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M479.0 215.0Q504 218.5 529.0 215.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="504" cy="220.4" rx="30" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(-31 0)"><ellipse cx="625" cy="224" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(0 3.6)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(0 1.8)" fill="#2e2c46"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="625" cy="210.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="625" cy="213.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M599.0 217.0Q625 220.5 651.0 217.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="625" cy="222.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(-62 0)"><ellipse cx="746" cy="223" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(0 3.6)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(0 1.8)" fill="#2e2c46"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="746" cy="209.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="746" cy="212.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M720.0 216.0Q746 219.5 772.0 216.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="746" cy="221.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g clip-path="url(#stp)"><rect x="200" y="195" width="600" height="50" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".7"/></g></g><g id="gb" class="sj-t-grass"></g><g id="gd" class="sj-t-grass"></g><g id="pvg" opacity="0" transform="translate(0 4)" style="transition:opacity .35s"><ellipse id="pvs" cx="504" cy="211" rx="14" ry="3.5" fill="#06050f" opacity=".45" filter="url(#sb2)"/><image id="pvi" x="482.5" y="149" width="43" height="61" preserveAspectRatio="xMidYMax meet" display="none"/><g id="pvp"><rect id="pvr" x="483" y="140" width="42" height="70" rx="6" fill="#ffffff" fill-opacity=".06" stroke="#f4f5fb" stroke-opacity=".5" stroke-dasharray="3 3"/><text id="pvt" x="504" y="172" text-anchor="middle" font-size="4.5" fill="#f4f5fb" fill-opacity=".85"><tspan id="pt1" x="504"></tspan><tspan id="pt2" x="504" dy="6"></tspan></text></g></g>
+<g class="sj-t-ledge"><g transform="translate(62 2.2)"><ellipse cx="262" cy="220.5" rx="39" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="262" cy="206.5" rx="26.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="262" cy="209.5" rx="21.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M237.0 213.5Q262 217.0 287.0 213.5" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="262" cy="218.9" rx="30" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(31 2.2)"><ellipse cx="383" cy="220" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="383" cy="206.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="383" cy="209.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M357.0 213.0Q383 216.5 409.0 213.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="383" cy="218.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(0 2.2)"><ellipse cx="504" cy="222" rx="39" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="504" cy="208.0" rx="26.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="504" cy="211.0" rx="21.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M479.0 215.0Q504 218.5 529.0 215.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="504" cy="220.4" rx="30" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(-31 2.2)"><ellipse cx="625" cy="224" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="625" cy="210.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="625" cy="213.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M599.0 217.0Q625 220.5 651.0 217.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="625" cy="222.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(-62 2.2)"><ellipse cx="746" cy="223" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="746" cy="209.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="746" cy="212.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M720.0 216.0Q746 219.5 772.0 216.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="746" cy="221.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g clip-path="url(#stp)" transform="translate(0 2.2)"><rect x="200" y="195" width="600" height="50" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".7"/></g></g><g id="gb" class="sj-t-grass"></g><g id="gd" class="sj-t-grass"></g><g id="pvg" opacity="0" transform="translate(0 6.2)" style="transition:opacity .35s"><ellipse id="pvs" cx="504" cy="211" rx="14" ry="3.5" fill="#06050f" opacity=".45" filter="url(#sb2)"/><image id="pvi" x="482.5" y="149" width="43" height="61" preserveAspectRatio="xMidYMax meet" display="none"/><g id="pvp"><rect id="pvr" x="483" y="140" width="42" height="70" rx="6" fill="#ffffff" fill-opacity=".06" stroke="#f4f5fb" stroke-opacity=".5" stroke-dasharray="3 3"/><text id="pvt" x="504" y="172" text-anchor="middle" font-size="4.5" fill="#f4f5fb" fill-opacity=".85"><tspan id="pt1" x="504"></tspan><tspan id="pt2" x="504" dy="6"></tspan></text></g></g>
 <!-- anak berjubah merah di tengah -->
 </svg>
 <div class="sj-tint"></div><div class="sj-vig"></div>
-<div class="sj-md" id="sjMode" role="group"><button class="sj-mc" data-m="all" type="button" aria-pressed="true"><b></b><span></span></button><button class="sj-mc" data-m="mine" type="button" aria-pressed="false"><b></b><span></span></button></div>
+<div class="sj-md" id="sjMode" role="group"><button class="sj-mc" data-m="all" type="button" aria-pressed="true"><b></b><span></span></button><button class="sj-mc" data-m="mine" type="button" aria-pressed="false"><b></b><span></span></button><div class="sj-pg" id="sjProg" hidden></div></div>
 <div class="sj-tb sj-off" id="sjTop"><button id="sjTitle" type="button" aria-haspopup="menu" aria-expanded="false"></button><div class="sj-dd" id="sjDd" role="menu" hidden><button class="sj-do" data-m="all" type="button" role="menuitemradio" aria-pressed="true"></button><button class="sj-do" data-m="mine" type="button" role="menuitemradio" aria-pressed="false"></button></div></div>
 <div class="sj-kp sj-off" id="gc">
 <div class="sj-cat sj-pn"><div class="sj-hd"><div class="sj-gi"><svg class="sj-fg" id="fg" viewBox="86 28 128 245" aria-hidden="true"><path class="sj-cape" d="M132.7,110.9c11.6,6.9,18.3,13.7,28.8-0.7c30.5,11.5,34.7,64.7,47.7,93.8c-15.8,34-90.6,31.3-118.8,10.6C103.5,180.6,101,131.5,132.7,110.9z M196,200.7c-11.6-18.4-11.7-88-42-69.3c-10.1,5.5-17.5-17.4-26.6-0.2c-7.2,24.1-22.3,51.9-23.5,75.3C133.8,223.1,172.2,227.7,196,200.7z"/><path class="sj-head" d="M170.7,79.5c1.8,26.9-45.3,31.4-43.3,2C124,53.1,171.2,50.7,170.7,79.5z"/><path class="sj-hair" d="M148.7,49.3c-58.2,9.8-10.3,53-27.4,54.1c-2.3-15-4-4.3-10.7-9.7c0.2-4.7,3.8-10.4-3.9-10.5c-11.3-9.7,27.7-44.4,44.2-40c14.6-2.4,54.3,28.6,37.1,38.2c-6.8-0.2-1.6,6.7-1.9,10.1c-1.7,3.7-5.2,4.3-8.9,4.8c-3.3,1.4-1,7.3-5.7,7.1C179,83.4,183.2,54.8,148.7,49.3z"/><path class="sj-legs" d="M179.8,241.1c-1.8,7.5,4.3,28.6-7.8,27.1c-5.1-7.2-12-27.5-6-33.7C172.9,233.1,182.2,231.3,179.8,241.1z"/><path class="sj-legs" d="M116.5,251.1c0-12-3.2-25.5,13-16.8C141.4,245.5,115.3,286.7,116.5,251.1z"/><path class="sj-horn" d="M187.2,34.7c-1.7,8.7-7.8,13.6-12.5,12.8c-3.2-0.5-5.2-3.6-6-5c4.8-8.2,11.3-12.4,15.3-10.9C184.8,32,186.1,32.7,187.2,34.7z"/><path class="sj-horn" d="M110.7,36.6c0.6-2.6,1.6-3.4,2.3-3.7c2.9-1.3,8.2,3,13.5,10.7c-0.6,1.5-2.1,4.9-4.8,5.4C118,49.8,112.7,45.1,110.7,36.6z"/></svg><svg class="sj-pp" id="pp" viewBox="88 90 124 120" aria-hidden="true"><path d="M108.1,165.6c-22.9,6.2-23.5-15.3,0.1-11.6c10.7-6.8-6.1-21.4-2.7-28.5c5.4-6.3,12.4,5.8,17.9-0.4c14.8-7.1,11.6-21.7,17.4-33c9.1,16.8,5.7,17.4,24.8,27.7c6.2,7.4,12.6-8.9,18.3-3.4c3,3.8,2.3,8.1-2.1,12.2c-11.5,24.2,39.7,14.8,24.7,27c-6.6,5.4-17.6,1.5-22.5,8.1c-4.6,15.5-24.2,17.9-29.2,31.1c1.6,6.7-4.6,20.6-9.5,9c-1.7-5.3,2.2-14.9-5-16.3c-9.6-1.4-17.9-10.5-26.6-2.4C104.4,186.7,124.4,168.9,108.1,165.6z M121.3,153.1c-1.4,28.6,45.5,33,53.9,6.8C187.8,122.6,118.6,109.1,121.3,153.1z"/><path d="M181.2,174.9c3.5,0,7.9,5.4,6.9,8.5C184.7,192,168,175.6,181.2,174.9z"/><path d="M159.1,148.8c3.6,15.7-25.8,15.1-25.3,0.7C135.2,137.8,160.9,134.2,159.1,148.8z"/></svg></div><div class="sj-gtx"><div class="sj-ttl"><h1 id="gh"></h1><div class="sj-sub" id="sjInfo"></div></div><input class="sj-search" id="sjSearch" type="search" autocomplete="off" enterkeyhint="search"><i class="sj-inf" id="gp" role="button" tabindex="0">!</i></div></div>
 <div class="sj-subs" id="subs"></div></div>
-<div class="sj-lp sj-pn"><div class="sj-pt" id="pt" hidden><div class="sj-row"><button id="sjWish" type="button" aria-pressed="false"></button><button id="sjDetail" type="button"></button><button id="sjDye" type="button" aria-pressed="false" hidden></button></div></div><div class="sj-list" id="list"></div></div>
+<div class="sj-lp sj-pn"><div class="sj-pt" id="pt" hidden><div class="sj-row"><button id="sjWish" type="button" aria-pressed="false"></button><button id="sjDetail" type="button"></button><button id="sjDye" type="button" aria-pressed="false" hidden></button></div></div><div class="sj-list sj-v" id="list"></div></div>
 </div>
 </div>
 
@@ -3561,6 +3580,12 @@ function frame(now) {
   if (window.SkyGfx && SkyGfx.level() === 'low' && now - last < 28) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // grafik rendah: ~30 fps
   if (now - last < 14) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // [perf] batas ~60 fps: layar 90/120 Hz tidak perlu menjalankan adegan 2x lebih sering
   const dt = Math.min(.05, (now - last) / 1000); last = now;
+  // [perf] governor FPS: bila rata-rata frame > 26 ms selama 3 dtk (tanpa overlay), turunkan grafis satu tingkat (tidak disimpan permanen)
+  if (window.SkyGfx && !document.hidden && SkyGfx.level() !== 'low' && !ovOpen()) {
+    const g = window._fpsGov || (window._fpsGov = { n: 0, sum: 0, t0: now });
+    g.n++; g.sum += (now - (g.prev || now - dt * 1000)) ; g.prev = now;
+    if (now - g.t0 > 3000) { const avg = g.sum / Math.max(1, g.n); if (avg > 26 && g.t0 > 0) { SkyGfx.set(SkyGfx.level() === 'high' ? 'medium' : 'low', true); try { console.info('[skymeet] FPS rendah (' + Math.round(1000 / avg) + ' fps), grafis diturunkan ke ' + SkyGfx.level()); } catch (e) {} } g.n = 0; g.sum = 0; g.t0 = now; }
+  } else if (window._fpsGov) { window._fpsGov.n = 0; window._fpsGov.sum = 0; window._fpsGov.t0 = now; window._fpsGov.prev = 0; }
   updateSky(dt, now); Forest.tick(dt);   // [forest-addon]
   if (Forest.p < .995) drawBodiesIfChanged();   // [forest-addon]
   if (Forest.p > .003) Forest.draw(dt, now);   // [forest-addon]
@@ -4346,7 +4371,7 @@ function gcUpdate() {
     const k = skyAt(sunNow().alt), c = mix(skyColorAt(k, clamp01(b / H)), k.fog, .35).map(v => Math.round(v * .8));
     const fc = [0, 1, 2].map(i => Math.round(L([84, 152, 182][i], [22, 48, 94][i], fnk) * .9));   // warna bukit jauh hutan (siang → malam)
     const mc = c.map((v, i) => Math.round(L(v, fc[i], ef)));
-    gcTint.style.fill = 'rgb(' + mc + ')'; gcTint.style.opacity = L(.66, .55, ef).toFixed(3);
+    { const tf = 'rgb(' + mc + ')', to = L(.66, .55, ef).toFixed(3); if (gcTint._f !== tf) { gcTint._f = tf; gcTint.style.fill = tf; } if (gcTint._o !== to) { gcTint._o = to; gcTint.style.opacity = to; } }   // [perf] tulis hanya bila berubah: hindari render ulang filter SVG
   } catch (e) {}   // warna gunung ikut langit/kabut di cakrawala, lalu ikut warna bukit jauh saat di hutan
   const wk = ({ clear: 1, cloudy: .92, rain: .82, storm: .7, snow: .85, fog: .6 })[wx] ?? 1;   // hujan/kabut meredupkan pendar, tetapi tidak menghilangkannya
   gcEl.style.visibility = 'visible'; gcEl.style.opacity = (gcA * L(1, wk, ef)).toFixed(3);
@@ -4356,7 +4381,8 @@ function gcUpdate() {
 let gcLast = 0, gcLoopOn = false;
 function gcLoop(now) {
   if (document.hidden || (window.SkyOv && SkyOv.paused)) { gcLoopOn = false; return; }
-  if (now - gcLast >= 14) { gcLast = now; gcUpdate(); gcBakeSync(); }
+  const gcGap = ((window.SkyGfx && SkyGfx.level() === 'low') || (typeof ovOpen === 'function' && ovOpen())) ? 28 : 14;   // [perf] 30 fps saat grafis rendah / overlay terbuka
+  if (now - gcLast >= gcGap) { gcLast = now; gcUpdate(); gcBakeSync(); }
   requestAnimationFrame(gcLoop);
 }
 function gcLoopStart() { if (!gcLoopOn && !document.hidden && !(window.SkyOv && SkyOv.paused)) { gcLoopOn = true; requestAnimationFrame(gcLoop); } }
@@ -10966,9 +10992,9 @@ initPerm(); startLoop();
   const BASES = ['https://unpkg.com/skygame-data@latest/assets/', 'https://cdn.jsdelivr.net/npm/skygame-data@latest/assets/', 'https://fastly.jsdelivr.net/npm/skygame-data@latest/assets/'];
   const $ = id => document.getElementById(id);
   const TX = {
-    en:{ cos:'Cosmetics', detail:'Details', listAll:'Cosmetics List', listMine:'My List', allSub:'All items', mineSub:(o, w) => o + ' owned · ' + w + ' wished', wish:'Wish', wishAdd:'Added to your wish list', wishDel:'Removed from your wish list', wishNote:"You don't own this item yet. Hope you get it someday!", emptyMine:'Nothing here yet. Mark items as owned or add them with Wish.', dyeBtn:'Dye', about:'About', map:'Map', search:'Search items', all:'All', loading:'Loading…', err:'Could not load data. Check your connection.', retry:'Retry', more:'Show more', items:'items', owned:'Owned', mark:'Mark as owned', unmark:'Remove from owned', wiki:'Wiki', close:'Close', none:'Nothing found', realms:'Realms', areas:'Areas', shrines:'Shrines', dye:'Dye preview' },
-    id:{ cos:'Kosmetik', detail:'Detail', listAll:'Daftar Kosmetik', listMine:'Daftar Milikmu', allSub:'Semua item', mineSub:(o, w) => o + ' dimiliki · ' + w + ' wish', wish:'Wish', wishAdd:'Ditambahkan ke wish', wishDel:'Dihapus dari wish', wishNote:'Item ini belum kamu miliki. Semoga suatu hari nanti berhasil kamu dapatkan ✨', emptyMine:'Belum ada item di sini. Tandai item sebagai dimiliki atau tambahkan lewat Wish.', dyeBtn:'Pewarna', about:'Tentang', map:'Peta', search:'Cari item', all:'Semua', loading:'Memuat…', err:'Data gagal dimuat. Periksa koneksi.', retry:'Coba lagi', more:'Tampilkan lagi', items:'item', owned:'Dimiliki', mark:'Tandai dimiliki', unmark:'Hapus dari dimiliki', wiki:'Wiki', close:'Tutup', none:'Tidak ditemukan', realms:'Realm', areas:'Area', shrines:'Kuil', dye:'Pratinjau pewarna' },
-    es:{ cos:'Cosméticos', detail:'Detalles', listAll:'Lista de cosméticos', listMine:'Tu lista', allSub:'Todos los objetos', mineSub:(o, w) => o + ' tuyos · ' + w + ' deseados', wish:'Deseo', wishAdd:'Añadido a tus deseos', wishDel:'Quitado de tus deseos', wishNote:'Aún no tienes este objeto. ¡Ojalá lo consigas pronto!', emptyMine:'Aún no hay nada aquí. Marca objetos como obtenidos o añádelos con Deseo.', dyeBtn:'Tinte', about:'Sobre', map:'Mapa', search:'Buscar objetos', all:'Todos', loading:'Cargando…', err:'No se pudieron cargar los datos. Revisa tu conexión.', retry:'Reintentar', more:'Mostrar más', items:'objetos', owned:'Tengo', mark:'Marcar como obtenido', unmark:'Quitar de obtenidos', wiki:'Wiki', close:'Cerrar', none:'Sin resultados', realms:'Reinos', areas:'Áreas', shrines:'Santuarios', dye:'Vista del tinte' }
+    en:{ prog:'Collection progress', cos:'Cosmetics', detail:'Details', listAll:'Cosmetics List', listMine:'My List', allSub:'All items', mineSub:(o, w) => o + ' owned · ' + w + ' wished', wish:'Wish', wishAdd:'Added to your wish list', wishDel:'Removed from your wish list', wishNote:"You don't own this item yet. Hope you get it someday!", emptyMine:'Nothing here yet. Mark items as owned or add them with Wish.', dyeBtn:'Dye', about:'About', map:'Map', search:'Search items', all:'All', loading:'Loading…', err:'Could not load data. Check your connection.', retry:'Retry', more:'Show more', items:'items', owned:'Owned', mark:'Mark as owned', unmark:'Remove from owned', wiki:'Wiki', close:'Close', none:'Nothing found', realms:'Realms', areas:'Areas', shrines:'Shrines', dye:'Dye preview' },
+    id:{ prog:'Progres koleksi', cos:'Kosmetik', detail:'Detail', listAll:'Daftar Kosmetik', listMine:'Daftar Milikmu', allSub:'Semua item', mineSub:(o, w) => o + ' dimiliki · ' + w + ' wish', wish:'Wish', wishAdd:'Ditambahkan ke wish', wishDel:'Dihapus dari wish', wishNote:'Item ini belum kamu miliki. Semoga suatu hari nanti berhasil kamu dapatkan ✨', emptyMine:'Belum ada item di sini. Tandai item sebagai dimiliki atau tambahkan lewat Wish.', dyeBtn:'Pewarna', about:'Tentang', map:'Peta', search:'Cari item', all:'Semua', loading:'Memuat…', err:'Data gagal dimuat. Periksa koneksi.', retry:'Coba lagi', more:'Tampilkan lagi', items:'item', owned:'Dimiliki', mark:'Tandai dimiliki', unmark:'Hapus dari dimiliki', wiki:'Wiki', close:'Tutup', none:'Tidak ditemukan', realms:'Realm', areas:'Area', shrines:'Kuil', dye:'Pratinjau pewarna' },
+    es:{ prog:'Progreso de colección', cos:'Cosméticos', detail:'Detalles', listAll:'Lista de cosméticos', listMine:'Tu lista', allSub:'Todos los objetos', mineSub:(o, w) => o + ' tuyos · ' + w + ' deseados', wish:'Deseo', wishAdd:'Añadido a tus deseos', wishDel:'Quitado de tus deseos', wishNote:'Aún no tienes este objeto. ¡Ojalá lo consigas pronto!', emptyMine:'Aún no hay nada aquí. Marca objetos como obtenidos o añádelos con Deseo.', dyeBtn:'Tinte', about:'Sobre', map:'Mapa', search:'Buscar objetos', all:'Todos', loading:'Cargando…', err:'No se pudieron cargar los datos. Revisa tu conexión.', retry:'Reintentar', more:'Mostrar más', items:'objetos', owned:'Tengo', mark:'Marcar como obtenido', unmark:'Quitar de obtenidos', wiki:'Wiki', close:'Cerrar', none:'Sin resultados', realms:'Reinos', areas:'Áreas', shrines:'Santuarios', dye:'Vista del tinte' }
   };
   const TYPES = {
     Outfit:{ en:'Outfit', id:'Pakaian', es:'Atuendo' }, OutfitShoes:{ en:'Outfit & Shoes', id:'Pakaian & Sepatu', es:'Atuendo y calzado' },
@@ -11268,6 +11294,28 @@ O.push((p.x+nx*up).toFixed(1)+' '+(p.y+ny*up).toFixed(1));I.push((p.x-nx*dn).toF
 document.getElementById('mossp').setAttribute('d','M'+O.join('L')+'L'+I.reverse().join('L')+'Z');
 document.getElementById('mossq').setAttribute('d','M'+O2.join('L')+'L'+I2.reverse().join('L')+'Z')})();
 const svgL=document.querySelector('#snj svg.sj-land');
+/* [fix goyang] tepi kasar pintu dibakar jadi geometri statis. Sebelumnya filter feTurbulence+feDisplacementMap (url(#rough), 3x per pintu) dihitung ulang
+   tiap frame selama kamera memperbesar pintu, sehingga tepi pintu bergoyang. Sekarang bentuknya tetap kasar tetapi tanpa filter. */
+(function(){
+  const mb=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+  svgL.querySelectorAll('.sj-gate').forEach((g,k)=>{
+    const ps=[...g.querySelectorAll('path[filter="url(#rough)"]')]; if(!ps.length) return;
+    let L; try{ L=ps[0].getTotalLength(); }catch(e){ return; }
+    if(!(L>20)) return;
+    const N=Math.max(28,Math.round(L/3)),r=mb(7001+k*131),T=6.2832,ph=[0,1,2,3,4,5].map(()=>r()*T),P=[];
+    for(let i=0;i<N;i++){
+      const q=ps[0].getPointAtLength(L*i/N),t=i/N;
+      const nx=Math.sin(t*T*3+ph[0])*.5+Math.sin(t*T*7+ph[1])*.3+Math.sin(t*T*17+ph[2])*.2,ny=Math.sin(t*T*3+ph[3])*.5+Math.sin(t*T*8+ph[4])*.3+Math.sin(t*T*19+ph[5])*.2;
+      P.push([q.x+nx*1.3+(r()-.5)*.6,q.y+ny*1.3+(r()-.5)*.6]);
+    }
+    const f=v=>v.toFixed(1),m=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2],s0=m(P[N-1],P[0]);
+    let d='M'+f(s0[0])+' '+f(s0[1]);
+    for(let i=0;i<N;i++){const c=P[i],e=m(P[i],P[(i+1)%N]);d+='Q'+f(c[0])+' '+f(c[1])+' '+f(e[0])+' '+f(e[1])}
+    d+='Z';
+    ps.forEach(p=>{p.setAttribute('d',d);p.removeAttribute('filter')});
+  });
+})();
+
 const GC=[324,414,504,594,684];
     const gc = $('gc'), gh = $('gh'), gp = $('gp'), fg = $('fg'), pp = $('pp');
     let cam, foc = -1, raf = 0;
@@ -11288,7 +11336,7 @@ function go(t){const a={...cam},t0=performance.now(),D=matchMedia('(prefers-redu
     function an(e, kf, o){ if(NOANIM || !e || !e.animate) return; try{ return e.animate(kf, Object.assign({ duration:420, easing:'cubic-bezier(.2,.8,.2,1)', fill:'backwards' }, o || {})); }catch(_){} }
     const UP = (y, sc) => [{ opacity:0, translate:'0 ' + y + 'px', scale:String(sc || 1) }, { opacity:1, translate:'0 0', scale:'1' }];
     let tileBase = 0, pvKey = '', lastTitle = '';
-    function introMode(d){ mdE.querySelectorAll('.sj-mc').forEach((b, i) => an(b, UP(16, .94), { delay:(d || 0) + 150 + i * 110, duration:520 })); }
+    function introMode(d){ mdE.querySelectorAll('.sj-mc, .sj-pg').forEach((b, i) => an(b, UP(16, .94), { delay:(d || 0) + 150 + i * 110, duration:520 })); }
     // ----- pindah halaman: masuk (scene naik, kabut cahaya memudar) dan keluar (elemen turun & memudar bergantian) -----
     let outAn = [], lvT = 0;
     function cancelOut(){ outAn.forEach(a => { try{ a.cancel(); }catch(_){} }); outAn = []; clearTimeout(lvT); document.body.classList.remove('sj-leaving'); }
@@ -11297,8 +11345,8 @@ function go(t){const a={...cam},t0=performance.now(),D=matchMedia('(prefers-redu
       document.body.classList.add('sj-leaving'); lvT = setTimeout(() => { document.body.classList.remove('sj-leaving'); }, 950);
       const out = (e, d, y, dur) => { const a = an(e, [{ opacity:1, translate:'0 0' }, { opacity:0, translate:'0 ' + y + 'px' }], { duration:dur || 420, delay:d, fill:'both', easing:'ease-in' }); if(a) outAn.push(a); };
       if(foc >= 0){ out(tbE, 0, -14); out(gc, 60, 26); }
-      else mdE.querySelectorAll('.sj-mc').forEach((b, i) => out(b, i * 70, 20));
-      out(svgL, 140, 46, 640); out(mw, 100, 0, 500);
+      else mdE.querySelectorAll('.sj-mc, .sj-pg').forEach((b, i) => out(b, i * 70, 20));
+      out(svgL, 140, 46, 640); out(mw, 100, 0, 500); out(R.querySelector('.sj-vig'), 0, 0, 600);
     }
     function introPage(){
       an(svgL, [{ opacity:0, translate:'0 50px' }, { opacity:1, translate:'0 0' }], { duration:950, delay:80 });
@@ -11338,6 +11386,31 @@ function go(t){const a={...cam},t0=performance.now(),D=matchMedia('(prefers-redu
       { const tt = mode === 'mine' ? T.listMine : T.listAll; if(tt !== lastTitle){ ttlB.textContent = tt; if(lastTitle && foc >= 0) an(ttlB, UP(-5), { duration:280 }); lastTitle = tt; } }
       ddE.querySelectorAll('.sj-do').forEach(b => { b.setAttribute('aria-pressed', String(b.dataset.m === mode)); b.textContent = b.dataset.m === 'mine' ? T.listMine : T.listAll; });
       if(foc >= 0) info();
+      paintProg();
+    }
+    let progKey = '';
+    function paintProg(){   // ringkasan kepemilikan per lemari; ketuk baris = buka gerbang lemari itu
+      const pg = $('sjProg'); if(!pg) return;
+      if(!items){ pg.hidden = true; return; }
+      const T = t(), rows = []; let tO = 0, tT = 0;
+      CLOSETS.forEach(c => { const ty = new Set(); c.tabs.forEach(x => x.types.forEach(y => ty.add(y))); let n = 0, o = 0; items.forEach(i => { if(ty.has(i.type)){ n++; if(own[i.id]) o++; } }); if(n){ rows.push([c.k, o, n]); tO += o; tT += n; } });
+      if(!tT){ pg.hidden = true; return; }
+      rows.sort((a, b) => GATE_CL.indexOf(a[0]) - GATE_CL.indexOf(b[0]));
+      const key = T.prog + '|' + rows.map(r => r.join(',')).join(';');
+      if(key === progKey && !pg.hidden) return; progKey = key;
+      pg.textContent = '';
+      const hd = document.createElement('div'); hd.className = 'ph';
+      const h1 = document.createElement('b'), h2 = document.createElement('span');
+      h1.textContent = T.prog; h2.textContent = tO + ' / ' + tT + ' \u00b7 ' + Math.round(tO / tT * 100) + '%';
+      hd.append(h1, h2); pg.appendChild(hd);
+      rows.forEach(([k, o, n]) => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'pr';
+        const l = document.createElement('span'), bar = document.createElement('span'), fill = document.createElement('i'), v = document.createElement('em');
+        l.textContent = nm(CL_NAME, k); bar.className = 'pb'; fill.style.width = Math.round(o / n * 100) + '%'; bar.appendChild(fill); v.textContent = o + '/' + n;
+        b.append(l, bar, v); b.onclick = () => { const gi = GATE_CL.indexOf(k); if(gi >= 0) openG(gi); };
+        pg.appendChild(b);
+      });
+      pg.hidden = false;
     }
     function setMode(m){
       if(m === mode){ paintMode(); return; }
@@ -11450,11 +11523,11 @@ function go(t){const a={...cam},t0=performance.now(),D=matchMedia('(prefers-redu
       // ukuran kotak item mengikuti sisa tinggi card: tumpukan memenuhi ruang dari bawah header sampai setengah kotak di atas batu gerbang
       let SS = Math.max(30, Math.min(84, (Y - TOP - fx - 28) / 3.5));
       // kotak item memenuhi lebar card kiri-kanan: jumlah kolom dibulatkan ke atas, ukuran kotak disesuaikan (hanya mengecil sedikit, tinggi tetap muat)
-      const LW = gc.clientWidth - 16, NC = Math.max(3, Math.ceil((LW + 6) / (SS + 6)));
+      const LW = gc.clientWidth - 2, NC = Math.max(3, Math.ceil((LW + 6) / (SS + 6)));
       SS = Math.floor((LW - (NC - 1) * 6) / NC * 100) / 100;
       gc.style.setProperty('--sj-q', qq.toFixed(1) + 'px'); gc.style.setProperty('--sj-s', SS.toFixed(2) + 'px'); gc.style.setProperty('--sj-kb', (H - (Y - SS / 2)) + 'px');
       PH = 3 * NC;
-      listE.classList.toggle('sj-v', innerHeight > innerWidth);
+      listE.classList.add('sj-v');   // selalu scroll atas-bawah di semua lebar layar
     }
     function openG(i){
       foc = i; curCl = GATE_CL[i]; curTab = clObj().tabs[0].k; sel = null; selBtn = null; vw = 'normal'; q = ''; srchE.value = ''; hideTip();
@@ -11491,12 +11564,17 @@ const d='M'+pts.join('L')+'Z';ps.forEach(p=>p.setAttribute('d',d))})})();
       document.querySelectorAll('#snj .sj-gate').forEach(g => g.setAttribute('aria-label', nm(CL_NAME, GATE_CL[+g.dataset.i])));
       if(foc >= 0){ gh.textContent = nm(CL_NAME, curCl); renderSubs(); info(); }
     }
-    let isOn = false;   // animasi keluar hanya boleh jalan bila sebelumnya benar-benar sedang di halaman kosmetik
+    let wasOn = false;   // [fix bocor] sebelumnya outro() jalan di SETIAP pindah halaman (mis. Beranda->Event) sehingga scene kosmetik berkedip di atas halaman lain ~1 dtk
     function active(on){
-      const was = isOn; isOn = on;
       starsRun(on);
-      if(!on){ if(was){ outro(); if(noteE) noteE.classList.remove('show'); } closeG(true); }
+      if(!on){
+        if(wasOn) outro(); else cancelOut();
+        closeG(true); hideTip();
+        try{ if(noteE) noteE.classList.remove('show'); }catch(e){}
+        try{ closeModal(); }catch(e){}   // detail item tidak boleh tertinggal saat pindah halaman
+      }
       else { cancelOut(); cam = foc < 0 ? overview() : focusCam(foc); draw(); if(foc < 0){ mdE.classList.remove('sj-off'); paintMode(); introMode(300); } introPage(); }
+      wasOn = on;
     }
     return { filter, info, lang, active, refresh, reload };
   })(el);
@@ -11580,7 +11658,6 @@ const d='M'+pts.join('L')+'Z';ps.forEach(p=>p.setAttribute('d',d))})})();
   window.addEventListener('sky:page', e => {
     const n = e.detail && e.detail.page;
     SJ.active(n === 5);
-    if(n !== 5) closeModal();
     if(n === 5) loadItems();
     if(n === 6) setTimeout(loadMap, 150);
   });
