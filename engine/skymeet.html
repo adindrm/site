@@ -3642,6 +3642,14 @@ function frame(now) {
     if (f.lean0 === undefined) f.lean0 = f.lean; f.lean = f.lean0 + TR.lean;
     // cahaya, kepakan jubah, dan percepatan terbang berjalan bersamaan dari satu waktu dorongan
     const T = (now - f.start) / 1000; let tau = -1;
+    // mengarah ke atas (mendaki): jubah lebih sering mengepak. Kepakan pertama cepat setelah mulai naik, lalu berulang tiap ~2,6-4,2 dtk selama masih naik; tidak saat menyelam, di bawah permukaan, atau freestyle
+    if (!f.trk && !f.under && !(f.dv && f.dv.st >= 1) && Math.sin(p.rot + HEAD_ANGLE) < -.3) {
+      if (f.upNext === undefined) f.upNext = T + rnd(.6, 1.6);
+      else if (T >= f.upNext) {
+        if (!f.flaps.some(tb => Math.abs(T - tb) < 2.4)) { f.flaps.push(T); f.flaps.sort((m, n) => m - n); if (f.xs) f.xs.push({ t: T, a: rnd(.4, .7) }); f.upNext = T + rnd(2.6, 4.2); }
+        else f.upNext = T + .5;
+      }
+    } else f.upNext = undefined;
     for (const tb of f.flaps) if (T >= tb) tau = T - tb;   // kepakan terakhir yang sudah dimulai
     const g = tau >= 0 ? glowCurve(tau) : 0;
     // menukik: begitu lintasan mulai menurun, jubah tertarik ke bawah; makin curam turunnya, makin dalam
