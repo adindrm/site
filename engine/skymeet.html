@@ -2014,7 +2014,7 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
 #snj .sj-fog{position:absolute;left:-20%;width:140%;height:90px;top:calc(var(--sj-hz) - 45px);background:radial-gradient(ellipse at center,rgba(255,190,200,.16),transparent 70%);animation:sjfog 22s ease-in-out infinite alternate;pointer-events:none}
 @keyframes sjfog{to{transform:translateX(12%)}}
 #snj .sj-vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,transparent 55%,rgba(10,4,14,.55));pointer-events:none}
-#snj .sj-mote{position:absolute;border-radius:50%;background:#fff3b8;box-shadow:0 0 3px 1px rgba(255,230,140,.7);animation:sjdrift linear infinite;pointer-events:none}
+#snj .sj-mote{position:absolute;border-radius:50%;background:#fff3b8;animation:sjdrift linear infinite;pointer-events:none}
 @keyframes sjdrift{from{transform:translate3d(0,6px,0);opacity:.2}50%{opacity:.9}to{transform:translate3d(var(--sj-d),-14px,0);opacity:.2}}
 #snj #sjMw{position:absolute;left:0;top:0;width:0;height:0;transform-origin:0 0;pointer-events:none}
 #snj .sj-ic{animation:sjg 3s ease-in-out infinite}
@@ -3137,7 +3137,7 @@ function resize() {
   ctx.setTransform(dpr1, 0, 0, dpr1, 0, 0);
   sv.width = W * dpr; sv.height = H * dpr; sx.setTransform(dpr, 0, 0, dpr, 0, 0);
   wxc.width = W * dpr; wxc.height = H * dpr; wx2.setTransform(dpr, 0, 0, dpr, 0, 0);
-  seaC.width = W * dpr1; seaC.height = H * dpr1; seaX.setTransform(dpr1, 0, 0, dpr1, 0, 0);
+  seaC.width = W * dpr1; seaC.height = H * dpr1; seaX.setTransform(dpr1, 0, 0, dpr1, 0, 0); seaKc = 1;
   hsv.width = W * dpr; hsv.height = H * dpr; hsx.setTransform(dpr, 0, 0, dpr, 0, 0);
   spc.width = W * dpr; spc.height = H * dpr; spx.setTransform(dpr, 0, 0, dpr, 0, 0);
   { const ek = dpr1 * (window.SkyGfx ? (SkyGfx.level() === 'low' ? .6 : SkyGfx.level() === 'medium' ? .8 : 1) : 1);   // [perf] kanvas efek event ikut pengaturan Grafis (CSS menjaga ukuran tampil 100%)
@@ -3601,7 +3601,8 @@ function frame(now) {
   if (Forest.p < .995) drawBodiesIfChanged();   // [forest-addon]
   if (Forest.p > .003) Forest.draw(dt, now);   // [forest-addon]
   drawWx(dt, now);
-  for (let i = flyers.length - 1; i >= 0; i--) {
+  const P5 = document.body.classList.contains('p5');   // [perf] halaman kosmetik: burung/jejak terbang tidak terlihat, jadi tidak dihitung
+  for (let i = P5 ? -1 : flyers.length - 1; i >= 0; i--) {
     const f = flyers[i], t = tOf(f, now);
     if (t < 0) continue;
     if (f.xs && f.xs.length && !(f.dv && f.dv.st >= 1)) {   // tiap kepakan tambahan ikut menambah kecepatan (kurva sama seperti dorongan utama): waktu jalur dimajukan lebih cepat
@@ -3696,7 +3697,7 @@ function frame(now) {
       } else e.prev = pos;
     }
   }
-  if (!flyers.length && now >= nextAt && !REDUCE && evMode !== 'grandma') spawn(now);
+  if (!P5 && !flyers.length && now >= nextAt && !REDUCE && evMode !== 'grandma') spawn(now);
 
   if (hsparks.length) hsx.clearRect(0, 0, W, H);
   { let m = 0;
@@ -3879,6 +3880,7 @@ function moonFrac(ms) {
 }
 const WXF = { clear: 1, cloudy: .6, rain: .25, storm: .08, snow: .35, fog: .3 };   // cuaca meredupkan matahari/bulan
 // ---- Sunset: langit berubah warna menurut tinggi matahari, dan pandangan "turun" ke dataran rendah dengan lautan ----
+let seaKc = 1;   // [perf] skala kanvas laut: 1 normal, .5 di halaman kosmetik (laut lembut; CSS meregangkan ke 100%)
 let seaFlip = 0, lastSkyV = null;   // [perf] pencacah frame laut; nilai warna langit terakhir yang ditulis
 let lastBg = '', lastFog = '', lastMist = '', lastFogOp = '', lastWindOp = '';
 let cam = 0, sjOn = false, SP = null, MP = null, starK = 0, skyTick = 0, skyOwn = false;   // cam: 0 = pandangan tinggi, 1 = turun ke permukaan laut
@@ -3947,7 +3949,7 @@ function updateSky(dt, now) {
     if (fo !== lastFogOp) { fogB.style.opacity = fo; lastFogOp = fo; }
     if (mi !== lastMist) { mistB.style.filter = mi; lastMist = mi; }
     if (wo !== lastWindOp) { windsEl.style.opacity = wo; lastWindOp = wo; } }
-  if (cam > .01 && Forest.p < .995) { seaC.style.display = 'block'; if (!evBusy || (seaFlip ^= 1)) drawSea(now, a); }   // [perf] saat event laut digambar tiap frame ke-2 else if (seaC.style.display !== 'none') seaC.style.display = 'none';
+  if (cam > .01 && Forest.p < .995) { seaC.style.display = 'block'; { const wk = sjOn ? .5 : 1; if (wk !== seaKc) { const d1 = Math.min(window.SkyGfx ? SkyGfx.dpr(1.75) : Math.min(devicePixelRatio || 1, LOW ? 1 : 1.75), 1) * wk; seaC.width = Math.round(W * d1); seaC.height = Math.round(H * d1); seaX.setTransform(d1, 0, 0, d1, 0, 0); seaKc = wk; } } if (!evBusy || (seaFlip ^= 1)) drawSea(now, a); }   // [perf] saat event laut digambar tiap frame ke-2 else if (seaC.style.display !== 'none') seaC.style.display = 'none';
 }
 function drawSea(now, a) {
   const yh = H * (1 - .34 * cam), t = now / 1000, k = turtleSky(skyAt(a)), deep = k.sea, skyH = skyColorAt(k, yh / H);
@@ -3960,18 +3962,18 @@ function drawSea(now, a) {
   // riak gelombang halus (makin dekat makin lebar)
   const light = mix(skyH, [255, 255, 255], .5).map(Math.round).join(',');
   seaX.fillStyle = `rgb(${light})`;
-  for (let j = 0; j < 46; j++) {
-    const f = j / 46, y = yh + Math.pow(f, 1.7) * (H - yh) + 2;
-    for (let q = 0; q < 5; q++) {
+  for (let j = 0; j < 26; j++) {
+    const f = j / 26, y = yh + Math.pow(f, 1.7) * (H - yh) + 2;
+    for (let q = 0; q < 3; q++) {
       const x = ((hash(j, q) * W * 1.2 + t * (4 + 30 * f) * (q % 2 ? 1 : -1)) % (W * 1.2) + W * 1.2) % (W * 1.2) - W * .1, len = (16 + 150 * f) * (.5 + hash(q, j));
-      seaX.globalAlpha = (.04 + .1 * f) * (.5 + .5 * Math.sin(t * 1.2 + j + q * 2)); seaX.fillRect(x, y, len, 1 + f * 1.5);
+      seaX.globalAlpha = (.06 + .15 * f) * (.5 + .5 * Math.sin(t * 1.2 + j + q * 2)); seaX.fillRect(x, y, len, 1 + f * 1.5);
     }
   }
   // pantulan matahari: kilauan memanjang tepat di bawah matahari
   seaX.globalAlpha = 1;
-  if (inten > .02) { seaX.fillStyle = `rgb(${col})`; for (let j = 0; j < 70; j++) {
-    const f = j / 70, y = yh + Math.pow(f, 1.5) * (H - yh), spread = 8 + (y - yh) * .22;
-    for (let q = 0; q < 5; q++) {
+  if (inten > .02) { seaX.fillStyle = `rgb(${col})`; for (let j = 0; j < 40; j++) {
+    const f = j / 40, y = yh + Math.pow(f, 1.5) * (H - yh), spread = 8 + (y - yh) * .22;
+    for (let q = 0; q < 3; q++) {
       const x = xs + (hash(j, q + 9) - .5) * 2 * spread * (1 + .3 * Math.sin(t * .6 + j)), w = (4 + (y - yh) * .06) * (.4 + hash(q, j * 3));
       seaX.globalAlpha = inten * (1 - f * .7) * (.35 + .65 * Math.max(0, Math.sin(t * 2 + j * 1.7 + q * 4.1))) * .8;
       seaX.fillRect(x - w / 2, y, w, 1.5 + f * 2.5);
@@ -5795,7 +5797,9 @@ initPerm(); startLoop();
   const p1El = document.getElementById('p1'), p2El = document.getElementById('p2'), p3El = document.getElementById('p3'), p4El = document.getElementById('p4'), p5El = document.getElementById('p5'), p6El = document.getElementById('p6');
   let page = 1, rvTimer = null, pushed = false;
   const hashPage = () => location.hash === '#/events' ? 2 : location.hash === '#/progress' ? 3 : location.hash === '#/visit' ? 4 : location.hash === '#/outfit' ? 5 : location.hash === '#/map' ? 6 : 1;
-  let pendingPage = hashPage();   // dibuka langsung di #events
+  // setiap muat ulang halaman selalu mulai dari Beranda: hash halaman (#/events, #/outfit, dst.) dibuang tanpa menambah riwayat peramban
+  try{ if(/^#\/(events|progress|visit|outfit|map)$/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+  let pendingPage = hashPage();
   const pgEls = [p1El, p2El, p3El, p4El, p5El, p6El];
   function show(n){
     if(introActive){ pendingPage = n; try{ updateNavCurrent(); }catch(e){} return; }
@@ -11317,7 +11321,7 @@ initPerm(); startLoop();
   const SJ = (function(mk){
     const $ = id => document.getElementById(id);
     const NS='http://www.w3.org/2000/svg',R=document.getElementById('snj'),c=document.getElementById('sjStars'),x=c.getContext('2d');let S=[];
-function rs(){const d=Math.min(devicePixelRatio||1,2);c.width=innerWidth*d;c.height=innerHeight*d;x.setTransform(d,0,0,d,0,0);S=Array.from({length:110},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight*.32,r:Math.random()*1.3+.3,p:Math.random()*6,s:.5+Math.random()*1.5}))}
+function rs(){const d=Math.min(devicePixelRatio||1,2);c.width=innerWidth*d;c.height=innerHeight*d;x.setTransform(d,0,0,d,0,0);S=Array.from({length:60},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight*.32,r:Math.random()*1.3+.3,p:Math.random()*6,s:.5+Math.random()*1.5}))}
 addEventListener('resize',rs);rs();
 let sT=0;function f(t){if(!sRun)return;if(t-sT<32){requestAnimationFrame(f);return}sT=t;x.clearRect(0,0,innerWidth,innerHeight);for(const s of S){x.globalAlpha=.3+.7*Math.abs(Math.sin(t/1000*s.s+s.p));x.fillStyle='#ffeede';x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill()}requestAnimationFrame(f)}
 let sRun=false;function starsRun(on){if(on===sRun)return;sRun=on;if(on)requestAnimationFrame(f)}
@@ -11328,7 +11332,7 @@ const gtx=document.getElementById('gtx'),rg=(a,b)=>a+Math.random()*(b-a);
 const WM={};function wg(par,kx,ky,x){const k=par.id+kx+'_'+ky;let g=WM[k];if(!g){g=el('g',{class:'sj-wd'});g.style.cssText=`--sj-k:${(.6+Math.random()*.8).toFixed(2)};animation-delay:${(-(x+1000)*.005).toFixed(2)}s`;par.appendChild(g);WM[k]=g}return g}
 function edgeY(x){const q=x<500?[[-700,238],[250,208],[500,216]]:[[500,216],[750,224],[1000,206]];let d=1e9,r=0;for(let t=0;t<=1;t+=.004){const u=1-t,X=u*u*q[0][0]+2*u*t*q[1][0]+t*t*q[2][0];if(Math.abs(X-x)<d){d=Math.abs(X-x);r=u*u*q[0][1]+2*u*t*q[1][1]+t*t*q[2][1]}}return r}
 const mw=document.createElement('div');mw.id='sjMw';R.appendChild(mw);
-for(let i=0;i<80;i++){const m=document.createElement('div');m.className='sj-mote';const z=1+Math.random()*1.4;m.style.cssText=`width:${z}px;height:${z}px;left:${100+Math.random()*800}px;top:${170+Math.random()*120}px;--sj-d:${Math.random()*16-8}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*8}s`;mw.appendChild(m)}
+for(let i=0;i<30;i++){const m=document.createElement('div');m.className='sj-mote';const z=1.6+Math.random()*1.8;m.style.cssText=`width:${z}px;height:${z}px;left:${100+Math.random()*800}px;top:${170+Math.random()*120}px;--sj-d:${Math.random()*16-8}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*8}s`;mw.appendChild(m)}
 /* tepi gundukan bergerigi pendek: satu path statis, tanpa filter & tanpa helai */
 (function(){const e=document.getElementById('edge'),L=e.getTotalLength(),N=Math.round(L/2.6),O=[],I=[],O2=[],I2=[],PH=[1,2,3,4,5].map(()=>Math.random()*6.28);
 for(let i=0;i<=N;i++){const t=L*i/N,p=e.getPointAtLength(t),q=e.getPointAtLength(Math.min(L,t+1.5)),tx=q.x-p.x,ty=q.y-p.y,m=Math.hypot(tx,ty)||1;
@@ -11365,8 +11369,28 @@ const GC=[324,414,504,594,684];
     let cam, foc = -1, raf = 0;
     function overview(){const W=innerWidth,H=innerHeight,z=2.9,w=1600/z,h=640/z,m=W/H<w/h;return{cx:500,sc:m?Math.min(W/w,H/h):Math.max(W/w,H/h),yb:300}}
 function focusCam(i){const W=innerWidth,H=innerHeight,T=H*.52,sc=Math.min(W/200,(H-T)/166);return{cx:GC[i],sc,yb:246}}
-function draw(){const W=innerWidth,H=innerHeight,{cx,sc,yb}=cam;svgL.setAttribute('viewBox',`${cx-W/2/sc} ${yb-H/sc} ${W/sc} ${H/sc}`);R.style.setProperty('--sj-hz',(H-(yb-168)*sc)+'px');window.SJ_HZ=H-(yb-168)*sc;window.SJ_RF=H-(yb-84)*sc;mw.style.transform=`translate(${W/2-cx*sc}px,${H-yb*sc}px) scale(${sc})`}
-function go(t){R.classList.add('sj-mv');const a={...cam},t0=performance.now(),D=matchMedia('(prefers-reduced-motion:reduce)').matches?1:950;cancelAnimationFrame(raf);(function st(n){const k=Math.min(1,(n-t0)/D),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;cam={cx:a.cx+(t.cx-a.cx)*e,sc:a.sc*Math.pow(t.sc/a.sc,e),yb:a.yb+(t.yb-a.yb)*e};draw();if(k<1)raf=requestAnimationFrame(st);else R.classList.remove('sj-mv')})(t0)}
+let mv=null,svgBB=null;
+function mvReset(){const o=svgL.style;o.transform='';o.width='';o.height='';o.left='';o.top='';o.bottom='';o.transformOrigin='';o.willChange='';}
+function endMv(){if(!mv)return;mv=null;mvReset();}
+function draw(){const W=innerWidth,H=innerHeight,{cx,sc,yb}=cam;
+  if(mv){const k=sc/mv.sb;svgL.style.transform=`translate3d(${W/2+(mv.x-cx)*sc}px,${H+(mv.y-yb)*sc}px,0) scale(${k})`;}   /* gerak kamera: scene SVG digambar sekali, lalu hanya digeser/diskalakan oleh GPU */
+  else svgL.setAttribute('viewBox',`${cx-W/2/sc} ${yb-H/sc} ${W/sc} ${H/sc}`);
+  R.style.setProperty('--sj-hz',(H-(yb-168)*sc)+'px');window.SJ_HZ=H-(yb-168)*sc;window.SJ_RF=H-(yb-84)*sc;mw.style.transform=`translate(${W/2-cx*sc}px,${H-yb*sc}px) scale(${sc})`}
+function mvBegin(a,t){   /* siapkan satu lapisan yang mencakup kamera awal + akhir; gagal = pakai cara lama (viewBox) */
+  try{
+    const W=innerWidth,H=innerHeight;
+    if(!svgBB){const b=svgL.getBBox();if(!(b.width>10&&b.height>10))return;svgBB=b}
+    const vr=c=>({x:c.cx-W/2/c.sc,y:c.yb-H/c.sc,w:W/c.sc,h:H/c.sc}),A=vr(a),B=vr(t);
+    let x0=Math.min(A.x,B.x),y0=Math.min(A.y,B.y),x1=Math.max(A.x+A.w,B.x+B.w),y1=Math.max(A.y+A.h,B.y+B.h);
+    x0=Math.max(x0,svgBB.x);y0=Math.max(y0,svgBB.y);x1=Math.min(x1,svgBB.x+svgBB.width);y1=Math.min(y1,svgBB.y+svgBB.height);   /* bagian kosong di luar isi scene tidak ikut digambar */
+    const w=x1-x0,h=y1-y0; if(!(w>10&&h>10))return;
+    let sb=Math.max(a.sc,t.sc); const cap=3*W*H; if(w*h*sb*sb>cap)sb=Math.sqrt(cap/(w*h));
+    mv={x:x0,y:y0,sb};
+    svgL.setAttribute('viewBox',`${x0} ${y0} ${w} ${h}`);svgL.setAttribute('preserveAspectRatio','none');
+    const o=svgL.style;o.left='0';o.top='0';o.bottom='auto';o.width=(w*sb)+'px';o.height=(h*sb)+'px';o.transformOrigin='0 0';o.willChange='transform';
+  }catch(e){mv=null;mvReset();}
+}
+function go(t){cancelAnimationFrame(raf);if(mv){endMv();svgL.setAttribute('preserveAspectRatio','xMidYMax slice');draw()}R.classList.add('sj-mv');const a={...cam},t0=performance.now(),D=matchMedia('(prefers-reduced-motion:reduce)').matches?1:950;if(D>1)mvBegin(a,t);(function st(n){const k=Math.min(1,(n-t0)/D),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;cam={cx:a.cx+(t.cx-a.cx)*e,sc:a.sc*Math.pow(t.sc/a.sc,e),yb:a.yb+(t.yb-a.yb)*e};if(k<1){draw();raf=requestAnimationFrame(st)}else{cam={cx:t.cx,sc:t.sc,yb:t.yb};const had=!!mv;endMv();if(had)svgL.setAttribute('preserveAspectRatio','xMidYMax slice');draw();R.classList.remove('sj-mv')}})(t0)}
 
     // gerbang -> lemari kosmetik Skymeet (urutan gerbang Senja: Outfit, Masks, Hair, Capes, Props)
     const GATE_CL = ['outfit', 'mask', 'hair', 'cape', 'props'], ON = { outfit:'legs', mask:'head', hair:'hair', cape:'cape', props:'all' };
@@ -11602,7 +11626,7 @@ function go(t){R.classList.add('sj-mv');const a={...cam},t0=performance.now(),D=
     });
     svgL.addEventListener('click', e => { if(!e.target.closest('.sj-gate')) closeG(); });
     addEventListener('keydown', e => { if(e.key === 'Escape' && document.body.classList.contains('p5') && !$('ctModal').classList.contains('open')) closeG(); }, true);   // fase capture: berjalan sebelum penutup detail item, jadi Escape pertama hanya menutup detail
-    addEventListener('resize', () => { cancelAnimationFrame(raf); cam = foc < 0 ? overview() : focusCam(foc); draw(); if(foc >= 0){ layoutKp(foc); if(!items) renderList(); } });
+    addEventListener('resize', () => { cancelAnimationFrame(raf); if(mv){ endMv(); svgL.setAttribute('preserveAspectRatio', 'xMidYMax slice'); R.classList.remove('sj-mv'); } svgBB = null; cam = foc < 0 ? overview() : focusCam(foc); draw(); if(foc >= 0){ layoutKp(foc); if(!items) renderList(); } });
     cam = overview(); draw();
     /* tepi batu pijakan: tidak oval, sedikit kasar, berbeda untuk tiap batu (seed tetap) */
 (function(){const mb=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
@@ -11627,7 +11651,7 @@ const d='M'+pts.join('L')+'Z';ps.forEach(p=>p.setAttribute('d',d))})})();
         try{ if(noteE) noteE.classList.remove('show'); }catch(e){}
         try{ closeModal(); }catch(e){}   // detail item tidak boleh tertinggal saat pindah halaman
       }
-      else { cancelOut(); cam = foc < 0 ? overview() : focusCam(foc); draw(); if(foc < 0){ mdE.classList.remove('sj-off'); paintMode(); introMode(300); } introPage(); }
+      else { cancelOut(); cancelAnimationFrame(raf); if(mv){ endMv(); svgL.setAttribute('preserveAspectRatio', 'xMidYMax slice'); R.classList.remove('sj-mv'); } cam = foc < 0 ? overview() : focusCam(foc); draw(); if(foc < 0){ mdE.classList.remove('sj-off'); paintMode(); introMode(300); } introPage(); }
       wasOn = on;
     }
     return { filter, info, lang, active, refresh, reload };
