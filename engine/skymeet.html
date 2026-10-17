@@ -13,7 +13,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>
-
+/* tautan relatif (manifest, ikon, aset, sw.js) harus dihitung dari folder tempat berkas ini berada.
+   URL tanpa "/" di akhir dan tanpa ekstensi (mis. /engine/skymeet) punya dua kemungkinan:
+     (a) FOLDER   : /engine/skymeet/index.html            -> perlu <base href="/engine/skymeet/">
+     (b) URL BERSIH: /engine/skymeet -> /engine/skymeet.html -> JANGAN pakai <base> (aset sejajar dengan berkas ini)
+   Jadi jangan menebak: cek apakah manifest.webmanifest benar-benar ada di dalam folder itu. */
 (function(){
   var p = location.pathname;
   if(/\/$/.test(p) || /\.[A-Za-z0-9]{1,5}$/.test(p.split('/').pop())) return;
@@ -1862,7 +1866,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #p1 .page-in{ transition:opacity .7s ease; }
   #evView{ position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; padding:calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 74px); opacity:0; visibility:hidden; pointer-events:none; transition:opacity .9s ease, visibility 0s linear .9s; }
   body.evOn #evView{ opacity:1; visibility:visible; transition:opacity .9s ease .2s; }
-  body.evOn #p1 .page-in{ opacity:0; pointer-events:none; }
+  body.evOn #p1 .page-in{ opacity:0; pointer-events:none; visibility:hidden; transition:opacity .7s ease, visibility 0s linear .7s; }   /* [perf] visibility:hidden: blur & animasi di bawah layar event berhenti dihitung */
   body.evOn #musicBox{ opacity:0 !important; visibility:hidden !important; pointer-events:none !important; transition:opacity .5s ease, visibility 0s linear .5s !important; }
   body.evOn #musicBox *{ pointer-events:none !important; }   /* ikon musik disembunyikan selama event berlangsung */
   body.evOn #chatDots{ opacity:0; visibility:hidden; transition:opacity .6s ease, visibility 0s linear .6s; }   /* gelembung chat disembunyikan (dan tidak bisa diketuk) selama layar event */
@@ -1889,6 +1893,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   body.evForest #skFront{ transition:none; }
   @keyframes forestRays{ from{ transform:rotate(-3deg); } to{ transform:rotate(3deg); } }
   @media (prefers-reduced-motion: reduce){ #evView, #p1 .page-in{ transition-duration:.01s; } }
+/* [perf] petir Gunung Cahaya: Sedang = 1 pendar, Rendah = tanpa filter */
+html.gfx-medium #gcM.gcStorm .gc-bolt{ filter:blur(.5px) drop-shadow(0 0 5px var(--gcB1,#ffb830)); }
+html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
 /* petir puncak gunung lebih garang saat meteor jatuh: kedip lebih rapat & penuh, sedikit lebih besar, dengan pendar berwarna */
 @keyframes gcZapS{0%,100%{opacity:0}5%{opacity:1}8%{opacity:.3}11%{opacity:1}15%{opacity:.45}19%{opacity:1}25%{opacity:.25}33%{opacity:.95}38%{opacity:.1}44%{opacity:0}}
 #gcM.gcStorm .gc-bolt{animation:gcZapS 1.15s linear infinite;transform-origin:399px 222px;transform:scale(1.3);filter:blur(.5px) drop-shadow(0 0 5px var(--gcB1,#ffb830)) drop-shadow(0 0 12px var(--gcB1,#ffb830))}
@@ -1897,6 +1904,33 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 #gcM.gcStorm .gc-peakglow{animation-duration:1.15s}
 #gcM .gc-bolt use[fill="#ffb830"]{fill:var(--gcB1,#ffb830);stroke:var(--gcB1,#ffb830)}#gcM .gc-bolt use[fill="#ffee90"]{fill:var(--gcB2,#ffee90)}
 #gcM{position:absolute;left:0;top:0;width:810px;height:520px;transform-origin:0 0;pointer-events:none;opacity:0;visibility:hidden}#gcM svg{display:block;width:810px;height:520px;overflow:visible}  .gc-beam{transform-box:fill-box;transform-origin:center;animation:gcRingzap 3.6s cubic-bezier(.45,.05,.35,1) infinite}@keyframes gcRingzap{0%,6%{opacity:.38;transform:scale(1)}8.5%{opacity:.85;transform:scale(1.008)}10.5%{opacity:.62;transform:scale(1.004)}13%{opacity:1;transform:scale(1.012)}15%{opacity:.78;transform:scale(1.007)}18%{opacity:.92;transform:scale(1.009)}24%{opacity:.66;transform:scale(1.004)}34%{opacity:.5;transform:scale(1.002)}48%{opacity:.41;transform:scale(1)}62%,100%{opacity:.38;transform:scale(1)}}@keyframes gcRingzap2{0%,6%{opacity:.82}8.5%{opacity:.95}10.5%{opacity:.88}13%{opacity:1}20%{opacity:.93}34%{opacity:.85}50%,100%{opacity:.82}}.gc-bolt{opacity:0;filter:blur(.6px);animation:gcZap 3.6s ease-in-out infinite}.gc-bolt.gc-b2{animation-delay:.18s;animation-duration:3.6s}.gc-bolt.gc-b3{animation-delay:1.7s;animation-duration:4.1s}.gc-peakglow{animation:gcZapglow 3.6s ease-in-out infinite}@keyframes gcZap{0%,5.5%,100%{opacity:0}8%{opacity:.85}9.5%{opacity:.5}11.5%{opacity:1}14%{opacity:.45}18%{opacity:.12}23%{opacity:0}}@keyframes gcZapglow{0%,5.5%,100%{opacity:.25}8%{opacity:.85}9.5%{opacity:.6}11.5%{opacity:1}14%{opacity:.6}20%{opacity:.35}30%{opacity:.25}}.gc-rock{transform-box:fill-box;transform-origin:center;animation:gcFloatR 6s ease-in-out infinite}@keyframes gcFloatR{0%,100%{transform:translate(0,0) rotate(0deg) scale(.55)}50%{transform:translate(var(--dx,2px),var(--dy,-7px)) rotate(var(--r,8deg)) scale(.55)}}.gc-ringsway{mix-blend-mode:screen;transform-box:fill-box;transform-origin:center;animation:gcRingSway 7s ease-in-out infinite,gcRingzap2 4.1s ease-in-out 1.7s infinite backwards}@keyframes gcRingSway{0%,100%{transform:translate(0,0) rotate(0deg) scale(1)}33%{transform:translate(1.8px,-2.5px) rotate(.6deg) scale(1.015)}66%{transform:translate(-1.6px,-1px) rotate(-.5deg) scale(.99)}}.gc-sway{transform-origin:409px 230px;animation:gcSway 3.2s ease-in-out infinite}@keyframes gcSway{0%,100%{transform:rotate(-0.7deg) scaleY(1)}50%{transform:rotate(0.7deg) scaleY(1.02)}}.gc-st{fill:none;stroke:var(--gcSt,#fff3d2);stroke-linecap:round;animation:gcFlowUp linear infinite}@keyframes gcFlowUp{to{stroke-dashoffset:var(--p)}}.gc-streaks{animation:gcStreakzap 3.6s cubic-bezier(.45,.05,.35,1) infinite}@keyframes gcStreakzap{0%,6%{opacity:.5}8.5%{opacity:.9}10.5%{opacity:.7}13%{opacity:1}15%{opacity:.8}18%{opacity:.92}24%{opacity:.7}34%{opacity:.58}48%{opacity:.5}62%,100%{opacity:.5}}@media (prefers-reduced-motion:reduce){#gcM *{animation:none!important}}
+  /* ===== [event] pengingat chat masuk di Beranda: gelembung + balas cepat (dari skymeetberandaevent) ===== */
+  /* ===== pengingat chat masuk di Beranda: gelembung di titik-titik tertentu + balas cepat ===== */
+  #chatDots{ position:absolute; inset:0; z-index:2; pointer-events:none; transition:opacity .6s ease; }
+  .cDot{ position:absolute; width:52px; height:52px; padding:0; display:grid; place-items:center; border:1px solid rgba(128,128,128,.4); border-radius:50%; background:var(--panel); color:var(--ink); cursor:pointer; pointer-events:auto; touch-action:manipulation; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); animation:cdPop .5s cubic-bezier(.2,.9,.3,1) both, cdBob 6s ease-in-out infinite; animation-delay:0s, var(--bd,0s); }
+  .cDot::before{ content:''; position:absolute; inset:-6px; border-radius:50%; border:2px solid var(--ink); opacity:0; animation:cdRing 2.8s ease-out infinite; animation-delay:var(--bd,0s); pointer-events:none; }
+  .cDot .friendAvatar{ width:40px; height:40px; flex:none; font-size:16px; }
+  .cBadge{ position:absolute; top:-5px; right:-5px; min-width:21px; height:21px; padding:0 6px; display:grid; place-items:center; border-radius:11px; background:var(--ink); color:var(--top); font-size:11px; font-weight:700; line-height:1; }
+  .cd0{ left:7%; top:21%; } .cd1{ right:7%; top:33%; --bd:.9s; } .cd2{ left:9%; top:57%; --bd:1.7s; } .cd3{ right:9%; top:67%; --bd:2.4s; }
+  @keyframes cdPop{ from{ opacity:0; scale:.3; } to{ opacity:1; scale:1; } }
+  @keyframes cdBob{ 0%,100%{ translate:0 0; } 50%{ translate:0 -7px; } }
+  @keyframes cdRing{ 0%{ opacity:.5; scale:.85; } 100%{ opacity:0; scale:1.5; } }
+  @media (prefers-reduced-motion: reduce){ .cDot, .cDot::before{ animation:none; } }
+  #qrOv{ position:fixed; inset:0; z-index:58; display:grid; place-items:center; padding:16px; background:rgba(0,0,0,.42); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
+  #qrOv.open{ opacity:1; visibility:visible; transition:opacity .25s ease; }
+  .qrBox{ width:min(420px,100%); max-height:min(580px, calc(100dvh - 32px)); display:flex; flex-direction:column; gap:12px; padding:14px; border-radius:20px; color:var(--ink); background:linear-gradient(180deg, var(--top), var(--bottom)); border:1px solid rgba(128,128,128,.34); box-shadow:0 18px 50px rgba(0,0,0,.35); transform:translateY(12px) scale(.98); transition:transform .3s cubic-bezier(.2,.8,.2,1); }
+  #qrOv.open .qrBox{ transform:none; }
+  .qrHead{ display:flex; align-items:center; gap:10px; } .qrHead .friendAvatar{ flex:none; }
+  .qrWho{ flex:1; min-width:0; display:flex; flex-direction:column; } .qrWho b{ font-weight:600; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .qrWho span{ font-size:12px; color:var(--ink-soft); }
+  .qrX{ flex:none; width:34px; height:34px; padding:0; display:grid; place-items:center; border-radius:50%; background:rgba(128,128,128,.2); border:1px solid rgba(128,128,128,.32); color:var(--ink); cursor:pointer; }
+  .qrMsgs{ display:flex; flex-direction:column; gap:6px; overflow-y:auto; max-height:240px; padding:2px; }
+  .qrMsg{ align-self:flex-start; max-width:88%; padding:8px 12px; border-radius:14px 14px 14px 4px; background:rgba(128,128,128,.2); font-size:14px; line-height:1.4; overflow-wrap:anywhere; white-space:pre-wrap; }
+  .qrMore{ font-size:12px; color:var(--ink-soft); padding:0 4px; }
+  .qrForm{ display:flex; gap:8px; align-items:flex-end; }
+  #qrIn{ flex:1; resize:none; min-height:44px; max-height:110px; padding:10px 12px; border-radius:14px; background:rgba(128,128,128,.16); border:1px solid rgba(128,128,128,.32); color:var(--ink); font:inherit; font-size:16px; line-height:1.4; }
+  #qrIn::placeholder{ color:var(--ink-soft); }
+  #qrSend{ height:44px; padding:0 16px; border:0; border-radius:14px; background:var(--ink); color:var(--top); font:inherit; font-weight:600; cursor:pointer; } #qrSend:disabled{ opacity:.45; cursor:default; }
+  .qrOpen{ align-self:center; padding:2px; background:none; border:0; color:var(--ink-soft); font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; }
 </style>
 </head>
 <body class="notranslate" translate="no">
@@ -2154,6 +2188,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   <div id="track">
 
     <section class="page" id="p1">
+      <div id="chatDots" aria-live="polite"></div>
       <div id="evView" aria-hidden="true">
         <div class="evSys"><div class="sysrow"><span id="evSysClock">--:--</span><span id="evSysS"></span></div><span class="lt" id="evSysT"></span></div>
         <div class="evSky"><div class="clock-label"><span class="lt" id="evSkyT"></span><span class="ls" id="evSkyS"></span></div>
@@ -2370,6 +2405,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   </div>
 </div>
 
+<div id="qrOv" aria-hidden="true"><div class="qrBox" role="dialog" aria-modal="true" aria-labelledby="qrName">
+  <div class="qrHead"><span id="qrAvBox"></span><div class="qrWho"><b id="qrName"></b><span id="qrSub"></span></div><button type="button" class="qrX" id="qrClose"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="qrMsgs" id="qrMsgs"></div>
+  <form class="qrForm" id="qrForm"><textarea id="qrIn" rows="1" enterkeyhint="send" autocomplete="off"></textarea><button type="submit" id="qrSend" disabled></button></form>
+  <button type="button" class="qrOpen" id="qrOpen"></button>
+</div></div>
 <div id="chatOverlay">
   <div id="chatHead">
     <button type="button" id="chatBack" aria-label="Back">&#8592;</button>
@@ -2752,7 +2793,8 @@ function resize() {
   seaC.width = W * dpr1; seaC.height = H * dpr1; seaX.setTransform(dpr1, 0, 0, dpr1, 0, 0);
   hsv.width = W * dpr; hsv.height = H * dpr; hsx.setTransform(dpr, 0, 0, dpr, 0, 0);
   spc.width = W * dpr; spc.height = H * dpr; spx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  evc.width = W * dpr1; evc.height = H * dpr1; evx.setTransform(dpr1, 0, 0, dpr1, 0, 0);   // [event] kanvas efek event
+  { const ek = dpr1 * (window.SkyGfx ? (SkyGfx.level() === 'low' ? .6 : SkyGfx.level() === 'medium' ? .8 : 1) : 1);   // [perf] kanvas efek event ikut pengaturan Grafis (CSS menjaga ukuran tampil 100%)
+    evc.width = Math.round(W * ek); evc.height = Math.round(H * ek); evx.setTransform(ek, 0, 0, ek, 0, 0); }
   unit = Math.min(1.4, Math.max(.5, Math.min(W, H * .8) / 420));
 }
 addEventListener('resize', resize); resize();
@@ -3049,7 +3091,7 @@ function puffList() {
 }
 const puffAt = (pf, rx) => { const sr = scene.getBoundingClientRect(), r = pf.el.getBoundingClientRect(); return [Math.max(W * .06, Math.min(W * .94, r.left - sr.left + r.width / 2 + rx * r.width)), r.top - sr.top + r.height * .45]; };
 function setDiveMask(d, ys, u) {   // pudar di awan, tegas di air
-  const soft = d.kind === 'cloud' ? Math.max(8, u * .8) : Math.max(3, u * .2), m = `linear-gradient(180deg,#000 0,#000 ${ys - soft}px,rgba(0,0,0,${d.fl || 0}) ${ys + soft * .4}px)`;   // d.fl > 0: di awan, kid kadang masih terlihat samar (belum 'nyemplung' sepenuhnya); air selalu tegas
+  const soft = d.kind === 'cloud' ? Math.max(6, u * .6) : Math.max(2, u * .12), m = `linear-gradient(180deg,#000 0,#000 ${ys - soft}px,rgba(0,0,0,${d.fl || 0}) ${ys + soft * .4}px)`;   // d.fl > 0: di awan, kid kadang masih terlihat samar (belum 'nyemplung' sepenuhnya); air selalu tegas
   d.clip.style.webkitMaskImage = d.clip.style.maskImage = m;
 }
 // setelah muncul: jalur baru dari titik muncul (arah awal = arah mendongak), kecepatan dan tujuan keluar layar acak; jalur semula ditinggalkan
@@ -3464,6 +3506,7 @@ function moonFrac(ms) {
 }
 const WXF = { clear: 1, cloudy: .6, rain: .25, storm: .08, snow: .35, fog: .3 };   // cuaca meredupkan matahari/bulan
 // ---- Sunset: langit berubah warna menurut tinggi matahari, dan pandangan "turun" ke dataran rendah dengan lautan ----
+let seaFlip = 0, lastSkyV = null;   // [perf] pencacah frame laut; nilai warna langit terakhir yang ditulis
 let lastBg = '', lastFog = '', lastMist = '', lastFogOp = '', lastWindOp = '';
 let cam = 0, SP = null, MP = null, starK = 0, skyTick = 0, skyOwn = false;   // cam: 0 = pandangan tinggi, 1 = turun ke permukaan laut
 const HEX = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
@@ -3517,15 +3560,20 @@ function updateSky(dt, now) {
   if (++skyTick % 3 === 0 || !skyOwn) {
     const k = turtleSky(skyAt(evMode === 'grandma' ? -15 : a)), c = k.sky.map(rgb);   // Grandma: langit malam
     const bg = `linear-gradient(180deg, ${c[0]} 0%, ${c[1]} 35%, ${c[2]} 70%, ${c[3]} 100%)`, fg = k.fog.map(Math.round).join(',');
-    if (bg !== lastBg) { back.style.background = bg; lastBg = bg; }
-    if (fg !== lastFog) { scene.style.setProperty('--skfog', fg); lastFog = fg; }
+    // [perf] saat langit bergeser pelan (Turtle) warna hanya ditulis jika berubah >= 1,5/255: lapisan berblur tidak digambar ulang tiap frame
+    const flat = [].concat(...k.sky, k.fog), moved = !lastBg || !lastSkyV || flat.some((v, i) => Math.abs(v - lastSkyV[i]) >= 1.5);
+    if (moved) {
+      if (bg !== lastBg) { back.style.background = bg; lastBg = bg; }
+      if (fg !== lastFog) { scene.style.setProperty('--skfog', fg); lastFog = fg; }
+      lastSkyV = flat;
+    }
     skyOwn = true;
   }
   { const fo = (1 - .92 * cam).toFixed(3), mi = `blur(34px) opacity(${(1 - cam).toFixed(3)})`, wo = (1 - .55 * cam).toFixed(3);
     if (fo !== lastFogOp) { fogB.style.opacity = fo; lastFogOp = fo; }
     if (mi !== lastMist) { mistB.style.filter = mi; lastMist = mi; }
     if (wo !== lastWindOp) { windsEl.style.opacity = wo; lastWindOp = wo; } }
-  if (cam > .01 && Forest.p < .995) { seaC.style.display = 'block'; drawSea(now, a); } else if (seaC.style.display !== 'none') seaC.style.display = 'none';
+  if (cam > .01 && Forest.p < .995) { seaC.style.display = 'block'; if (!evBusy || (seaFlip ^= 1)) drawSea(now, a); }   // [perf] saat event laut digambar tiap frame ke-2 else if (seaC.style.display !== 'none') seaC.style.display = 'none';
 }
 function drawSea(now, a) {
   const yh = H * (1 - .34 * cam), t = now / 1000, k = turtleSky(skyAt(a)), deep = k.sea, skyH = skyColorAt(k, yh / H);
@@ -3828,7 +3876,7 @@ function drawGeyser(t, dt, yh, A) {
 const mfx = [];
 function meteorImpact(m, now) {
   if (m.forest) return;   // hutan: meteor hilang di balik bukit, tanpa kilau, air, asap, maupun goyangan awan   // meteor jatuh ke air atau awan: kilau panas, cipratan/gumpalan, asap, dan partikel air/embun
-  const x = m.xl, y = m.yl, u = m.u, ku = u / 18, sea = m.sea, dirx = -1, add = o => { if (mfx.length < 700) mfx.push(Object.assign({ age: 0 }, o)); };
+  const x = m.xl, y = m.yl, u = m.u, ku = u / 18, sea = m.sea, dirx = -1, add = o => { if (mfx.length < MFX_CAP()) mfx.push(Object.assign({ age: 0 }, o)); };
   add({ k: 'glow', x, y, r: u * 3.6, col: (m.pal || MPAL.red).imp, life: .75, a: .85 }); add({ k: 'glow', x, y, r: u * 2, col: [255, 214, 150], life: .4, a: .9 });
   if (sea) {
     const drop = (a, v, r, life, streak, g) => add({ k: 'drop', sea: 1, ku, x: x + rnd(-.3, .3) * u, y, y0: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: g || 620 * ku, r, life, age: -rnd(0, .06), streak });
@@ -3862,7 +3910,7 @@ function drawMfx(dt) {   // digambar di lapisan splash (di atas awan)
       const rr = q.r * (1 + (q.grow - 1) * Math.pow(k, .55)); spx.globalAlpha = q.a * Math.min(1, q.age / .15) * Math.pow(1 - k, 1.2); spx.drawImage(glowSpr(q.col), q.x - rr, q.y - rr, rr * 2, rr * 2);
     } else if (q.k === 'drop') {
       q.vy += q.g * dt; q.x += q.vx * dt; q.y += q.vy * dt;
-      if (q.sea && q.vy > 0 && q.y >= q.y0 + 2) { if (Math.random() < .3 && mfx.length < 700) mfx.push({ k: 'ring', x: q.x, y: q.y0, r0: 1, r1: 6 * q.ku, life: .5, a: .35, age: 0 }); continue; }   // tetesan jatuh kembali: riak kecil
+      if (q.sea && q.vy > 0 && q.y >= q.y0 + 2) { if (Math.random() < .3 && mfx.length < MFX_CAP()) mfx.push({ k: 'ring', x: q.x, y: q.y0, r0: 1, r1: 6 * q.ku, life: .5, a: .35, age: 0 }); continue; }   // tetesan jatuh kembali: riak kecil
       spx.globalAlpha = (1 - k * .6) * .9 * (q.al || 1); spx.strokeStyle = spx.fillStyle = q.col || 'rgb(236,248,255)';
       if (q.streak) { spx.lineWidth = q.r * 1.5; spx.lineCap = 'round'; spx.beginPath(); spx.moveTo(q.x, q.y); spx.lineTo(q.x - q.vx * .02, q.y - q.vy * .02); spx.stroke(); }
       else { spx.beginPath(); spx.arc(q.x, q.y, q.r * .8, 0, 6.2832); spx.fill(); }
@@ -3946,26 +3994,29 @@ function gcEdenStep() {
     const pg = gcEl.querySelector('.gc-peakglow'); if (pg) { pg.style.transformBox = 'fill-box'; pg.style.transformOrigin = 'center'; pg.style.transform = boost > 0 ? 'scale(' + (1 + .45 * boost).toFixed(3) + ')' : ''; }
   }
 }
+const GCK = 1.18;   // Gunung Cahaya sedikit lebih besar; ukurannya hanya mengikuti TINGGI layar, jadi layar sempit tidak mengecilkannya
 function gcUpdate() {
   if (!gcEl) return;
   gcEdenStep();
   let fp = 0, rt = NaN, fnk = 0; try { fp = Forest.p; rt = Forest.ridge; fnk = Forest.nk; } catch (e) {}
   const show = evMode === 'grandma' || !evMode || evMode === 'turtle' || evMode === 'geyser';   // hutan (Grandma / hujan) kini ikut menampilkan Gunung Cahaya
   gcA += ((show ? 1 : 0) - gcA) * .06;
-  if (gcA < .01) { gcEl.style.visibility = 'hidden'; return; }
+  if (gcA < .01) { gcEl.style.visibility = 'hidden'; gcEl.style.display = 'none'; return; }   // [perf] display:none: 15 animasi CSS & filter SVG berhenti saat gunung tersembunyi
+  gcEl.style.display = '';
   const L = (p, q, k) => p + (q - p) * k, ef = smooth(clamp01(fp));   // ef: 0 = langit/laut, 1 = dasar hutan
   // pose langit/laut. Saat tujuannya hutan (Grandma / hujan), pose terakhir DITAHAN: dari laut gunung bergeser pelan ke hutan (kebalikan hutan → laut),
   // bukan melompat dulu ke tengah langit mengikuti kamera laut yang naik cepat.
   const toForest = evMode === 'grandma' || (!evMode && (wx === 'rain' || wx === 'storm'));
   if (!toForest || !gcPose) {
     const e = evMode === 'grandma' ? 0 : smooth(clamp01(cam)), yh = H * (1 - .34 * cam);   // ukuran & posisi sama untuk Turtle, Geyser, dan latar laut
-    gcPose = { w: Math.min(W * .34, H * .3) * (1 - e) + Math.min(W * .26, H * .22) * e, x: W * (.5 * (1 - e) + .15 * e), b: H * .76 * (1 - e) + (yh + 1) * e, W, H };   // laut: kiri, di belakang bukit/pulau kiri; langit & Grandma: tepat di tengah, sejajar jam
+    const wS = Math.min(H * .3 * GCK, W * .86), wE = H * .22 * GCK;   // wS: langit (tengah), wE: laut (kiri); batas W*.86 hanya mencegah melebihi lebar layar yang ekstrem sempit
+    gcPose = { w: wS * (1 - e) + wE * e, x: W * .5 * (1 - e) + Math.max(W * .15, wE * .45) * e, b: H * .76 * (1 - e) + (yh + 1) * e, W, H };   // laut: kiri, di belakang bukit/pulau kiri; langit & Grandma: tepat di tengah, sejajar jam
   }
   if (gcPose.W !== W || gcPose.H !== H) { gcPose.x *= W / gcPose.W; gcPose.w *= W / gcPose.W; gcPose.b *= H / gcPose.H; gcPose.W = W; gcPose.H = H; }   // layar berubah ukuran saat pose ditahan
   const wSky = gcPose.w, xSky = gcPose.x, bSky = gcPose.b;
   // hutan: berdiri di tengah, kakinya terselip di balik punggung bukit terjauh (kanvas #forest menutupi dasarnya), dan ikut naik bersama kamera
   // menuju hutan: gunung naik langsung ke tempatnya (tanpa menukik ke bawah layar dulu); keluar dari hutan tetap mengikuti kamera naik seperti semula
-  const y0 = L(H * .9, 0, ef), bFor = (toForest ? 0 : y0) + (isFinite(rt) ? rt : H * .42) + H * .105, wFor = Math.min(W * .32, H * .27);
+  const y0 = L(H * .9, 0, ef), bFor = (toForest ? 0 : y0) + (isFinite(rt) ? rt : H * .42) + H * .105, wFor = Math.min(W * .8, H * .27 * GCK);
   const w = L(wSky, wFor, ef), s = w / 810, x = L(xSky, W * .5, ef), b = L(bSky, bFor, ef);
   try {
     const k = skyAt(sunNow().alt), c = mix(skyColorAt(k, clamp01(b / H)), k.fog, .35).map(v => Math.round(v * .8));
@@ -3978,14 +4029,15 @@ function gcUpdate() {
   gcEl.style.transform = 'translate(' + x.toFixed(1) + 'px,' + b.toFixed(1) + 'px) scale(' + s.toFixed(4) + ') translate(-358px,-508px)';
 }
 (function gcLoop() { gcUpdate(); requestAnimationFrame(gcLoop); })();   // berjalan sendiri tiap frame, tidak bergantung pada ada atau tidaknya event
+const MFX_CAP = () => Math.round(700 * (window.SkyGfx ? SkyGfx.scale() : 1));   // [perf] jumlah partikel meteor ikut Grafis (1 / .65 / .35)
 function drawEvt(dt, now) {
   const want = evMode === 'turtle' || evMode === 'geyser';
   evEnv += ((want ? 1 : 0) - evEnv) * (1 - Math.exp(-dt * 1.4)); if (evEnv < .003 && !want) evEnv = 0;
   // [hitung-mundur] suasana (senja / laut / hutan) tampil saat hitung mundur, tetapi elemen event (kura-kura, semburan geyser, spirit Grandma) baru muncul saat event benar-benar berlangsung
   evFx += ((want && evLive ? 1 : 0) - evFx) * (1 - Math.exp(-dt * 1.4)); if (evFx < .003 && !(want && evLive)) evFx = 0;
   evSp += ((evMode === 'grandma' && !evLive ? 0 : 1) - evSp) * (1 - Math.exp(-dt * 1.2)); if (evSp > .997) evSp = 1;
-  if (!evEnv && !meteors.length && !plume.length) { if (evc._dirty) { evx.clearRect(0, 0, W, H); evc._dirty = false; } return; }
-  evc._dirty = true; evx.clearRect(0, 0, W, H);
+  if (!evEnv && !meteors.length && !plume.length) { if (evc._dirty) { evx.clearRect(0, 0, W, H); evc._dirty = false; } evc.style.display = 'none'; return; }   // [perf] kanvas efek disembunyikan saat tak ada efek
+  evc._dirty = true; evc.style.display = ''; evx.clearRect(0, 0, W, H);
   if (evEnv) {
     const yh = H * (1 - .34 * cam), A = evEnv * clamp01((cam - .35) / .5), t = now / 1000;   // efek menyesuaikan dan muncul seiring pandangan turun ke laut
     if (evShown === 'turtle') { if (evFx > .003) drawTurtle(t, dt, yh, A * evFx); } else if (evShown === 'geyser') { if (evFx > .003 || plume.length) drawGeyser(t, dt, yh, A * evFx); }
@@ -4237,7 +4289,7 @@ function doorPath(g, D, oy) {   // bentuk pintu batang: lengkung tidak simetris 
   g.closePath();
 }
 function buildForest() {
-  const dp = Math.min(devicePixelRatio || 1, 1.5); FOREST.dp = dp;
+  const dp = window.SkyGfx ? SkyGfx.dpr(1.5) : Math.min(devicePixelRatio || 1, 1.5); FOREST.dp = dp;   // [perf] ikut pengaturan Grafis (Rendah = 1x, Sedang = 1,25x)
   fcv.width = ffcv.width = cvS.width = Math.round(W * dp); fcv.height = ffcv.height = cvS.height = Math.round(H * dp); fgx.setTransform(dp, 0, 0, dp, 0, 0); sgx.setTransform(dp, 0, 0, dp, 0, 0); ffx.setTransform(dp, 0, 0, dp, 0, 0);
   const R = mulberry(20261011), mk = () => { const c = document.createElement('canvas'); c.width = Math.round(W * dp); c.height = Math.round(H * dp); const g = c.getContext('2d'); g.scale(dp, dp); return [c, g]; };
   const px = f => f * W, E = .85; FOREST.E = E;   // E: tinggi tambahan dunia hutan di atas layar (kanopi daun), dilewati saat kamera turun
@@ -4555,6 +4607,7 @@ function drawForest(dt, now) {
 }
 let rsT = 0;
 addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { buildForest(); }, 150); });
+addEventListener('sky:gfx', () => { clearTimeout(rsT); rsT = setTimeout(() => { buildForest(); }, 150); });   // [perf] ganti Grafis: hutan dibangun ulang dengan resolusi baru
 
 
 // Matahari/bulan khusus hutan: lebih besar dan terang, tidak diredupkan cuaca, matahari tenggelam dulu baru bulan terbit
@@ -6823,6 +6876,12 @@ initPerm(); startLoop();
   Object.keys(VT7).forEach(l => Object.assign(VT[l], VT7[l], VT8[l], VT9[l]));
   const VT10 = { en:{ react:'React' }, id:{ react:'Beri reaksi' }, es:{ react:'Reaccionar' } };
   Object.keys(VT10).forEach(l => Object.assign(VT[l], VT10[l]));
+  const VTQR = {
+    en:{ qrNew:'New messages: {n}', qrMore:'+{n} more', qrPh:'Reply\u2026', qrSend:'Send', qrOpen:'Open full chat', qrClose:'Close', qrSent:'Reply sent' },
+    id:{ qrNew:'Pesan baru: {n}', qrMore:'+{n} lainnya', qrPh:'Balas\u2026', qrSend:'Kirim', qrOpen:'Buka chat lengkap', qrClose:'Tutup', qrSent:'Balasan terkirim' },
+    es:{ qrNew:'Mensajes nuevos: {n}', qrMore:'+{n} m\u00e1s', qrPh:'Responder\u2026', qrSend:'Enviar', qrOpen:'Abrir chat completo', qrClose:'Cerrar', qrSent:'Respuesta enviada' }
+  };
+  Object.keys(VTQR).forEach(l => Object.assign(VT[l], VTQR[l]));
   const vt = () => VT[window.SkyApp.getLang()] || VT.en;
   function setWho(){ if(mySession) $('whoAmI').textContent = mySession.type === 'guest' ? vt().guestWho : vt().who + mySession.id; }
   function applyVisitLang(){
@@ -9823,7 +9882,71 @@ initPerm(); startLoop();
     lastTypeSend = Date.now();
     if(srv()) api('typing', { to: f.code }); else lsSet('sky_typing_' + chatPid, JSON.stringify({ from: myCode, ts: Date.now() }));
   });
-  function paintDots(n){ $('navDot').hidden = $('navDotItem').hidden = !n; }
+  function paintDots(n){ $('navDot').hidden = $('navDotItem').hidden = !n; renderDots(); }
+  // ---------- pengingat chat masuk di Beranda: gelembung di titik-titik tertentu (maks. 4) + balas cepat lewat overlay ----------
+  var qrFriend = null, qrFrom = null, dotSig = '';   // var: paintDots() bisa terpanggil sebelum baris ini dijalankan
+  function dotList(){
+    const out = [];
+    for(const f of friendsCache){
+      const n = unreadOf(f); if(!n) continue;
+      const l = visMsgs(pairId(myCode, f.code)).filter(m => m.from !== myCode && !m.del), last = l.length ? l[l.length - 1] : null;
+      out.push({ f, n, ts: last ? last.ts : 0 });
+    }
+    return out.sort((a, b) => b.ts - a.ts);
+  }
+  function renderDots(){
+    const box = $('chatDots'); if(!box) return;
+    const shown = (myUid ? dotList() : []).slice(0, 4), v = vt();
+    const sig = shown.map(x => x.f.code + ':' + x.n + ':' + (fMeta(x.f).avatar || '') + ':' + fLabel(x.f)).join('|') + '#' + window.SkyApp.getLang();
+    if(sig === dotSig) return; dotSig = sig;
+    box.textContent = '';
+    shown.forEach((x, i) => {
+      const b = mkEl('button', 'cDot cd' + i), av = mkEl('span', 'friendAvatar'), m = fMeta(x.f); b.type = 'button';
+      if(m.avatar) setAv(av, m.avatar); else av.textContent = String(fLabel(x.f)).charAt(0).toUpperCase();
+      b.append(av, mkEl('span', 'cBadge', String(x.n)));
+      const lab = fLabel(x.f) + ' \u00b7 ' + v.qrNew.replace('{n}', x.n); b.title = lab; b.setAttribute('aria-label', lab);
+      b.addEventListener('click', () => openQr(x.f, b));
+      box.appendChild(b);
+    });
+  }
+  window.addEventListener('sky:lang', () => { dotSig = ''; renderDots(); });
+  function markReadFor(f){   // seperti markRead(), tapi untuk teman tertentu (tanpa membuka chat)
+    let top = 0; readMsgs(pairId(myCode, f.code)).forEach(m => { if(m.from !== myCode && m.id > top) top = m.id; });
+    if(top > (readMap[f.code] || 0)){ readMap[f.code] = top; saveReads(); paintDots(friendsCache.reduce((a, x) => a + unreadOf(x), 0)); syncReads(); }
+  }
+  function openQr(f, from){
+    const v = vt(), pid = pairId(myCode, f.code), rd = readMap[f.code] || 0, m = fMeta(f), all = visMsgs(pid).filter(x => x.from !== myCode && !x.del);
+    const unread = all.filter(x => x.id > rd), pick = (unread.length ? unread : all).slice(-4);
+    qrFriend = f; qrFrom = from || null;
+    const av = mkEl('span', 'friendAvatar'); if(m.avatar) setAv(av, m.avatar); else av.textContent = String(fLabel(f)).charAt(0).toUpperCase(); $('qrAvBox').replaceChildren(av);
+    $('qrName').textContent = fLabel(f); $('qrSub').textContent = unread.length ? v.qrNew.replace('{n}', unread.length) : '';
+    const box = $('qrMsgs'); box.textContent = '';
+    pick.forEach(x => box.appendChild(mkEl('div', 'qrMsg', dispText(x, v))));
+    if(unread.length > pick.length) box.appendChild(mkEl('div', 'qrMore', v.qrMore.replace('{n}', unread.length - pick.length)));
+    box.scrollTop = box.scrollHeight;
+    $('qrIn').placeholder = v.qrPh; $('qrIn').value = ''; $('qrSend').textContent = v.qrSend; $('qrSend').disabled = true; $('qrOpen').textContent = v.qrOpen; $('qrClose').setAttribute('aria-label', v.qrClose); $('qrClose').title = v.qrClose;
+    $('qrOv').classList.add('open'); $('qrOv').setAttribute('aria-hidden', 'false'); SFX.open();
+    setTimeout(() => $('qrIn').focus({ preventScroll:true }), 260);
+  }
+  function closeQr(skipFocus){
+    $('qrOv').classList.remove('open'); $('qrOv').setAttribute('aria-hidden', 'true'); const b = qrFrom; qrFriend = qrFrom = null;
+    if(!skipFocus && b && b.isConnected) b.focus({ preventScroll:true });
+  }
+  function qrSend(){
+    const f = qrFriend, ta = $('qrIn'); let text = ta.value.trim(); if(!f || !text) return;
+    if(text.indexOf(IMG_P) === 0 || text.indexOf(RE_P) === 0 || text.indexOf(INV_P) === 0) text = '\u200b' + text;
+    const pid = pairId(myCode, f.code), cid = myCode + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), msg = { cid, from: myCode, text, ts: srvNow() };
+    if(srv()) msg.st = 'sending'; else msg.id = msg.ts;
+    const l = readMsgs(pid); l.push(msg); writeMsgs(pid, l);
+    markReadFor(f); SFX.send(); toast(vt().qrSent); closeQr(true); renderFriends(); renderDots(); flushOutbox();
+  }
+  $('qrClose').addEventListener('click', () => closeQr());
+  $('qrOv').addEventListener('click', e => { if(e.target === $('qrOv')) closeQr(); });
+  $('qrOpen').addEventListener('click', () => { const f = qrFriend; closeQr(true); if(f) openChat(f); });
+  $('qrForm').addEventListener('submit', e => { e.preventDefault(); qrSend(); });
+  $('qrIn').addEventListener('input', () => { const ta = $('qrIn'); $('qrSend').disabled = !ta.value.trim(); ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 2, 110) + 'px'; });
+  $('qrIn').addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey && !e.isComposing && matchMedia('(pointer:fine)').matches){ e.preventDefault(); qrSend(); } });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && $('qrOv').classList.contains('open')){ e.stopImmediatePropagation(); closeQr(); } }, true);
   function flamedMap(){ try{ return JSON.parse(lsGet('sky_flamed_' + myUid) || '{}'); }catch(e){ return {}; } }
   function flamedToday(code){ return flamedMap()[code] === window.SkyApp.dayKey(); }   // sekali sehari per teman (ganti hari = reset harian Sky)
   function syncFlame(row){   // sudah dinyalakan hari ini: api berwarna & bergerak; belum: abu-abu & diam
