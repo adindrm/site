@@ -1902,7 +1902,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   html.gfx-low #gcM .gc-bolt{ opacity:0; }
   #gcM .gcBake{ display:none; position:absolute; left:-100px; top:-180px; width:930px; height:800px; pointer-events:none; }
   #gcM.gcBaked .gcBake{ display:block; }
-  #gcM.gcBaked > svg{ display:none; }
+  #gcM.gcBaked > svg.gcL, #gcM.gcBaked > .gc-ringsway{ display:none; }
   .setCard .locSt{ font-size:13px; line-height:1.4; color:var(--ink-soft); margin:2px 0 10px; }
   /* ===== umpan balik tombol: reaksi saat ditekan lebih terlihat + tanda menunggu (loading) ===== */
   button:not(:disabled):not(#fab):active, [role="button"]:active, .pill:active, .chip:active, .cbtn:active, .fBtn:active{
@@ -2216,7 +2216,16 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 <div id="celestial"></div>
 <div id="skFront" aria-hidden="true">
   <canvas id="skBodies"></canvas>
-  <div id="gcM" aria-hidden="true"><svg viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg"><defs>
+<style id="gcLayerCss">
+/* [perf] Gunung Cahaya dipecah jadi beberapa lapisan: pancaran, batu, gunung, cincin, petir. Gerakan di satu lapisan tidak lagi
+   memaksa blur/mask lapisan lain digambar ulang; cincin (blend screen + ~30 blur + mask besar) kini dianimasikan di level HTML (GPU). */
+#gcM > svg.gcDefs{position:absolute;left:0;top:0;width:0;height:0;overflow:hidden}
+#gcM > svg.gcL,#gcM > .gc-ringsway{position:absolute;left:0;top:0}
+#gcM > .gc-ringsway{width:810px;height:520px;transform-origin:358px 247px}
+#gcM > .gc-ringsway > svg{position:absolute;left:0;top:0}
+#gcM svg.gc-beam{transform-origin:358px 247px}
+</style>
+  <div id="gcM" aria-hidden="true"><svg class="gcDefs" width="0" height="0" viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
     
     
     <linearGradient id="gc-mtn2" gradientUnits="userSpaceOnUse" x1="0" y1="90" x2="0" y2="210">
@@ -2238,7 +2247,7 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
       <stop offset="0" stop-color="#ffb888" stop-opacity="0"/>
       <stop offset="1" stop-color="#ffb888" stop-opacity=".4"/>
     </linearGradient>
-    <filter id="gc-wave" filterUnits="userSpaceOnUse" x="-100" y="-250" width="1050" height="800">
+    <filter id="gc-wave" filterUnits="userSpaceOnUse" x="292" y="-148" width="236" height="406">
       <feTurbulence type="fractalNoise" baseFrequency="0.014 0.024" numOctaves="2" seed="3" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
@@ -2276,7 +2285,7 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
     <mask id="gc-vfade" maskUnits="userSpaceOnUse" x="300" y="-140" width="220" height="390"><rect x="300" y="-140" width="220" height="390" fill="url(#gc-vf)"/></mask>
     
     <linearGradient id="gc-mf" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fff"/><stop offset=".18" stop-color="#fff"/><stop offset=".55" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity=".04"/>
+      <stop offset="0" stop-color="#fff"/><stop offset=".14" stop-color="#fff"/><stop offset=".45" stop-color="#fff" stop-opacity=".55"/><stop offset=".8" stop-color="#fff" stop-opacity=".14"/><stop offset=".93" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
     <mask id="gc-mfade" maskUnits="userSpaceOnUse" x="0" y="200" width="840" height="270"><rect x="0" y="200" width="840" height="270" fill="url(#gc-mf)"/></mask>
     <linearGradient id="gc-fL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd8a0" stop-opacity="0"/><stop offset=".35" stop-color="#f6b870" stop-opacity=".03"/><stop offset=".65" stop-color="#f6c080" stop-opacity=".18"/><stop offset=".88" stop-color="#ffe4b8" stop-opacity=".8"/><stop offset="1" stop-color="#fff4dc"/></linearGradient>
@@ -2298,10 +2307,8 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
     <filter id="gc-blur2" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="1.6"/></filter>
     <filter id="gc-blur05" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation=".5"/></filter>
   <polygon id="gc-b10" points="400.15,221.91 399.60,213.26 398.99,204.90 394.84,197.17 397.35,189.80 393.20,181.20 389.76,173.00 393.09,165.73 387.13,158.48 383.16,151.96 383.92,143.72 386.14,135.96 389.23,128.63 398.73,120.07 400.56,112.73 400.46,112.71 398.49,119.89 388.80,128.29 385.38,135.67 382.85,143.51 381.80,152.23 385.75,159.44 391.12,166.03 387.45,172.99 390.79,182.24 394.40,190.02 391.57,197.46 395.50,205.86 395.65,213.44 395.85,222.09"/><polygon id="gc-b11" points="394.13,196.21 391.52,194.46 390.04,191.58 387.76,189.01 386.41,185.92 384.13,183.33 384.06,183.38 385.92,186.19 386.78,189.53 388.58,192.40 389.68,195.81 392.28,198.42"/><polygon id="gc-b12" points="392.60,166.67 395.55,164.57 396.88,161.25 398.48,158.39 401.31,156.61 403.55,154.01 403.49,153.95 401.08,156.31 397.98,157.86 395.91,160.73 394.44,163.60 391.62,165.09"/><polygon id="gc-b13" points="383.75,143.20 381.08,141.01 378.05,139.51 375.85,137.01 373.89,134.22 371.07,132.27 371.03,132.33 373.70,134.39 375.49,137.27 377.63,140.02 380.58,141.73 383.02,144.03"/><polygon id="gc-b20" points="401.33,219.86 395.18,213.13 397.29,206.93 390.08,199.50 387.06,193.32 385.17,187.77 386.78,181.18 383.18,173.95 387.88,166.69 384.63,159.33 386.17,151.89 382.52,144.75 380.97,138.89 377.63,132.79 380.50,126.28 380.41,126.24 377.37,132.80 380.54,139.06 381.89,144.99 385.27,152.00 383.49,159.45 386.50,166.53 381.55,173.80 384.91,181.41 383.03,187.78 384.82,194.20 387.92,201.08 394.51,207.90 392.09,214.06 398.67,222.14"/><polygon id="gc-b21" points="386.72,194.50 388.88,191.91 391.16,189.50 393.99,187.54 395.67,184.46 397.24,181.44 397.17,181.40 395.30,184.24 393.41,186.95 390.41,188.50 387.69,190.70 385.17,193.02"/><polygon id="gc-b22" points="387.76,166.27 385.84,163.33 382.95,161.34 380.09,159.57 378.14,156.86 376.57,153.85 376.49,153.89 377.88,157.00 379.72,159.94 382.49,161.98 385.06,164.04 386.62,166.95"/><polygon id="gc-b30" points="398.46,220.49 396.42,215.18 397.60,210.23 393.54,205.51 395.67,200.34 396.33,195.46 397.56,190.68 399.89,185.10 398.36,179.79 390.86,174.63 384.53,169.80 385.26,165.16 393.71,159.68 397.03,154.73 388.90,148.97 388.84,149.05 396.80,154.83 393.43,159.36 384.80,164.75 383.82,170.19 390.25,175.45 397.43,180.59 398.44,184.94 395.98,190.11 394.47,195.05 393.62,199.74 391.20,205.89 395.08,210.92 393.57,215.35 395.54,221.51"/><polygon id="gc-b31" points="396.20,194.94 394.68,191.65 391.59,189.97 389.59,187.33 387.25,184.85 385.40,182.01 385.34,182.05 386.96,185.06 389.05,187.74 390.90,190.71 393.64,192.53 394.60,195.57"/><polygon id="gc-b32" points="390.85,175.44 393.61,173.24 394.51,169.88 396.37,167.11 398.60,164.57 401.13,162.31 401.08,162.24 398.44,164.40 396.05,166.85 393.98,169.62 392.96,172.79 390.26,174.64"/></defs>
-  
-  
-  
-  
+</svg>
+<svg class="gcL" viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg">
   <g transform="translate(-11 0)">
   <g class="gc-sway" filter="url(#gc-wave)" mask="url(#gc-vfade)">
     <path d="M356,236 C378,150 390,60 394,-10 L395,-130 L423,-130 L424,-10 C428,60 440,150 462,236Z" fill="url(#gc-hg1)" filter="url(#gc-blur6)"/>
@@ -2336,6 +2343,8 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
   </g>
   <circle class="gc-beam" cx="409" cy="224" r="70" fill="url(#gc-glowBase)"/>
   </g>
+</svg>
+<svg class="gcL" viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg">
   <g transform="translate(0 20)">
     <g class="gc-rock" style="animation-delay:0s;animation-duration:6s;--dx:2.4px;--dy:-6.4px;--r:10deg">
       <polygon points="386.7,209.2 390.3,202.6 396.9,203.8 398.7,209.8 393.9,213.4" fill="#7a5090"/>
@@ -2370,6 +2379,8 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
       <polygon points="405.1,197.3 406.7,194.5 409.5,195.0 407.7,196.8" fill="#ffe3c8" opacity=".55"/>
     </g>
   </g>
+</svg>
+<svg class="gcL" viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg">
   <g mask="url(#gc-mfade)">
   <g transform="translate(-40 50) scale(2.98 1.94)">
     <path id="gc-gunung" d="M32.4,199.9c14-10.6,28.6-22.4,43.5-35.5c12.3-10.8,23.6-21.5,34.1-31.9c8.6-5.3,26.7-54,36.9-40.5c4.6,2.9,5.4-1.4,7.5-1.6c1.9-0.1,3.6,2.9,3.8,3.3c12.9,22.6,36.7,36.9,55,55.4c9.5,9.6,22.9,23,42.1,38.7c10.6,8.6,19.7,15.2,26.3,19.8c-87.8,0.8-175.7,1.6-263.5,2.5Z" fill="url(#gc-mtn2)"/>
@@ -2381,8 +2392,8 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
     </g>
   </g>
   </g>
-  <g class="gc-ringsway">
-  <g class="gc-beam">
+</svg>
+<div class="gc-ringsway"><svg class="gcL gc-beam" viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg">
     <g mask="url(#gc-outRing)">
       <path d="M337.5,201.5 Q260,204 150,205 Q260,206 337.5,208.5Z" fill="url(#gc-fL)" stroke="url(#gc-fL)" stroke-width="11" stroke-opacity=".65" filter="url(#gc-blur4)"/>
       <path d="M458.5,201.5 Q536,204 646,205 Q536,206 458.5,208.5Z" fill="url(#gc-fR)" stroke="url(#gc-fR)" stroke-width="11" stroke-opacity=".65" filter="url(#gc-blur4)"/>
@@ -2419,8 +2430,8 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
     <circle cx="398" cy="205" r="66.28" fill="none" stroke="#4ac8ff" stroke-width=".06" opacity=".5" filter="url(#gc-soft)"/>
     <circle cx="398" cy="205" r="66.00" fill="none" stroke="#4a6bff" stroke-width=".06" opacity=".5" filter="url(#gc-soft)"/>
     <circle cx="398" cy="205" r="65.72" fill="none" stroke="#9a5aff" stroke-width=".06" opacity=".5" filter="url(#gc-soft)"/>
-  </g>
-  </g>
+</svg></div>
+<svg class="gcL" viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg">
   <g>
     <circle class="gc-peakglow" cx="399" cy="222" r="60" fill="url(#gc-glowPk)"/>
     <g class="gc-bolt gc-b1" stroke-linejoin="round"><use href="#gc-b10" fill="#ffb830" stroke="#ffb830" stroke-width="3" opacity=".6" filter="url(#gc-blur6)"/><use href="#gc-b11" fill="#ffb830" stroke="#ffb830" stroke-width="3" opacity=".6" filter="url(#gc-blur6)"/><use href="#gc-b12" fill="#ffb830" stroke="#ffb830" stroke-width="3" opacity=".6" filter="url(#gc-blur6)"/><use href="#gc-b13" fill="#ffb830" stroke="#ffb830" stroke-width="3" opacity=".6" filter="url(#gc-blur6)"/><use href="#gc-b10" fill="#ffee90" filter="url(#gc-soft)"/><use href="#gc-b11" fill="#ffee90" filter="url(#gc-soft)"/><use href="#gc-b12" fill="#ffee90" filter="url(#gc-soft)"/><use href="#gc-b13" fill="#ffee90" filter="url(#gc-soft)"/></g>
@@ -3164,8 +3175,8 @@ const glowCurve  = tau => tau < 0 ? 0 : tau < .6 ? ease(tau / .6) : Math.exp(-(t
 
 // Profil kecepatan: mulai pelan, (kadang) ada satu dorongan yang hanya menambah kecepatan sedikit (sekitar 1,5-1,9x).
 // Posisi didapat dari integrasi kecepatan, jadi selalu halus.
-function makeProfile(durSec) {
-  const N = 240, A = Math.random() < .75 ? rnd(.5, .9) : 0, tb = rnd(.22, .55) * durSec;
+function makeProfile(durSec, tbO, AO) {   // tbO/AO (opsional): paksa waktu dan kuat dorongan (dipakai kepakan saat muncul)
+  const N = 240, A = AO !== undefined ? AO : (Math.random() < .75 ? rnd(.5, .9) : 0), tb = tbO !== undefined ? tbO : rnd(.22, .55) * durSec;
   const v = [], u = [0];
   for (let i = 0; i <= N; i++) {
     const t = i / N, ramp = clamp01(t / .3);
@@ -3251,6 +3262,7 @@ function cascadeDev(grp, src, tNowOf) {
     }
   }
 }
+const tOf = (f, now) => (now - f.start + (f.tw || 0) * 1000) / f.dur;   // progres jalur: waktu berjalan + percepatan tambahan dari kepakan (tw, detik)
 function basePt(f, t) {
   const u = sample(f.prof.u, f.prof.N, t);
   const [a0,b0,a1,b1,a2,b2] = f.P, x0=a0*W, y0=b0*H, x1=a1*W, y1=b1*H, x2=a2*W, y2=b2*H;
@@ -3265,11 +3277,12 @@ function pose(f, t, now) {
 // Waktu kepakan (detik sejak mulai) tiap kid. Sendirian: sama seperti dorongan kecepatan. Berkelompok: tiap kid berbeda-beda.
 function flapTimes(i, prof, durSec, count) {
   if (count === 1) return prof.A ? [prof.tb] : [];
-  const out = [];
+  const out = [], ex = [];   // ex: kepakan tambahan (bukan dorongan utama profil) -> ikut menambah kecepatan
   if (prof.A) { if (Math.random() < .85) out.push(Math.max(.3, prof.tb + (i ? rnd(-1, 1.6) : rnd(-.2, .4)))); }
-  else if (Math.random() < .4) out.push(rnd(.2, .6) * durSec);
-  if (Math.random() < .35) out.push((out.length ? out[0] : rnd(.2, .5) * durSec) + rnd(5, 9));
-  return out.sort((a, b) => a - b).filter(v => v < durSec - 3);
+  else if (Math.random() < .4) { const v = rnd(.2, .6) * durSec; out.push(v); ex.push(v); }
+  if (Math.random() < .35) { const v = (out.length ? out[0] : rnd(.2, .5) * durSec) + rnd(5, 9); out.push(v); ex.push(v); }
+  const r = out.sort((a, b) => a - b).filter(v => v < durSec - 3); r.ex = ex.filter(v => v < durSec - 3);
+  return r;
 }
 function toScreen(p, lx, ly) {
   const k = p.s * unit, dx = (lx-155)*k, dy = (ly-150)*k, c = Math.cos(p.rot), s = Math.sin(p.rot);
@@ -3308,7 +3321,9 @@ function spawn(now) {
   const P = [x0, y0, (x0 + x2) / 2 + rnd(-.1, .1), Math.max(.08, Math.min(y0, y2) - rnd(.05, .25)), x2, y2];
   const depth = rnd(.3, 1.2), dur = Math.min(45000, rnd(13000, 18000) / depth), prof = makeProfile(dur / 1000);   // kedalaman merata dari jauh (.3, kecil) sampai dekat (1.2, besar); durasi dibatasi 45 dtk
   // ukuran dasar dibagi seluruh kelompok (selisih kecil), supaya jarak antarkid bisa dinyatakan dalam lebar jubah
-  const scB = rnd(.03, .042) * depth * (1 + 1.1 * depth * depth * depth), capePx = 190 * scB * unit;
+  const kFar = clamp01(1 - (depth - .3) / .3), FAR_PX = 15;   // titik terjauh (depth .3): ukuran SELALU tepat FAR_PX px di layar mana pun; variasi acak memudar menjelang terjauh
+  const gD = d => d * (1 + 1.1 * d * d * d), scFar = FAR_PX / (300 * unit), scNear = rnd(.03, .042) * gD(1.2), hD = (gD(depth) - gD(.3)) / (gD(1.2) - gD(.3));   // interpolasi naik terus dari terjauh (FAR_PX) ke terdekat (ukuran semula): tidak pernah terbalik
+  const scB = scFar + hD * (scNear - scFar), capePx = 190 * scB * unit;
   const LAT_K = .62 * rnd(.94, 1.08), TRL_K = .78 * rnd(.94, 1.08);   // jarak samping dan ke belakang per tingkat, dalam lebar jubah
   let pathPx = 0; { let px_ = P[0] * W, py_ = P[1] * H; for (let q = 1; q <= 24; q++) { const u_ = q / 24, nx = bez(u_, P[0] * W, P[2] * W, P[4] * W), ny = bez(u_, P[1] * H, P[3] * H, P[5] * H); pathPx += Math.hypot(nx - px_, ny - py_); px_ = nx; py_ = ny; } }
   const speedPx = pathPx / (dur / 1000), grp = [];
@@ -3327,16 +3342,17 @@ function spawn(now) {
     const rank = (i + 1) >> 1;   // formasi V: pemimpin di depan, lalu berpasangan kiri-kanan makin ke belakang
     const side = i ? (i % 2 ? 1 : -1) : 0, gl = side * rank * LAT_K, gt = rank * TRL_K;   // posisi dalam satuan lebar jubah
     const dev = devIdx.has(i) ? { t0: rnd(.2, .5), len: rnd(.3, .42), amp: rnd(.16, .28) * (Math.random() < .5 ? 1 : -1) } : null;
-    let flaps = flapTimes(i, prof, dur / 1000, count);
+    let flaps = flapTimes(i, prof, dur / 1000, count), xsT = (flaps.ex || []).slice();   // xsT: waktu kepakan yang menambah kecepatan
     const dv = (allDive || i === diveIdx) ? { st: 0, t0: rnd(.14, .3) * dur / 1000 } : null;   // detik sejak kid mulai terbang; sisanya ditentukan saat mulai menyelam
     if (dev) {   // setiap perubahan arah penyimpangan (mulai menyimpang, lalu berbalik kembali ke jalur) diiringi kepakan jubah
       const dT = [dev.t0 * dur / 1000 - .1, (dev.t0 + dev.len * .5) * dur / 1000 - .1];
       flaps = flaps.filter(v => dT.every(d => Math.abs(v - d) > 3)).concat(dT).sort((a, b) => a - b);
+      xsT = xsT.filter(v => dT.every(d => Math.abs(v - d) > 3)).concat(dT);
     }
-    flyers.push({ el, depth, cape: el.querySelector('.cape'), hd: el.querySelector('path:not(.cape)'), l1: el.querySelectorAll('path:not(.cape)')[1], l2: el.querySelectorAll('path:not(.cape)')[2], la: 0, tips: [[57.5, 110.2], [234.5, 58.8]], start: now + (gt * capePx / speedPx) * 1000, dur, g: 0, flapAt: 0, prof, flaps,
+    flyers.push({ el, depth, cape: el.querySelector('.cape'), hd: el.querySelector('path:not(.cape)'), l1: el.querySelectorAll('path:not(.cape)')[1], l2: el.querySelectorAll('path:not(.cape)')[2], la: 0, tips: [[57.5, 110.2], [234.5, 58.8]], start: now + (gt * capePx / speedPx) * 1000, dur, g: 0, flapAt: 0, prof, flaps, xs: xsT.map(t => ({ t, a: rnd(.5, .9) })), tw: 0,
       dev, dv, dvDone: !!dv, cx: rnd(.65, 1.35), cf: rnd(.75, 1.35), fs: rnd(.85, 1.15), lean: rnd(-.12, .12),   // variasi kain per kid: besar ayunan, kecepatan riak, kuat kepakan, kemiringan dasar
       P: P.slice(), lat: gl * capePx, gl, gt, grp,   // jalur sama untuk semua; formasi lewat offset samping tetap dan jeda waktu
-      sc: scB * rnd(.97, 1.03), wob: rnd(0, 6.28), far: 1 + .4 * (1 - Math.max(0, Math.min(1, (depth - .4) / .6))),   // yang paling dekat jauh lebih besar (sampai sekitar 2,1 kali)
+      sc: scB * (1 + (rnd(.97, 1.03) - 1) * (1 - kFar)), wob: rnd(0, 6.28), far: 1 + .4 * (1 - Math.max(0, Math.min(1, (depth - .4) / .6))),   // yang paling dekat jauh lebih besar (sampai sekitar 2,1 kali)
       em: EM.map((e, idx) => { const L = Math.max(W, H) * (idx ? .38 : .5) * (.45 + .55 * depth); return { ...e, prev: null, s: idx * 97, L, ret: L / 2.5, depth, m: 1 + .25 * (count - 1) }; }) });
     grp.push(flyers[flyers.length - 1]);
   }
@@ -3434,12 +3450,12 @@ function setDiveMask(d, ys, u) {   // pudar di awan, tegas di air
   d.clip.style.webkitMaskImage = d.clip.style.maskImage = m;
 }
 // setelah muncul: jalur baru dari titik muncul (arah awal = arah mendongak), kecepatan dan tujuan keluar layar acak; jalur semula ditinggalkan
-function reroute(f, now, x, y, h, v, tOut, flip) {
+function reroute(f, now, x, y, h, v, tOut, flip, bo) {   // bo: kuat dorongan kecepatan yang menyertai kepakan saat muncul
   let dir = Math.cos(h) >= 0 ? 1 : -1; if (Math.random() < (flip ? .5 : .3)) dir = -dir;
   const x2 = dir > 0 ? rnd(1.05, 1.12) : rnd(-.12, -.05), y2 = rnd(.12, .5), Lh = rnd(.12, .25) * W, x1 = x + Math.cos(h) * Lh, y1 = Math.max(H * .06, y + Math.sin(h) * Lh);
   const len = Math.hypot(x2 * W - x, y2 * H - y) * 1.25 + Lh, dur = Math.max(6500, Math.min(24000, len / Math.max(18, v) * 1000));
-  f.P = [x / W, y / H, x1 / W, y1 / H, x2, y2]; f.prof = makeProfile(dur / 1000); f.dur = dur; f.start = now; f.dev = null;
-  f.flaps = [(tOut - now) / 1000 - .22]; if (Math.random() < .45) f.flaps.push(rnd(3, 6));   // kepakan saat muncul tetap berlanjut mulus
+  f.P = [x / W, y / H, x1 / W, y1 / H, x2, y2]; f.prof = bo ? makeProfile(dur / 1000, (tOut - now) / 1000, bo) : makeProfile(dur / 1000); f.dur = dur; f.start = now; f.dev = null; f.tw = 0; f.xs = [];
+  f.flaps = [(tOut - now) / 1000]; if (Math.random() < .45) { const t2 = rnd(3, 6); f.flaps.push(t2); f.xs.push({ t: t2, a: rnd(.5, .9) }); }   // kepakan saat muncul tetap berlanjut mulus
 }
 function diveStep(f, p, t, now, dt) {
   const d = f.dv, T = (now - f.start) / 1000, u = Math.max(14, 300 * p.s * unit), ho = 80 * p.s * unit;
@@ -3502,9 +3518,11 @@ function diveStep(f, p, t, now, dt) {
   }
   if (d.st === 4) {   // naik: kecepatan acak, mendongak, muncul dengan satu kepakan jubah
     d.h += R(angDiff(d.up, d.h), 2.6);
-    mv(d.v + (d.vu - d.v) * (1 - Math.exp(-dt * 1.6)));
-    if (!d.out && d.y - ho <= d.ys2) { d.out = 1; d.tOut = now; fxImpact(d.kind, d.x, d.ys2, u, true, Math.sign(Math.cos(d.h)) || 1, now); f.flaps.push(T - .22); }   // satu kepakan mulai sedikit sebelum kepala menembus permukaan
-    if (d.out && d.y + 150 * p.s * unit < d.ys2 - 2) { const tOut = d.tOut, x = d.x, y = d.y, h = d.h, v = d.v; diveEnd(f); reroute(f, now, x, y, h, v, tOut); p.x = x; p.y = y; p.rot = h - HEAD_ANGLE; return; }
+    if (d.vb === undefined) d.vb = d.v; d.vb += (d.vu - d.vb) * (1 - Math.exp(-dt * 1.6));   // vb: kecepatan dasar tanpa dorongan
+    mv(d.vb * (1 + (d.tF2 === undefined ? 0 : d.Ae * boostCurve(T - d.tF2))));   // kepakan saat muncul menambah kecepatan (kurva dorongan yang sama)
+    if (!d.out && d.y - ho <= d.ys2) { d.out = 1; d.tOut = now; fxImpact(d.kind, d.x, d.ys2, u, true, Math.sign(Math.cos(d.h)) || 1, now); }   // kepala menembus permukaan: cipratan/gumpalan
+    if (d.out && !d.fp && d.y <= d.ys2 + ho * .3) { d.fp = 1; d.tFp = now - 120; d.tF2 = T - .12; d.Ae = rnd(.5, .9); f.flaps.push(d.tF2); }   // SATU kepakan jubah tiap kali muncul dari air/awan: mulai saat badan (tempat jubah) menembus permukaan, jadi hentakannya terlihat di udara, bukan tersembunyi di bawah mask
+    if (d.out && d.y + 150 * p.s * unit < d.ys2 - 2) { if (!d.fp) { d.fp = 1; d.tFp = now - 120; d.tF2 = T - .12; d.Ae = rnd(.5, .9); f.flaps.push(d.tF2); } const tOut = d.tFp, x = d.x, y = d.y, h = d.h, v = d.vb, Ae = d.Ae; diveEnd(f); reroute(f, now, x, y, h, v, tOut, false, Ae); p.x = x; p.y = y; p.rot = h - HEAD_ANGLE; return; }
     if (T - d.tU > (evBusy ? 40 : 12)) { diveEnd(f); return; }
   }
   p.x = d.x; p.y = d.y; p.rot = d.h - HEAD_ANGLE + Math.sin(now / 650 + f.wob) * .05;
@@ -3586,8 +3604,13 @@ function frame(now) {
   if (Forest.p > .003) Forest.draw(dt, now);   // [forest-addon]
   drawWx(dt, now);
   for (let i = flyers.length - 1; i >= 0; i--) {
-    const f = flyers[i], t = (now - f.start) / f.dur;
+    const f = flyers[i], t = tOf(f, now);
     if (t < 0) continue;
+    if (f.xs && f.xs.length && !(f.dv && f.dv.st >= 1)) {   // tiap kepakan tambahan ikut menambah kecepatan (kurva sama seperti dorongan utama): waktu jalur dimajukan lebih cepat
+      const Tb = (now - f.start) / 1000; let b = 0;
+      for (const e of f.xs) { const q = Tb - e.t; if (q >= 0 && q < 24) b += e.a * boostCurve(q); }
+      if (b > 0) f.tw = (f.tw || 0) + dt * b;
+    }
     if (t >= 1 && !(f.dv && f.dv.on)) {
       f.el.remove(); if (f.dv && f.dv.clip) f.dv.clip.remove(); flyers.splice(i, 1); for (const e of f.em) e.endAt = now;
       if (!flyers.length) nextAt = now + (evBusy ? rnd(1200, 3500) : rnd(6000, 14000));   // sebentar jeda, lalu muncul lagi (lebih sering saat ada event)
@@ -3707,25 +3730,26 @@ function frame(now) {
 }
 // Beranda: klik atau ketuk sebuah Sky kid -> ia berganti jadi freestyle acak dan menyimpang dari jalurnya, lalu kembali ke jalur
 function triggerFly(f, now) {
-  const t = (now - f.start) / f.dur;
+  const t = tOf(f, now);
   if (f.trk || t < 0 || t > .92 || (f.dv && f.dv.st)) return false;   // kid yang sedang menyelam tidak bisa diklik
   const names = Object.keys(TRICKS), def = TRICKS[names[Math.floor(Math.random() * names.length)]], Ts = (now - f.start) / 1000;
   f.trk = { def, start: now };
   const fl = def.flaps.map(fr => Ts + fr * def.dur);
   if (!f.dev || t < f.dev.t0 || t >= f.dev.t0 + f.dev.len) {   // menyimpang dari titik ini, lalu mengayun kembali (mulus, nol di awal dan akhir)
     const len = Math.min(rnd(.3, .42), 1 - t - .04);
-    if (len >= .12) { f.dev = { t0: t, len, amp: rnd(.16, .28) * (Math.random() < .5 ? 1 : -1) }; fl.push(Ts, Ts + len * .5 * f.dur / 1000); if (f.grp) cascadeDev(f.grp, f, j => Math.max(0, (now - j.start) / j.dur)); }
+    if (len >= .12) { f.dev = { t0: t, len, amp: rnd(.16, .28) * (Math.random() < .5 ? 1 : -1) }; fl.push(Ts, Ts + len * .5 * f.dur / 1000); if (f.grp) cascadeDev(f.grp, f, j => Math.max(0, tOf(j, now))); }
   }
   fl.sort((a, b) => a - b);
   const keep = []; for (const v of fl) if (!keep.length || v - keep[keep.length - 1] > 1.7) keep.push(v);
+  f.xs = (f.xs || []).filter(e => e.t <= Ts).concat(keep.map(t => ({ t, a: rnd(.5, .9) })));   // tiap kepakan trik/menyimpang menambah kecepatan
   f.flaps = f.flaps.filter(v => v <= Ts).concat(keep);   // kepakan yang sudah lewat tetap, yang akan datang diganti kepakan freestyle
   return true;
 }
 // klik dua kali pada sebuah kid: ia berbelok memilih jalur baru (arah, tujuan, dan kecepatan acak) dari posisinya sekarang
 function doubleTapReroute(f, now) {
-  const t = (now - f.start) / f.dur; if (t < 0 || t > .92 || (f.dv && f.dv.st)) return;
+  const t = tOf(f, now); if (t < 0 || t > .92 || (f.dv && f.dv.st)) return;
   const a = basePt(f, t), b = basePt(f, Math.min(1, t + .004)), st = .004 * f.dur / 1000, h = Math.hypot(b.x - a.x, b.y - a.y) > .01 ? Math.atan2(b.y - a.y, b.x - a.x) : a.h, v = Math.hypot(b.x - a.x, b.y - a.y) / st;
-  f.trk = null; reroute(f, now, f.sx, f.sy, h, v, now, true); f.flaps = [0];   // satu kepakan saat berbelok
+  f.trk = null; reroute(f, now, f.sx, f.sy, h, v, now, true); f.flaps = [0]; f.xs = [{ t: 0, a: rnd(.5, .9) }];   // satu kepakan saat berbelok (ikut menambah kecepatan)
 }
 let lastTap = { f: null, t: 0 };
 document.addEventListener('pointerdown', e => {   // kid ada di belakang halaman: ketukan di area kosong (bukan tombol/isian/dialog) yang dekat kid memicunya
@@ -4389,14 +4413,28 @@ let gcBakeKey = '', gcBakeT = 0, gcBakeLast = 0, gcBakeBusy = false, gcCssCache 
 function gcCssText() {
   if (gcCssCache !== null) return gcCssCache;
   let o = '';
-  try { for (const sh of document.styleSheets) { let rs; try { rs = sh.cssRules; } catch (e) { continue; }
+  try { for (const sh of document.styleSheets) { if (sh.ownerNode && sh.ownerNode.id === 'gcLayerCss') continue; let rs; try { rs = sh.cssRules; } catch (e) { continue; }
     for (const r of rs) { const sel = r.selectorText || r.name || ''; if (!/gc/i.test(sel) || sel === '#gcM' || /^html/.test(sel)) continue; o += r.cssText.replace(/#gcM/g, 'svg'); } } } catch (e) {}
   return gcCssCache = o;
+}
+function gcBakeSvg() {   // [perf] lapisan-lapisan terpisah disatukan kembali ke struktur SVG semula agar bisa dipanggang ke satu kanvas
+  const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg');
+  const df = gcEl.querySelector('svg.gcDefs defs'); if (df) svg.appendChild(df.cloneNode(true));
+  for (const el of gcEl.children) {
+    if (el.matches && el.matches('svg.gcL')) { for (const c of el.childNodes) svg.appendChild(c.cloneNode(true)); }
+    else if (el.classList && el.classList.contains('gc-ringsway')) {
+      const rs = document.createElementNS(NS, 'g'), bm = document.createElementNS(NS, 'g'), inner = el.querySelector('svg');
+      rs.setAttribute('class', 'gc-ringsway'); bm.setAttribute('class', 'gc-beam');
+      if (inner) for (const c of inner.childNodes) bm.appendChild(c.cloneNode(true));
+      rs.appendChild(bm); svg.appendChild(rs);
+    }
+  }
+  return svg;
 }
 function gcBake() {
   if (gcBakeBusy) return; gcBakeBusy = true; gcBakeLast = performance.now();
   try {
-    const svg = gcEl.querySelector('svg').cloneNode(true);
+    const svg = gcBakeSvg();
     svg.setAttribute('viewBox', '-60 -240 930 800'); svg.setAttribute('width', 930); svg.setAttribute('height', 800);
     let vars = ''; for (let i = 0; i < gcEl.style.length; i++) { const n = gcEl.style[i]; if (n.indexOf('--') === 0) vars += n + ':' + gcEl.style.getPropertyValue(n) + ';'; }
     svg.setAttribute('style', vars + 'overflow:visible');
@@ -4465,7 +4503,7 @@ window.SkyScene = {
   setBusy(on) {   // saat event berlangsung (kecuali Grandma): Sky kid lebih sering muncul dan dominan menyelam
     on = !!on; if (on === evBusy) return; evBusy = on;
     if (on && !flyers.length) nextAt = Math.min(nextAt, performance.now() + 1200);
-    if (on && !REDUCE) for (const f of flyers) if (!f.dv && !f.dvDone && !f.dev && (performance.now() - f.start) / f.dur < .5) { f.dvDone = true; f.dv = { st: 0, t0: (performance.now() - f.start) / 1000 + rnd(.8, 2) }; }   // [event-dive] kid yang sudah di layar saat event mulai ikut menyelam
+    if (on && !REDUCE) for (const f of flyers) if (!f.dv && !f.dvDone && !f.dev && tOf(f, performance.now()) < .5) { f.dvDone = true; f.dv = { st: 0, t0: (performance.now() - f.start) / 1000 + rnd(.8, 2) }; }   // [event-dive] kid yang sudah di layar saat event mulai ikut menyelam
   },
   setEdenLight(on) { gcEdenOn = !!on; },   // true selama Eden mingguan belum dinonaktifkan: cahaya gunung merah terus
   meteor(kind) {   // kind kosong/'eden': 3 meteor merah (Eden). 'red' / 'black': hujan meteor 5 detik (shard merah / hitam). Cahaya gunung bereaksi 2 detik sebelum meteor pertama jatuh
