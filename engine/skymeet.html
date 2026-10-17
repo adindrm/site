@@ -1861,6 +1861,24 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     border-radius:50%; border:2px solid var(--ink, currentColor); border-right-color:transparent; animation:spin .7s linear infinite; pointer-events:none;
   }
   @media (prefers-reduced-motion: reduce){ button.pending::after, button.busy:not(.fBtn)::after{ animation-duration:1.6s; } }
+  /* [busy] indikator proses lebih jelas & mengikuti tema (warna --ink / --glow berubah mengikuti langit):
+     cincin lebih besar dengan pendar, label tetap samar terbaca, tombol berdenyut halus, dan garis progres tipis di atas layar */
+  button.pending > *, button.busy:not(.fBtn) > *{ opacity:.35; }
+  button.pending::after, button.busy:not(.fBtn)::after{
+    width:20px; height:20px; margin:-10px 0 0 -10px;
+    border:2.5px solid color-mix(in srgb, var(--ink, currentColor) 26%, transparent); border-top-color:var(--ink, currentColor);
+    filter:drop-shadow(0 0 5px var(--glow, transparent)); animation:spin .75s linear infinite;
+  }
+  button.pending, button.busy:not(.fBtn){ animation:pendPulse 1.3s ease-in-out infinite; }
+  @keyframes pendPulse{ 0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--ink, #fff) 0%, transparent); } 50%{ box-shadow:0 0 0 5px color-mix(in srgb, var(--ink, #fff) 16%, transparent), 0 0 14px var(--glow, transparent); } }
+  #netBar{ position:fixed; left:0; right:0; top:env(safe-area-inset-top, 0px); height:3px; z-index:99999; pointer-events:none; overflow:hidden; opacity:0; transition:opacity .3s ease; background:color-mix(in srgb, var(--ink, #fff) 10%, transparent); }
+  #netBar.on{ opacity:1; }
+  #netBar i{ position:absolute; top:0; bottom:0; left:0; width:38%; border-radius:3px; background:linear-gradient(90deg, transparent, var(--ink, #fff) 45%, var(--ink, #fff) 55%, transparent); box-shadow:0 0 10px var(--glow, transparent); animation:netBarRun 1.15s ease-in-out infinite; }
+  @keyframes netBarRun{ from{ transform:translateX(-100%); } to{ transform:translateX(265%); } }
+  @media (prefers-reduced-motion: reduce){
+    button.pending, button.busy:not(.fBtn){ animation:none; }
+    #netBar i{ animation:none; left:0; width:100%; opacity:.55; }
+  }
   /* ===== [event] layar event Beranda + gaya Gunung Cahaya (dari skymeetberandaevent) ===== */
   /* ===== layar pengingat event (Beranda): header jam sistem + jam Sky, di tengah hanya nama event kecil & hitung mundur ===== */
   #p1 .page-in{ transition:opacity .7s ease; }
@@ -10507,10 +10525,22 @@ initPerm(); startLoop();
     var wait = Math.max(0, 350 - (performance.now() - b._t0));   // tanda minimal 0,35 dtk supaya tidak berkedip
     setTimeout(function(){ if(b._pend > 0) return; b._pend = 0; b.classList.remove('pending'); b.removeAttribute('aria-busy'); if(b._posSet){ b.style.position = ''; b._posSet = false; } }, wait);
   }
+  // [busy] garis progres di atas layar: hanya permintaan yang dipicu pengguna (tombol, atau aksi server selain yang berjalan di latar)
+  var BG = { poll:1, typing:1, read:1, saveData:1 }, bar = null, barN = 0, barT = 0, barH = 0, barS = 0;
+  function barEl(){ if(!bar){ bar = document.createElement('div'); bar.id = 'netBar'; bar.setAttribute('aria-hidden', 'true'); bar.appendChild(document.createElement('i')); document.body.appendChild(bar); } return bar; }
+  function barInc(){ if(++barN === 1){ clearTimeout(barH); barT = setTimeout(function(){ barEl().classList.add('on'); barS = performance.now(); }, 180); } }   // permintaan cepat (<0,18 dtk) tidak memunculkan garis
+  function barDec(){
+    if(--barN > 0) return; barN = 0; clearTimeout(barT);
+    if(bar && bar.classList.contains('on')) barH = setTimeout(function(){ if(!barN) bar.classList.remove('on'); }, Math.max(0, 450 - (performance.now() - barS)));   // tampil minimal 0,45 dtk
+  }
+  window.SkyBusy = { mark:mark, unmark:unmark, bar:{ start:barInc, stop:barDec } };   // untuk proses non-fetch (mis. olah gambar): SkyBusy.bar.start() ... SkyBusy.bar.stop()
   window.fetch = function(){
     var b = lastBtn, ok = b && b.isConnected && !b.disabled && performance.now() - lastT < 800 && !b.classList.contains('busy');
+    var a0 = arguments[0], a1 = arguments[1], u = typeof a0 === 'string' ? a0 : ((a0 && a0.url) || ''), isApi = u.indexOf('script.google.com') >= 0, bg = false;
+    if(isApi && a1 && typeof a1.body === 'string'){ var m = /^\{"action":"([A-Za-z]+)"/.exec(a1.body); bg = !!(m && BG[m[1]]); }
     var p = _f.apply(this, arguments);
     if(ok){ mark(b); var done = function(){ unmark(b); }; p.then(done, done); }
+    if(ok || (isApi && !bg)){ barInc(); p.then(barDec, barDec); }
     return p;
   };
 })();
