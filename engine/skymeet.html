@@ -3580,12 +3580,7 @@ function frame(now) {
   if (window.SkyGfx && SkyGfx.level() === 'low' && now - last < 28) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // grafik rendah: ~30 fps
   if (now - last < 14) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // [perf] batas ~60 fps: layar 90/120 Hz tidak perlu menjalankan adegan 2x lebih sering
   const dt = Math.min(.05, (now - last) / 1000); last = now;
-  // [perf] governor FPS: bila rata-rata frame > 26 ms selama 3 dtk (tanpa overlay), turunkan grafis satu tingkat (tidak disimpan permanen)
-  if (window.SkyGfx && !document.hidden && SkyGfx.level() !== 'low' && !ovOpen()) {
-    const g = window._fpsGov || (window._fpsGov = { n: 0, sum: 0, t0: now });
-    g.n++; g.sum += (now - (g.prev || now - dt * 1000)) ; g.prev = now;
-    if (now - g.t0 > 3000) { const avg = g.sum / Math.max(1, g.n); if (avg > 26 && g.t0 > 0) { SkyGfx.set(SkyGfx.level() === 'high' ? 'medium' : 'low', true); try { console.info('[skymeet] FPS rendah (' + Math.round(1000 / avg) + ' fps), grafis diturunkan ke ' + SkyGfx.level()); } catch (e) {} } g.n = 0; g.sum = 0; g.t0 = now; }
-  } else if (window._fpsGov) { window._fpsGov.n = 0; window._fpsGov.sum = 0; window._fpsGov.t0 = now; window._fpsGov.prev = 0; }
+  // [perf] governor FPS otomatis dihapus: tingkat grafis hanya berubah lewat pilihan manual di menu Pengaturan
   updateSky(dt, now); Forest.tick(dt);   // [forest-addon]
   if (Forest.p < .995) drawBodiesIfChanged();   // [forest-addon]
   if (Forest.p > .003) Forest.draw(dt, now);   // [forest-addon]
