@@ -3838,7 +3838,8 @@ function updateSky(dt, now) {
     if (fo !== lastFogOp) { fogB.style.opacity = fo; lastFogOp = fo; }
     if (mi !== lastMist) { mistB.style.filter = mi; lastMist = mi; }
     if (wo !== lastWindOp) { windsEl.style.opacity = wo; lastWindOp = wo; } }
-  if (cam > .01 && Forest.p < .995) { seaC.style.display = 'block'; { const wk = sjOn ? .5 : 1; if (wk !== seaKc) { const d1 = Math.min(window.SkyGfx ? SkyGfx.dpr(1.75) : Math.min(devicePixelRatio || 1, LOW ? 1 : 1.75), 1) * wk; seaC.width = Math.round(W * d1); seaC.height = Math.round(H * d1); seaX.setTransform(d1, 0, 0, d1, 0, 0); seaKc = wk; } } if (!evBusy || (seaFlip ^= 1)) drawSea(now, a); }   // [perf] saat event laut digambar tiap frame ke-2 else if (seaC.style.display !== 'none') seaC.style.display = 'none';
+  if (cam > .01 && Forest.p < .995) { seaC.style.display = 'block'; { const wk = sjOn ? .5 : 1; if (wk !== seaKc) { const d1 = Math.min(window.SkyGfx ? SkyGfx.dpr(1.75) : Math.min(devicePixelRatio || 1, LOW ? 1 : 1.75), 1) * wk; seaC.width = Math.round(W * d1); seaC.height = Math.round(H * d1); seaX.setTransform(d1, 0, 0, d1, 0, 0); seaKc = wk; } } if (!evBusy || (seaFlip ^= 1)) drawSea(now, a); }
+  else if (seaC.style.display !== 'none') seaC.style.display = 'none';   // [perf] laut disembunyikan saat tidak dipakai; saat event laut digambar tiap frame ke-2
 }
 function drawSea(now, a) {
   const yh = H * (1 - .34 * cam), t = now / 1000, k = turtleSky(skyAt(a)), deep = k.sea, skyH = skyColorAt(k, yh / H);
@@ -4623,6 +4624,8 @@ function doorPath(g, D, oy) {   // bentuk pintu batang: lengkung tidak simetris 
   g.bezierCurveTo(...P(.2, -.03), ...P(-.2, .03), ...P(-.5, 0));
   g.closePath();
 }
+let forestBuilt = false;   // [lazy] hutan baru dibangun saat pertama kali dibutuhkan (hujan / Grandma)
+function ensureForest() { if (!forestBuilt) { forestBuilt = true; buildForest(); } }
 function buildForest() {
   const dp = window.SkyGfx ? SkyGfx.dpr(1.5) : Math.min(devicePixelRatio || 1, 1.5); FOREST.dp = dp;   // [perf] ikut pengaturan Grafis (Rendah = 1x, Sedang = 1,25x)
   fcv.width = ffcv.width = cvS.width = Math.round(W * dp); fcv.height = ffcv.height = cvS.height = Math.round(H * dp); fgx.setTransform(dp, 0, 0, dp, 0, 0); sgx.setTransform(dp, 0, 0, dp, 0, 0); ffx.setTransform(dp, 0, 0, dp, 0, 0);
@@ -4941,8 +4944,8 @@ function drawForest(dt, now) {
   q.globalAlpha = 1;
 }
 let rsT = 0;
-addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { buildForest(); }, 150); });
-addEventListener('sky:gfx', () => { clearTimeout(rsT); rsT = setTimeout(() => { buildForest(); }, 150); });   // [perf] ganti Grafis: hutan dibangun ulang dengan resolusi baru
+addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { if (forestBuilt) buildForest(); }, 150); });
+addEventListener('sky:gfx', () => { clearTimeout(rsT); rsT = setTimeout(() => { if (forestBuilt) buildForest(); }, 150); });   // [perf] ganti Grafis: hutan dibangun ulang dengan resolusi baru
 
 
 // Matahari/bulan khusus hutan: lebih besar dan terang, tidak diredupkan cuaca, matahari tenggelam dulu baru bulan terbit
@@ -4986,13 +4989,14 @@ function bodies(g) {
 // ---------- API untuk HTML induk ----------
 function tick(dt) {   // panggil sekali per frame setelah updateSky(): hujan -> kamera turun ke hutan (sekitar 5 detik), reda -> naik kembali
   const FPt = (evMode === 'grandma' || (!evMode && (wx === 'rain' || wx === 'storm'))) ? 1 : 0;   // event lain punya pemandangannya sendiri; Grandma memakai hutan (tanpa hujan, selalu malam)
+  if (!forestBuilt && (FPt || FP > 0)) ensureForest();   // [lazy] bangun hutan sebelum kamera mulai turun
   FP = REDUCE ? FPt : FP + Math.sign(FPt - FP) * Math.min(Math.abs(FPt - FP), dt / 5.5);
   scene.classList.toggle('fmix', FP > .003); scene.classList.toggle('fdeep', FP > .55); scene.classList.toggle('bg-forest', FP >= .995); scene.style.setProperty('--fp', FP.toFixed(3));
   scene.classList.toggle('fnight', evMode === 'grandma'); scene.classList.toggle('fgrand', evMode === 'grandma');
   const fo = 1 - smooth(clamp01(FP));   // awan, kabut, dan angin bawaan memudar seiring kamera turun
   fogB.style.opacity = (parseFloat(fogB.style.opacity) || 1) * fo; windsEl.style.opacity = (parseFloat(windsEl.style.opacity) || 1) * fo; mistB.style.opacity = fo;
 }
-buildForest();
+// [lazy] buildForest() tidak lagi dipanggil saat start; lihat ensureForest() di tick()
 return { get p() { return FP; }, set p(v) { FP = clamp01(v); }, get ridge() { return FOREST.rt; }, get nk() { return FOREST.nk || 0; }, tick, draw: drawForest };
 })();
 // ===== forest-addon:end =====
