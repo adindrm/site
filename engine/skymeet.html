@@ -3256,6 +3256,7 @@ const ovOpen = () => { if (!ovEls) ovEls = ['rsOv', 'setOv', 'avOv', 'addOverlay
 function frame(now) {
   if (now - last < 28 && ovOpen()) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // overlay berblur menutup scene: 30 fps cukup
   if (window.SkyGfx && SkyGfx.level() === 'low' && now - last < 28) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // grafik rendah: ~30 fps
+  if (now - last < 14) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // [perf] batas ~60 fps: layar 90/120 Hz tidak perlu menjalankan adegan 2x lebih sering
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   updateSky(dt, now); Forest.tick(dt);   // [forest-addon]
   if (Forest.p < .995) drawBodiesIfChanged();   // [forest-addon]
@@ -6223,10 +6224,13 @@ initPerm(); startLoop();
     const k = f.children, old = f._f; if(nx === old) return;
     k[nx].classList.add('on'); k[old].classList.remove('on'); f._f = nx;   // satu frame tampil; tukar dalam satu langkah (tanpa celah & tanpa tumpukan)
   }
+  let flameLastTick = -1;
   function flameLoop(ts){
     flameTimer = requestAnimationFrame(flameLoop);
     if(document.hidden || reduceFlame.matches) return;
     const tick = Math.floor(ts / FLAME_MS);
+    if(tick === flameLastTick) return;   // [perf] api hanya berganti tiap FLAME_MS: lewati forEach + getClientRects di frame layar lainnya
+    flameLastTick = tick;
     flames.forEach(f => {
       if(!f.isConnected){ flames.delete(f); return; }
       if(f.dataset.hold || !f.getClientRects().length) return;
