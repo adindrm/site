@@ -2035,6 +2035,7 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
 #snj button{font:inherit;font-size:12px;color:var(--sj-ink-soft);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:7px 14px;cursor:pointer}
 #snj button[aria-pressed="true"]{color:#0b1026;background:var(--sj-ink);border-color:transparent}
 @media (prefers-reduced-motion:reduce){#snj *{animation:none!important}}
+#snj.sj-mv .sj-mote,#snj.sj-mv .sj-fog,#snj.sj-mv .sj-ic,#snj.sj-mv .sj-dot,#snj.sj-mv .sj-kid,#snj.sj-mv .sj-portal{animation-play-state:paused}
 #snj .sj-kp{position:absolute;left:50%;transform:translateX(-50%);bottom:var(--sj-kb,0px);width:min(640px,calc(100% - 24px));display:flex;flex-direction:column;align-items:center;gap:8px;z-index:5;animation:sjpop .9s;transition:opacity .5s,visibility .5s;pointer-events:none}
 #snj .sj-kp>*{pointer-events:auto;flex:none}
 #snj .sj-kp.sj-off{opacity:0;visibility:hidden;pointer-events:none}
@@ -2140,7 +2141,7 @@ body.p5 #skKid{display:none!important}   /* anak Sky bawaan disembunyikan di hal
 /* judul + pilihan daftar: satu baris dengan tombol Menu (kiri) dan Bahasa (kanan), di tengah */
 #snj .sj-tb{position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 16px);z-index:7;display:flex;flex-direction:column;align-items:center;transition:opacity .5s,visibility .5s}
 #snj .sj-tb.sj-off{opacity:0;visibility:hidden;pointer-events:none}
-#snj button#sjTitle{display:block;min-height:44px;max-width:calc(100vw - 250px);padding:0 18px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.15);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-size:13px;font-weight:500;letter-spacing:.6px;color:#f4f5fb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;touch-action:manipulation}
+#snj button#sjTitle{display:block;min-height:44px;max-width:calc(100vw - 250px);padding:0 18px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(10,6,22,.45);font-size:13px;font-weight:500;letter-spacing:.6px;color:#f4f5fb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;touch-action:manipulation}
 #snj button#sjTitle:focus-visible{outline:2px solid #f4f5fb;outline-offset:2px}
 #snj .sj-dd{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 6px);z-index:8;width:max-content;max-width:calc(100vw - 40px);display:flex;flex-direction:column;gap:2px;padding:4px;border-radius:14px;background:rgba(14,8,30,.96);border:1px solid rgba(255,255,255,.22)}
 #snj .sj-dd[hidden]{display:none}
@@ -3592,6 +3593,7 @@ function frame(now) {
   if (window.SkyOv && SkyOv.paused) { raf = 0; return; }   // [ovpause] overlay menutup latar: loop berhenti (dilanjutkan lewat SkyOv.resume)
   if (now - last < 28 && ovOpen()) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // overlay berblur menutup scene: 30 fps cukup
   if (window.SkyGfx && SkyGfx.level() === 'low' && now - last < 28) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // grafik rendah: ~30 fps
+  if (now - last < 28 && document.body.classList.contains('p5')) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // [perf] halaman kosmetik: latar laut/langit cukup ~30 fps agar UI (ganti tab, kamera) tetap mulus
   if (now - last < 14) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // [perf] batas ~60 fps: layar 90/120 Hz tidak perlu menjalankan adegan 2x lebih sering
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   // [perf] governor FPS otomatis dihapus: tingkat grafis hanya berubah lewat pilihan manual di menu Pengaturan
@@ -11190,10 +11192,15 @@ initPerm(); startLoop();
   const og = () => OG[lg()] || OG.en;
   const SVG_NORET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8L18.74 5.74A9.75 9.75 0 0 0 12 3C11 3 10.03 3.16 9.13 3.47"/><path d="M8 16H3v5"/><path d="M3 12C3 9.51 4 7.26 5.64 5.64"/><path d="m3 16 2.26 2.26A9.75 9.75 0 0 0 12 21c2.49 0 4.74-1 6.36-2.64"/><path d="M21 12c0 1-.16 1.97-.47 2.87"/><path d="M21 3v5h-5"/><path d="M22 22 2 2"/></svg>';
   // ikon dari aset (aset/skymeet/kosmetik/...); belum ada file = ikon bawaan. Daftar kunci dicoba berurutan.
+  const abC = {};   // cache hasil resolve per kunci: url, atau false bila aset tidak ada
   function assetBadge(cls, keys, fallbackHtml, title){
     const b = el('span', 'bd ' + cls); b.innerHTML = fallbackHtml; if(title) b.title = title;
     const A = window.SkyAsset;
-    if(A && keys.length){ (async () => { for(const k of keys){ const u = await A.resolve(k); if(u){ b.replaceChildren(A.mkImg(u)); return; } } })(); }
+    if(A && keys.length){
+      for(const k of keys){ if(abC[k]){ b.replaceChildren(A.mkImg(abC[k])); return b; } }
+      if(keys.every(k => abC[k] === false)) return b;
+      (async () => { for(const k of keys){ if(abC[k] === false) continue; const u = await A.resolve(k); abC[k] = u || false; if(u){ b.replaceChildren(A.mkImg(u)); return; } } })();
+    }
     return b;
   }
   const slug = n => String(n || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -11312,7 +11319,7 @@ initPerm(); startLoop();
     const NS='http://www.w3.org/2000/svg',R=document.getElementById('snj'),c=document.getElementById('sjStars'),x=c.getContext('2d');let S=[];
 function rs(){const d=Math.min(devicePixelRatio||1,2);c.width=innerWidth*d;c.height=innerHeight*d;x.setTransform(d,0,0,d,0,0);S=Array.from({length:110},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight*.32,r:Math.random()*1.3+.3,p:Math.random()*6,s:.5+Math.random()*1.5}))}
 addEventListener('resize',rs);rs();
-function f(t){if(!sRun)return;x.clearRect(0,0,innerWidth,innerHeight);for(const s of S){x.globalAlpha=.3+.7*Math.abs(Math.sin(t/1000*s.s+s.p));x.fillStyle='#ffeede';x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill()}requestAnimationFrame(f)}
+let sT=0;function f(t){if(!sRun)return;if(t-sT<32){requestAnimationFrame(f);return}sT=t;x.clearRect(0,0,innerWidth,innerHeight);for(const s of S){x.globalAlpha=.3+.7*Math.abs(Math.sin(t/1000*s.s+s.p));x.fillStyle='#ffeede';x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill()}requestAnimationFrame(f)}
 let sRun=false;function starsRun(on){if(on===sRun)return;sRun=on;if(on)requestAnimationFrame(f)}
 function el(n,a){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e}
 function bl(px,by,w,h,f,o){const l=(Math.random()-.5)*h*.35;return el('path',{d:`M${px} ${by}L${px+w} ${by}L${px+w/2+l} ${by-h}Z`,fill:f,opacity:o})}
@@ -11359,14 +11366,14 @@ const GC=[324,414,504,594,684];
     function overview(){const W=innerWidth,H=innerHeight,z=2.9,w=1600/z,h=640/z,m=W/H<w/h;return{cx:500,sc:m?Math.min(W/w,H/h):Math.max(W/w,H/h),yb:300}}
 function focusCam(i){const W=innerWidth,H=innerHeight,T=H*.52,sc=Math.min(W/200,(H-T)/166);return{cx:GC[i],sc,yb:246}}
 function draw(){const W=innerWidth,H=innerHeight,{cx,sc,yb}=cam;svgL.setAttribute('viewBox',`${cx-W/2/sc} ${yb-H/sc} ${W/sc} ${H/sc}`);R.style.setProperty('--sj-hz',(H-(yb-168)*sc)+'px');window.SJ_HZ=H-(yb-168)*sc;window.SJ_RF=H-(yb-84)*sc;mw.style.transform=`translate(${W/2-cx*sc}px,${H-yb*sc}px) scale(${sc})`}
-function go(t){const a={...cam},t0=performance.now(),D=matchMedia('(prefers-reduced-motion:reduce)').matches?1:950;cancelAnimationFrame(raf);(function st(n){const k=Math.min(1,(n-t0)/D),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;cam={cx:a.cx+(t.cx-a.cx)*e,sc:a.sc*Math.pow(t.sc/a.sc,e),yb:a.yb+(t.yb-a.yb)*e};draw();if(k<1)raf=requestAnimationFrame(st)})(t0)}
+function go(t){R.classList.add('sj-mv');const a={...cam},t0=performance.now(),D=matchMedia('(prefers-reduced-motion:reduce)').matches?1:950;cancelAnimationFrame(raf);(function st(n){const k=Math.min(1,(n-t0)/D),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;cam={cx:a.cx+(t.cx-a.cx)*e,sc:a.sc*Math.pow(t.sc/a.sc,e),yb:a.yb+(t.yb-a.yb)*e};draw();if(k<1)raf=requestAnimationFrame(st);else R.classList.remove('sj-mv')})(t0)}
 
     // gerbang -> lemari kosmetik Skymeet (urutan gerbang Senja: Outfit, Masks, Hair, Capes, Props)
     const GATE_CL = ['outfit', 'mask', 'hair', 'cape', 'props'], ON = { outfit:'legs', mask:'head', hair:'hair', cape:'cape', props:'all' };
     const mdE = $('sjMode'), tbE = $('sjTop'), ttlB = $('sjTitle'), ddE = $('sjDd'), wsB = $('sjWish');
     const subsE = $('subs'), listE = $('list'), infoE = $('sjInfo'), srchE = $('sjSearch'), ptE = $('pt'), dtB = $('sjDetail'), dyB = $('sjDye');
     let PH = 9, sel = null, selBtn = null, vw = 'normal', shownN = 0, st2 = 0;
-    const CH = 150;
+    const CH = 60;
     let mode = 'all';   // 'all' = Daftar Kosmetik, 'mine' = Daftar Milikmu
     // ----- animasi (WAAPI; mati otomatis bila gerak dikurangi) -----
     const NOANIM = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -11514,7 +11521,7 @@ function go(t){const a={...cam},t0=performance.now(),D=matchMedia('(prefers-redu
     }
     function more(d){
       const end = Math.min(filtered.length, shownN + CH), first = shownN;
-      for(let n = shownN; n < end; n++){ const b = tile(filtered[n]); listE.appendChild(b); if(n - first < 40) an(b, UP(0, .8), { delay:(d || 0) + (n - first) * 16, duration:340 }); }
+      for(let n = shownN; n < end; n++){ const b = tile(filtered[n]); listE.appendChild(b); if(n - first < 24) an(b, UP(0, .8), { delay:(d || 0) + (n - first) * 16, duration:340 }); }
       shownN = end;
     }
     listE.addEventListener('scroll', () => {
@@ -11561,7 +11568,7 @@ function go(t){const a={...cam},t0=performance.now(),D=matchMedia('(prefers-redu
     dyB.onclick = () => { vw = vw === 'dye' ? 'normal' : 'dye'; renderPv(); };
     srchE.addEventListener('input', e => { clearTimeout(st2); st2 = setTimeout(() => { q = e.target.value; if(foc >= 0){ sel = null; filter(); } }, 180); });
     // posisi panel: rata tengah, sisi bawah card item berjarak setengah kotak dari tepi atas batu gerbang
-    function hallY(x){const E=document.getElementById('edge'),L=E.getTotalLength();let d=1e9,y=90;for(let l=0;l<=L;l+=1){const p=E.getPointAtLength(l);if(p.y<200&&Math.abs(p.x-x)<d){d=Math.abs(p.x-x);y=p.y}}return y}
+    const hallC={};function hallY(x){if(hallC[x]!==undefined)return hallC[x];const E=document.getElementById('edge'),L=E.getTotalLength();let d=1e9,y=90;for(let l=0;l<=L;l+=1){const p=E.getPointAtLength(l);if(p.y<200&&Math.abs(p.x-x)<d){d=Math.abs(p.x-x);y=p.y}}return hallC[x]=y}
 
     function topReserve(){ let b = 0; ['navBtn', 'langCurrent'].forEach(id => { const e = $(id); if(e){ const r = e.getBoundingClientRect(); if(r.height) b = Math.max(b, r.bottom); } }); return Math.max(12, b + 8); }
     function layoutKp(i){
