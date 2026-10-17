@@ -11064,13 +11064,35 @@ initPerm(); startLoop();
   }
 
   // ================= KOSMETIK =================
-  let own = {};
-  try{ own = JSON.parse(localStorage.getItem('sky_own_items') || '{}') || {}; }catch(e){}
-  const saveOwn = () => { try{ localStorage.setItem('sky_own_items', JSON.stringify(own)); }catch(e){} };
-  let wish = {};   // item yang di-wish (belum dimiliki): tampil abu-abu di Daftar Milikmu
-  try{ wish = JSON.parse(localStorage.getItem('sky_wish_items') || '{}') || {}; }catch(e){}
-  const saveWish = () => { try{ localStorage.setItem('sky_wish_items', JSON.stringify(wish)); }catch(e){} };
-  Object.keys(wish).forEach(k => { if(own[k]) delete wish[k]; });
+  // ---- penyimpanan 'dimiliki' & wish: per akun lewat SkyApp.store ----
+  // tamu = tersimpan lokal di perangkat; akun login = ikut tersinkron ke server (saveData/getData, stempel waktu terbaru menang)
+  const ST = window.SkyApp && window.SkyApp.store;
+  const toMap = a => { const m = {}; (Array.isArray(a) ? a : []).forEach(x => { if(x !== null && x !== undefined) m[x] = 1; }); return m; };
+  const toArr = m => Object.keys(m).map(k => (isFinite(k) ? Number(k) : k));   // disimpan sebagai daftar id (hemat: batas data akun ±49.000 karakter)
+  const lsMap = k => { try{ return JSON.parse(localStorage.getItem(k) || '{}') || {}; }catch(e){ return {}; } };
+  let own = {}, wish = {}, selfSet = false;
+  function loadMine(){
+    if(ST){
+      let a = ST.get('cosOwn'), w = ST.get('cosWish');
+      if(a === undefined && w === undefined){   // migrasi sekali dari penyimpanan lokal versi lama
+        const lo = lsMap('sky_own_items'), lw = lsMap('sky_wish_items');
+        if(Object.keys(lo).length || Object.keys(lw).length){
+          a = toArr(lo); w = toArr(lw); selfSet = true;
+          try{ ST.set('cosOwn', a); ST.set('cosWish', w); localStorage.removeItem('sky_own_items'); localStorage.removeItem('sky_wish_items'); }catch(e){}
+          selfSet = false;
+        }
+      }
+      own = toMap(a); wish = toMap(w);
+    } else { own = lsMap('sky_own_items'); wish = lsMap('sky_wish_items'); }
+    Object.keys(wish).forEach(k => { if(own[k]) delete wish[k]; });   // item yang sudah dimiliki tidak perlu di-wish
+  }
+  const putMine = (k, m, ls) => {
+    if(ST){ selfSet = true; try{ ST.set(k, toArr(m)); }catch(e){} selfSet = false; }
+    else { try{ localStorage.setItem(ls, JSON.stringify(m)); }catch(e){} }
+  };
+  const saveOwn = () => putMine('cosOwn', own, 'sky_own_items');
+  const saveWish = () => putMine('cosWish', wish, 'sky_wish_items');
+  loadMine();
   let items = null, curCl = 'outfit', curTab = 'base', q = '', ctLoading = false, filtered = [], sjState = 'idle';
   const clObj = () => CLOSETS.find(c => c.k === curCl) || CLOSETS[0];
   const tabObj = () => clObj().tabs.find(x => x.k === curTab) || clObj().tabs[0];
@@ -11333,6 +11355,7 @@ function go(t){const a={...cam},t0=performance.now(),D=matchMedia('(prefers-redu
       else { info(); renderPv(); }
       paintMode();
     }
+    function reload(){ paintMode(); if(foc >= 0){ sel = null; filter(); } }   // data akun berubah (login/logout/sinkron dari server)
     mdE.addEventListener('click', e => { const b = e.target.closest('.sj-mc'); if(b) setMode(b.dataset.m); });
     ddE.addEventListener('click', e => { const b = e.target.closest('.sj-do'); if(b){ setMode(b.dataset.m); ddClose(); } });
     ttlB.addEventListener('click', e => { e.stopPropagation(); hideTip(); ddE.hidden = !ddE.hidden; ttlB.setAttribute('aria-expanded', String(!ddE.hidden));
@@ -11473,7 +11496,7 @@ const d='M'+pts.join('L')+'Z';ps.forEach(p=>p.setAttribute('d',d))})})();
       if(!on){ outro(); closeG(true); }
       else { cancelOut(); cam = foc < 0 ? overview() : focusCam(foc); draw(); if(foc < 0){ mdE.classList.remove('sj-off'); paintMode(); introMode(300); } introPage(); }
     }
-    return { filter, info, lang, active, refresh };
+    return { filter, info, lang, active, refresh, reload };
   })(el);
 
   // ================= PETA =================
@@ -11551,6 +11574,7 @@ const d='M'+pts.join('L')+'Z';ps.forEach(p=>p.setAttribute('d',d))})})();
     paintToggles();
   }
   window.addEventListener('sky:lang', paintLabels);
+  if(ST) ST.onChange(k => { if(selfSet) return; if(k === '*' || k === 'cosOwn' || k === 'cosWish'){ loadMine(); try{ SJ.reload(); }catch(e){} } });   // ganti akun / data terbaru dari server
   window.addEventListener('sky:page', e => {
     const n = e.detail && e.detail.page;
     SJ.active(n === 5);
