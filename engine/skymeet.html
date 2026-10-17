@@ -3432,6 +3432,7 @@ document.addEventListener('pointerdown', e => {   // kid ada di belakang halaman
 let raf = 0;
 function startLoop() { if (!raf && !document.hidden && !evPause && !(window.SkyOv && SkyOv.paused)) { last = performance.now(); raf = requestAnimationFrame(frame); } }
 function stopLoop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
+window.addEventListener('sky:ovresume', () => { startLoop(); gcLoopStart(); });   // [ovpause] dipicu SkyOv saat semua overlay tertutup
 // tab tersembunyi: semua animasi & penyegaran cuaca berhenti; saat dibuka lagi waktu direset supaya tidak melompat
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopLoop(); else { startLoop(); if (Date.now() - lastWxAt > WX_EVERY) refreshWx(); } });
 
@@ -10636,9 +10637,8 @@ initPerm(); startLoop();
     if(!p) resume();
   }
   function resume(){
-    try{ if(typeof startLoop === 'function') startLoop(); }catch(e){}
-    try{ if(typeof gcLoopStart === 'function') gcLoopStart(); }catch(e){}
-    try{ window.dispatchEvent(new Event('sky:starsvis')); }catch(e){}   // membangunkan loop bintang (kick)
+    try{ window.dispatchEvent(new Event('sky:ovresume')); }catch(e){}   // loop adegan utama + Gunung Cahaya (didengar di dalam skrip utama)
+    try{ window.dispatchEvent(new Event('sky:starsvis')); }catch(e){}   // loop bintang (kick)
   }
   function recompute(){
     var o = [];
