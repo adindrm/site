@@ -70,6 +70,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     --ink: #f4f5fb;
     --ink-soft: rgba(244,245,251,0.62);
     --logo-filter:none; --logo-inv:brightness(0); --warn:#ffd9a0; --warn-bg:rgba(255,200,120,0.1); --warn-bd:rgba(255,200,120,0.24); --err:#ff9b9b; --ok:#8fe3a8; --toast-bg:rgba(20,22,45,0.94); --toast-fg:#f4f5fb;
+    --glass:rgba(8,12,32,0.42); --glass-strong:rgba(0,0,0,0.56); --glass-ov:rgba(0,0,0,0.64);   /* [glass] pengganti backdrop-filter: lapis transparan yang lebih pekat, mengikuti tema */
     --panel: rgba(0,0,0,0.34);   /* latar menu dropdown: gelap saat malam, terang saat siang agar teks tetap terbaca */
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
@@ -154,7 +155,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #ldRing{ position:relative; width:58px; height:58px; will-change:transform,opacity; }
   #ldRing svg{ width:100%; height:100%; display:block; transform:rotate(-90deg); overflow:visible; }
   #ldRing .ld-tr{ fill:none; stroke:rgba(255,255,255,calc(.12 + var(--hit,0) * .3)); stroke-width:3; }
-  #ldRing .ld-arc{ fill:none; stroke:var(--ld-accent); stroke-width:3; stroke-linecap:round; stroke-dasharray:213.63; stroke-dashoffset:213.63; filter:drop-shadow(0 0 calc(6px + var(--hit,0) * 14px) var(--ld-accent)); }
+  #ldRing .ld-arc{ fill:none; stroke:var(--ld-accent); stroke-width:3; stroke-linecap:round; stroke-dasharray:213.63; stroke-dashoffset:213.63; filter:drop-shadow(0 0 calc(3px + var(--hit,0) * 7px) var(--ld-accent)); }
   #ldPct{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--ld-fg); text-shadow:0 0 calc(var(--hit,0) * 12px) var(--ld-accent); font-variant-numeric:tabular-nums; transition:opacity .25s; }
   #ldRing.ld-full #ldPct{ opacity:0; }
   .ld-wh{ position:absolute; inset:0; opacity:0; transition:opacity .35s; pointer-events:none; }
@@ -170,7 +171,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     position:fixed; inset:0; z-index:9998; overflow-y:auto;
     display:flex; align-items:flex-start; justify-content:center; padding:24px;
     color:#f4f5fb;
-    --ink:#f4f5fb; --ink-soft:rgba(244,245,251,0.62); --panel:rgba(0,0,0,0.34); --logo-filter:none;   /* layar login selalu bertema malam, sama dengan loading */
+    --ink:#f4f5fb; --ink-soft:rgba(244,245,251,0.62); --panel:rgba(0,0,0,0.34); --glass:rgba(8,12,32,0.42); --glass-strong:rgba(0,0,0,0.56); --glass-ov:rgba(0,0,0,0.64); --logo-filter:none;   /* layar login selalu bertema malam, sama dengan loading */
     --warn:#ffd9a0; --warn-bg:rgba(255,200,120,0.1); --warn-bd:rgba(255,200,120,0.24); --err:#ff9b9b; --ok:#8fe3a8;
     background: linear-gradient(180deg, #030611 0%, #070d20 55%, #02040c 100%);   /* langit malam yang sama dengan beranda; kabut + bintang digambar di #loginStars */
     transition: opacity 0.4s ease, visibility 0.4s ease;
@@ -183,7 +184,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #loginScreen:not(.ready) #loginCard{ opacity:0; visibility:hidden; pointer-events:none; }
   /* kartu login muncul dari tengah, tepat saat titik-titik bintang pecah menyebar */
   #loginScreen.ready #loginCard{ animation: lgPop 1.1s cubic-bezier(.2,.8,.2,1) both; }
-  @keyframes lgPop{ 0%{ opacity:0; transform:scale(.86) translateY(16px); filter:blur(8px); } 55%{ filter:blur(0); } 100%{ opacity:1; transform:none; filter:none; } }
+  @keyframes lgPop{ 0%{ opacity:0; transform:scale(.86) translateY(16px); } 100%{ opacity:1; transform:none; } }
   @media (prefers-reduced-motion: reduce){ #loginScreen.ready #loginCard{ animation: lgFade .8s ease both; } @keyframes lgFade{ from{ opacity:0; } to{ opacity:1; } } }
   #loginCard{ width:100%; max-width:360px; margin:auto; display:flex; flex-direction:column; gap:14px; text-align:center; }
   #loginMain, #regPane{ display:flex; flex-direction:column; gap:12px; }
@@ -224,12 +225,12 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .wl img.ai{ width:28px; height:28px; }   /* ikon dari aset (aset/skymeet/progres/winglight) */
   .wl input{ position:absolute; left:50%; bottom:-6px; transform:translateX(-50%); width:3.2ch; min-width:20px; box-sizing:content-box; padding:1px 3px; border-radius:7px; border:0; outline:none; background:var(--panel); color:var(--ink); font:600 10px/1.2 'Space Grotesk', sans-serif; text-align:center; font-variant-numeric:tabular-nums; }
   /* halaman Visit: profil, teman, kehadiran */
-  .profCard{ display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:16px; background:rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.18); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+  .profCard{ display:flex; flex-direction:column; gap:10px; padding:14px 16px; border-radius:16px; background:var(--glass); border:1px solid rgba(255,255,255,0.18); }
   .profTop{ display:flex; align-items:center; gap:12px; }
   .profMain{ flex:1; min-width:0; text-align:left; }
   .profCard .idLabel{ font-size:11px; color:var(--ink-soft); letter-spacing:0.04em; text-transform:uppercase; }
   .profCard .idVal{ font-size:18px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  #setBox .profCard{ background:rgba(0,0,0,0.15); -webkit-backdrop-filter:none; backdrop-filter:none; border-color:rgba(255,255,255,0.14); }
+  #setBox .profCard{ background:var(--glass); border-color:rgba(255,255,255,0.14); }
   .profStatus{ font-size:12px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .profStatus:empty{ display:none; }
   .profUser{ font-size:12px; color:var(--ink-soft); }
   .avBig{ flex:none; width:56px; height:56px; padding:0; border-radius:50%; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.18); font-size:28px; cursor:pointer; display:grid; place-items:center; }
@@ -273,7 +274,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .chTx{ display:flex; flex-direction:column; min-width:0; }
   #chatSub{ font-size:11px; color:var(--ink-soft); }
   .cfLayer{ position:fixed; inset:0; z-index:90; pointer-events:none; overflow:hidden; }
-  .cf{ position:absolute; left:var(--x); top:-30px; width:var(--s); height:var(--s); color:#ffe9a8; animation:cfFall 1.9s ease-in var(--d) forwards; filter:drop-shadow(0 0 3px #fff6d8) drop-shadow(0 0 9px rgba(255,214,120,0.95)) drop-shadow(0 0 20px rgba(255,185,80,0.6)); }
+  .cf{ position:absolute; left:var(--x); top:-30px; width:var(--s); height:var(--s); color:#ffe9a8; animation:cfFall 1.9s ease-in var(--d) forwards; filter:drop-shadow(0 0 1.5px rgba(255,246,216,.5)) drop-shadow(0 0 4.5px rgba(255,214,120,0.47)) drop-shadow(0 0 10px rgba(255,185,80,0.3)); }
   .cf svg, .cf img{ display:block; width:100%; height:100%; fill:currentColor; }
   @keyframes cfFall{ to{ transform:translateY(110vh) rotate(var(--r)); opacity:0.2; } }
   #friendList{ display:flex; flex-direction:column; gap:8px; }
@@ -292,7 +293,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .friendRow .friendTxt{ min-width:0; }
   .friendName, .friendHint{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #fBody, #aBody{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px; }
-  .fCard{ padding:14px 16px; border-radius:16px; background:rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.18); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); display:flex; flex-direction:column; gap:10px; }
+  .fCard{ padding:14px 16px; border-radius:16px; background:var(--glass); border:1px solid rgba(255,255,255,0.18); display:flex; flex-direction:column; gap:10px; }
   .fNameRow{ display:flex; gap:8px; }
   .fNameRow input{
     flex:1; min-width:0; font-family:inherit; font-size:14px; color:var(--ink); background:rgba(255,255,255,0.06);
@@ -314,15 +315,15 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #chatOverlay.open, #friendOverlay.open{ transform:translateX(0); visibility:visible; }
   #chatOverlay{ z-index:61; inset:auto; top:var(--vvt,0px); left:0; right:0; height:var(--vvh,100%); }
   /* overlay tambah teman: kartu di tengah dengan latar redup (bukan layar penuh lagi) */
-  #addOverlay{ position:fixed; inset:0; z-index:62; display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; padding:calc(env(safe-area-inset-top,0px) + 8vh) 16px 24px; background:rgba(0,0,0,0.5); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
+  #addOverlay{ position:fixed; inset:0; z-index:62; display:flex; align-items:flex-start; justify-content:center; overflow-y:auto; padding:calc(env(safe-area-inset-top,0px) + 8vh) 16px 24px; background:var(--glass-ov); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
   #addOverlay.open{ opacity:1; visibility:visible; transition:opacity .25s ease, visibility 0s; }
   #addBox{ width:100%; max-width:420px; flex:none; display:flex; flex-direction:column; border-radius:20px; background:linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%); border:1px solid rgba(255,255,255,0.18); box-shadow:0 12px 40px rgba(0,0,0,0.35); transform:translateY(12px) scale(.97); transition:transform .3s ease; }
   #addOverlay.open #addBox{ transform:none; }
   #aHead{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 12px 10px 18px; border-bottom:1px solid rgba(255,255,255,0.08); }
   #addBox #aBody{ flex:none; overflow:visible; padding:14px 18px 18px; }
-  #addBox .mergedCard{ padding:0; background:none; border:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
+  #addBox .mergedCard{ padding:0; background:none; border:none; }
   /* overlay pengaturan (kartu di tengah) */
-  #setOv, #rsOv, #avOv{ position:fixed; inset:0; z-index:63; display:flex; align-items:flex-start; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 20px); background:rgba(0,0,0,0.5); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
+  #setOv, #rsOv, #avOv{ position:fixed; inset:0; z-index:63; display:flex; align-items:flex-start; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 20px); background:var(--glass-ov); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
   #setOv.open, #rsOv.open, #avOv.open{ opacity:1; visibility:visible; transition:opacity .25s ease, visibility 0s; }
   #setBox, #rsBox, #avBox{ width:100%; max-width:420px; max-height:100%; display:flex; flex-direction:column; overflow:hidden; border-radius:20px; background:linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%); border:1px solid rgba(255,255,255,0.18); box-shadow:0 12px 40px rgba(0,0,0,0.35); color:var(--ink); transform:translateY(12px) scale(.97); transition:transform .3s ease; }
   #setOv.open #setBox, #rsOv.open #rsBox, #avOv.open #avBox{ transform:none; }
@@ -379,7 +380,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #chatEmoji[aria-expanded="true"]{ background:rgba(255,255,255,0.16); }
   #chatAttach{ flex:none; width:44px; padding:0; display:grid; place-items:center; color:var(--ink); background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); border-radius:14px; cursor:pointer; touch-action:manipulation; }
   #chatAttach svg, #chatAttach .ai{ width:22px; height:22px; }
-  #chatAtt{ position:absolute; left:0; right:0; bottom:100%; display:flex; gap:8px; padding:8px 16px; overflow-x:auto; background:rgba(10,14,30,0.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  #chatAtt{ position:absolute; left:0; right:0; bottom:100%; display:flex; gap:8px; padding:8px 16px; overflow-x:auto; background:var(--glass-strong); }
   #chatAtt[hidden]{ display:none; }
   #chatAtt .at{ position:relative; flex:none; width:56px; height:56px; border-radius:10px; overflow:hidden; }
   #chatAtt .at img{ width:100%; height:100%; object-fit:cover; display:block; }
@@ -389,7 +390,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .msg .mq b{ display:block; font-size:11px; font-weight:600; opacity:.85; margin-bottom:1px; }
   .msg .mq span{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; opacity:.8; }
   .msg.hl{ box-shadow:0 0 0 2px rgba(255,214,120,0.85), 0 0 18px rgba(255,214,120,0.5); }
-  #chatReply{ position:absolute; left:0; right:0; bottom:100%; display:flex; align-items:center; gap:10px; padding:8px 16px; background:rgba(10,14,30,0.7); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border-top:1px solid rgba(255,255,255,0.08); }
+  #chatReply{ position:absolute; left:0; right:0; bottom:100%; display:flex; align-items:center; gap:10px; padding:8px 16px; background:var(--glass-strong); border-top:1px solid rgba(255,255,255,0.08); }
   #chatReply[hidden]{ display:none; }
   #chatAtt:not([hidden]) + #chatReply{ bottom:calc(100% + 72px); }
   #chatReply .rpx{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; padding-left:8px; border-left:3px solid rgba(255,214,120,0.9); }
@@ -507,8 +508,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #topRow{ display:flex; align-items:center; justify-content:flex-end; gap:8px; }
   #addOpen{
     display:flex; align-items:center; gap:7px; min-height:44px; padding:0 14px 0 12px; border-radius:999px;
-    border:1px solid rgba(255,255,255,0.18); background:rgba(0,0,0,0.15);
-    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,0.18); background:var(--glass);
+
     color:var(--ink); font-family:'Space Grotesk', sans-serif; cursor:pointer; touch-action:manipulation;
     visibility:hidden; opacity:0; transform:translateX(10px) scale(0.94); pointer-events:none;
     transition:opacity .3s ease, transform .35s cubic-bezier(.2,.9,.3,1.2), visibility 0s linear .35s;
@@ -707,8 +708,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   #skyClock .sd{
     display:inline-block; min-width:1ch; text-align:center;
-    opacity:0; transform: translateY(0.42em); filter: blur(6px);
-    transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+    opacity:0; transform: translateY(0.42em);
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
   #skyClock .sc{ display:inline-block; width:0.32em; text-align:center; opacity:0; transition: opacity 0.3s ease; }
   body.p2 #skyClock .sd{
@@ -749,8 +750,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .cat-card{
     display:flex; flex-direction:column; width:100%;
     border-radius:16px; border:1px solid rgba(255,255,255,0.18);
-    background: rgba(0,0,0,0.15);
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    background: var(--glass);
+
     overflow:hidden; font-variant-numeric: tabular-nums;
     transition: border-color 0.4s ease;
   }
@@ -847,7 +848,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   /* animasi muncul berurutan: setiap elemen .rv masuk satu per satu (--r = urutan) */
   .rv, .rv3{
-    opacity:0; transform: translateY(14px); filter: blur(5px);
+    opacity:0; transform: translateY(14px);
     transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
   }
   body.p2 .rv, body.p3 .rv3{
@@ -923,21 +924,21 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .rsGrid .rsLb{ display:block; width:100%; min-height:2.3em; font-size:9px; line-height:1.15; text-align:center; color:var(--ink-soft); overflow:hidden; overflow-wrap:anywhere; pointer-events:none; }
   .rsGrid .fCu[aria-expanded="true"] .rsLb{ color:var(--ink); }
   .rsGrid .fIc .ri svg{ fill:none; }   /* ikon bawaan (rasi acak) berupa garis; .fIc svg{fill:currentColor} sebelumnya membuatnya terisi putih */
-  .pgRealm.done .fIc, .pgSeason.done .fIc{ filter:drop-shadow(0 0 6px rgba(255,200,90,0.85)); }
+  .pgRealm.done .fIc, .pgSeason.done .fIc{ filter:drop-shadow(0 0 3px rgba(255,200,90,0.42)); }
   .ssList{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; padding:0 16px 8px; }
   .ssItem{ position:relative; width:56px; }   /* daftar season: tiap season = ikon + nama kecil di bawah + jumlah selesai di sudut kanan ikon; tombol aktif di sudut kiri */
   .ssList .fCu{ width:100%; max-width:none; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:3px; height:auto; padding:4px 0 3px; }
   .ssList .fCuN{ top:21px; bottom:auto; right:0; font-size:9px; padding:2px 3px; letter-spacing:-.2px; }
   .ssList .rsLb{ display:block; width:100%; min-height:2.3em; font-size:9px; line-height:1.15; text-align:center; color:var(--ink-soft); overflow:hidden; overflow-wrap:anywhere; pointer-events:none; }
   .ssList .fIc .ri svg{ fill:none; }
-  .pgSeasonItem.done .fIc{ filter:drop-shadow(0 0 6px rgba(255,200,90,0.85)); }
-  .ssStar{ position:absolute; left:0; top:21px; z-index:1; width:18px; height:18px; min-width:0; min-height:0; padding:0; border-radius:50%; border:0; background:var(--panel); color:var(--ink-soft); font-size:12px; line-height:18px; text-align:center; cursor:pointer; touch-action:manipulation; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+  .pgSeasonItem.done .fIc{ filter:drop-shadow(0 0 3px rgba(255,200,90,0.42)); }
+  .ssStar{ position:absolute; left:0; top:21px; z-index:1; width:18px; height:18px; min-width:0; min-height:0; padding:0; border-radius:50%; border:0; background:var(--glass-strong); color:var(--ink-soft); font-size:12px; line-height:18px; text-align:center; cursor:pointer; touch-action:manipulation; }
   .ssStar[aria-pressed="true"]{ color:#ffe9a8; background:rgba(255,233,168,.2); }
   .ssOffT{ display:block; margin:0 auto 8px; padding:6px 10px; border:0; background:none; color:var(--ink-soft); font:inherit; font-size:12px; text-decoration:underline; cursor:pointer; touch-action:manipulation; } .ssOffT[hidden]{ display:none; } .ssOffT:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
   .ssBar{ display:flex; justify-content:center; padding:4px 16px 12px; }
   .ssAddM{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:8px; } .ssAddM[hidden]{ display:none; } .ssAddN{ width:100%; text-align:center; font-size:13px; opacity:.75; }
   /* overlay rasi: tanpa garis/kotak; latar malam memudar halus ke tepi, rasi + persen menyatu dengan layar */
-  #rsOv{ align-items:center; background:rgba(1,3,10,0.55); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); padding:calc(env(safe-area-inset-top,0px) + 4px) 2px calc(env(safe-area-inset-bottom,0px) + 4px); }
+  #rsOv{ align-items:center; background:var(--glass-ov); padding:calc(env(safe-area-inset-top,0px) + 4px) 2px calc(env(safe-area-inset-bottom,0px) + 4px); }
   #rsBox{ position:relative; display:block; width:100%; max-width:580px; height:100%; max-height:980px; padding:0; border:0; border-radius:0; overflow:visible; background:none; box-shadow:none; }
   #rsBox::before{ content:''; position:absolute; inset:0; pointer-events:none;
     background:radial-gradient(ellipse at 50% 44%, rgba(22,38,76,0.7) 0%, rgba(8,15,36,0.62) 45%, rgba(3,6,16,0.55) 100%), linear-gradient(180deg, #030611 0%, #070d20 55%, #02040c 100%);
@@ -955,7 +956,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .rsT.intro .rsCh{ animation:rsChFloat var(--fdur,6s) ease-in-out var(--fdelay,0s) infinite, rsChIn 1.1s cubic-bezier(.2,.8,.2,1) var(--in,0s) backwards; }
   #rsOv:not(.open) .rsT .rsCh{ animation-play-state:paused; }
   @keyframes rsChFloat{ 0%,100%{ transform:translateY(0) rotate(0deg); opacity:.88; } 30%{ transform:translateY(calc(var(--amp,4px) * -1)) rotate(var(--rot,.8deg)); opacity:1; } 66%{ transform:translateY(calc(var(--amp,4px) * .5)) rotate(calc(var(--rot,.8deg) * -.7)); opacity:.92; } }
-  @keyframes rsChIn{ from{ opacity:0; filter:blur(8px); translate:0 16px; } }
+  @keyframes rsChIn{ from{ opacity:0; translate:0 16px; } }
   @media (prefers-reduced-motion: reduce){ .rsT .rsCh{ animation:none !important; } }
   #rsClose{ position:absolute; top:14px; right:16px; z-index:3; width:40px; height:40px; padding:0; border:0; border-radius:0; background:none; box-shadow:none; color:#eaf3ff; font-size:19px; text-shadow:0 0 8px rgba(190,215,255,0.7), 0 0 18px rgba(150,190,255,0.4); }
   #rsBar{ position:absolute; z-index:2; left:0; right:0; bottom:42px; height:84px; display:flex; align-items:center; justify-content:center; gap:18px; padding:0 16px; pointer-events:none; }
@@ -969,7 +970,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #rsFig{ position:absolute; inset:0; width:100%; height:100%; border:0; background:transparent; z-index:1; color-scheme:dark; }
   #rsBox.spo .rsT, #rsBox.spo #rsBar{ opacity:0; pointer-events:none; transition:opacity .3s ease; }
   .rsNav{ flex:none; display:grid; place-items:center; width:48px; height:48px; padding:0; border:0; border-radius:0; background:none; box-shadow:none; color:#eaf3ff; cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:opacity .3s ease, transform .2s ease; }
-  .rsNav svg{ width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 9px rgba(196,220,255,0.9)) drop-shadow(0 0 18px rgba(125,171,255,0.6)); }
+  .rsNav svg{ width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 1.5px rgba(255,255,255,.5)) drop-shadow(0 0 4.5px rgba(196,220,255,0.45)) drop-shadow(0 0 9px rgba(125,171,255,0.3)); }
   .rsNav:active{ transform:scale(.88); }
   .rsNav.off{ opacity:0; visibility:hidden; pointer-events:none; }
   .rsNav:focus-visible, #rsClose:focus-visible{ outline:2px solid rgba(207,226,255,0.8); outline-offset:2px; border-radius:50%; }
@@ -1009,7 +1010,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .fabTog .fabSt{ right:-4px; bottom:-1px; }
   .thL .fabTog{ flex:none; margin-left:-8px; }   /* ikon sejajar dengan tepi kiri kartu */
   /* warna api: dua daftar filter dengan fungsi & urutan sama supaya bisa di-transisi mulus (abu-abu <-> kuning menyala) */
-  :root{ --fx-gray:grayscale(1) opacity(.55) brightness(1) drop-shadow(0 0 0 rgba(255,236,150,0)) drop-shadow(0 0 0 rgba(255,190,70,0)); --fx-lit:grayscale(0) opacity(1) brightness(1.1) drop-shadow(0 0 3px rgba(255,236,150,.95)) drop-shadow(0 0 9px rgba(255,190,70,.7)); --fx-glow:grayscale(0) opacity(1) brightness(1.9) drop-shadow(0 0 5px rgba(255,248,210,1)) drop-shadow(0 0 16px rgba(255,200,80,.95)); }
+  :root{ --fx-gray:grayscale(1) opacity(.55) brightness(1) drop-shadow(0 0 0 rgba(255,236,150,0)) drop-shadow(0 0 0 rgba(255,190,70,0)); --fx-lit:grayscale(0) opacity(1) brightness(1.1) drop-shadow(0 0 1.5px rgba(255,236,150,0.47)) drop-shadow(0 0 4.5px rgba(255,190,70,0.35)); --fx-glow:grayscale(0) opacity(1) brightness(1.9) drop-shadow(0 0 2.5px rgba(255,248,210,0.5)) drop-shadow(0 0 8px rgba(255,200,80,0.47)); }
   /* tombol on/off ikon melayang: ikon saja (tanpa kartu/bingkai), area sentuh 44px */
   button.fabTog, button.fabTog[aria-pressed="true"]{ display:inline-grid; place-items:center; width:44px; height:44px; min-width:44px; min-height:44px; padding:0; border:0; border-radius:50%; background:none; box-shadow:none; }
   .fabTog .flame{ width:30px; height:30px; font-size:24px; filter:var(--fx-gray); transition:filter 1.4s ease; }   /* menyala perlahan */
@@ -1026,18 +1027,18 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @media (prefers-reduced-motion: reduce){ .flame.flk{ animation:none; } }
   .pill small.wx{ opacity:.6; font-size:11px; margin-left:5px; font-weight:400; }
   /* ikon melayang progres harian */
-  #fab{ display:none; position:fixed; z-index:30; width:52px; height:52px; padding:0; border:none; background:none; place-items:center; color:#ffd27a; cursor:pointer; touch-action:none; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.45)); -webkit-tap-highlight-color:transparent; }
+  #fab{ display:none; position:fixed; z-index:30; width:52px; height:52px; padding:0; border:none; background:none; place-items:center; color:#ffd27a; cursor:pointer; touch-action:none; filter:drop-shadow(0 1px 3px rgba(0,0,0,0.23)); -webkit-tap-highlight-color:transparent; }
   body.ready.fabOn #fab{ display:grid; animation:fabIn .45s cubic-bezier(.2,.9,.3,1) both; }   /* tampil di semua halaman */
   #fab.out{ display:grid; animation:fabOut .3s ease-in both; pointer-events:none; }               /* menciut lalu hilang (JS lalu memicu ledakan partikel) */
   @keyframes fabIn{ 0%{ opacity:0; transform:scale(.05); } 65%{ opacity:1; transform:scale(1.12); } 100%{ opacity:1; transform:none; } }
   @keyframes fabOut{ 0%{ opacity:1; transform:none; } 100%{ opacity:0; transform:scale(.05); } }
   /* harian selesai (lilin abu-abu): api berdenyut makin terang, membengkak, lalu pecah jadi partikel (JS) */
   /* selesai harian: TANPA membesar. Cahaya perlahan makin terang (0-55%), lalu ikon perlahan luruh/memudar (55-100%) sambil melepas partikel api (JS) */
-  @keyframes fabFin{ 0%{ opacity:1; transform:scale(1); filter:drop-shadow(0 2px 6px rgba(0,0,0,.45)) blur(0px); } 45%{ opacity:1; transform:scale(.88); filter:drop-shadow(0 2px 6px rgba(0,0,0,.45)) blur(0px); } 100%{ opacity:0; transform:scale(.18); filter:drop-shadow(0 0 0 rgba(0,0,0,0)) blur(4px); } }   /* perlahan mengecil sambil memudar */
+  @keyframes fabFin{ 0%{ opacity:1; transform:scale(1); filter:drop-shadow(0 1px 3px rgba(0,0,0,0.23)); } 45%{ opacity:1; transform:scale(.88); filter:drop-shadow(0 1px 3px rgba(0,0,0,0.23)); } 100%{ opacity:0; transform:scale(.18); filter:drop-shadow(0 0 0 rgba(0,0,0,0)); } }   /* perlahan mengecil sambil memudar */
   #fab.fin{ animation:fabFin 2.8s ease-in-out both; transform-origin:50% 86%; }
   #fab.up, #fab.up.fin{ transform-origin:50% var(--oy,76%); }   /* titik pusat = dasar api = ujung tali: skala 1.3 & animasi mengecil tetap berpusat di ujung tali (tanpa bergeser) */
   #fab.up.dn{ scale:1; }   /* di panel: ikon sudah ber-scale 1.3 — mengganti titik pusat saat animasi mulai membuatnya bergeser */   /* menciut ke tengah-bawah (dasar api) */
-  @keyframes fabGlow{ 0%{ filter:var(--fin0, var(--fx-gray)); } 55%,100%{ filter:grayscale(0) opacity(1) brightness(2.4) drop-shadow(0 0 6px rgba(255,250,215,1)) drop-shadow(0 0 24px rgba(255,205,95,1)); } }
+  @keyframes fabGlow{ 0%{ filter:var(--fin0, var(--fx-gray)); } 55%,100%{ filter:grayscale(0) opacity(1) brightness(2.4) drop-shadow(0 0 3px rgba(255,250,215,0.5)) drop-shadow(0 0 12px rgba(255,205,95,0.5)); } }
   #fab.fin .flame{ animation:fabGlow 2.8s ease-in-out both; }
   #fab .flame{ width:36px; height:36px; font-size:30px; pointer-events:none; filter:var(--fx-gray); transition:filter 1.8s ease; }   /* diam = abu-abu */
   #fab.lit .flame{ filter:var(--fx-lit); transition:filter 1.8s ease-in-out; }                                                                    /* poin selesai = menyala */
@@ -1067,7 +1068,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fab.lit .fOrbit i{ opacity:1; }
   @media (prefers-reduced-motion: reduce){ body.ready.fabOn #fab{ animation:none; } #fab .fAura, #fab .fOrbit, #fab .fOrbit i{ animation:none; } #fab.mag, #fab{ transition:none; } }
   /* panel ikon melayang v2: kaca gelap berpendar hangat, handle, bilah progres, baris berkartu */
-  #fabOv{ backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
   #fabOv .fp{ position:relative; overflow:hidden; background:linear-gradient(180deg, rgba(42,50,98,0.97), rgba(18,22,48,0.985) 62%); border-color:rgba(255,226,160,0.22); box-shadow:0 -14px 40px rgba(0,0,0,0.5), 0 -1px 26px rgba(255,200,110,0.14); }
   #fabOv .fp::before{ content:''; position:absolute; top:7px; left:50%; width:38px; height:4px; margin-left:-19px; border-radius:4px; background:rgba(255,255,255,0.22); z-index:2; }
   #fabOv .fp::after{ content:''; position:absolute; top:-46%; left:-20%; right:-20%; height:70%; background:radial-gradient(closest-side, rgba(255,205,120,0.17), transparent 72%); pointer-events:none; }
@@ -1080,7 +1080,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .fs::before{ z-index:1; width:calc(var(--p,0) * 100%); background:linear-gradient(90deg,#ffb04a,#ffe08a); box-shadow:0 0 10px rgba(255,200,100,0.6); transition:width .6s cubic-bezier(.2,.8,.2,1); }
   @keyframes fabRow{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
   @media (prefers-reduced-motion: reduce){ #fabOv .fs::before{ transition:none; } }
-  #fabOv{ position:fixed; inset:0; z-index:200; display:grid; place-items:end center; background:rgba(5,8,20,0.55); }
+  #fabOv{ position:fixed; inset:0; z-index:200; display:grid; place-items:end center; background:rgba(5,8,20,0.68); }
   #fabOv[hidden]{ display:none; }
   #fabOv .fp{ width:min(440px,100%); max-height:82vh; display:flex; flex-direction:column; color:var(--ink); background:rgba(22,28,58,0.97); border:1px solid rgba(255,255,255,0.14); border-radius:20px 20px 0 0; padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 14px); animation:fabUp .28s ease; }
   @keyframes fabUp{ from{ transform:translateY(24px); opacity:0; } to{ transform:none; opacity:1; } }
@@ -1110,7 +1110,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .sec.col{ gap:0; }
   #pgRoot{ display:flex; flex-direction:column; gap:22px; }
   .hrow{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .sec-h{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; width:100%; min-height:92px; padding:12px 10px; text-align:center; border-radius:16px; border:1px solid rgba(255,255,255,0.18); background:rgba(0,0,0,0.15); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--ink); font-family:inherit; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; cursor:pointer; touch-action:manipulation; }
+  .sec-h{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; width:100%; min-height:92px; padding:12px 10px; text-align:center; border-radius:16px; border:1px solid rgba(255,255,255,0.18); background:var(--glass); color:var(--ink); font-family:inherit; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; cursor:pointer; touch-action:manipulation; }
   .sec-h .tx{ max-width:100%; line-height:1.25; overflow-wrap:anywhere; }
   .sec-h .chv{ position:absolute; top:10px; right:10px; width:12px; height:12px; flex:none; transition:transform 0.25s ease; }
   .sec-h[aria-expanded="true"] .chv{ transform:rotate(180deg); }
@@ -1157,9 +1157,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     padding:0 14px 0 16px;
     border-radius:999px;
     border:1px solid rgba(255,255,255,0.18);
-    background: rgba(0,0,0,0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--glass);
+
+
   }
   #langCurrent svg{ width:12px; height:12px; transition: transform 0.25s ease; }
   #langCurrent[aria-expanded="true"] svg{ transform: rotate(180deg); }
@@ -1170,9 +1170,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     padding:6px;
     border-radius:18px;
     border:1px solid rgba(255,255,255,0.18);
-    background: var(--panel);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: var(--glass-strong);
+
+
     opacity:0;
     transform: translateY(-6px) scale(0.97);
     transform-origin: top right;
@@ -1219,8 +1219,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #musicBox{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 16px); left:50%; transform:translateX(-50%); z-index:10; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s; }
   body.ready.mz:not(.p2):not(.p3):not(.p4):not(.p5):not(.p6) #musicBox{   /* hanya di beranda */ opacity:1; visibility:visible; transition:opacity .5s ease .2s, visibility 0s; }
   /* saat hanya ikon musik: TANPA kartu. Kartu (latar + garis + blur) baru muncul saat jeda/lanjut terbuka atau daftar musik tampil */
-  #mzBar{ display:flex; align-items:center; gap:2px; height:56px; padding:0 1px; border-radius:999px; border:1px solid transparent; background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; pointer-events:auto; max-width:calc(100vw - 24px); transition:opacity .3s ease, background-color .3s ease, border-color .3s ease, padding .28s ease; }
-  #musicBox.open #mzBar, #musicBox.listOpen #mzBar{ padding:0 5px; border-color:rgba(255,255,255,0.18); background:rgba(0,0,0,0.15); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+  #mzBar{ display:flex; align-items:center; gap:2px; height:56px; padding:0 1px; border-radius:999px; border:1px solid transparent; background:transparent; pointer-events:auto; max-width:calc(100vw - 24px); transition:opacity .3s ease, background-color .3s ease, border-color .3s ease, padding .28s ease; }
+  #musicBox.open #mzBar, #musicBox.listOpen #mzBar{ padding:0 5px; border-color:rgba(255,255,255,0.18); background:var(--glass); }
   #musicBox.dim #mzBar{ opacity:.55; }
   .mzB{ display:grid; place-items:center; flex:none; padding:0; border:0; border-radius:50%; background:none; color:var(--ink); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
   .mzB:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
@@ -1242,7 +1242,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @keyframes mzSway{ 0%, 100%{ transform:rotate(-7deg); } 50%{ transform:rotate(7deg); } }   /* bergoyang sangat pelan */
   #musicBox.playing:not(.open) .mi-note{ animation:mzSway 4.2s ease-in-out infinite; transform-origin:50% 85%; }
   @media (prefers-reduced-motion: reduce){ #musicBox.playing:not(.open) .mi-note{ animation:none; } #musicBox, .mzPrev, .mzNext, #mzList, #mzBar, .bell{ transition:none !important; } }
-  #mzList{ position:absolute; z-index:11; top:calc(100% + 8px); left:50%; display:flex; flex-direction:column; min-width:200px; max-width:min(280px, calc(100vw - 32px)); max-height:min(50vh, 300px); overflow-y:auto; padding:6px; border-radius:18px; border:1px solid rgba(255,255,255,0.18); background:var(--panel); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); opacity:0; visibility:hidden; transform:translate(-50%, -6px) scale(0.97); transform-origin:top center; pointer-events:none; transition:opacity .25s ease, transform .25s ease, visibility 0s linear .25s; }
+  #mzList{ position:absolute; z-index:11; top:calc(100% + 8px); left:50%; display:flex; flex-direction:column; min-width:200px; max-width:min(280px, calc(100vw - 32px)); max-height:min(50vh, 300px); overflow-y:auto; padding:6px; border-radius:18px; border:1px solid rgba(255,255,255,0.18); background:var(--glass-strong); opacity:0; visibility:hidden; transform:translate(-50%, -6px) scale(0.97); transform-origin:top center; pointer-events:none; transition:opacity .25s ease, transform .25s ease, visibility 0s linear .25s; }
   #musicBox.listOpen #mzList{ opacity:1; visibility:visible; transform:translate(-50%, 0) scale(1); pointer-events:auto; transition:opacity .25s ease, transform .25s ease, visibility 0s; }
   .mzItem{ display:flex; align-items:center; gap:10px; width:100%; min-height:48px; padding:0 12px; border:0; border-radius:12px; background:transparent; font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:500; color:var(--ink-soft); text-align:left; cursor:pointer; touch-action:manipulation; }
   .mzItem::before{ content:''; flex:none; width:12px; }
@@ -1254,8 +1254,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     display:flex; align-items:center; gap:9px;
     min-height:44px; padding:0 16px 0 14px;
     border-radius:999px; border:1px solid rgba(255,255,255,0.18);
-    background: rgba(0,0,0,0.15);
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    background: var(--glass);
+
     font-family:'Space Grotesk', sans-serif; font-size:13px; font-weight:500; letter-spacing:0.6px;
     color: var(--ink); cursor:pointer; touch-action: manipulation;
   }
@@ -1491,10 +1491,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @media (max-width:340px){ #hdrLogo{ display:none; } }
   @media (prefers-reduced-motion: reduce){ img.ai, #netInd, #netInd.off, #netInd.pop{ animation:none !important; } }
   #loginCard p.about, .lgInfo{ text-align:center; }
-  #guestOv{ position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); animation:gFade .25s ease both; }
+  #guestOv{ position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; padding:24px; background:var(--glass-ov); animation:gFade .25s ease both; }
   #guestOv[hidden]{ display:none; }
   /* dialog konfirmasi keluar (di atas menu & semua halaman) */
-  #outOv{ position:fixed; inset:0; z-index:10040; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); animation:gFade .25s ease both; }
+  #outOv{ position:fixed; inset:0; z-index:10040; display:flex; align-items:center; justify-content:center; padding:24px; background:var(--glass-ov); animation:gFade .25s ease both; }
   #outOv[hidden]{ display:none; }
   #outBox{ width:100%; max-width:320px; display:flex; flex-direction:column; gap:10px; text-align:center; padding:22px 20px 14px; border-radius:20px; background:var(--toast-bg); color:var(--toast-fg); box-shadow:0 12px 40px rgba(0,0,0,0.35); animation:gPop .3s ease both; }
   #outBox h2{ font-size:16px; font-weight:500; }
@@ -1539,7 +1539,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .pgCurRow .fCu{ width:100%; max-width:50px; }
   .pgCurRow .curSep{ display:none; }   /* pemisah tidak lagi menjadi kolom/penyebab jarak: digambar lewat .pgRasi::before di celah antar ikon */
   .pgCurRow .pgRasi::before{ content:''; position:absolute; left:-2px; top:50%; width:1px; height:28px; margin-top:-14px; pointer-events:none; background:rgba(128,128,128,0.45); background:color-mix(in srgb, var(--ink) 34%, transparent); }
-  .pgCurRow .pgRasi .fCuChev{ right:auto; left:50%; bottom:0; transform:translateX(-50%); min-width:0; padding:0; background:none; -webkit-backdrop-filter:none; backdrop-filter:none; color:var(--ink-soft); }   /* panah di bawah ikon (tidak menimpa ikon seperti angka) */
+  .pgCurRow .pgRasi .fCuChev{ right:auto; left:50%; bottom:0; transform:translateX(-50%); min-width:0; padding:0; background:none; color:var(--ink-soft); }   /* panah di bawah ikon (tidak menimpa ikon seperti angka) */
   .pgCurRow .pgRasi .fCuChev svg{ width:9px; height:9px; }
   .pgCurRow .pgRasi .fIc{ margin-top:-5px; }
   .curSep{ flex:none; align-self:center; width:1px; height:28px; margin:0 3px; background:rgba(128,128,128,0.45); background:color-mix(in srgb, var(--ink) 34%, transparent); }
@@ -1565,7 +1565,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   button.fCu:active{ transform:scale(.92); } button.fCu[aria-expanded="true"]{ background:rgba(255,255,255,0.12); }
   .fCu .fIc{ width:28px; height:28px; } .fCu .fIc svg, .fCu .fIc img.ai{ width:26px; height:26px; }
   .fCu .sk{ width:28px; height:28px; border-radius:50%; }
-  .fCuN{ position:absolute; right:0; bottom:1px; min-width:14px; text-align:center; font-size:10px; line-height:1; font-weight:600; padding:2px 4px; border-radius:7px; background:var(--panel); color:var(--ink); font-variant-numeric:tabular-nums; pointer-events:none; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+  .fCuN{ position:absolute; right:0; bottom:1px; min-width:14px; text-align:center; font-size:10px; line-height:1; font-weight:600; padding:2px 4px; border-radius:7px; background:var(--glass-strong); color:var(--ink); font-variant-numeric:tabular-nums; pointer-events:none; }
   .fCuChev svg{ width:8px; height:8px; display:block; transition:transform .25s ease; } .fCu[aria-expanded="true"] .fCuChev svg{ transform:rotate(180deg); }
   .fDrop{ overflow:hidden; max-height:0; opacity:0; transition:max-height .35s ease, opacity .25s ease; }
   .fDrop.open{ max-height:900px; opacity:1; }
@@ -1574,7 +1574,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @media (prefers-reduced-motion: reduce){ .fDrop, .fIcoBtn, button.fCu{ transition:none; } }
   /* ===== kontras di semua mode langit: siang (--ink gelap) & malam (--ink terang). Permukaan ikut tema atau punya warna sendiri yang konsisten ===== */
   #invSheet, #momOv, #fabOv{ --top:#0b1026; --bottom:#1a2044; }   /* dialog yang selalu gelap: teks pil aktif (color:var(--top)) tidak boleh ikut langit siang yang terang */
-  #chatReply{ background:var(--panel); border-top-color:rgba(128,128,128,0.3); }   /* bar balasan: ikut tema (dulu selalu gelap sementara teksnya gelap saat siang = tak terbaca) */
+  #chatReply{ background:var(--glass-strong); border-top-color:rgba(128,128,128,0.3); }   /* bar balasan: ikut tema (dulu selalu gelap sementara teksnya gelap saat siang = tak terbaca) */
   #chatReply .rpc, .msg .ma button, #chatEmoji, .reqBtn{ background:rgba(128,128,128,0.2); border:1px solid rgba(128,128,128,0.32); }
   .msg .ma button:hover{ background:rgba(128,128,128,0.34); }
   #chatEmoji[aria-expanded="true"]{ background:rgba(128,128,128,0.36); }
@@ -1607,8 +1607,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   body:has(#friendOverlay.open) #fab, body:has(#chatOverlay.open) #fab{ z-index:61; }   /* ikon melayang tetap tampak di profil teman & room chat (di bawah kartu tambah teman/pengaturan) */
   #fabHint{ position:fixed; inset:0; z-index:300; opacity:0; transition:opacity .35s ease; cursor:pointer; }
   #fabHint.on{ opacity:1; }
-  #fabHint .hdim{ position:absolute; inset:0; background:rgba(4,7,18,.62); -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);
-    -webkit-mask:radial-gradient(circle at var(--hx) var(--hy), transparent calc(var(--hr) - 1px), #000 var(--hr)); mask:radial-gradient(circle at var(--hx) var(--hy), transparent calc(var(--hr) - 1px), #000 var(--hr)); }   /* lubang bulat di atas tombol: sekitarnya redup + blur */
+  #fabHint .hdim{ position:absolute; inset:0; background:rgba(4,7,18,.8);
+    -webkit-mask:radial-gradient(circle at var(--hx) var(--hy), transparent calc(var(--hr) - 1px), #000 var(--hr)); mask:radial-gradient(circle at var(--hx) var(--hy), transparent calc(var(--hr) - 1px), #000 var(--hr)); }   /* lubang bulat di atas tombol: sekitarnya redup (lebih pekat, tanpa blur) */
   #fabHint .hring{ position:absolute; left:calc(var(--hx) - var(--hr)); top:calc(var(--hy) - var(--hr)); width:calc(var(--hr) * 2); height:calc(var(--hr) * 2); border-radius:50%; pointer-events:none; border:2px solid rgba(255,226,160,.85); box-shadow:0 0 18px rgba(255,200,110,.55), inset 0 0 14px rgba(255,200,110,.25); animation:hintPulse 2.4s ease-in-out infinite; }
   @keyframes hintPulse{ 0%,100%{ transform:scale(1); opacity:.85; } 50%{ transform:scale(1.07); opacity:1; } }
   #fabHint .hbox{ position:absolute; padding:14px 16px 12px; border-radius:16px; color:#f4f5fb; background:rgba(22,28,58,.97); border:1px solid rgba(255,226,160,.3); box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 22px rgba(255,200,110,.14); }
@@ -1669,7 +1669,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .fic .fmb{ width:72%; margin:1px auto 0; }
   #fabOv .fic.on{ background:rgba(255,210,122,0.14); border-color:rgba(255,210,122,0.4); }
   #fabOv .fic.on .fi{ opacity:1; transform:translateY(-1px); }
-  #fabOv .fic.done .fi{ opacity:1; filter:drop-shadow(0 0 6px rgba(255,200,90,0.85)); }
+  #fabOv .fic.done .fi{ opacity:1; filter:drop-shadow(0 0 3px rgba(255,200,90,0.42)); }
   #fabOv .fic.done .fn, #fabOv .fic.on .fn{ color:var(--ink); }
   #fabOv .fpan{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .3s ease; }
   #fabOv .fpan.open{ grid-template-rows:1fr; }
@@ -1681,7 +1681,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .fcap{ display:flex; flex-direction:column; align-items:center; gap:2px; margin:12px auto 0; padding:8px 20px 6px; border:1px solid rgba(128,128,128,0.3); border-radius:16px; background:none; color:var(--ink); font:inherit; cursor:pointer; touch-action:manipulation; transition:background .2s ease, border-color .2s ease; }
   #fabOv .fcap .fi{ filter:grayscale(1); opacity:.6; }
   #fabOv .fcap.on{ background:rgba(255,210,122,0.18); border-color:rgba(255,210,122,0.6); }
-  #fabOv .fcap.on .fi{ filter:grayscale(1) drop-shadow(0 0 6px rgba(255,220,140,0.9)); opacity:1; }
+  #fabOv .fcap.on .fi{ filter:grayscale(1) drop-shadow(0 0 3px rgba(255,220,140,0.45)); opacity:1; }
   @media (prefers-reduced-motion: reduce){ #fabOv .fpan, #fabOv .fi{ transition:none; } }
   /* bentuk lilin: tinggi TETAP setengah layar (dropdown tidak mengubah ukuran kotak, isinya yang menggulir), tersisa jarak kiri-kanan di layar kecil */
   #fabOv .fp{ width:min(440px, calc(100% - 28px)); height:max(56vh, 360px); height:max(56dvh, 360px); max-height:86vh; max-height:86dvh; }
@@ -1695,7 +1695,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .fedn[hidden]{ display:none; }
   #fabOv .fedn b{ font-size:13px; font-weight:600; }
   #fabOv .fedn small{ font-size:10px; color:var(--ink-soft); }
-  #fabOv .fedn .fi{ position:relative; opacity:1; filter:drop-shadow(0 0 5px rgba(255,70,50,.85)); }
+  #fabOv .fedn .fi{ position:relative; opacity:1; filter:drop-shadow(0 0 2.5px rgba(255,70,50,0.42)); }
   #fabOv .fedn .fi::before{ content:''; position:absolute; left:50%; top:50%; width:64px; height:64px; margin:-32px 0 0 -32px; border-radius:50%; background:radial-gradient(closest-side, rgba(255,40,30,.75) 0%, rgba(255,90,60,.4) 35%, rgba(255,150,90,.14) 62%, transparent 100%); pointer-events:none; z-index:-1; animation:edenGlow 3.2s ease-in-out infinite; }
   @keyframes edenGlow{ 0%,100%{ opacity:.65; transform:scale(.9); } 50%{ opacity:1; transform:scale(1.12); } }
   @media (prefers-reduced-motion: reduce){ #fabOv .fedn .fi::before{ animation:none; } }
@@ -1704,7 +1704,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .fedn.on .fi::before{ display:none; }
   #fabOv .ff{ flex:none; display:grid; place-items:center; padding-top:2px; border-top:1px solid rgba(128,128,128,0.18); }
   #fabOv .ff .fcap{ margin:6px auto 0; }
-  #fabOv{ background:rgba(28,18,8,0.5); }
+  #fabOv{ background:rgba(28,18,8,0.66); }
   #fabOv .fp{ --ink:#3a2f26; --ink-soft:rgba(58,47,38,0.62); --top:#fff8e8; color:#3a2f26; overflow:visible; padding-top:30px;
     background:radial-gradient(120% 55% at 50% 0%, rgba(255,214,140,0.42), transparent 62%), linear-gradient(180deg,#fffefa,#f8f1e3 68%,#eee3cc);
     border:1px solid rgba(214,186,140,0.6); border-bottom:0;
@@ -1760,7 +1760,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #skSplash{ z-index:3; }   /* cipratan awan saat Sky kid menyelam: di atas kid supaya menutupi garis potong permukaan */
   .dclip{ position:absolute; inset:0; pointer-events:none; }   /* pembungkus kid yang sedang menyelam (dipotong di garis permukaan lewat mask) */
   .skWinds{ transform-origin:50% 100%; }   /* goyangan awan bawah saat ada yang menyelam */
-  #skKid, .skKid{ position:absolute; left:-155px; top:-150px; width:300px; height:300px; transform-origin:155px 150px; opacity:0; pointer-events:none; will-change:transform, opacity; filter:drop-shadow(0 6px 10px rgba(20,60,130,.28)); }
+  #skKid, .skKid{ position:absolute; left:-155px; top:-150px; width:300px; height:300px; transform-origin:155px 150px; opacity:0; pointer-events:none; will-change:transform, opacity; filter:drop-shadow(0 3px 5px rgba(20,60,130,0.14)); }
   #skKid svg, .skKid svg{ display:block; width:100%; height:100%; overflow:visible; }
   .skWinds{ position:absolute; left:0; right:0; bottom:0; height:46%; pointer-events:none; overflow:hidden; }
   .skCover{ position:absolute; left:0; right:0; top:0; height:62%; overflow:hidden; pointer-events:none; opacity:0; transition:opacity 2.5s; }
@@ -1793,8 +1793,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   html.gfx-low #stars .nebula, html.gfx-low #loginStars .nebula, html.gfx-low .skMist, html.gfx-low .skFog, html.gfx-low #fab .fabDeco{ display:none !important; }
   html.gfx-medium #fab .fOrbit, html.gfx-medium #fab .fAura{ animation:none; }
   html.gfx-low .skPuff i{ animation:none !important; }
-  html.gfx-low *, html.gfx-low *::before, html.gfx-low *::after{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
-  html.gfx-low #setOv, html.gfx-low #rsOv, html.gfx-low #avOv{ background:rgba(0,0,0,0.62); }
+  html.gfx-low #setOv, html.gfx-low #rsOv, html.gfx-low #avOv, html.gfx-low #guestOv, html.gfx-low #qrOv{ background:var(--glass-ov); }
   /* [perf] Gunung Cahaya: filter gelombang dimatikan di grafis sedang/rendah; di rendah animasi berhenti & gunung dipanggang ke kanvas */
   html.gfx-medium .gc-sway, html.gfx-low .gc-sway{ filter:none !important; }
   html.gfx-low #gcM *{ animation:none !important; }
@@ -1822,7 +1821,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   button.pending::after, button.busy:not(.fBtn)::after{
     width:20px; height:20px; margin:-10px 0 0 -10px;
     border:2.5px solid color-mix(in srgb, var(--ink, currentColor) 26%, transparent); border-top-color:var(--ink, currentColor);
-    filter:drop-shadow(0 0 5px var(--glow, transparent)); animation:spin .75s linear infinite;
+    filter:drop-shadow(0 0 2.5px var(--glow, transparent)); animation:spin .75s linear infinite;
   }
   button.pending, button.busy:not(.fBtn){ animation:pendPulse 1.3s ease-in-out infinite; }
   @keyframes pendPulse{ 0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--ink, #fff) 0%, transparent); } 50%{ box-shadow:0 0 0 5px color-mix(in srgb, var(--ink, #fff) 16%, transparent), 0 0 14px var(--glow, transparent); } }
@@ -1855,11 +1854,11 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #evName{ font-size:11px; font-weight:600; letter-spacing:2.2px; text-transform:uppercase; color:var(--ink-soft); }
   #evCd{ font-size:clamp(34px, 10vw, 56px); font-weight:200; font-variant-numeric:tabular-nums; line-height:1; color:var(--ink); }
   /* [event] tombol lampu: tetap ada selama event (hitung mundur / berlangsung); ketuk = sembunyikan layar event, ketuk lagi = tampilkan. Di bawah tombol bahasa (top 16px + tinggi 44px) */
-  #evX{ position:absolute; z-index:4; top:calc(env(safe-area-inset-top, 0px) + 70px); right:16px; width:36px; height:36px; display:grid; place-items:center; padding:0; border-radius:50%; background:rgba(0,0,0,.15); border:1px solid rgba(255,255,255,.18); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--ink-soft); cursor:pointer; touch-action:manipulation; opacity:0; visibility:hidden; pointer-events:none; transform:scale(.9); transition:opacity .4s ease, transform .35s cubic-bezier(.2,.9,.3,1.2), color .3s ease, visibility 0s linear .4s; }
+  #evX{ position:absolute; z-index:4; top:calc(env(safe-area-inset-top, 0px) + 70px); right:16px; width:36px; height:36px; display:grid; place-items:center; padding:0; border-radius:50%; background:var(--glass); border:1px solid rgba(255,255,255,.18); color:var(--ink-soft); cursor:pointer; touch-action:manipulation; opacity:0; visibility:hidden; pointer-events:none; transform:scale(.9); transition:opacity .4s ease, transform .35s cubic-bezier(.2,.9,.3,1.2), color .3s ease, visibility 0s linear .4s; }
   body.evAvail #evX{ opacity:1; visibility:visible; pointer-events:auto; transform:none; transition:opacity .4s ease .2s, transform .35s cubic-bezier(.2,.9,.3,1.2) .2s, color .3s ease, visibility 0s; }
   #evX svg{ width:18px; height:18px; }
   #evX .bd{ fill:transparent; transition:fill .3s ease; }
-  #evX.on{ color:#ffd76a; } #evX.on .bd{ fill:rgba(255,215,106,.32); } #evX.on svg{ filter:drop-shadow(0 0 5px rgba(255,205,90,.65)); }
+  #evX.on{ color:#ffd76a; } #evX.on .bd{ fill:rgba(255,215,106,.32); } #evX.on svg{ filter:drop-shadow(0 0 2.5px rgba(255,205,90,0.33)); }
   #evX:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
   /* layar hijau placeholder Grandma dihapus: langit malam biasa tetap tampil di belakang hutan */
   #evForest{ display:none!important; }
@@ -1880,7 +1879,7 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
   /* ===== [event] pengingat chat masuk di Beranda: gelembung + balas cepat (dari skymeetberandaevent) ===== */
   /* ===== pengingat chat masuk di Beranda: gelembung di titik-titik tertentu + balas cepat ===== */
   #chatDots{ position:absolute; inset:0; z-index:2; pointer-events:none; transition:opacity .6s ease; }
-  .cDot{ position:absolute; width:52px; height:52px; padding:0; display:grid; place-items:center; border:1px solid rgba(128,128,128,.4); border-radius:50%; background:var(--panel); color:var(--ink); cursor:pointer; pointer-events:auto; touch-action:manipulation; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); animation:cdPop .5s cubic-bezier(.2,.9,.3,1) both, cdBob 6s ease-in-out infinite; animation-delay:0s, var(--bd,0s); }
+  .cDot{ position:absolute; width:52px; height:52px; padding:0; display:grid; place-items:center; border:1px solid rgba(128,128,128,.4); border-radius:50%; background:var(--glass-strong); color:var(--ink); cursor:pointer; pointer-events:auto; touch-action:manipulation; animation:cdPop .5s cubic-bezier(.2,.9,.3,1) both, cdBob 6s ease-in-out infinite; animation-delay:0s, var(--bd,0s); }
   .cDot::before{ content:''; position:absolute; inset:-6px; border-radius:50%; border:2px solid var(--ink); opacity:0; animation:cdRing 2.8s ease-out infinite; animation-delay:var(--bd,0s); pointer-events:none; }
   .cDot .friendAvatar{ width:40px; height:40px; flex:none; font-size:16px; }
   .cBadge{ position:absolute; top:-5px; right:-5px; min-width:21px; height:21px; padding:0 6px; display:grid; place-items:center; border-radius:11px; background:var(--ink); color:var(--top); font-size:11px; font-weight:700; line-height:1; }
@@ -1889,7 +1888,7 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
   @keyframes cdBob{ 0%,100%{ translate:0 0; } 50%{ translate:0 -7px; } }
   @keyframes cdRing{ 0%{ opacity:.5; scale:.85; } 100%{ opacity:0; scale:1.5; } }
   @media (prefers-reduced-motion: reduce){ .cDot, .cDot::before{ animation:none; } }
-  #qrOv{ position:fixed; inset:0; z-index:58; display:grid; place-items:center; padding:16px; background:rgba(0,0,0,.42); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
+  #qrOv{ position:fixed; inset:0; z-index:58; display:grid; place-items:center; padding:16px; background:var(--glass-ov); opacity:0; visibility:hidden; transition:opacity .25s ease, visibility 0s linear .25s; }
   #qrOv.open{ opacity:1; visibility:visible; transition:opacity .25s ease; }
   .qrBox{ width:min(420px,100%); max-height:min(580px, calc(100dvh - 32px)); display:flex; flex-direction:column; gap:12px; padding:14px; border-radius:20px; color:var(--ink); background:linear-gradient(180deg, var(--top), var(--bottom)); border:1px solid rgba(128,128,128,.34); box-shadow:0 18px 50px rgba(0,0,0,.35); transform:translateY(12px) scale(.98); transition:transform .3s cubic-bezier(.2,.8,.2,1); }
   #qrOv.open .qrBox{ transform:none; }
@@ -1921,13 +1920,13 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
 @keyframes sjg{50%{opacity:.5}}
 @keyframes sjbob{50%{transform:translateY(-3px)}}
 #snj .sj-ci path{fill:rgba(218,215,242,.3)}
-#snj .sj-ci .sj-on{fill:#ffd98a;filter:drop-shadow(0 0 6px rgba(255,190,80,.95))}
+#snj .sj-ci .sj-on{fill:#ffd98a;filter:drop-shadow(0 0 3px rgba(255,190,80,0.47))}
 #snj .sj-wd{transform-box:fill-box;transform-origin:50% 100%;animation:sjwind 5s ease-in-out infinite}
 @keyframes sjwind{0%,100%{transform:skewX(calc(var(--sj-k)*-3deg))}50%{transform:skewX(calc(var(--sj-k)*8deg))}}
 #snj svg.sj-land *{pointer-events:none}
 #snj svg.sj-land .sj-gate,#snj svg.sj-land .sj-gate *{pointer-events:auto}
 #snj .sj-gate{cursor:pointer;outline:none}
-@keyframes sjpop{from{opacity:0;filter:blur(8px)}to{opacity:1;filter:none}}
+@keyframes sjpop{from{opacity:0}to{opacity:1}}
 #snj .sj-row{display:flex;gap:8px;justify-content:center}
 #snj button{font:inherit;font-size:12px;color:var(--sj-ink-soft);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:7px 14px;cursor:pointer}
 #snj button[aria-pressed="true"]{color:#0b1026;background:var(--sj-ink);border-color:transparent}
@@ -1946,7 +1945,7 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
 #snj .sj-pp{display:none}
 #snj .sj-pp.sj-on{display:block}
 #snj .sj-gi .sj-pp.sj-on{position:absolute;left:11px;top:25.2px;height:12px;width:auto;transform:translate(-50%,-50%)}
-#snj .sj-fg[data-on="cape"] .sj-cape,#snj .sj-fg[data-on="head"] .sj-head,#snj .sj-fg[data-on="hair"] .sj-hair,#snj .sj-fg[data-on="legs"] .sj-legs,#snj .sj-pp.sj-on path{fill:#ffd98a;filter:drop-shadow(0 0 5px rgba(255,200,90,.9))}
+#snj .sj-fg[data-on="cape"] .sj-cape,#snj .sj-fg[data-on="head"] .sj-head,#snj .sj-fg[data-on="hair"] .sj-hair,#snj .sj-fg[data-on="legs"] .sj-legs,#snj .sj-pp.sj-on path{fill:#ffd98a;filter:drop-shadow(0 0 2.5px rgba(255,200,90,0.45))}
 #snj h1{font-size:15px;font-weight:500;line-height:1.2}
 #snj .sj-sub{font-size:10.5px;color:var(--sj-ink-soft);line-height:1.3}
 #snj .sj-inf{position:absolute;top:8px;right:9px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:700 12px/1 inherit;font-style:normal;color:var(--sj-ink);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.38);cursor:pointer;outline:none}
@@ -1982,7 +1981,7 @@ body.p5 #snj{display:block;animation:sjin .6s ease both}
 body.sj-leaving:not(.p5) #snj{display:block;pointer-events:none}   /* tetap tampil selama animasi keluar saat pindah ke halaman lain */
 @keyframes sjin{from{opacity:0}to{opacity:1}}
 /* header Skymeet di atas scene Senja yang selalu gelap-senja: paksa tinta terang agar terbaca, apa pun jam di langit utama */
-body.p5 #nav, body.p5 #control{--ink:#f4f5fb;--ink-soft:rgba(244,245,251,.62);--panel:rgba(0,0,0,.34);--logo-filter:none;--logo-inv:brightness(0)}
+body.p5 #nav, body.p5 #control{--ink:#f4f5fb;--ink-soft:rgba(244,245,251,.62);--panel:rgba(0,0,0,.34);--glass:rgba(8,12,32,0.42);--glass-strong:rgba(0,0,0,0.56);--glass-ov:rgba(0,0,0,0.64);--logo-filter:none;--logo-inv:brightness(0)}
 #snj .sj-hd{gap:8px}
 #snj .sj-gtx{display:flex;align-items:center;gap:8px;min-width:0}
 #snj .sj-ttl{flex:0 1 auto;min-width:0;max-width:46%}
@@ -2094,8 +2093,7 @@ body.p5 #skKid{display:none!important}   /* anak Sky bawaan disembunyikan di hal
 @media (max-height:560px){#snj .sj-pg{display:none}}
 
 /* [perf] Grafis Sedang: overlay layar penuh memakai latar redup tanpa backdrop-filter (blur seluas layar adalah yang paling mahal di HP menengah). Kartu & tombol kecil tetap berkaca. Grafis Tinggi tidak berubah; Rendah sudah begini. */
-html.gfx-medium #setOv, html.gfx-medium #rsOv, html.gfx-medium #avOv, html.gfx-medium #guestOv{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(0,0,0,0.62); }
-html.gfx-medium #qrOv{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(0,0,0,.55); }
+html.gfx-medium #setOv, html.gfx-medium #rsOv, html.gfx-medium #avOv, html.gfx-medium #guestOv, html.gfx-medium #qrOv{ background:var(--glass-ov); }   /* [glass] backdrop-filter dihapus di semua level grafis; Sedang memakai lapis yang sama */
 </style>
 <style id="ovPauseCss">
 /* [ovpause] saat overlay menutup latar, animasi CSS adegan dijeda. Ikon melayang (#fab) sengaja tidak ikut dijeda. */
@@ -4302,15 +4300,23 @@ function gcUpdate() {
   gcEl.style.transform = 'translate(' + x.toFixed(1) + 'px,' + b.toFixed(1) + 'px) scale(' + s.toFixed(4) + ') translate(-358px,-508px)';
 }
 // [perf] loop Gunung Cahaya: dibatasi ~60 fps (layar 90/120 Hz tidak 2x lebih sering), berhenti saat tab tersembunyi
-let gcLast = 0, gcLoopOn = false;
-function gcLoop(now) {
+let gcLast = 0, gcLoopOn = false, gcGen = 0;
+function gcLoop(now, gen) {
+  if (gen !== gcGen) return;   // [fix-jeda] loop lama yang sudah digantikan berhenti sendiri (tidak ada loop ganda)
   if (document.hidden || (window.SkyOv && SkyOv.paused)) { gcLoopOn = false; return; }
   const gcGap = ((window.SkyGfx && SkyGfx.level() === 'low') || (typeof ovOpen === 'function' && ovOpen())) ? 28 : 14;   // [perf] 30 fps saat grafis rendah / overlay terbuka
   if (now - gcLast >= gcGap) { gcLast = now; gcUpdate(); gcBakeSync(); }
-  requestAnimationFrame(gcLoop);
+  requestAnimationFrame(t => gcLoop(t, gen));
 }
-function gcLoopStart() { if (!gcLoopOn && !document.hidden && !(window.SkyOv && SkyOv.paused)) { gcLoopOn = true; requestAnimationFrame(gcLoop); } }
+// [fix-jeda] bila flag mengira loop masih hidup tetapi tidak ada frame >600 ms (mis. rAF ditahan browser saat jeda), loop dihidupkan ulang
+function gcLoopStart() {
+  if (document.hidden || (window.SkyOv && SkyOv.paused)) return;
+  if (gcLoopOn && performance.now() - gcLast < 600) return;
+  gcLoopOn = true; const g = ++gcGen; requestAnimationFrame(t => gcLoop(t, g));
+}
 document.addEventListener('visibilitychange', gcLoopStart);
+window.addEventListener('pageshow', gcLoopStart); window.addEventListener('focus', gcLoopStart);
+setInterval(gcLoopStart, 1500);   // [fix-jeda] jaring pengaman: efek Gunung Cahaya tidak boleh berhenti permanen setelah terjeda
 // [perf] grafis rendah: SVG gunung (54 blur + filter) dirender SEKALI ke kanvas; hanya transform/opacity yang berubah per frame.
 // Dirender ulang (maks ~1x / 0,7 dtk) hanya bila warna berubah (Eden / pulse shard).
 const gcBakeCv = document.createElement('canvas'); gcBakeCv.className = 'gcBake'; gcBakeCv.width = 930; gcBakeCv.height = 800; gcEl.appendChild(gcBakeCv);
@@ -4446,7 +4452,7 @@ body.evForest #skFront { visibility: visible !important; transition: none !impor
 #skFront.w-rain #forestFront { filter: brightness(.88); } #skFront.w-storm #forestFront { filter: brightness(.72); }
 #skFront.night.w-rain #forestFront { filter: brightness(.5); } #skFront.night.w-storm #forestFront { filter: brightness(.42); }
 #skFront.w-storm #forest, #skFront.w-storm #forestSky { filter: brightness(.85); }   /* langit tetap jelas; badai hanya sedikit meredup */
-#skFront.fdeep .skKid { filter: drop-shadow(0 0 9px rgba(165,220,255,.5)) drop-shadow(0 0 22px rgba(120,190,255,.22)); }
+#skFront.fdeep .skKid { filter: drop-shadow(0 0 4.5px rgba(165,220,255,0.25)) drop-shadow(0 0 11px rgba(120,190,255,0.11)); }
 /* penyesuaian elemen bawaan, tanpa mengubah CSS induk */
 #skFront.fmix.w-rain .skCover { opacity: calc(.9 * (1 - var(--fp, 0))); }
 #skFront.fmix.w-storm .skCover { opacity: calc(1 - var(--fp, 0)); }
@@ -5218,6 +5224,7 @@ initPerm(); startLoop();
       setV('--ink', '#1a2140');
       setV('--ink-soft', 'rgba(26,33,64,0.62)');
       setV('--panel', 'rgba(255,255,255,0.62)');
+      setV('--glass', 'rgba(255,255,255,0.48)'); setV('--glass-strong', 'rgba(255,255,255,0.82)'); setV('--glass-ov', 'rgba(14,20,48,0.52)');
       setV('--warn', '#7a4300'); setV('--warn-bg', 'rgba(255,255,255,0.6)'); setV('--warn-bd', 'rgba(122,67,0,0.32)');
       setV('--logo-filter', 'brightness(0)'); setV('--logo-inv', 'brightness(0) invert(1)');
       setV('--err', '#b3261e'); setV('--ok', '#1d6f3a');
@@ -5226,6 +5233,7 @@ initPerm(); startLoop();
       setV('--ink', '#f4f5fb');
       setV('--ink-soft', 'rgba(244,245,251,0.62)');
       setV('--panel', 'rgba(0,0,0,0.34)');
+      setV('--glass', 'rgba(8,12,32,0.42)'); setV('--glass-strong', 'rgba(0,0,0,0.56)'); setV('--glass-ov', 'rgba(0,0,0,0.64)');
       setV('--warn', '#ffd9a0'); setV('--warn-bg', 'rgba(255,200,120,0.1)'); setV('--warn-bd', 'rgba(255,200,120,0.24)');
       setV('--logo-filter', 'none'); setV('--logo-inv', 'brightness(0)');
       setV('--err', '#ff9b9b'); setV('--ok', '#8fe3a8');
@@ -6572,8 +6580,8 @@ initPerm(); startLoop();
   }
 
   // kilau cahaya perlahan: mulai dari kondisi sekarang -> puncak terang (mengikuti siluet ikon lewat drop-shadow) -> kembali. rest = kondisi akhir (null = kondisi awal elemen)
-  const FX_GLOW_F = 'grayscale(0) opacity(1) brightness(1.6) drop-shadow(0 0 5px rgba(255,248,205,1)) drop-shadow(0 0 16px rgba(255,200,80,.95))';
-  const FX_LIT_F  = 'grayscale(0) opacity(1) brightness(1.1) drop-shadow(0 0 3px rgba(255,236,150,.95)) drop-shadow(0 0 9px rgba(255,190,70,.7))';
+  const FX_GLOW_F = 'grayscale(0) opacity(1) brightness(1.6) drop-shadow(0 0 2.5px rgba(255,248,205,0.5)) drop-shadow(0 0 8px rgba(255,200,80,0.47))';
+  const FX_LIT_F  = 'grayscale(0) opacity(1) brightness(1.1) drop-shadow(0 0 1.5px rgba(255,236,150,0.47)) drop-shadow(0 0 4.5px rgba(255,190,70,0.35))';
   const FX_REST_F = 'grayscale(0) opacity(1) brightness(1) drop-shadow(0 0 0 rgba(255,236,150,0)) drop-shadow(0 0 0 rgba(255,190,70,0))';
   const FX_GRAY_F = 'grayscale(1) opacity(.55) brightness(1) drop-shadow(0 0 0 rgba(255,236,150,0)) drop-shadow(0 0 0 rgba(255,190,70,0))';
   function fxGlowPulse(el, ms, rest, from){
@@ -6856,7 +6864,7 @@ initPerm(); startLoop();
     fabBtn.classList.toggle('gray', cap); fabBtn.setAttribute('aria-label', t.ttl + ' ' + tot + '/' + all); fabBtn.title = t.ttl;
     const lv = cap ? 1 : (all ? Math.min(1, tot / all) : 0), sp = (k, v) => fabBtn.style.setProperty(k, v);   // lv: progres 0..1; lilin abu-abu (20) = langsung puncak terang
     sp('--lv', lv.toFixed(3)); sp('--fg', Math.max(0, 1 - lv / .45).toFixed(3)); sp('--fo', (.42 + .58 * Math.min(1, lv / .55)).toFixed(3)); sp('--fb', (1 + .9 * lv).toFixed(3));
-    sp('--fr', (lv * 18).toFixed(1) + 'px'); sp('--fa', lv ? (.25 + .75 * lv).toFixed(3) : '0'); sp('--fs', (.78 + .42 * lv).toFixed(3)); sp('--fu', (.85 + 1.5 * lv).toFixed(3));   // --fu: ukuran api di panel terbuka (kecil -> sangat besar mengikuti progres)
+    sp('--fr', (lv * 9).toFixed(1) + 'px'); sp('--fa', lv ? (.125 + .375 * lv).toFixed(3) : '0'); sp('--fs', (.78 + .42 * lv).toFixed(3)); sp('--fu', (.85 + 1.5 * lv).toFixed(3));   // --fu: ukuran api di panel terbuka (kecil -> sangat besar mengikuti progres)
     
     fabBtn.style.setProperty('--p', all ? tot / all : 0); fabOv.style.setProperty('--p', all ? tot / all : 0);   // cincin progres di ikon + bilah di panel
     if(fabOv.hidden) return;
