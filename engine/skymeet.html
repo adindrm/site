@@ -1847,6 +1847,13 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   html.gfx-low .skPuff i{ animation:none !important; }
   html.gfx-low *, html.gfx-low *::before, html.gfx-low *::after{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
   html.gfx-low #setOv, html.gfx-low #rsOv, html.gfx-low #avOv{ background:rgba(0,0,0,0.62); }
+  /* [perf] Gunung Cahaya: filter gelombang dimatikan di grafis sedang/rendah; di rendah animasi berhenti & gunung dipanggang ke kanvas */
+  html.gfx-medium .gc-sway, html.gfx-low .gc-sway{ filter:none !important; }
+  html.gfx-low #gcM *{ animation:none !important; }
+  html.gfx-low #gcM .gc-bolt{ opacity:0; }
+  #gcM .gcBake{ display:none; position:absolute; left:-100px; top:-180px; width:930px; height:800px; pointer-events:none; }
+  #gcM.gcBaked .gcBake{ display:block; }
+  #gcM.gcBaked > svg{ display:none; }
   .setCard .locSt{ font-size:13px; line-height:1.4; color:var(--ink-soft); margin:2px 0 10px; }
   /* ===== umpan balik tombol: reaksi saat ditekan lebih terlihat + tanda menunggu (loading) ===== */
   button:not(:disabled):not(#fab):active, [role="button"]:active, .pill:active, .chip:active, .cbtn:active, .fBtn:active{
@@ -1981,10 +1988,8 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
       <stop offset="0" stop-color="#ffb888" stop-opacity="0"/>
       <stop offset="1" stop-color="#ffb888" stop-opacity=".4"/>
     </linearGradient>
-    <filter id="gc-wave" filterUnits="userSpaceOnUse" x="-300" y="-300" width="1440" height="1070">
-      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="2" seed="3" result="n">
-        <animate attributeName="baseFrequency" dur="6s" repeatCount="indefinite" values="0.012 0.02;0.016 0.028;0.012 0.02"/>
-      </feTurbulence>
+    <filter id="gc-wave" filterUnits="userSpaceOnUse" x="-100" y="-250" width="1050" height="800">
+      <feTurbulence type="fractalNoise" baseFrequency="0.014 0.024" numOctaves="2" seed="3" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
     <radialGradient id="gc-glowR" cx=".5" cy=".5" r=".5">
@@ -2037,11 +2042,11 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
     </radialGradient>
     <mask id="gc-outRing" maskUnits="userSpaceOnUse" x="-300" y="-300" width="1440" height="1070"><rect x="-300" y="-300" width="1440" height="1070" fill="url(#gc-outG)"/></mask>
     <linearGradient id="gc-fD" href="#gc-fL" x1="0" y1="1" x2="0" y2="0"/>
-    <filter id="gc-blur6" filterUnits="userSpaceOnUse" x="-300" y="-300" width="1440" height="1070"><feGaussianBlur stdDeviation="6"/></filter>
-    <filter id="gc-soft" filterUnits="userSpaceOnUse" x="-300" y="-300" width="1440" height="1070"><feGaussianBlur stdDeviation="1.4"/></filter>
-    <filter id="gc-blur4" filterUnits="userSpaceOnUse" x="-300" y="-300" width="1440" height="1070"><feGaussianBlur stdDeviation="4"/></filter>
-    <filter id="gc-blur2" filterUnits="userSpaceOnUse" x="-300" y="-300" width="1440" height="1070"><feGaussianBlur stdDeviation="1.6"/></filter>
-    <filter id="gc-blur05" filterUnits="userSpaceOnUse" x="-300" y="-300" width="1440" height="1070"><feGaussianBlur stdDeviation=".5"/></filter>
+    <filter id="gc-blur6" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="gc-soft" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="1.4"/></filter>
+    <filter id="gc-blur4" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="gc-blur2" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="1.6"/></filter>
+    <filter id="gc-blur05" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation=".5"/></filter>
   <polygon id="gc-b10" points="400.15,221.91 399.60,213.26 398.99,204.90 394.84,197.17 397.35,189.80 393.20,181.20 389.76,173.00 393.09,165.73 387.13,158.48 383.16,151.96 383.92,143.72 386.14,135.96 389.23,128.63 398.73,120.07 400.56,112.73 400.46,112.71 398.49,119.89 388.80,128.29 385.38,135.67 382.85,143.51 381.80,152.23 385.75,159.44 391.12,166.03 387.45,172.99 390.79,182.24 394.40,190.02 391.57,197.46 395.50,205.86 395.65,213.44 395.85,222.09"/><polygon id="gc-b11" points="394.13,196.21 391.52,194.46 390.04,191.58 387.76,189.01 386.41,185.92 384.13,183.33 384.06,183.38 385.92,186.19 386.78,189.53 388.58,192.40 389.68,195.81 392.28,198.42"/><polygon id="gc-b12" points="392.60,166.67 395.55,164.57 396.88,161.25 398.48,158.39 401.31,156.61 403.55,154.01 403.49,153.95 401.08,156.31 397.98,157.86 395.91,160.73 394.44,163.60 391.62,165.09"/><polygon id="gc-b13" points="383.75,143.20 381.08,141.01 378.05,139.51 375.85,137.01 373.89,134.22 371.07,132.27 371.03,132.33 373.70,134.39 375.49,137.27 377.63,140.02 380.58,141.73 383.02,144.03"/><polygon id="gc-b20" points="401.33,219.86 395.18,213.13 397.29,206.93 390.08,199.50 387.06,193.32 385.17,187.77 386.78,181.18 383.18,173.95 387.88,166.69 384.63,159.33 386.17,151.89 382.52,144.75 380.97,138.89 377.63,132.79 380.50,126.28 380.41,126.24 377.37,132.80 380.54,139.06 381.89,144.99 385.27,152.00 383.49,159.45 386.50,166.53 381.55,173.80 384.91,181.41 383.03,187.78 384.82,194.20 387.92,201.08 394.51,207.90 392.09,214.06 398.67,222.14"/><polygon id="gc-b21" points="386.72,194.50 388.88,191.91 391.16,189.50 393.99,187.54 395.67,184.46 397.24,181.44 397.17,181.40 395.30,184.24 393.41,186.95 390.41,188.50 387.69,190.70 385.17,193.02"/><polygon id="gc-b22" points="387.76,166.27 385.84,163.33 382.95,161.34 380.09,159.57 378.14,156.86 376.57,153.85 376.49,153.89 377.88,157.00 379.72,159.94 382.49,161.98 385.06,164.04 386.62,166.95"/><polygon id="gc-b30" points="398.46,220.49 396.42,215.18 397.60,210.23 393.54,205.51 395.67,200.34 396.33,195.46 397.56,190.68 399.89,185.10 398.36,179.79 390.86,174.63 384.53,169.80 385.26,165.16 393.71,159.68 397.03,154.73 388.90,148.97 388.84,149.05 396.80,154.83 393.43,159.36 384.80,164.75 383.82,170.19 390.25,175.45 397.43,180.59 398.44,184.94 395.98,190.11 394.47,195.05 393.62,199.74 391.20,205.89 395.08,210.92 393.57,215.35 395.54,221.51"/><polygon id="gc-b31" points="396.20,194.94 394.68,191.65 391.59,189.97 389.59,187.33 387.25,184.85 385.40,182.01 385.34,182.05 386.96,185.06 389.05,187.74 390.90,190.71 393.64,192.53 394.60,195.57"/><polygon id="gc-b32" points="390.85,175.44 393.61,173.24 394.51,169.88 396.37,167.11 398.60,164.57 401.13,162.31 401.08,162.24 398.44,164.40 396.05,166.85 393.98,169.62 392.96,172.79 390.26,174.64"/></defs>
   
   
@@ -4047,7 +4052,50 @@ function gcUpdate() {
   gcEl.style.visibility = 'visible'; gcEl.style.opacity = (gcA * L(1, wk, ef)).toFixed(3);
   gcEl.style.transform = 'translate(' + x.toFixed(1) + 'px,' + b.toFixed(1) + 'px) scale(' + s.toFixed(4) + ') translate(-358px,-508px)';
 }
-(function gcLoop() { gcUpdate(); requestAnimationFrame(gcLoop); })();   // berjalan sendiri tiap frame, tidak bergantung pada ada atau tidaknya event
+// [perf] loop Gunung Cahaya: dibatasi ~60 fps (layar 90/120 Hz tidak 2x lebih sering), berhenti saat tab tersembunyi
+let gcLast = 0, gcLoopOn = false;
+function gcLoop(now) {
+  if (document.hidden) { gcLoopOn = false; return; }
+  if (now - gcLast >= 14) { gcLast = now; gcUpdate(); gcBakeSync(); }
+  requestAnimationFrame(gcLoop);
+}
+function gcLoopStart() { if (!gcLoopOn && !document.hidden) { gcLoopOn = true; requestAnimationFrame(gcLoop); } }
+document.addEventListener('visibilitychange', gcLoopStart);
+// [perf] grafis rendah: SVG gunung (54 blur + filter) dirender SEKALI ke kanvas; hanya transform/opacity yang berubah per frame.
+// Dirender ulang (maks ~1x / 0,7 dtk) hanya bila warna berubah (Eden / pulse shard).
+const gcBakeCv = document.createElement('canvas'); gcBakeCv.className = 'gcBake'; gcBakeCv.width = 930; gcBakeCv.height = 800; gcEl.appendChild(gcBakeCv);
+let gcBakeKey = '', gcBakeT = 0, gcBakeLast = 0, gcBakeBusy = false, gcCssCache = null;
+function gcCssText() {
+  if (gcCssCache !== null) return gcCssCache;
+  let o = '';
+  try { for (const sh of document.styleSheets) { let rs; try { rs = sh.cssRules; } catch (e) { continue; }
+    for (const r of rs) { const sel = r.selectorText || r.name || ''; if (!/gc/i.test(sel) || sel === '#gcM' || /^html/.test(sel)) continue; o += r.cssText.replace(/#gcM/g, 'svg'); } } } catch (e) {}
+  return gcCssCache = o;
+}
+function gcBake() {
+  if (gcBakeBusy) return; gcBakeBusy = true; gcBakeLast = performance.now();
+  try {
+    const svg = gcEl.querySelector('svg').cloneNode(true);
+    svg.setAttribute('viewBox', '-60 -240 930 800'); svg.setAttribute('width', 930); svg.setAttribute('height', 800);
+    let vars = ''; for (let i = 0; i < gcEl.style.length; i++) { const n = gcEl.style[i]; if (n.indexOf('--') === 0) vars += n + ':' + gcEl.style.getPropertyValue(n) + ';'; }
+    svg.setAttribute('style', vars + 'overflow:visible');
+    const st = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    st.textContent = gcCssText() + 'svg *{animation:none!important}.gc-bolt{opacity:0}.gc-beam{opacity:.55}.gc-peakglow{opacity:.5}';
+    svg.insertBefore(st, svg.firstChild);
+    const im = new Image();
+    im.onload = () => { try { const g = gcBakeCv.getContext('2d'); g.clearRect(0, 0, 930, 800); g.drawImage(im, 0, 0, 930, 800); gcEl.classList.add('gcBaked'); } catch (e) { gcEl.classList.remove('gcBaked'); } gcBakeBusy = false; };
+    im.onerror = () => { gcBakeBusy = false; gcEl.classList.remove('gcBaked'); };
+    im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(svg));
+  } catch (e) { gcBakeBusy = false; }
+}
+function gcBakeSync() {
+  if (!(window.SkyGfx && SkyGfx.level() === 'low')) { if (gcBakeKey) { gcBakeKey = ''; gcEl.classList.remove('gcBaked'); } return; }
+  const k = gcRedA + '|' + gcOrA; if (k === gcBakeKey) return; gcBakeKey = k;
+  clearTimeout(gcBakeT); const wait = Math.max(0, 700 - (performance.now() - gcBakeLast));
+  gcBakeT = setTimeout(gcBake, wait);
+}
+addEventListener('sky:gfx', () => { gcBakeKey = ''; gcBakeSync(); });
+gcLoopStart();
 const MFX_CAP = () => Math.round(700 * (window.SkyGfx ? SkyGfx.scale() : 1));   // [perf] jumlah partikel meteor ikut Grafis (1 / .65 / .35)
 function drawEvt(dt, now) {
   const want = evMode === 'turtle' || evMode === 'geyser';
