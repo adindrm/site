@@ -1956,6 +1956,14 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
   #qrSend{ height:44px; padding:0 16px; border:0; border-radius:14px; background:var(--ink); color:var(--top); font:inherit; font-weight:600; cursor:pointer; } #qrSend:disabled{ opacity:.45; cursor:default; }
   .qrOpen{ align-self:center; padding:2px; background:none; border:0; color:var(--ink-soft); font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; }
 </style>
+<style id="ovPauseCss">
+/* [ovpause] saat overlay menutup latar, animasi CSS adegan dijeda. Ikon melayang (#fab) sengaja tidak ikut dijeda. */
+body.ovActive #stars .mote,
+body.ovActive #skFront, body.ovActive #skFront *, body.ovActive #skFront *::before, body.ovActive #skFront *::after,
+body.ovActive #gcM, body.ovActive #gcM *,
+body.ovActive #track .cDot, body.ovActive #track .cDot::before,
+body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovActive #track #hint svg{ animation-play-state:paused !important; }
+</style>
 </head>
 <body class="notranslate" translate="no">
 <div id="skBack" aria-hidden="true"></div>
@@ -3258,6 +3266,7 @@ const showCv = (c, on) => { if (c._v !== on) { c._v = on; c.style.visibility = o
 let ovEls = null;
 const ovOpen = () => { if (!ovEls) ovEls = ['rsOv', 'setOv', 'avOv', 'addOverlay'].map(id => document.getElementById(id)); return ovEls.some(e => e && e.classList.contains('open')); };
 function frame(now) {
+  if (window.SkyOv && SkyOv.paused) { raf = 0; return; }   // [ovpause] overlay menutup latar: loop berhenti (dilanjutkan lewat SkyOv.resume)
   if (now - last < 28 && ovOpen()) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // overlay berblur menutup scene: 30 fps cukup
   if (window.SkyGfx && SkyGfx.level() === 'low' && now - last < 28) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // grafik rendah: ~30 fps
   if (now - last < 14) { raf = document.hidden ? 0 : requestAnimationFrame(frame); return; }   // [perf] batas ~60 fps: layar 90/120 Hz tidak perlu menjalankan adegan 2x lebih sering
@@ -3421,7 +3430,7 @@ document.addEventListener('pointerdown', e => {   // kid ada di belakang halaman
   if (best) { if (lastTap.f === best && now - lastTap.t < 380) { lastTap = { f: null, t: 0 }; doubleTapReroute(best, now); } else { lastTap = { f: best, t: now }; triggerFly(best, now); } }
 });
 let raf = 0;
-function startLoop() { if (!raf && !document.hidden && !evPause) { last = performance.now(); raf = requestAnimationFrame(frame); } }
+function startLoop() { if (!raf && !document.hidden && !evPause && !(window.SkyOv && SkyOv.paused)) { last = performance.now(); raf = requestAnimationFrame(frame); } }
 function stopLoop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
 // tab tersembunyi: semua animasi & penyegaran cuaca berhenti; saat dibuka lagi waktu direset supaya tidak melompat
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopLoop(); else { startLoop(); if (Date.now() - lastWxAt > WX_EVERY) refreshWx(); } });
@@ -4054,11 +4063,11 @@ function gcUpdate() {
 // [perf] loop Gunung Cahaya: dibatasi ~60 fps (layar 90/120 Hz tidak 2x lebih sering), berhenti saat tab tersembunyi
 let gcLast = 0, gcLoopOn = false;
 function gcLoop(now) {
-  if (document.hidden) { gcLoopOn = false; return; }
+  if (document.hidden || (window.SkyOv && SkyOv.paused)) { gcLoopOn = false; return; }
   if (now - gcLast >= 14) { gcLast = now; gcUpdate(); gcBakeSync(); }
   requestAnimationFrame(gcLoop);
 }
-function gcLoopStart() { if (!gcLoopOn && !document.hidden) { gcLoopOn = true; requestAnimationFrame(gcLoop); } }
+function gcLoopStart() { if (!gcLoopOn && !document.hidden && !(window.SkyOv && SkyOv.paused)) { gcLoopOn = true; requestAnimationFrame(gcLoop); } }
 document.addEventListener('visibilitychange', gcLoopStart);
 // [perf] grafis rendah: SVG gunung (54 blur + filter) dirender SEKALI ke kanvas; hanya transform/opacity yang berubah per frame.
 // Dirender ulang (maks ~1x / 0,7 dtk) hanya bila warna berubah (Eden / pulse shard).
@@ -5624,8 +5633,8 @@ initPerm(); startLoop();
       }
       ctx.globalAlpha = 1;
     }
-    function loop(t){ raf = 0; if(!isOn() || document.hidden) return; const gap = (window.SkyGfx && SkyGfx.level() === 'low') ? 60 : 33; if(!lastT || t - lastT >= gap){ lastT = t; draw(t); } if(!still) raf = requestAnimationFrame(loop); }   // siang/tab tersembunyi: berhenti total
-    function kick(){ if(!raf && !still && isOn() && !document.hidden) raf = requestAnimationFrame(loop); }
+    function loop(t){ raf = 0; if(!isOn() || document.hidden || (window.SkyOv && SkyOv.paused)) return; const gap = (window.SkyGfx && SkyGfx.level() === 'low') ? 60 : 33; if(!lastT || t - lastT >= gap){ lastT = t; draw(t); } if(!still) raf = requestAnimationFrame(loop); }   // siang/tab tersembunyi: berhenti total
+    function kick(){ if(!raf && !still && isOn() && !document.hidden && !(window.SkyOv && SkyOv.paused)) raf = requestAnimationFrame(loop); }
     window.addEventListener('resize', () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
     document.addEventListener('visibilitychange', kick);
     window.addEventListener('sky:starsvis', kick);
@@ -10600,6 +10609,62 @@ initPerm(); startLoop();
     if(ok || (isApi && !bg)){ barInc(); p.then(barDec, barDec); }
     return p;
   };
+})();
+</script>
+<script>
+/* [ovpause] Jeda latar saat overlay terbuka. Satu sumber kebenaran: SkyOv.paused (+ class body.ovActive).
+   Overlay dideteksi lewat MutationObserver pada class/hidden, jadi tidak perlu mengubah jalur buka/tutup yang sudah ada.
+   Jeda berlaku ~280 ms setelah overlay terbuka (menunggu transisi fade), dan dilanjutkan seketika saat semua overlay tertutup. */
+(function(){
+  var CLS = ['chatOverlay','friendOverlay','setOv','avOv','rsOv','addOverlay','qrOv'];      // terbuka = class "open"
+  var HID = ['guestOv','outOv','devOv','fabOv','momOv'];                                      // terbuka = atribut hidden dilepas
+  var EXT = ['pvOv','fabHint'];                                                              // pvOv = ada di DOM; fabHint = class "on"
+  var ALL = CLS.concat(HID, EXT), DELAY = 280;
+  var ent = {}, timer = 0, body = document.body;
+  var api = window.SkyOv = { paused:false, enabled:true, open:[] };
+
+  function isOpen(id, el){
+    if(!el || !el.isConnected) return false;
+    if(id === 'pvOv') return true;
+    if(id === 'fabHint') return el.classList.contains('on');
+    if(HID.indexOf(id) > -1) return !el.hidden;
+    return el.classList.contains('open');
+  }
+  function setPaused(p){
+    if(api.paused === p) return;
+    api.paused = p; body.classList.toggle('ovActive', p);
+    if(!p) resume();
+  }
+  function resume(){
+    try{ if(typeof startLoop === 'function') startLoop(); }catch(e){}
+    try{ if(typeof gcLoopStart === 'function') gcLoopStart(); }catch(e){}
+    try{ window.dispatchEvent(new Event('sky:starsvis')); }catch(e){}   // membangunkan loop bintang (kick)
+  }
+  function recompute(){
+    var o = [];
+    for(var i = 0; i < ALL.length; i++){ var e = ent[ALL[i]]; if(e && isOpen(ALL[i], e.el)) o.push(ALL[i]); }
+    api.open = o;
+    if(api.enabled && o.length){
+      if(!api.paused && !timer) timer = setTimeout(function(){ timer = 0; if(api.open.length && api.enabled) setPaused(true); }, DELAY);
+    } else {
+      if(timer){ clearTimeout(timer); timer = 0; }
+      setPaused(false);
+    }
+  }
+  function attach(){
+    for(var i = 0; i < ALL.length; i++){
+      var id = ALL[i], el = document.getElementById(id), e = ent[id];
+      if(e && e.el === el) continue;
+      if(e && e.mo) e.mo.disconnect();
+      if(!el){ delete ent[id]; continue; }
+      var mo = new MutationObserver(recompute);
+      mo.observe(el, { attributes:true, attributeFilter:['class','hidden'] });
+      ent[id] = { el:el, mo:mo };
+    }
+    recompute();
+  }
+  new MutationObserver(attach).observe(body, { childList:true });   // overlay dinamis selalu di-append langsung ke body
+  attach();
 })();
 </script>
 </body>
