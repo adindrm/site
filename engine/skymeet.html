@@ -696,12 +696,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   /* lencana sudut seperti Sky Planner: kiri atas = asal (tangan; oranye spirit, putih toko), kanan atas = musim, kiri bawah = dimiliki, kanan bawah = tidak akan kembali */
   .ctItem .bd{ position:absolute; width:20px; height:20px; display:flex; align-items:center; justify-content:center; line-height:1; z-index:2; }
   .ctItem .bd svg, .ctItem .bd img{ width:100%; height:100%; object-fit:contain; pointer-events:none; }
-  .ctItem .bd.hd{ top:4px; left:4px; color:#fff; } .ctItem .bd.hd.sp{ color:#ffa63d; }
   .ctItem .bd.ss{ top:4px; right:4px; width:22px; height:22px; }
   .ctItem .bd.ss .si{ width:100%; height:100%; border-radius:50%; background:rgba(255,255,255,0.22); color:var(--ink); font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; }
   .ctItem .bd.nr{ bottom:4px; right:4px; color:rgba(255,255,255,0.9); }
-  .ctItem .bd.ck{ bottom:4px; left:4px; width:18px; height:18px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.6); font-size:12px; font-weight:700; color:#0b1026; cursor:pointer; }
-  .ctItem .bd.ck::before{ content:''; position:absolute; inset:-9px; }
+  .ctItem .bd.ck{ bottom:4px; left:4px; width:18px; height:18px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.6); font-size:12px; font-weight:700; color:#0b1026; pointer-events:none; }
   .ctItem.own .bd.ck{ background:var(--ok); border-color:var(--ok); }
   .ctMore, .ctRetry{ font-family:inherit; font-size:13px; color:var(--ink); background:rgba(255,255,255,0.1); border:none; border-radius:12px; padding:11px 18px; cursor:pointer; align-self:center; }
   .ctMsg{ font-size:13px; color:var(--ink-soft); padding:30px 0; text-align:center; }
@@ -1745,6 +1743,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #chatHead .hb img.ai, #chatAttach img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
   /* ===== ikon melayang: hiasan hanya saat panel terbuka; panel = lilin putih, ikon = nyala di ujung sumbu ===== */
   #fab .fabDeco{ opacity:0; transition:opacity .35s ease; }
+  #fab:not(.up) .fabDeco, #fab:not(.up) .fabDeco *{ animation-play-state:paused !important; }   /* [perf] hiasan (aura, orbit, kelip) tak terlihat saat panel tertutup: jangan dianimasikan terus-menerus */
   #fab.up .fabDeco{ opacity:1; transition:opacity .9s ease .45s; }
   #fab.up .fAura{ inset:-22px; }
   #fab.fly{ transition:left .85s cubic-bezier(.45,.05,.2,1), top .85s cubic-bezier(.45,.05,.2,1), scale .85s cubic-bezier(.45,.05,.2,1); }
@@ -2095,7 +2094,7 @@ body.p5 #nav, body.p5 #control{--ink:#f4f5fb;--ink-soft:rgba(244,245,251,.62);--
 #snj .sj-search:focus{border-color:rgba(255,217,138,.75)}
 #snj .sj-search::placeholder{color:var(--sj-ink-soft)}
 #snj .sj-it.own{border-color:#8fe3a8;box-shadow:inset 0 0 0 1px #8fe3a8}
-#snj .sj-it{position:relative}
+#snj .sj-it{position:relative;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #sjTip{color:#f4f5fb}
 #snj .sj-sc{padding:6px;align-items:stretch;text-align:center}
 #snj .sj-sc .sj-tw{position:relative;flex:1 1 auto;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
@@ -2110,13 +2109,10 @@ body.p5 #nav, body.p5 #control{--ink:#f4f5fb;--ink-soft:rgba(244,245,251,.62);--
 #snj .sj-it .sj-th{border:0;width:calc(100% - 8px);height:calc(100% - 8px)}
 #snj .sj-it .bd{position:absolute;width:var(--b);height:var(--b);display:flex;align-items:center;justify-content:center;line-height:1;z-index:2}
 #snj .sj-it .bd svg,#snj .sj-it .bd img{width:100%;height:100%;object-fit:contain;pointer-events:none}
-#snj .sj-it .bd.hd{top:2px;left:2px;color:#fff}
-#snj .sj-it .bd.hd.sp{color:#ffa63d}
 #snj .sj-it .bd.ss{top:2px;right:2px}
 #snj .sj-it .bd.ss .si{width:100%;height:100%;border-radius:50%;background:rgba(255,255,255,.22);color:var(--sj-ink);font-size:calc(var(--b)*.55);font-weight:600;display:flex;align-items:center;justify-content:center}
 #snj .sj-it .bd.nr{bottom:2px;right:2px;color:rgba(255,255,255,.9)}
-#snj .sj-it .bd.ck{bottom:2px;left:2px;width:calc(var(--b)*.9);height:calc(var(--b)*.9);border-radius:50%;border:0;font-size:calc(var(--b)*.6);font-weight:700;color:#0b1026;cursor:pointer}
-#snj .sj-it .bd.ck::before{content:'';position:absolute;inset:-4px}
+#snj .sj-it .bd.ck{bottom:2px;left:2px;width:calc(var(--b)*.9);height:calc(var(--b)*.9);border-radius:50%;border:0;font-size:calc(var(--b)*.6);font-weight:700;color:#0b1026;pointer-events:none}
 #snj .sj-it.own .bd.ck{background:#8fe3a8}
 #snj .sj-msg{grid-row:1/4;grid-column:1/-1;align-self:center;justify-self:center;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:12.5px;color:var(--sj-ink-soft);text-align:center;padding:0 12px}
 #snj .sj-pt button{white-space:nowrap}
@@ -6653,13 +6649,14 @@ initPerm(); startLoop();
     const tick = Math.floor(ts / FLAME_MS);
     if(tick === flameLastTick) return;   // [perf] api hanya berganti tiap FLAME_MS: lewati forEach + getClientRects di frame layar lainnya
     flameLastTick = tick;
+    const todo = [];   // [perf] baca dulu (getClientRects), tulis sesudahnya: selang-seling baca/tulis per api memaksa style+layout dihitung ulang tiap api
     flames.forEach(f => {
       if(!f.isConnected){ flames.delete(f); return; }
-      if(f.dataset.hold || !f.getClientRects().length) return;
-      const k = f.children, nx = tick % k.length;
-      if(nx === f._f) return;
-      showFrame(f, nx);   // frame baru memudar masuk di atas frame lama: tidak ada celah kosong / kedip
+      if(f.dataset.hold) return;
+      const nx = tick % f.children.length;
+      if(nx !== f._f && f.getClientRects().length) todo.push(f, nx);
     });
+    for(let i = 0; i < todo.length; i += 2) showFrame(todo[i], todo[i + 1]);   // frame baru memudar masuk di atas frame lama: tidak ada celah kosong / kedip
   }
   // ---- kontrol frame manual (dipakai ikon on/off: tidak loop) ----
   function setFrame(f, i){
@@ -6698,6 +6695,7 @@ initPerm(); startLoop();
   function fxBurst(x, y, o){   // tiap partikel terbang, berkilat, lalu pecah lagi sekali jadi partikel mungil (o.sub buah)
     if(reduceFlame.matches || !Element.prototype.animate) return;
     o = Object.assign({ n:10, dist:40, life:620, size:[2, 4], up:0, ang:0, spread:Math.PI * 2, sub:3 }, o || {});
+    { const lv = window.SkyGfx && SkyGfx.level(), k = lv === 'low' ? .5 : lv === 'medium' ? .75 : 1; if(k < 1){ o.n = Math.max(3, Math.round(o.n * k)); o.sub = Math.round(o.sub * k); } }   // [perf] partikel (tiap partikel = elemen DOM + box-shadow + 2 animasi) dikurangi di Grafis Sedang/Rendah
     for(let i = 0; i < o.n; i++){
       const sz = o.size[0] + Math.random() * (o.size[1] - o.size[0]), p = fxDot(x, y, sz, fxCol());
       const a = o.ang + (Math.random() - .5) * o.spread, d = o.dist * (.5 + Math.random() * .7), dx = Math.cos(a) * d, dy = Math.sin(a) * d - o.up * (.6 + Math.random() * .8);
@@ -11190,7 +11188,6 @@ initPerm(); startLoop();
     es:{ spirit:'Espíritu', shop:'Tienda', noret:'No volverá', season:'Temporada' }
   };
   const og = () => OG[lg()] || OG.en;
-  const SVG_HAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>';
   const SVG_NORET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8L18.74 5.74A9.75 9.75 0 0 0 12 3C11 3 10.03 3.16 9.13 3.47"/><path d="M8 16H3v5"/><path d="M3 12C3 9.51 4 7.26 5.64 5.64"/><path d="m3 16 2.26 2.26A9.75 9.75 0 0 0 12 21c2.49 0 4.74-1 6.36-2.64"/><path d="M21 12c0 1-.16 1.97-.47 2.87"/><path d="M21 3v5h-5"/><path d="M22 22 2 2"/></svg>';
   // ikon dari aset (aset/skymeet/kosmetik/...); belum ada file = ikon bawaan. Daftar kunci dicoba berurutan.
   function assetBadge(cls, keys, fallbackHtml, title){
@@ -11203,10 +11200,6 @@ initPerm(); startLoop();
   function decorate(b, i){
     b.querySelectorAll('.bd').forEach(n => n.remove());
     const o = org[i.guid], T = og();
-    if(o && o.src){   // kiri atas: tangan. Aset: kosmetik/spirit (oranye) atau kosmetik/toko (putih)
-      const sp = o.src === 'spirit', h = assetBadge('hd' + (sp ? ' sp' : ''), [sp ? 'kosmetik/spirit' : 'kosmetik/toko'], SVG_HAND, sp ? T.spirit : T.shop);
-      b.appendChild(h);
-    }
     if(o && o.season){   // kanan atas: ikon musim. Aset: kosmetik/musim/<nama>; tanpa file = huruf pertama
       const nm = o.season, short = slug(nm.replace(/^season of /i, '')), full = slug(nm);
       const su = safeUrl(o.sicon);   // urutan: aset buatan sendiri (kosmetik/musim/<nama>) > ikon musim dari data > huruf pertama
@@ -11214,8 +11207,7 @@ initPerm(); startLoop();
       const s = assetBadge('ss', [('kosmetik/musim/' + short), ('kosmetik/musim/' + full)], fb, nm);
       b.appendChild(s);
     }
-    const ck = el('span', 'bd ck'); ck.setAttribute('role', 'checkbox'); ck.setAttribute('aria-checked', String(!!own[i.id])); ck.textContent = own[i.id] ? '✓' : '';
-    ck.addEventListener('click', e => { e.stopPropagation(); toggleOwn(i, b); });
+    const ck = el('span', 'bd ck'); ck.setAttribute('aria-hidden', 'true'); ck.textContent = own[i.id] ? '✓' : '';   // hanya indikator; menandai dimiliki = tekan lama item
     b.appendChild(ck);
     if(i.group === 'Limited') b.appendChild(assetBadge('nr', ['kosmetik/tidak-kembali'], SVG_NORET, T.noret));   // kanan bawah: tidak akan kembali; item yang bisa dimiliki/akan kembali = kosong
   }
@@ -11223,7 +11215,7 @@ initPerm(); startLoop();
     if(own[i.id]) delete own[i.id]; else own[i.id] = 1;
     if(own[i.id] && wish[i.id]){ delete wish[i.id]; saveWish(); }   // sudah dimiliki = keluar dari wish
     saveOwn(); tile.classList.toggle('own', !!own[i.id]);
-    const ck = tile.querySelector('.bd.ck'); if(ck){ ck.textContent = own[i.id] ? '✓' : ''; ck.setAttribute('aria-checked', String(!!own[i.id])); }
+    const ck = tile.querySelector('.bd.ck'); if(ck){ ck.textContent = own[i.id] ? '✓' : ''; }
     if(ck && own[i.id] && ck.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches){ try{ ck.animate([{ scale:'0.4' }, { scale:'1.35' }, { scale:'1' }], { duration:340, easing:'ease-out' }); }catch(_){} }
     SJ.refresh();
   }
@@ -11507,7 +11499,17 @@ function go(t){const a={...cam},t0=performance.now(),D=matchMedia('(prefers-redu
       b.title = i.name || ''; b.setAttribute('aria-label', i.name || ''); b.appendChild(th); b._it = i;
       tiles[i.guid] = b; decorate(b, i);   // lencana sama dengan menu lama: tangan (spirit/toko), musim, dimiliki, tidak akan kembali
       if(sel === i) selBtn = b;
-      b.onclick = () => { if(selBtn && selBtn !== b) selBtn.setAttribute('aria-pressed', 'false'); sel = i; selBtn = b; vw = 'normal'; b.setAttribute('aria-pressed', 'true'); renderPv(); an(b, [{ scale:'1' }, { scale:'1.14' }, { scale:'1' }], { duration:280, fill:'none' }); if(isWishOnly(i)) note(t().wishNote); };
+      // tekan lama item (~0,55 dtk) = tandai / batal tandai dimiliki; ketukan singkat tetap memilih item
+      let lpT = 0, lpX = 0, lpY = 0;
+      const lpStop = () => { clearTimeout(lpT); lpT = 0; };
+      b.addEventListener('pointerdown', e => {
+        if(e.button > 0) return; b._lp = false; lpStop(); lpX = e.clientX; lpY = e.clientY;
+        lpT = setTimeout(() => { lpT = 0; b._lp = true; toggleOwn(i, b); try{ navigator.vibrate && navigator.vibrate(18); }catch(_){} }, 550);
+      });
+      b.addEventListener('pointermove', e => { if(lpT && Math.hypot(e.clientX - lpX, e.clientY - lpY) > 10) lpStop(); });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => b.addEventListener(ev, lpStop));
+      b.addEventListener('contextmenu', e => e.preventDefault());   // Android: tekan lama memicu menu konteks
+      b.onclick = () => { if(b._lp){ b._lp = false; return; } if(selBtn && selBtn !== b) selBtn.setAttribute('aria-pressed', 'false'); sel = i; selBtn = b; vw = 'normal'; b.setAttribute('aria-pressed', 'true'); renderPv(); an(b, [{ scale:'1' }, { scale:'1.14' }, { scale:'1' }], { duration:280, fill:'none' }); if(isWishOnly(i)) note(t().wishNote); };
       return b;
     }
     function more(d){
