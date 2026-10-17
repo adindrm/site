@@ -83,7 +83,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     font-family:'Space Grotesk', sans-serif;
     overflow:hidden;
     background: linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%);
-    transition: background 3s linear;
     position:relative;
     color: var(--ink);
   }
@@ -4942,40 +4941,43 @@ initPerm(); startLoop();
   }
 
   let inkDark = false;
+  /* [perf] tulis variabel CSS hanya bila nilainya berubah: setProperty tiap detik memaksa hitung ulang style seluruh pohon DOM */
+  const _sv = {}; let _bg = '', _tc = '';
+  const setV = (k, v) => { if(_sv[k] !== v){ _sv[k] = v; root.setProperty(k, v); } };
   function applySky(h){
     const S = window.SkyScene;
     const f = S ? S.frame() : getFrame(h);   // langit & warna tulisan mengikuti matahari sungguhan di lokasi perangkat (cadangan: tabel jam)
-    root.setProperty('--top', f.top);
-    root.setProperty('--bottom', f.bottom);
-    if(!S){ root.setProperty('--body-color', f.body); root.setProperty('--glow', f.glow); }
-    root.setProperty('--star-opacity', f.stars.toFixed(2));
+    setV('--top', f.top);
+    setV('--bottom', f.bottom);
+    if(!S){ setV('--body-color', f.body); setV('--glow', f.glow); }
+    setV('--star-opacity', f.stars.toFixed(2));
     { const was = starsOn; starsOn = f.stars > 0.02; if(starsOn && !was) window.dispatchEvent(new Event('sky:starsvis')); }
 
     // tinta gelap bila bagian tengah langit terang (kontras lebih baik daripada putih); jeda kecil agar tidak berkedip di batasnya
     const dark = S ? (Math.abs(f.lum - 0.207) < 0.012 ? inkDark : f.lum > 0.207) : ((luminance(f.top) + luminance(f.bottom)) / 2 > 0.62);
     inkDark = dark;
-    root.setProperty('--veil', dark ? 'rgba(255,255,255,0.22)' : 'rgba(3,6,20,0.3)');
+    setV('--veil', dark ? 'rgba(255,255,255,0.22)' : 'rgba(3,6,20,0.3)');
     if(dark){
-      root.setProperty('--ink', '#1a2140');
-      root.setProperty('--ink-soft', 'rgba(26,33,64,0.62)');
-      root.setProperty('--panel', 'rgba(255,255,255,0.62)');
-      root.setProperty('--warn', '#7a4300'); root.setProperty('--warn-bg', 'rgba(255,255,255,0.6)'); root.setProperty('--warn-bd', 'rgba(122,67,0,0.32)');
-      root.setProperty('--logo-filter', 'brightness(0)'); root.setProperty('--logo-inv', 'brightness(0) invert(1)');
-      root.setProperty('--err', '#b3261e'); root.setProperty('--ok', '#1d6f3a');
-      root.setProperty('--toast-bg', 'rgba(255,255,255,0.97)'); root.setProperty('--toast-fg', '#1a2140');
+      setV('--ink', '#1a2140');
+      setV('--ink-soft', 'rgba(26,33,64,0.62)');
+      setV('--panel', 'rgba(255,255,255,0.62)');
+      setV('--warn', '#7a4300'); setV('--warn-bg', 'rgba(255,255,255,0.6)'); setV('--warn-bd', 'rgba(122,67,0,0.32)');
+      setV('--logo-filter', 'brightness(0)'); setV('--logo-inv', 'brightness(0) invert(1)');
+      setV('--err', '#b3261e'); setV('--ok', '#1d6f3a');
+      setV('--toast-bg', 'rgba(255,255,255,0.97)'); setV('--toast-fg', '#1a2140');
     } else {
-      root.setProperty('--ink', '#f4f5fb');
-      root.setProperty('--ink-soft', 'rgba(244,245,251,0.62)');
-      root.setProperty('--panel', 'rgba(0,0,0,0.34)');
-      root.setProperty('--warn', '#ffd9a0'); root.setProperty('--warn-bg', 'rgba(255,200,120,0.1)'); root.setProperty('--warn-bd', 'rgba(255,200,120,0.24)');
-      root.setProperty('--logo-filter', 'none'); root.setProperty('--logo-inv', 'brightness(0)');
-      root.setProperty('--err', '#ff9b9b'); root.setProperty('--ok', '#8fe3a8');
-      root.setProperty('--toast-bg', 'rgba(20,22,45,0.94)'); root.setProperty('--toast-fg', '#f4f5fb');
+      setV('--ink', '#f4f5fb');
+      setV('--ink-soft', 'rgba(244,245,251,0.62)');
+      setV('--panel', 'rgba(0,0,0,0.34)');
+      setV('--warn', '#ffd9a0'); setV('--warn-bg', 'rgba(255,200,120,0.1)'); setV('--warn-bd', 'rgba(255,200,120,0.24)');
+      setV('--logo-filter', 'none'); setV('--logo-inv', 'brightness(0)');
+      setV('--err', '#ff9b9b'); setV('--ok', '#8fe3a8');
+      setV('--toast-bg', 'rgba(20,22,45,0.94)'); setV('--toast-fg', '#f4f5fb');
     }
 
-    document.body.style.background = `linear-gradient(180deg, ${f.top} 0%, ${f.bottom} 100%)`;
+    { const bg = `linear-gradient(180deg, ${f.top} 0%, ${f.bottom} 100%)`; if(bg !== _bg){ _bg = bg; document.body.style.background = bg; } }
     const themeMeta = document.querySelector('meta[name="theme-color"]');
-    if(themeMeta) themeMeta.setAttribute('content', S ? f.edge : f.top);
+    { const tc = S ? f.edge : f.top; if(themeMeta && tc !== _tc){ _tc = tc; themeMeta.setAttribute('content', tc); } }
 
   }
 
@@ -10406,7 +10408,7 @@ initPerm(); startLoop();
 
     // ---- alur utama ----
     let t0 = performance.now();
-    let fpsAvg = 16.7, stride = 1, prevPending = -1, lastAbsorb = 0;
+    let fpsAvg = 16.7, stride = 1, prevPending = -1, lastAbsorb = 0, bStride = 1, bActive = 1;
     let last = t0, raf = 0, bursting = false, BS = 0, tBurst = Infinity, realP = 0, shown = 0, realDoneAt = -1, revealed = false, finished = false, rmAt = 0, popAt = 0, popAlive = 1, dots = [], pops = [], frags = [], popC = { x: 0, y: 0 };
     function reveal(){
       if(revealed) return; revealed = true;
@@ -10428,7 +10430,7 @@ initPerm(); startLoop();
       const t = now - t0, time = t / 1000;
       nowAbs = now;
       const rdt = Math.max(0, (now - last) / 1000), dt = Math.min(.033, rdt), sdt = Math.min(.09, rdt); last = now;   // sdt: simulasi partikel mengejar waktu nyata setelah tersendat (tidak merayap lambat)
-      if(rdt < .25){ fpsAvg += (rdt * 1000 - fpsAvg) * .05; if(t > 1500 && fpsAvg > 30 && stride < 3){ stride++; fpsAvg = 16.7; } }   // perangkat lambat: gambar lebih sedikit partikel, bukan membeku
+      if(rdt < .25){ fpsAvg += (rdt * 1000 - fpsAvg) * .05; if(!bursting && t > 1500 && fpsAvg > 30 && stride < 3){ stride++; fpsAvg = 16.7; } }   // perangkat lambat: gambar lebih sedikit partikel, bukan membeku
       const ns = Math.min(6, Math.max(2, Math.ceil(sdt / .0125)));
 
       // persen = yang lebih lambat antara waktu (5 detik) dan proses memuat asli
@@ -10439,7 +10441,7 @@ initPerm(); startLoop();
       const target = Math.min(t / MIN_MS, realDone ? 1 : Math.min(realP, .99));
       shown += (target - shown) * (1 - Math.exp(-10 * dt));
       if(target >= 1 && shown > .998) shown = 1;
-      if(!reduced && !bursting && t >= G && t >= tBurst && shown >= .995){ bursting = true; BS = t; }
+      if(!reduced && !bursting && t >= G && t >= tBurst && shown >= .995){ bursting = true; BS = t; bStride = stride; bActive = Math.max(1, parts.filter(q => !(bStride > 1 && (q.i % bStride))).length); }   // pecah memakai himpunan & ukuran partikel yang sama dengan yang tampil saat menyusun logo
 
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cvs.width, cvs.height);
       ctx.globalCompositeOperation = 'lighter';
@@ -10475,21 +10477,23 @@ initPerm(); startLoop();
       let pending = 0;
       const tails = Array.from({ length: 9 }, () => new Path2D());
       for(const p of parts){
-        if(!bursting && stride > 1 && (p.i % stride)) continue;
-        let x, y, a = 1, sz = p.size * (!bursting && stride > 1 ? 1 + .3 * (stride - 1) : 1), rot = p.rot + time * p.spin;
+        const stp = bursting ? bStride : stride;
+        if(stp > 1 && (p.i % stp)){ if(bursting) p.done = true; continue; }   // partikel yang tidak tampil saat menyusun logo juga tidak ikut pecah
+        let x, y, a = 1, sz = p.size * (stp > 1 ? 1 + .3 * (stp - 1) : 1), rot = p.rot + time * p.spin;
+        const twk = Math.sin(time * 3 + p.ph) * .5 + .5, kb = clamp((t - G) / 500);   // tampilan kelip yang SAMA di fase menunggu & awal pecah (masuk halus dari tampilan menyusun)
+        const iz = 1 + (.85 + .35 * twk - 1) * kb, ia = 1 + (.7 + .3 * twk - 1) * kb;
         if(t < G){   // berkumpul membentuk logo
           p.sim = false; p.done = false;
           const g = clamp((t / G - p.delay) / .55), e = outQuart(g);
           const dx = p.tx - p.sx, dy = p.ty - p.sy, k = (1 - e) * Math.sin(e * Math.PI) * p.curve;
           x = p.sx + dx * e - dy * k; y = p.sy + dy * e + dx * k; a = clamp(g * 3);
         } else if(!bursting){   // menunggu persen 100%: berkelip
-          const tw = Math.sin(time * 3 + p.ph) * .5 + .5;
-          x = p.tx; y = p.ty; a = .7 + .3 * tw; sz *= .85 + .35 * tw;
+          x = p.tx; y = p.ty; a = ia; sz *= iz;
         } else {   // pecah
           if(p.done) continue;
           pending++;
           const tb = t - BS - p.bdel;
-          if(tb < 0){ x = p.tx; y = p.ty; }
+          if(tb < 0){ x = p.tx; y = p.ty; a = ia; sz *= iz; }
           else {
             if(!p.sim){
               p.sim = true; p.age = 0; p.x = p.tx; p.y = p.ty; p.hn = 0;
@@ -10499,6 +10503,7 @@ initPerm(); startLoop();
             for(let k = 0; k < ns; k++) step(p, sdt / ns);
             x = p.x; y = p.y;
             if(p.done || y > H_ + 200){ p.done = true; continue; }
+            { const bk = clamp(tb / 350); a = ia + (1 - ia) * bk; sz *= iz + (1 - iz) * bk; }   // dari tampilan kelip -> penuh, tanpa lompatan
             sz *= .35 + .65 * clamp((p.d - 24 * Math.max(ringK, .2)) / 60);
             for(let i = TN - 1; i > 0; i--){ p.hx[i] = p.hx[i - 1]; p.hy[i] = p.hy[i - 1]; }
             p.hx[0] = x; p.hy[0] = y; if(p.hn < TN) p.hn++;
@@ -10515,7 +10520,7 @@ initPerm(); startLoop();
       rk.x = clamp(rk.x + rk.vx * dt, -4, 4); rk.y = clamp(rk.y + rk.vy * dt, -4, 4); rk.hit *= Math.exp(-5 * dt);
       let ro = t < G ? clamp(t / 700) : 1;
       if(bursting){
-        ringT = clamp((1 - pending / Math.max(1, parts.length) - .2) / .8);
+        ringT = clamp((1 - pending / bActive - .2) / .8);
         ro = 1 - clamp((ringU - .8) / .2);
       }
       if(bursting){   // anti-macet: bila tak ada lagi bintang yang terserap selama 2 dtk, sisanya langsung dianggap masuk
