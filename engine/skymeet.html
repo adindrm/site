@@ -4671,10 +4671,14 @@ function fSlotSprite(kind, s, dir, R, dp) {   // sprite satu jamur tunggal: 'g' 
   else { ax = dir > 0 ? s * .25 : w - s * .25; ay = s * .45; fShelfShroom(g, ax - dir * s * .1, ay, s, dir, R); glows.push({ x: dir * s * .5, y: 0, r: s * 2.4 }); }
   return { c, w, h, ax, ay, glows };
 }
-function fRidge(g, y0, amp, c1, c2, R, step) {
+function fRidge(g, y0, amp, c1, c2, R, step, flat) {   // flat = [x0, x1]: bagian punggung gundukan di rentang ini diratakan (tinggi y0), supaya sejajar di belakang pintu pohon
   g.beginPath(); g.moveTo(0, H + 2); g.lineTo(0, y0);
   let x = 0;
-  while (x < W) { const nx = Math.min(W, x + step * (.7 + R() * .6)); g.quadraticCurveTo((x + nx) / 2, y0 - amp * (R() - .3), nx, y0 + amp * (R() - .5) * .4); x = nx; }
+  while (x < W) {
+    const nx = Math.min(W, x + step * (.7 + R() * .6)); let cy = y0 - amp * (R() - .3), ey = y0 + amp * (R() - .5) * .4;   // R() dipanggil sama seperti semula: bentuk bagian lain tidak berubah
+    if (flat && nx > flat[0] && x < flat[1]) { cy = y0; ey = y0; }
+    g.quadraticCurveTo((x + nx) / 2, cy, nx, ey); x = nx;
+  }
   g.lineTo(W, H + 2); g.closePath();
   const gr = g.createLinearGradient(0, y0 - amp, 0, H); gr.addColorStop(0, c1); gr.addColorStop(1, c2); g.fillStyle = gr; g.fill();
 }
@@ -4772,7 +4776,7 @@ function buildForest() {
   fTrunk(g1, px(.715), px(.12), -H * .5, H * .9, [14, 48, 88], [48, 118, 160], -1, R, px(.012), 9);
   for (const [bx, by, a] of [[.69, .38, -2.4], [.735, .27, -.9], [.7, .5, -2.9]]) fTwig(g1, px(bx), H * by, H * .1, a, 2.2, 3, R, 'rgba(14,48,88,.95)');
   fCanopy(g1, -H * .34, [16, 58, 100], R, .24, H * .15); fCap(g1, [[.358, .045], [.642, .04], [.30, .15], [.715, .12]], -H * .5, [16, 58, 100], R, H * .15);   // kanopi daun di atas batang tengah
-  fRidge(g1, H * .8, H * .03, '#0d3a58', '#07213d', R, W * .1);
+  fRidge(g1, H * .8, H * .03, '#0d3a58', '#07213d', R, W * .1, [W * .16, W * .44]);   // rata di sekitar batang kiri-tengah dan pintunya
   gr = g1.createLinearGradient(0, H * .68, 0, H * .82); gr.addColorStop(0, 'rgba(12,48,84,0)'); gr.addColorStop(1, 'rgba(12,48,84,.6)');
   g1.fillStyle = gr; g1.fillRect(0, H * .68, W, H * .14);   // pangkal batang menyatu dengan tanah
   for (const [bx, by, br, a] of [[.62, .8, .1, .18], [.38, .83, .09, .16], [.8, .85, .1, .14], [.22, .88, .1, .14]]) {
