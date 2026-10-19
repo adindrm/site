@@ -13,6 +13,25 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>
+/* pengaman: createLinearGradient/createRadialGradient dengan nilai NaN/Infinity tidak lagi membuat loop animasi crash;
+   argumen diganti 0 dan sumbernya dicatat SEKALI di console (console.warn) supaya mudah dilacak */
+(function(){
+  var P = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype; if(!P) return;
+  ['createLinearGradient','createRadialGradient'].forEach(function(n){
+    var o = P[n], warned = false; if(!o) return;
+    P[n] = function(){
+      var a = arguments, bad = false;
+      for(var i = 0; i < a.length; i++) if(typeof a[i] !== 'number' || !isFinite(a[i])){ bad = true; break; }
+      if(bad){
+        if(!warned){ warned = true; try{ console.warn('[skymeet] ' + n + ' menerima nilai non-finite:', Array.prototype.slice.call(a), new Error().stack); }catch(e){} }
+        a = Array.prototype.map.call(a, function(v){ return (typeof v === 'number' && isFinite(v)) ? v : 0; });
+      }
+      return o.apply(this, a);
+    };
+  });
+})();
+</script>
+<script>
 /* tautan relatif (manifest, ikon, aset, sw.js) harus dihitung dari folder tempat berkas ini berada.
    URL tanpa "/" di akhir dan tanpa ekstensi (mis. /engine/skymeet) punya dua kemungkinan:
      (a) FOLDER   : /engine/skymeet/index.html            -> perlu <base href="/engine/skymeet/">
@@ -2026,7 +2045,7 @@ body.p5 #nav, body.p5 #control{--ink:#f4f5fb;--ink-soft:rgba(244,245,251,.62);--
 /* langit scene Senja = langit dinamis web utama (#skBack, bintang, matahari/bulan, laut, awan, cuaca): lapisan langit milik scene dimatikan agar langit utama tembus */
 #snj{background:transparent;--sj-sea:transparent}
 #snj #sjSky,#snj #sjStars,#snj .sj-fog,#snj .sj-tint{display:none}
-body.p5 #skKid{display:none!important}   /* anak Sky bawaan disembunyikan di halaman kosmetik: scene punya anak sendiri */
+body.p5 #skKid, body.p5 .skKid, body.p5 .dclip, body.p5 #skTrail{display:none!important}   /* halaman kosmetik: Sky kid (asli + klon yang terpause) beserta jejak kondensasinya disembunyikan; scene punya anak sendiri */
 
 /* ===== Daftar Kosmetik / Daftar Milikmu + Wish ===== */
 #snj .sj-md{position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 84px);width:min(420px,calc(100% - 24px));display:grid;grid-template-columns:1fr 1fr;gap:10px;z-index:5;transition:opacity .5s,visibility .5s}
@@ -2686,7 +2705,6 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 <linearGradient id="rk" x1="0" x2="1"><stop offset="0" stop-color="#b87a6e"/><stop offset="1" stop-color="#7a4a46"/></linearGradient>
 <clipPath id="gcl"><path d="M-700 238Q250 208 500 216T1000 206T1700 214V600H-700Z"/></clipPath><clipPath id="hc"><path d="M162.1 256Q206.8 238 220.7 200Q231.4 160 240.6 130Q250.7 96 296.9 92L370.0 84L547.1 80Q639.5 72 701.1 92Q764.2 112 776.6 168Q785.8 205 812.8 220Q835.9 230 855.1 256Z"/></clipPath><filter id="sb" filterUnits="userSpaceOnUse" x="-700" y="40" width="2400" height="260"><feGaussianBlur stdDeviation="3.5"/></filter><radialGradient id="av" cx=".5" cy=".85" r=".95"><stop offset="0" stop-color="#1c1626"/><stop offset=".5" stop-color="#0a0710"/><stop offset="1" stop-color="#020104"/></radialGradient><linearGradient id="rimg" x1="0" x2="1"><stop offset="0" stop-color="#7a7a84" stop-opacity=".6"/><stop offset=".6" stop-color="#7a7a84" stop-opacity="0"/></linearGradient><radialGradient id="ig"><stop offset="0" stop-color="#ffb64a" stop-opacity=".45"/><stop offset="1" stop-color="#ffb64a" stop-opacity="0"/></radialGradient><filter id="sb2" filterUnits="userSpaceOnUse" x="150" y="60" width="700" height="200"><feGaussianBlur stdDeviation="2.4"/></filter><clipPath id="ac0"><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z"/></clipPath><clipPath id="ac1"><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z"/></clipPath><clipPath id="ac2"><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z"/></clipPath><clipPath id="ac3"><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z"/></clipPath><clipPath id="ac4"><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z"/></clipPath><filter id="rk1" filterUnits="userSpaceOnUse" x="80" y="40" width="860" height="230"><feTurbulence type="fractalNoise" baseFrequency=".03 .06" numOctaves="4" seed="7" result="n"/><feDiffuseLighting in="n" lighting-color="#8c8c94" surfaceScale="3" diffuseConstant="1.1"><feDistantLight azimuth="235" elevation="50"/></feDiffuseLighting></filter><filter id="rk2" filterUnits="userSpaceOnUse" x="200" y="90" width="600" height="160"><feTurbulence type="fractalNoise" baseFrequency=".07 .09" numOctaves="3" seed="11" result="n"/><feDiffuseLighting in="n" lighting-color="#8c8c94" surfaceScale="2.6" diffuseConstant="1.1"><feDistantLight azimuth="40" elevation="48"/></feDiffuseLighting></filter><filter id="rough" filterUnits="userSpaceOnUse" x="150" y="60" width="700" height="200"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="3.5" xChannelSelector="R" yChannelSelector="G"/></filter><clipPath id="stp"><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(62 0)"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(62 3.6)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(31 0)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(31 3.6)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 0)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 3.6)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(-31 0)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(-31 3.6)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(-62 0)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(-62 3.6)"/></clipPath><radialGradient id="pb1" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#8c8c9e"/><stop offset=".55" stop-color="#5e5e76"/><stop offset="1" stop-color="#3a3a54"/></radialGradient><radialGradient id="pb2" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#82829a"/><stop offset=".55" stop-color="#56566e"/><stop offset="1" stop-color="#34344e"/></radialGradient><radialGradient id="pbd" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#5a5a74"/><stop offset=".55" stop-color="#3a3a54"/><stop offset="1" stop-color="#22223a"/></radialGradient><linearGradient id="alas" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10101e"/><stop offset=".35" stop-color="#22213a"/><stop offset=".52" stop-color="#34324e"/><stop offset=".62" stop-color="#46435f"/><stop offset="1" stop-color="#58566a"/></linearGradient><linearGradient id="alasS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14142c" stop-opacity="0"/><stop offset=".5" stop-color="#14142c" stop-opacity=".25"/><stop offset="1" stop-color="#14142c" stop-opacity=".85"/></linearGradient></defs>
 <rect x="-700" y="168" width="2400" height="103" fill="var(--sj-sea)"/>
-<g stroke="#b86a8a" stroke-width="1" opacity=".2"><path d="M-700 190h2400M-700 205h2400M-700 220h2400"/></g>
 <!-- aula batu di tengah -->
 <path d="M162.1 256Q206.8 238 220.7 200Q231.4 160 240.6 130Q250.7 96 296.9 92L370.0 84L547.1 80Q639.5 72 701.1 92Q764.2 112 776.6 168Q785.8 205 812.8 220Q835.9 230 855.1 256Z" fill="url(#hall)"/><g clip-path="url(#hc)"><rect x="80" y="50" width="860" height="230" filter="url(#rk1)" style="mix-blend-mode:soft-light" opacity=".8"/><ellipse cx="252" cy="171" rx="30" ry="7" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="694" cy="195" rx="18" ry="9" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="353" cy="208" rx="39" ry="7" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="349" cy="118" rx="45" ry="7" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="577" cy="155" rx="35" ry="10" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="668" cy="114" rx="39" ry="7" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="527" cy="139" rx="26" ry="9" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="481" cy="142" rx="38" ry="10" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="194" cy="129" rx="30" ry="12" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="765" cy="163" rx="18" ry="11" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="457" cy="166" rx="37" ry="10" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="493" cy="205" rx="28" ry="8" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="741" cy="123" rx="26" ry="12" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="214" cy="196" rx="37" ry="8" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="362" cy="190" rx="43" ry="6" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="491" cy="163" rx="31" ry="8" fill="#14142c" opacity="0.16" filter="url(#sb)"/></g>
 <g clip-path="url(#hc)" fill="none"><path id="edge" d="M162.1 256Q206.8 238 220.7 200Q231.4 160 240.6 130Q250.7 96 296.9 92L370.0 84L547.1 80Q639.5 72 701.1 92Q764.2 112 776.6 168Q785.8 205 812.8 220Q835.9 230 855.1 256" stroke="none"/></g><defs><filter id="mf2" filterUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><feGaussianBlur stdDeviation=".9"/></filter><filter id="mf" filterUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><feGaussianBlur stdDeviation="4"/></filter><mask id="mossm" maskUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><path id="mossp" fill="#fff" filter="url(#mf2)"/></mask><mask id="mossf" maskUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><path id="mossq" fill="#fff" filter="url(#mf)"/></mask></defs><g><g mask="url(#mossm)"><g mask="url(#mossf)"><rect x="80" y="40" width="860" height="240" fill="url(#gtexh)"/></g><rect x="80" y="40" width="860" height="240" fill="#1a1030" opacity=".1"/><rect x="80" y="40" width="860" height="240" fill="url(#gdusk)" opacity=".6"/><rect x="80" y="70" width="860" height="60" fill="#0c0618" opacity=".12"/></g></g><g id="gt" class="sj-t-grass"></g>
@@ -3828,7 +3846,7 @@ function updateSky(dt, now) {
   if (nn !== night) { night = nn; scene.classList.toggle('night', night); }
   // turun saat matahari mendekati cakrawala (sekitar 14 derajat), naik lagi saat senja berakhir (sekitar -8 sampai -16 derajat)
   sjOn = document.body.classList.contains('p5') && window.SJ_HZ > 0;   // halaman kosmetik: cakrawala laut mengikuti cakrawala scene Senja
-  const target = camForce != null ? camForce : sjOn ? clamp01((1 - window.SJ_HZ / H) / .34) : smooth(clamp01((14 - a) / 11)) * (1 - smooth(clamp01((-8 - a) / 8)));   // camForce: layar event memaksa pandangan turun ke laut
+  const target = camForce != null ? camForce : document.body.classList.contains('p5') ? 1 : smooth(clamp01((14 - a) / 11)) * (1 - smooth(clamp01((-8 - a) / 8)));   // camForce: layar event memaksa pandangan turun ke laut
   cam += (target - cam) * (1 - Math.exp(-dt * 3)); if (Math.abs(cam - target) < .001) cam = target;
   if (++skyTick % 3 === 0 || !skyOwn) {
     const k = turtleSky(skyAt(evMode === 'grandma' ? -15 : a)), c = k.sky.map(rgb);   // Grandma: langit malam
@@ -4097,7 +4115,7 @@ function drawTurtle(t, dt, yh, A) {
   evx.restore();
   evx.save(); wp(false); evx.clip(); evx.globalAlpha = A; body(above);
   evx.save(); evx.clip(P.clip);   // cahaya hangat dari sisi matahari, sisi membelakangi lebih gelap, kilau basah di puncak
-  const ls = side * (fl < 0 ? -1 : 1) * 11, g2 = evx.createRadialGradient(TCX + ls, 28, 0, TCX + ls, 28, 26); g2.addColorStop(0, 'rgba(255,176,104,.4)'); g2.addColorStop(1, 'rgba(255,176,104,0)'); evx.fillStyle = g2; evx.fillRect(25, 20, 62, 30);
+  const ls = (+side || 0) * (fl < 0 ? -1 : 1) * 11, g2 = evx.createRadialGradient(TCX + ls, 28, 0, TCX + ls, 28, 26); g2.addColorStop(0, 'rgba(255,176,104,.4)'); g2.addColorStop(1, 'rgba(255,176,104,0)'); evx.fillStyle = g2; evx.fillRect(25, 20, 62, 30);
   const gd = evx.createLinearGradient(TCX - ls * 2.4, 0, TCX + ls * .5, 0); gd.addColorStop(0, 'rgba(0,10,16,.4)'); gd.addColorStop(.7, 'rgba(0,10,16,0)'); evx.fillStyle = gd; evx.fillRect(25, 20, 62, 30);
   const g3 = evx.createRadialGradient(TCX + ls * .8, 27.5, 0, TCX + ls * .8, 27.5, 6); g3.addColorStop(0, 'rgba(255,255,255,.34)'); g3.addColorStop(1, 'rgba(255,255,255,0)'); evx.fillStyle = g3; evx.fillRect(TCX + ls * .8 - 7, 20, 14, 14);
   evx.restore(); evx.restore();
@@ -4217,10 +4235,11 @@ function drawMeteors(now) {
   for (let i = meteors.length - 1; i >= 0; i--) {
     const m = meteors[i], p = (now - m.t0) / (m.life * 1000);
     if (p < 0) continue;
+    if (![m.x0, m.y0, m.xl, m.yl, p].every(Number.isFinite)) { meteors.splice(i, 1); continue; }   // koordinat tidak valid: buang, jangan menggambar gradient NaN
     if (p >= 1) {   // mendarat: cipratan awan/air seperti Sky kid menyelam + kilau merah
       meteorImpact(m, now); meteors.splice(i, 1); continue;
     }
-    const e = p * (.75 + .25 * p), x = m.x0 + (m.xl - m.x0) * e, y = m.y0 + (m.yl - m.y0) * e, dd = Math.hypot(m.xl - m.x0, m.yl - m.y0), dx = (m.xl - m.x0) / dd, dy = (m.yl - m.y0) / dd;
+    const e = p * (.75 + .25 * p), x = m.x0 + (m.xl - m.x0) * e, y = m.y0 + (m.yl - m.y0) * e, dd = Math.hypot(m.xl - m.x0, m.yl - m.y0) || 1, dx = (m.xl - m.x0) / dd, dy = (m.yl - m.y0) / dd;
     const L = (150 + 220 * m.d) * Math.min(1, p * 3), a = clamp01(p / .07), tx = x - dx * L, ty = y - dy * L;
     evx.save(); evx.lineCap = 'round';
     const lg = evx.createLinearGradient(tx, ty, x, y); const P_ = m.pal || MPAL.red; lg.addColorStop(0, `rgba(${P_.t},0)`); lg.addColorStop(.6, `rgba(${P_.m},${.4 * a})`); lg.addColorStop(1, `rgba(${P_.h},${.95 * a})`);
@@ -4669,11 +4688,12 @@ function buildForest() {
   const [c1, g1] = mkW();
   fTrunk(g1, px(.358), px(.045), -H * .5, H * .86, [30, 86, 128], [80, 150, 190], 1, R, 0, 3);
   fTrunk(g1, px(.642), px(.04), -H * .5, H * .86, [28, 80, 120], [70, 140, 180], -1, R, 0, 3);
-  fTrunk(g1, px(.30), px(.15), -H * .5, H * .9, [24, 74, 124], [88, 160, 205], 1, R, -px(.01), 9);
+  const DOOR_Y = H * .835, PHONE_F = W < 600;   // DOOR_Y: sisi bawah pintu; di HP dasar batang pintu disejajarkan dengan sisi bawah pintu
+  fTrunk(g1, px(.30), px(.15), -H * .5, PHONE_F ? DOOR_Y : H * .9, [24, 74, 124], [88, 160, 205], 1, R, -px(.01), 9);
   fTrunk(g1, px(.715), px(.12), -H * .5, H * .9, [14, 48, 88], [48, 118, 160], -1, R, px(.012), 9);
   for (const [bx, by, a] of [[.69, .38, -2.4], [.735, .27, -.9], [.7, .5, -2.9]]) fTwig(g1, px(bx), H * by, H * .1, a, 2.2, 3, R, 'rgba(14,48,88,.95)');
   fCanopy(g1, -H * .34, [16, 58, 100], R, .24, H * .15); fCap(g1, [[.358, .045], [.642, .04], [.30, .15], [.715, .12]], -H * .5, [16, 58, 100], R, H * .15);   // kanopi daun di atas batang tengah
-  fRidge(g1, H * .8, H * .03, '#0d3a58', '#07213d', R, W * .1, [W * .16, W * .44]);   // rata di sekitar batang kiri-tengah dan pintunya
+  fRidge(g1, PHONE_F ? DOOR_Y : H * .8, H * .03, '#0d3a58', '#07213d', R, W * .1, [W * .16, W * .44]);   // HP: garis tanah di batang pintu = sisi bawah pintu   // rata di sekitar batang kiri-tengah dan pintunya
   gr = g1.createLinearGradient(0, H * .68, 0, H * .82); gr.addColorStop(0, 'rgba(12,48,84,0)'); gr.addColorStop(1, 'rgba(12,48,84,.6)');
   g1.fillStyle = gr; g1.fillRect(0, H * .68, W, H * .14);   // pangkal batang menyatu dengan tanah
   for (const [bx, by, br, a] of [[.62, .8, .1, .18], [.38, .83, .09, .16], [.8, .85, .1, .14], [.22, .88, .1, .14]]) {
@@ -4681,7 +4701,7 @@ function buildForest() {
     g1.fillStyle = gr; g1.fillRect(px(bx - br), H * by - px(br), px(br) * 2, px(br) * 2);   // lumut kehijauan
   }
   // pintu / ruang di dalam batang kiri-tengah: ruang gelap bercahaya, bingkai kulit kayu bergelombang, akar menjalar di dasar
-  const DW = W * .15 * .62, D = { w: DW, x: W * .30 - W * .15 * .03, y: H * .835, h: Math.min(H * .3, DW * 2.1) }, R2 = mulberry(77123);
+  const DW = W * .15 * .62, D = { w: DW, x: W * .30 - W * .15 * .03, y: DOOR_Y, h: Math.min(H * .3, DW * 2.1) }, R2 = mulberry(77123);
   {
     g1.lineJoin = 'round'; g1.lineCap = 'round';
     const bg = g1.createLinearGradient(D.x - D.w * .7, 0, D.x + D.w * .7, 0); bg.addColorStop(0, 'rgba(6,28,56,.95)'); bg.addColorStop(.55, 'rgba(22,66,108,.9)'); bg.addColorStop(1, 'rgba(92,164,208,.85)');
@@ -11215,7 +11235,7 @@ const svgL=document.querySelector('#snj svg.sj-land');
 const GC=[324,414,504,594,684];
     const gc = $('gc'), gh = $('gh'), gp = $('gp'), fg = $('fg'), pp = $('pp');
     let cam, foc = -1, raf = 0;
-    function overview(){const W=innerWidth,H=innerHeight,z=2.9,w=1600/z,h=640/z,m=W/H<w/h;return{cx:500,sc:m?Math.min(W/w,H/h):Math.max(W/w,H/h),yb:300}}
+    function overview(){const W=innerWidth,H=innerHeight,z=2.9,w=1600/z,h=640/z,m=W/H<w/h;const nat=m?Math.min(W/w,H/h):Math.max(W/w,H/h);return{cx:500,sc:Math.min(nat,Math.max(.78,W/2300)),yb:300}}   /* batas skala = jarak pandang layar sempit (~430px lebar): di layar lebar batu tidak membesar/mendekat */
 function focusCam(i){const W=innerWidth,H=innerHeight,T=H*.52,sc=Math.min(W/200,(H-T)/166);return{cx:GC[i],sc,yb:246}}
 let mv=null,svgBB=null;
 function mvReset(){const o=svgL.style;o.transform='';o.width='';o.height='';o.left='';o.top='';o.bottom='';o.transformOrigin='';o.willChange='';}
