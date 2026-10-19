@@ -811,6 +811,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   }
   .pl:empty{ display:none; }
   .page:focus{ outline:none; }
+  /* [perf] halaman 2-6 yang jauh dari layar tidak dihitung layout/paint-nya; tinggi halaman sudah tetap (16,67% track), jadi posisi gulir tidak melompat. Halaman 1 dikecualikan (berisi layar event) */
+  #p2, #p3, #p4, #p5, #p6{ content-visibility:auto; contain-intrinsic-size:auto 100vh; }
 
   #hint{
     position:absolute;
@@ -1767,6 +1769,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .skFog::before, .skFog::after{ content:""; position:absolute; display:block; border-radius:50%; background:rgba(var(--skfog),.66); filter:blur(28px); }
   .skFog.bottom::before{ width:48%; height:52%; left:14%; top:0; }
   .skFog.bottom::after{ width:45%; height:58%; right:2%; top:-3%; background:rgba(var(--skfog),.72); }
+  .skMistW{ position:absolute; inset:0; pointer-events:none; }   /* [perf] pembungkus mist: opacity diubah di sini, blur 34px di .skMist tetap statis (tidak diraster ulang) */
   .skMist{ position:absolute; left:-10%; width:120%; height:12vh; pointer-events:none; filter:blur(34px);
     background:linear-gradient(90deg, transparent, rgba(var(--skfog),.24) 18%, rgba(var(--skfog),.38) 48%, rgba(var(--skfog),.2) 82%, transparent); }
   .skMist.bottom{ bottom:18%; opacity:.75; }
@@ -1941,8 +1944,6 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
 @keyframes sjbob{50%{transform:translateY(-3px)}}
 #snj .sj-ci path{fill:rgba(218,215,242,.3)}
 #snj .sj-ci .sj-on{fill:#ffd98a;filter:drop-shadow(0 0 6px rgba(255,190,80,.95))}
-#snj .sj-wd{transform-box:fill-box;transform-origin:50% 100%;animation:sjwind 5s ease-in-out infinite}
-@keyframes sjwind{0%,100%{transform:skewX(calc(var(--sj-k)*-3deg))}50%{transform:skewX(calc(var(--sj-k)*8deg))}}
 #snj svg.sj-land *{pointer-events:none}
 #snj svg.sj-land .sj-gate,#snj svg.sj-land .sj-gate *{pointer-events:auto}
 #snj .sj-gate{cursor:pointer;outline:none}
@@ -2094,7 +2095,6 @@ body.p5 #skKid, body.p5 .skKid, body.p5 .dclip, body.p5 #skTrail{display:none!im
 @media (prefers-reduced-motion: reduce){ #snj *{transition-duration:.01s !important} }
 
 /* ===== pintu: tanpa animasi goyang / filter hover ===== */
-#snj .sj-wd{animation:none!important;transform:none!important}
 #snj .sj-gate,#snj .sj-gate *{animation:none!important;transition:none!important}
 #snj .sj-gate:hover,#snj .sj-gate:focus-visible{filter:none!important}
 /* [fix goyang pintu] `[role="button"]:active` global (scale .92 + brightness) ikut mengenai pintu (role=button). Pada SVG, scale berpusat di titik asal SVG,
@@ -2358,7 +2358,7 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 </svg></div>
   <canvas id="skSea"></canvas>
   <canvas id="skEvt"></canvas>
-  <div class="skMist bottom"></div>
+  <div class="skMistW" id="skMistW"><div class="skMist bottom"></div></div>
   <div class="skFog bottom"></div>
   <div class="skCover" id="skCover"></div>
   <div class="skWinds" id="skWinds"></div>
@@ -2696,23 +2696,23 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 <div class="sj-fog"></div>
 <svg class="sj-land" viewBox="-300 -60 1600 640" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
 <defs>
-<image id="gimg" href="aset/skymeet/gimg.jpg" width="300" height="300" preserveAspectRatio="none"/><pattern id="gtexN" patternUnits="userSpaceOnUse" x="-700" y="200" width="360" height="360" patternTransform="scale(1 .62)"><use href="#gimg" transform="scale(1.2)"/></pattern><pattern id="gtexF" patternUnits="userSpaceOnUse" x="-700" y="200" width="110" height="110" patternTransform="scale(1 .5)"><use href="#gimg" transform="scale(.367)"/></pattern><pattern id="gtexh" patternUnits="userSpaceOnUse" x="0" y="0" width="90" height="90"><use href="#gimg" transform="scale(.3)"/></pattern><linearGradient id="gfm" gradientUnits="userSpaceOnUse" x1="0" y1="206" x2="0" y2="290"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="gfar" maskUnits="userSpaceOnUse" x="-700" y="190" width="2400" height="420"><rect x="-700" y="190" width="2400" height="420" fill="url(#gfm)"/></mask><linearGradient id="ghaze" gradientUnits="userSpaceOnUse" x1="0" y1="204" x2="0" y2="262"><stop offset="0" stop-color="#0e0718" stop-opacity=".32"/><stop offset="1" stop-color="#0e0718" stop-opacity="0"/></linearGradient><filter id="gsh" filterUnits="userSpaceOnUse" x="-800" y="150" width="2600" height="520"><feGaussianBlur stdDeviation="16"/></filter>
+<image id="gimg" href="aset/skymeet/gimg.jpg" width="300" height="300" preserveAspectRatio="none"/><pattern id="gtexN" patternUnits="userSpaceOnUse" x="-700" y="200" width="360" height="360" patternTransform="scale(1 .62)"><use href="#gimg" transform="scale(1.2)"/></pattern><pattern id="gtexF" patternUnits="userSpaceOnUse" x="-700" y="200" width="110" height="110" patternTransform="scale(1 .5)"><use href="#gimg" transform="scale(.367)"/></pattern><pattern id="gtexh" patternUnits="userSpaceOnUse" x="0" y="0" width="90" height="90"><use href="#gimg" transform="scale(.3)"/></pattern><linearGradient id="gfm" gradientUnits="userSpaceOnUse" x1="0" y1="206" x2="0" y2="290"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient><mask id="gfar" maskUnits="userSpaceOnUse" x="-700" y="190" width="2400" height="420"><rect x="-700" y="190" width="2400" height="420" fill="url(#gfm)"/></mask><linearGradient id="ghaze" gradientUnits="userSpaceOnUse" x1="0" y1="204" x2="0" y2="262"><stop offset="0" stop-color="#0e0718" stop-opacity=".32"/><stop offset="1" stop-color="#0e0718" stop-opacity="0"/></linearGradient><filter id="gsh" x="-30%" y="-125%" width="160%" height="350%"><feGaussianBlur stdDeviation="16"/></filter>
 <linearGradient id="gdusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1028" stop-opacity=".42"/><stop offset=".3" stop-color="#24163a" stop-opacity=".28"/><stop offset="1" stop-color="#140c20" stop-opacity=".22"/></linearGradient>
 <linearGradient id="hall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a6488"/><stop offset="1" stop-color="#464262"/></linearGradient>
 <linearGradient id="alc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#120d18"/><stop offset="1" stop-color="#2a2038"/></linearGradient>
 <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c7c36"/><stop offset=".5" stop-color="#55662b"/><stop offset="1" stop-color="#37461d"/></linearGradient>
 <radialGradient id="pg" cx=".5" cy=".6"><stop offset="0" stop-color="#ffd0f0"/><stop offset=".5" stop-color="#e070c0" stop-opacity=".8"/><stop offset="1" stop-color="#e070c0" stop-opacity="0"/></radialGradient>
 <linearGradient id="rk" x1="0" x2="1"><stop offset="0" stop-color="#b87a6e"/><stop offset="1" stop-color="#7a4a46"/></linearGradient>
-<clipPath id="gcl"><path d="M-700 238Q250 208 500 216T1000 206T1700 214V600H-700Z"/></clipPath><clipPath id="hc"><path d="M162.1 256Q206.8 238 220.7 200Q231.4 160 240.6 130Q250.7 96 296.9 92L370.0 84L547.1 80Q639.5 72 701.1 92Q764.2 112 776.6 168Q785.8 205 812.8 220Q835.9 230 855.1 256Z"/></clipPath><filter id="sb" filterUnits="userSpaceOnUse" x="-700" y="40" width="2400" height="260"><feGaussianBlur stdDeviation="3.5"/></filter><radialGradient id="av" cx=".5" cy=".85" r=".95"><stop offset="0" stop-color="#1c1626"/><stop offset=".5" stop-color="#0a0710"/><stop offset="1" stop-color="#020104"/></radialGradient><linearGradient id="rimg" x1="0" x2="1"><stop offset="0" stop-color="#7a7a84" stop-opacity=".6"/><stop offset=".6" stop-color="#7a7a84" stop-opacity="0"/></linearGradient><radialGradient id="ig"><stop offset="0" stop-color="#ffb64a" stop-opacity=".45"/><stop offset="1" stop-color="#ffb64a" stop-opacity="0"/></radialGradient><filter id="sb2" filterUnits="userSpaceOnUse" x="150" y="60" width="700" height="200"><feGaussianBlur stdDeviation="2.4"/></filter><clipPath id="ac0"><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z"/></clipPath><clipPath id="ac1"><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z"/></clipPath><clipPath id="ac2"><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z"/></clipPath><clipPath id="ac3"><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z"/></clipPath><clipPath id="ac4"><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z"/></clipPath><filter id="rk1" filterUnits="userSpaceOnUse" x="80" y="40" width="860" height="230"><feTurbulence type="fractalNoise" baseFrequency=".03 .06" numOctaves="4" seed="7" result="n"/><feDiffuseLighting in="n" lighting-color="#8c8c94" surfaceScale="3" diffuseConstant="1.1"><feDistantLight azimuth="235" elevation="50"/></feDiffuseLighting></filter><filter id="rk2" filterUnits="userSpaceOnUse" x="200" y="90" width="600" height="160"><feTurbulence type="fractalNoise" baseFrequency=".07 .09" numOctaves="3" seed="11" result="n"/><feDiffuseLighting in="n" lighting-color="#8c8c94" surfaceScale="2.6" diffuseConstant="1.1"><feDistantLight azimuth="40" elevation="48"/></feDiffuseLighting></filter><filter id="rough" filterUnits="userSpaceOnUse" x="150" y="60" width="700" height="200"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="3.5" xChannelSelector="R" yChannelSelector="G"/></filter><clipPath id="stp"><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(62 0)"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(62 3.6)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(31 0)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(31 3.6)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 0)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 3.6)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(-31 0)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(-31 3.6)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(-62 0)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(-62 3.6)"/></clipPath><radialGradient id="pb1" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#8c8c9e"/><stop offset=".55" stop-color="#5e5e76"/><stop offset="1" stop-color="#3a3a54"/></radialGradient><radialGradient id="pb2" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#82829a"/><stop offset=".55" stop-color="#56566e"/><stop offset="1" stop-color="#34344e"/></radialGradient><radialGradient id="pbd" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#5a5a74"/><stop offset=".55" stop-color="#3a3a54"/><stop offset="1" stop-color="#22223a"/></radialGradient><linearGradient id="alas" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10101e"/><stop offset=".35" stop-color="#22213a"/><stop offset=".52" stop-color="#34324e"/><stop offset=".62" stop-color="#46435f"/><stop offset="1" stop-color="#58566a"/></linearGradient><linearGradient id="alasS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14142c" stop-opacity="0"/><stop offset=".5" stop-color="#14142c" stop-opacity=".25"/><stop offset="1" stop-color="#14142c" stop-opacity=".85"/></linearGradient></defs>
+<clipPath id="gcl"><path d="M-700 238Q250 208 500 216T1000 206T1700 214V600H-700Z"/></clipPath><clipPath id="hc"><path d="M162.1 256Q206.8 238 220.7 200Q231.4 160 240.6 130Q250.7 96 296.9 92L370.0 84L547.1 80Q639.5 72 701.1 92Q764.2 112 776.6 168Q785.8 205 812.8 220Q835.9 230 855.1 256Z"/></clipPath><filter id="sb" filterUnits="userSpaceOnUse" x="-700" y="170" width="2400" height="100"><feGaussianBlur stdDeviation="3.5"/></filter><filter id="sbe" x="-40%" y="-100%" width="180%" height="300%"><feGaussianBlur stdDeviation="3.5"/></filter><radialGradient id="av" cx=".5" cy=".85" r=".95"><stop offset="0" stop-color="#1c1626"/><stop offset=".5" stop-color="#0a0710"/><stop offset="1" stop-color="#020104"/></radialGradient><linearGradient id="rimg" x1="0" x2="1"><stop offset="0" stop-color="#7a7a84" stop-opacity=".6"/><stop offset=".6" stop-color="#7a7a84" stop-opacity="0"/></linearGradient><radialGradient id="ig"><stop offset="0" stop-color="#ffb64a" stop-opacity=".45"/><stop offset="1" stop-color="#ffb64a" stop-opacity="0"/></radialGradient><filter id="sb2d0" filterUnits="userSpaceOnUse" x="202" y="80" width="120" height="180"><feGaussianBlur stdDeviation="2.4"/></filter><filter id="sb2d1" filterUnits="userSpaceOnUse" x="323" y="80" width="120" height="180"><feGaussianBlur stdDeviation="2.4"/></filter><filter id="sb2d2" filterUnits="userSpaceOnUse" x="444" y="80" width="120" height="180"><feGaussianBlur stdDeviation="2.4"/></filter><filter id="sb2d3" filterUnits="userSpaceOnUse" x="565" y="80" width="120" height="180"><feGaussianBlur stdDeviation="2.4"/></filter><filter id="sb2d4" filterUnits="userSpaceOnUse" x="686" y="80" width="120" height="180"><feGaussianBlur stdDeviation="2.4"/></filter><filter id="sb2e" x="-40%" y="-150%" width="180%" height="400%"><feGaussianBlur stdDeviation="2.4"/></filter><clipPath id="ac0"><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z"/></clipPath><clipPath id="ac1"><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z"/></clipPath><clipPath id="ac2"><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z"/></clipPath><clipPath id="ac3"><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z"/></clipPath><clipPath id="ac4"><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z"/></clipPath><filter id="rk1" filterUnits="userSpaceOnUse" x="80" y="40" width="860" height="230"><feTurbulence type="fractalNoise" baseFrequency=".03 .06" numOctaves="4" seed="7" result="n"/><feDiffuseLighting in="n" lighting-color="#8c8c94" surfaceScale="3" diffuseConstant="1.1"><feDistantLight azimuth="235" elevation="50"/></feDiffuseLighting></filter><filter id="rk2" filterUnits="userSpaceOnUse" x="200" y="90" width="600" height="160"><feTurbulence type="fractalNoise" baseFrequency=".07 .09" numOctaves="3" seed="11" result="n"/><feDiffuseLighting in="n" lighting-color="#8c8c94" surfaceScale="2.6" diffuseConstant="1.1"><feDistantLight azimuth="40" elevation="48"/></feDiffuseLighting></filter><filter id="rough" filterUnits="userSpaceOnUse" x="150" y="60" width="700" height="200"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="3.5" xChannelSelector="R" yChannelSelector="G"/></filter><clipPath id="stp"><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(62 0)"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(62 3.6)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(31 0)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(31 3.6)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 0)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 3.6)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(-31 0)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(-31 3.6)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(-62 0)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(-62 3.6)"/></clipPath><radialGradient id="pb1" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#8c8c9e"/><stop offset=".55" stop-color="#5e5e76"/><stop offset="1" stop-color="#3a3a54"/></radialGradient><radialGradient id="pb2" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#82829a"/><stop offset=".55" stop-color="#56566e"/><stop offset="1" stop-color="#34344e"/></radialGradient><radialGradient id="pbd" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="#5a5a74"/><stop offset=".55" stop-color="#3a3a54"/><stop offset="1" stop-color="#22223a"/></radialGradient><linearGradient id="alas" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10101e"/><stop offset=".35" stop-color="#22213a"/><stop offset=".52" stop-color="#34324e"/><stop offset=".62" stop-color="#46435f"/><stop offset="1" stop-color="#58566a"/></linearGradient><linearGradient id="alasS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14142c" stop-opacity="0"/><stop offset=".5" stop-color="#14142c" stop-opacity=".25"/><stop offset="1" stop-color="#14142c" stop-opacity=".85"/></linearGradient></defs>
 <rect x="-700" y="168" width="2400" height="103" fill="var(--sj-sea)"/>
 <!-- aula batu di tengah -->
-<path d="M162.1 256Q206.8 238 220.7 200Q231.4 160 240.6 130Q250.7 96 296.9 92L370.0 84L547.1 80Q639.5 72 701.1 92Q764.2 112 776.6 168Q785.8 205 812.8 220Q835.9 230 855.1 256Z" fill="url(#hall)"/><g clip-path="url(#hc)"><rect x="80" y="50" width="860" height="230" filter="url(#rk1)" style="mix-blend-mode:soft-light" opacity=".8"/><ellipse cx="252" cy="171" rx="30" ry="7" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="694" cy="195" rx="18" ry="9" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="353" cy="208" rx="39" ry="7" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="349" cy="118" rx="45" ry="7" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="577" cy="155" rx="35" ry="10" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="668" cy="114" rx="39" ry="7" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="527" cy="139" rx="26" ry="9" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="481" cy="142" rx="38" ry="10" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="194" cy="129" rx="30" ry="12" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="765" cy="163" rx="18" ry="11" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="457" cy="166" rx="37" ry="10" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="493" cy="205" rx="28" ry="8" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="741" cy="123" rx="26" ry="12" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="214" cy="196" rx="37" ry="8" fill="#14142c" opacity="0.16" filter="url(#sb)"/><ellipse cx="362" cy="190" rx="43" ry="6" fill="#5c5c66" opacity="0.11" filter="url(#sb)"/><ellipse cx="491" cy="163" rx="31" ry="8" fill="#14142c" opacity="0.16" filter="url(#sb)"/></g>
-<g clip-path="url(#hc)" fill="none"><path id="edge" d="M162.1 256Q206.8 238 220.7 200Q231.4 160 240.6 130Q250.7 96 296.9 92L370.0 84L547.1 80Q639.5 72 701.1 92Q764.2 112 776.6 168Q785.8 205 812.8 220Q835.9 230 855.1 256" stroke="none"/></g><defs><filter id="mf2" filterUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><feGaussianBlur stdDeviation=".9"/></filter><filter id="mf" filterUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><feGaussianBlur stdDeviation="4"/></filter><mask id="mossm" maskUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><path id="mossp" fill="#fff" filter="url(#mf2)"/></mask><mask id="mossf" maskUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><path id="mossq" fill="#fff" filter="url(#mf)"/></mask></defs><g><g mask="url(#mossm)"><g mask="url(#mossf)"><rect x="80" y="40" width="860" height="240" fill="url(#gtexh)"/></g><rect x="80" y="40" width="860" height="240" fill="#1a1030" opacity=".1"/><rect x="80" y="40" width="860" height="240" fill="url(#gdusk)" opacity=".6"/><rect x="80" y="70" width="860" height="60" fill="#0c0618" opacity=".12"/></g></g><g id="gt" class="sj-t-grass"></g>
-<g class="sj-gate" data-i="0" tabindex="0" role="button" aria-label="Gerbang 1" transform="translate(62 0)"><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2)"><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac0)"><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2)"/><ellipse cx="262" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2)"/><ellipse cx="262" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2)"/><rect x="217" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
-<g class="sj-gate" data-i="1" tabindex="0" role="button" aria-label="Gerbang 2" transform="translate(31 0)"><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2)"><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac1)"><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2)"/><ellipse cx="383" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2)"/><ellipse cx="383" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2)"/><rect x="338" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
-<g class="sj-gate" data-i="2" tabindex="0" role="button" aria-label="Gerbang 3" transform="translate(0 0)"><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2)"><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac2)"><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2)"/><ellipse cx="504" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2)"/><ellipse cx="504" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2)"/><rect x="459" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
-<g class="sj-gate" data-i="3" tabindex="0" role="button" aria-label="Gerbang 4" transform="translate(-31 0)"><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2)"><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac3)"><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2)"/><ellipse cx="625" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2)"/><ellipse cx="625" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2)"/><rect x="580" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
-<g class="sj-gate" data-i="4" tabindex="0" role="button" aria-label="Gerbang 5" transform="translate(-62 0)"><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2)"><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac4)"><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2)"/><ellipse cx="746" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2)"/><ellipse cx="746" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2)"/><rect x="701" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
+<path d="M162.1 256Q206.8 238 220.7 200Q231.4 160 240.6 130Q250.7 96 296.9 92L370.0 84L547.1 80Q639.5 72 701.1 92Q764.2 112 776.6 168Q785.8 205 812.8 220Q835.9 230 855.1 256Z" fill="url(#hall)"/><g clip-path="url(#hc)"><rect x="80" y="50" width="860" height="230" filter="url(#rk1)" style="mix-blend-mode:soft-light" opacity=".8"/><ellipse cx="252" cy="171" rx="30" ry="7" fill="#5c5c66" opacity="0.11" filter="url(#sbe)"/><ellipse cx="694" cy="195" rx="18" ry="9" fill="#14142c" opacity="0.16" filter="url(#sbe)"/><ellipse cx="353" cy="208" rx="39" ry="7" fill="#5c5c66" opacity="0.11" filter="url(#sbe)"/><ellipse cx="349" cy="118" rx="45" ry="7" fill="#14142c" opacity="0.16" filter="url(#sbe)"/><ellipse cx="577" cy="155" rx="35" ry="10" fill="#5c5c66" opacity="0.11" filter="url(#sbe)"/><ellipse cx="668" cy="114" rx="39" ry="7" fill="#14142c" opacity="0.16" filter="url(#sbe)"/><ellipse cx="527" cy="139" rx="26" ry="9" fill="#5c5c66" opacity="0.11" filter="url(#sbe)"/><ellipse cx="481" cy="142" rx="38" ry="10" fill="#14142c" opacity="0.16" filter="url(#sbe)"/><ellipse cx="194" cy="129" rx="30" ry="12" fill="#5c5c66" opacity="0.11" filter="url(#sbe)"/><ellipse cx="765" cy="163" rx="18" ry="11" fill="#14142c" opacity="0.16" filter="url(#sbe)"/><ellipse cx="457" cy="166" rx="37" ry="10" fill="#5c5c66" opacity="0.11" filter="url(#sbe)"/><ellipse cx="493" cy="205" rx="28" ry="8" fill="#14142c" opacity="0.16" filter="url(#sbe)"/><ellipse cx="741" cy="123" rx="26" ry="12" fill="#5c5c66" opacity="0.11" filter="url(#sbe)"/><ellipse cx="214" cy="196" rx="37" ry="8" fill="#14142c" opacity="0.16" filter="url(#sbe)"/><ellipse cx="362" cy="190" rx="43" ry="6" fill="#5c5c66" opacity="0.11" filter="url(#sbe)"/><ellipse cx="491" cy="163" rx="31" ry="8" fill="#14142c" opacity="0.16" filter="url(#sbe)"/></g>
+<g clip-path="url(#hc)" fill="none"><path id="edge" d="M162.1 256Q206.8 238 220.7 200Q231.4 160 240.6 130Q250.7 96 296.9 92L370.0 84L547.1 80Q639.5 72 701.1 92Q764.2 112 776.6 168Q785.8 205 812.8 220Q835.9 230 855.1 256" stroke="none"/></g><defs><filter id="mf2" filterUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><feGaussianBlur stdDeviation=".9"/></filter><filter id="mf" filterUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><feGaussianBlur stdDeviation="4"/></filter><mask id="mossm" maskUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><path id="mossp" fill="#fff" filter="url(#mf2)"/></mask><mask id="mossf" maskUnits="userSpaceOnUse" x="80" y="40" width="860" height="240"><path id="mossq" fill="#fff" filter="url(#mf)"/></mask></defs><g><g mask="url(#mossm)"><g mask="url(#mossf)"><rect x="80" y="40" width="860" height="240" fill="url(#gtexh)"/></g><rect x="80" y="40" width="860" height="240" fill="#1a1030" opacity=".1"/><rect x="80" y="40" width="860" height="240" fill="url(#gdusk)" opacity=".6"/><rect x="80" y="70" width="860" height="60" fill="#0c0618" opacity=".12"/></g></g>
+<g class="sj-gate" data-i="0" tabindex="0" role="button" aria-label="Gerbang 1" transform="translate(62 0)"><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2d0)"><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac0)"><path d="M232 236C230 205 234 170 232 140Q232 110 262 110Q292 110 292 140C295 170 291 205 292 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2d0)"/><ellipse cx="262" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2e)"/><ellipse cx="262" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2e)"/><rect x="217" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
+<g class="sj-gate" data-i="1" tabindex="0" role="button" aria-label="Gerbang 2" transform="translate(31 0)"><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2d1)"><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac1)"><path d="M353 236C355 205 351 170 353 140Q353 110 383 110Q413 110 413 140C410 170 415 205 413 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2d1)"/><ellipse cx="383" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2e)"/><ellipse cx="383" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2e)"/><rect x="338" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
+<g class="sj-gate" data-i="2" tabindex="0" role="button" aria-label="Gerbang 3" transform="translate(0 0)"><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2d2)"><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac2)"><path d="M474 236C474 205 475 170 474 140Q474 110 504 110Q534 110 534 140C534 170 533 205 534 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2d2)"/><ellipse cx="504" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2e)"/><ellipse cx="504" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2e)"/><rect x="459" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
+<g class="sj-gate" data-i="3" tabindex="0" role="button" aria-label="Gerbang 4" transform="translate(-31 0)"><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2d3)"><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac3)"><path d="M595 236C598 205 594 170 595 140Q595 110 625 110Q655 110 655 140C653 170 657 205 655 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2d3)"/><ellipse cx="625" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2e)"/><ellipse cx="625" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2e)"/><rect x="580" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
+<g class="sj-gate" data-i="4" tabindex="0" role="button" aria-label="Gerbang 5" transform="translate(-62 0)"><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z" fill="none" stroke="#777683" stroke-width="12" opacity="1" filter="url(#rough)"/><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z" fill="url(#av)" filter="url(#rough)"/><g filter="url(#sb2d4)"><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z" fill="none" stroke="#06040c" stroke-width="5" opacity=".6" filter="url(#rough)"/></g><g clip-path="url(#ac4)"><path d="M716 236C713 205 718 170 716 140Q716 110 746 110Q776 110 776 140C777 170 774 205 776 236Z" fill="none" stroke="#010004" stroke-width="18" opacity="1" filter="url(#sb2d4)"/><ellipse cx="746" cy="154" rx="15.6" ry="38" fill="#010004" opacity=".8" filter="url(#sb2e)"/><ellipse cx="746" cy="218" rx="22.8" ry="7" fill="#d8884a" opacity=".1" filter="url(#sb2e)"/><rect x="701" y="100" width="90" height="140" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".35"/></g></g>
 
 <g class="sj-ic sj-ci"><g transform="translate(294.00 130.00) scale(0.2)"><path d="M132.7,110.9c11.6,6.9,18.3,13.7,28.8-0.7c30.5,11.5,34.7,64.7,47.7,93.8c-15.8,34-90.6,31.3-118.8,10.6C103.5,180.6,101,131.5,132.7,110.9z M196,200.7c-11.6-18.4-11.7-88-42-69.3c-10.1,5.5-17.5-17.4-26.6-0.2c-7.2,24.1-22.3,51.9-23.5,75.3C133.8,223.1,172.2,227.7,196,200.7z"/><path d="M170.7,79.5c1.8,26.9-45.3,31.4-43.3,2C124,53.1,171.2,50.7,170.7,79.5z"/><path d="M148.7,49.3c-58.2,9.8-10.3,53-27.4,54.1c-2.3-15-4-4.3-10.7-9.7c0.2-4.7,3.8-10.4-3.9-10.5c-11.3-9.7,27.7-44.4,44.2-40c14.6-2.4,54.3,28.6,37.1,38.2c-6.8-0.2-1.6,6.7-1.9,10.1c-1.7,3.7-5.2,4.3-8.9,4.8c-3.3,1.4-1,7.3-5.7,7.1C179,83.4,183.2,54.8,148.7,49.3z"/><path d="M179.8,241.1c-1.8,7.5,4.3,28.6-7.8,27.1c-5.1-7.2-12-27.5-6-33.7C172.9,233.1,182.2,231.3,179.8,241.1z" class="sj-on"/><path d="M116.5,251.1c0-12-3.2-25.5,13-16.8C141.4,245.5,115.3,286.7,116.5,251.1z" class="sj-on"/><path d="M187.2,34.7c-1.7,8.7-7.8,13.6-12.5,12.8c-3.2-0.5-5.2-3.6-6-5c4.8-8.2,11.3-12.4,15.3-10.9C184.8,32,186.1,32.7,187.2,34.7z"/><path d="M110.7,36.6c0.6-2.6,1.6-3.4,2.3-3.7c2.9-1.3,8.2,3,13.5,10.7c-0.6,1.5-2.1,4.9-4.8,5.4C118,49.8,112.7,45.1,110.7,36.6z"/></g><g transform="translate(384.00 130.00) scale(0.2)"><path d="M132.7,110.9c11.6,6.9,18.3,13.7,28.8-0.7c30.5,11.5,34.7,64.7,47.7,93.8c-15.8,34-90.6,31.3-118.8,10.6C103.5,180.6,101,131.5,132.7,110.9z M196,200.7c-11.6-18.4-11.7-88-42-69.3c-10.1,5.5-17.5-17.4-26.6-0.2c-7.2,24.1-22.3,51.9-23.5,75.3C133.8,223.1,172.2,227.7,196,200.7z"/><path d="M170.7,79.5c1.8,26.9-45.3,31.4-43.3,2C124,53.1,171.2,50.7,170.7,79.5z" class="sj-on"/><path d="M148.7,49.3c-58.2,9.8-10.3,53-27.4,54.1c-2.3-15-4-4.3-10.7-9.7c0.2-4.7,3.8-10.4-3.9-10.5c-11.3-9.7,27.7-44.4,44.2-40c14.6-2.4,54.3,28.6,37.1,38.2c-6.8-0.2-1.6,6.7-1.9,10.1c-1.7,3.7-5.2,4.3-8.9,4.8c-3.3,1.4-1,7.3-5.7,7.1C179,83.4,183.2,54.8,148.7,49.3z"/><path d="M179.8,241.1c-1.8,7.5,4.3,28.6-7.8,27.1c-5.1-7.2-12-27.5-6-33.7C172.9,233.1,182.2,231.3,179.8,241.1z"/><path d="M116.5,251.1c0-12-3.2-25.5,13-16.8C141.4,245.5,115.3,286.7,116.5,251.1z"/><path d="M187.2,34.7c-1.7,8.7-7.8,13.6-12.5,12.8c-3.2-0.5-5.2-3.6-6-5c4.8-8.2,11.3-12.4,15.3-10.9C184.8,32,186.1,32.7,187.2,34.7z"/><path d="M110.7,36.6c0.6-2.6,1.6-3.4,2.3-3.7c2.9-1.3,8.2,3,13.5,10.7c-0.6,1.5-2.1,4.9-4.8,5.4C118,49.8,112.7,45.1,110.7,36.6z"/></g><g transform="translate(474.00 130.00) scale(0.2)"><path d="M132.7,110.9c11.6,6.9,18.3,13.7,28.8-0.7c30.5,11.5,34.7,64.7,47.7,93.8c-15.8,34-90.6,31.3-118.8,10.6C103.5,180.6,101,131.5,132.7,110.9z M196,200.7c-11.6-18.4-11.7-88-42-69.3c-10.1,5.5-17.5-17.4-26.6-0.2c-7.2,24.1-22.3,51.9-23.5,75.3C133.8,223.1,172.2,227.7,196,200.7z"/><path d="M170.7,79.5c1.8,26.9-45.3,31.4-43.3,2C124,53.1,171.2,50.7,170.7,79.5z"/><path d="M148.7,49.3c-58.2,9.8-10.3,53-27.4,54.1c-2.3-15-4-4.3-10.7-9.7c0.2-4.7,3.8-10.4-3.9-10.5c-11.3-9.7,27.7-44.4,44.2-40c14.6-2.4,54.3,28.6,37.1,38.2c-6.8-0.2-1.6,6.7-1.9,10.1c-1.7,3.7-5.2,4.3-8.9,4.8c-3.3,1.4-1,7.3-5.7,7.1C179,83.4,183.2,54.8,148.7,49.3z" class="sj-on"/><path d="M179.8,241.1c-1.8,7.5,4.3,28.6-7.8,27.1c-5.1-7.2-12-27.5-6-33.7C172.9,233.1,182.2,231.3,179.8,241.1z"/><path d="M116.5,251.1c0-12-3.2-25.5,13-16.8C141.4,245.5,115.3,286.7,116.5,251.1z"/><path d="M187.2,34.7c-1.7,8.7-7.8,13.6-12.5,12.8c-3.2-0.5-5.2-3.6-6-5c4.8-8.2,11.3-12.4,15.3-10.9C184.8,32,186.1,32.7,187.2,34.7z"/><path d="M110.7,36.6c0.6-2.6,1.6-3.4,2.3-3.7c2.9-1.3,8.2,3,13.5,10.7c-0.6,1.5-2.1,4.9-4.8,5.4C118,49.8,112.7,45.1,110.7,36.6z"/></g><g transform="translate(564.00 130.00) scale(0.2)"><path d="M132.7,110.9c11.6,6.9,18.3,13.7,28.8-0.7c30.5,11.5,34.7,64.7,47.7,93.8c-15.8,34-90.6,31.3-118.8,10.6C103.5,180.6,101,131.5,132.7,110.9z M196,200.7c-11.6-18.4-11.7-88-42-69.3c-10.1,5.5-17.5-17.4-26.6-0.2c-7.2,24.1-22.3,51.9-23.5,75.3C133.8,223.1,172.2,227.7,196,200.7z" class="sj-on"/><path d="M170.7,79.5c1.8,26.9-45.3,31.4-43.3,2C124,53.1,171.2,50.7,170.7,79.5z"/><path d="M148.7,49.3c-58.2,9.8-10.3,53-27.4,54.1c-2.3-15-4-4.3-10.7-9.7c0.2-4.7,3.8-10.4-3.9-10.5c-11.3-9.7,27.7-44.4,44.2-40c14.6-2.4,54.3,28.6,37.1,38.2c-6.8-0.2-1.6,6.7-1.9,10.1c-1.7,3.7-5.2,4.3-8.9,4.8c-3.3,1.4-1,7.3-5.7,7.1C179,83.4,183.2,54.8,148.7,49.3z"/><path d="M179.8,241.1c-1.8,7.5,4.3,28.6-7.8,27.1c-5.1-7.2-12-27.5-6-33.7C172.9,233.1,182.2,231.3,179.8,241.1z"/><path d="M116.5,251.1c0-12-3.2-25.5,13-16.8C141.4,245.5,115.3,286.7,116.5,251.1z"/><path d="M187.2,34.7c-1.7,8.7-7.8,13.6-12.5,12.8c-3.2-0.5-5.2-3.6-6-5c4.8-8.2,11.3-12.4,15.3-10.9C184.8,32,186.1,32.7,187.2,34.7z"/><path d="M110.7,36.6c0.6-2.6,1.6-3.4,2.3-3.7c2.9-1.3,8.2,3,13.5,10.7c-0.6,1.5-2.1,4.9-4.8,5.4C118,49.8,112.7,45.1,110.7,36.6z"/></g><g transform="translate(640.50 116.44) scale(0.29)"><path class="sj-on" d="M108.1,165.6c-22.9,6.2-23.5-15.3,0.1-11.6c10.7-6.8-6.1-21.4-2.7-28.5c5.4-6.3,12.4,5.8,17.9-0.4c14.8-7.1,11.6-21.7,17.4-33c9.1,16.8,5.7,17.4,24.8,27.7c6.2,7.4,12.6-8.9,18.3-3.4c3,3.8,2.3,8.1-2.1,12.2c-11.5,24.2,39.7,14.8,24.7,27c-6.6,5.4-17.6,1.5-22.5,8.1c-4.6,15.5-24.2,17.9-29.2,31.1c1.6,6.7-4.6,20.6-9.5,9c-1.7-5.3,2.2-14.9-5-16.3c-9.6-1.4-17.9-10.5-26.6-2.4C104.4,186.7,124.4,168.9,108.1,165.6z M121.3,153.1c-1.4,28.6,45.5,33,53.9,6.8C187.8,122.6,118.6,109.1,121.3,153.1z"/><path class="sj-on" d="M181.2,174.9c3.5,0,7.9,5.4,6.9,8.5C184.7,192,168,175.6,181.2,174.9z"/><path class="sj-on" d="M159.1,148.8c3.6,15.7-25.8,15.1-25.3,0.7C135.2,137.8,160.9,134.2,159.1,148.8z"/></g></g>
 
@@ -2722,7 +2722,6 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 <!-- padang rumput -->
 <path d="M-700 238Q250 208 500 216T1000 206T1700 214V600H-700Z" fill="url(#gr)"/><path d="M-700 238Q250 208 500 216T1000 206T1700 214V600H-700Z" fill="url(#gtexN)"/><path d="M-700 238Q250 208 500 216T1000 206T1700 214V600H-700Z" fill="url(#gtexF)" mask="url(#gfar)"/><g clip-path="url(#gcl)"><path d="M-700 238Q250 208 500 216T1000 206T1700 214V600H-700Z" fill="url(#gdusk)"/><ellipse cx="260" cy="300" rx="170" ry="26" fill="#0c0618" opacity=".16" filter="url(#gsh)"/><ellipse cx="760" cy="330" rx="210" ry="30" fill="#0c0618" opacity=".14" filter="url(#gsh)"/><ellipse cx="520" cy="262" rx="330" ry="22" fill="#0c0618" opacity=".32" filter="url(#gsh)"/><ellipse cx="90" cy="360" rx="190" ry="40" fill="#0c0618" opacity=".18" filter="url(#gsh)"/><ellipse cx="560" cy="400" rx="260" ry="46" fill="#0c0618" opacity=".16" filter="url(#gsh)"/><ellipse cx="930" cy="290" rx="150" ry="24" fill="#0c0618" opacity=".18" filter="url(#gsh)"/><path d="M-700 238Q250 208 500 216T1000 206T1700 214V600H-700Z" fill="url(#ghaze)"/></g>
 <path d="M-700 238Q250 208 500 216T1000 206T1700 214" fill="none" stroke="#1a2210" stroke-width="12" opacity=".38" filter="url(#sb)"/>
-<g id="gtx" clip-path="url(#gcl)"></g>
 
 
 
@@ -2734,7 +2733,7 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 
 
 <!-- rumput & titik cahaya -->
-<g class="sj-t-ledge"><g transform="translate(62 2.2)"><ellipse cx="262" cy="220.5" rx="39" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="262" cy="206.5" rx="26.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="262" cy="209.5" rx="21.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M237.0 213.5Q262 217.0 287.0 213.5" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="262" cy="218.9" rx="30" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(31 2.2)"><ellipse cx="383" cy="220" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="383" cy="206.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="383" cy="209.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M357.0 213.0Q383 216.5 409.0 213.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="383" cy="218.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(0 2.2)"><ellipse cx="504" cy="222" rx="39" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="504" cy="208.0" rx="26.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="504" cy="211.0" rx="21.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M479.0 215.0Q504 218.5 529.0 215.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="504" cy="220.4" rx="30" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(-31 2.2)"><ellipse cx="625" cy="224" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="625" cy="210.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="625" cy="213.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M599.0 217.0Q625 220.5 651.0 217.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="625" cy="222.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g transform="translate(-62 2.2)"><ellipse cx="746" cy="223" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="746" cy="209.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2)"/><ellipse cx="746" cy="212.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2)"/><path d="M720.0 216.0Q746 219.5 772.0 216.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="746" cy="221.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2)"/></g><g clip-path="url(#stp)" transform="translate(0 2.2)"><rect x="200" y="195" width="600" height="50" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".7"/></g></g><g id="gb" class="sj-t-grass"></g><g id="gd" class="sj-t-grass"></g><g id="pvg" opacity="0" transform="translate(0 6.2)" style="transition:opacity .35s"><ellipse id="pvs" cx="504" cy="211" rx="14" ry="3.5" fill="#06050f" opacity=".45" filter="url(#sb2)"/><image id="pvi" x="482.5" y="149" width="43" height="61" preserveAspectRatio="xMidYMax meet" display="none"/><g id="pvp"><rect id="pvr" x="483" y="140" width="42" height="70" rx="6" fill="#ffffff" fill-opacity=".06" stroke="#f4f5fb" stroke-opacity=".5" stroke-dasharray="3 3"/><text id="pvt" x="504" y="172" text-anchor="middle" font-size="4.5" fill="#f4f5fb" fill-opacity=".85"><tspan id="pt1" x="504"></tspan><tspan id="pt2" x="504" dy="6"></tspan></text></g></g>
+<g class="sj-t-ledge"><g transform="translate(62 2.2)"><ellipse cx="262" cy="220.5" rx="39" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2e)"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M287.3 211.9Q288.7 213.5 287.3 215.1Q285.9 216.7 282.4 218.0Q278.8 219.3 273.3 220.0Q267.9 220.7 262.0 220.7Q256.1 220.7 250.7 220.0Q245.2 219.3 241.2 218.1Q237.3 216.8 236.0 215.2Q234.7 213.5 236.0 211.9Q237.4 210.2 241.4 209.0Q245.4 207.7 250.7 206.9Q256.0 206.2 262.0 206.2Q268.0 206.3 273.3 207.0Q278.6 207.7 282.3 209.0Q285.9 210.3 287.3 211.9Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="262" cy="206.5" rx="26.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2e)"/><ellipse cx="262" cy="209.5" rx="21.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2e)"/><path d="M237.0 213.5Q262 217.0 287.0 213.5" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="262" cy="218.9" rx="30" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2e)"/></g><g transform="translate(31 2.2)"><ellipse cx="383" cy="220" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2e)"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M409.5 211.4Q410.7 213.0 409.7 214.7Q408.7 216.3 404.7 217.6Q400.7 218.9 395.0 219.7Q389.3 220.4 383.0 220.4Q376.7 220.4 371.2 219.6Q365.8 218.8 361.9 217.5Q358.0 216.2 356.4 214.6Q354.9 213.0 356.2 211.4Q357.5 209.7 361.4 208.4Q365.3 207.1 371.0 206.3Q376.7 205.6 382.9 205.7Q389.1 205.8 394.8 206.5Q400.5 207.1 404.5 208.4Q408.4 209.7 409.5 211.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="383" cy="206.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2e)"/><ellipse cx="383" cy="209.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2e)"/><path d="M357.0 213.0Q383 216.5 409.0 213.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="383" cy="218.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2e)"/></g><g transform="translate(0 2.2)"><ellipse cx="504" cy="222" rx="39" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2e)"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M529.6 213.4Q531.0 215.0 529.5 216.6Q528.0 218.2 524.4 219.5Q520.8 220.9 515.4 221.5Q509.9 222.2 503.9 222.3Q497.9 222.4 492.4 221.7Q486.9 220.9 483.3 219.6Q479.6 218.3 478.4 216.6Q477.2 215.0 478.2 213.3Q479.3 211.7 483.2 210.4Q487.1 209.1 492.5 208.3Q497.9 207.6 504.0 207.6Q510.1 207.6 515.5 208.4Q520.8 209.1 524.5 210.4Q528.2 211.8 529.6 213.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="504" cy="208.0" rx="26.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2e)"/><ellipse cx="504" cy="211.0" rx="21.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2e)"/><path d="M479.0 215.0Q504 218.5 529.0 215.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="504" cy="220.4" rx="30" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2e)"/></g><g transform="translate(-31 2.2)"><ellipse cx="625" cy="224" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2e)"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M651.5 215.4Q653.1 217.0 651.6 218.6Q650.2 220.2 646.2 221.5Q642.2 222.8 636.7 223.5Q631.2 224.3 624.9 224.3Q618.7 224.4 613.3 223.6Q607.9 222.8 604.0 221.5Q600.2 220.2 598.5 218.6Q596.9 217.0 598.4 215.4Q600.0 213.8 603.8 212.5Q607.5 211.1 613.1 210.4Q618.8 209.7 625.0 209.7Q631.2 209.7 637.0 210.4Q642.8 211.0 646.4 212.4Q649.9 213.8 651.5 215.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="625" cy="210.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2e)"/><ellipse cx="625" cy="213.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2e)"/><path d="M599.0 217.0Q625 220.5 651.0 217.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="625" cy="222.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2e)"/></g><g transform="translate(-62 2.2)"><ellipse cx="746" cy="223" rx="40" ry="6.5" fill="#06060f" opacity=".6" filter="url(#sb2e)"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(0 1.4)" fill="#24223a" stroke="url(#alasS)" stroke-width=".8"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" transform="translate(0 0.7)" fill="#2e2c46"/><path d="M772.6 214.4Q773.9 216.0 772.4 217.6Q770.9 219.2 767.2 220.6Q763.6 221.9 757.9 222.6Q752.2 223.2 746.0 223.3Q739.8 223.3 734.1 222.6Q728.4 221.9 724.7 220.6Q721.0 219.2 719.4 217.6Q717.9 216.0 719.1 214.3Q720.4 212.7 724.6 211.5Q728.8 210.2 734.3 209.5Q739.9 208.8 746.0 208.8Q752.2 208.8 757.9 209.4Q763.6 210.1 767.5 211.4Q771.3 212.7 772.6 214.4Z" fill="url(#alas)" stroke="url(#alasS)" stroke-width="1"/><ellipse cx="746" cy="209.0" rx="27.0" ry="6" fill="#06050f" opacity=".7" filter="url(#sb2e)"/><ellipse cx="746" cy="212.0" rx="22.0" ry="3" fill="#06050f" opacity=".45" filter="url(#sb2e)"/><path d="M720.0 216.0Q746 219.5 772.0 216.0" fill="none" stroke="#b4b2d8" stroke-width="1.1" opacity=".14" stroke-linecap="round"/><ellipse cx="746" cy="221.4" rx="31" ry="4" fill="#0a0612" opacity=".4" filter="url(#sb2e)"/></g><g clip-path="url(#stp)" transform="translate(0 2.2)"><rect x="200" y="195" width="600" height="50" filter="url(#rk2)" style="mix-blend-mode:soft-light" opacity=".7"/></g></g><g id="pvg" opacity="0" transform="translate(0 6.2)" style="transition:opacity .35s"><ellipse id="pvs" cx="504" cy="211" rx="14" ry="3.5" fill="#06050f" opacity=".45" filter="url(#sb2e)"/><image id="pvi" x="482.5" y="149" width="43" height="61" preserveAspectRatio="xMidYMax meet" display="none"/><g id="pvp"><rect id="pvr" x="483" y="140" width="42" height="70" rx="6" fill="#ffffff" fill-opacity=".06" stroke="#f4f5fb" stroke-opacity=".5" stroke-dasharray="3 3"/><text id="pvt" x="504" y="172" text-anchor="middle" font-size="4.5" fill="#f4f5fb" fill-opacity=".85"><tspan id="pt1" x="504"></tspan><tspan id="pt2" x="504" dy="6"></tspan></text></g></g>
 <!-- anak berjubah merah di tengah -->
 </svg>
 <div class="sj-tint"></div><div class="sj-vig"></div>
@@ -3031,6 +3030,434 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 })();
 </script>
 <script>
+/* ===== Loading screen Skymeet: logo pecah jadi partikel bintang, persen mengikuti proses memuat asli =====
+   - Persen minimal 5 detik. Jika semua sudah termuat, 100% tepat di 5 detik.
+     Jika belum, persen tertahan di 99% sampai benar-benar selesai (jaring pengaman 20 dtk).
+   - Event: 'skymeetb:reveal' (20% bintang sudah terserap -> tampilkan login / masuk app)
+            'skymeetb:done'   (bintang terakhir terserap -> loading screen ditutup)  */
+(function(){
+  const screenEl = document.getElementById('loadingScreen');
+
+
+  // [perf] loader dimulai sebelum skrip utama; event ke skrip utama ditahan sampai dokumen selesai di-parse (listener-nya sudah terpasang)
+  const emit = n => { const go = () => window.dispatchEvent(new Event(n)); if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go, { once: true }); else go(); };
+  function bail(){   // bila canvas/animasi gagal: jangan pernah mengunci pengguna di loading
+    screenEl.classList.add('reveal', 'hidden');
+    emit('skymeetb:reveal');
+    emit('skymeetb:done');
+  }
+  try{ init(); }catch(e){ console.error('loader', e); bail(); }
+
+  function init(){
+    const G = 2600, MIN_MS = G, SAFETY_MS = 20000;   // MIN_MS = durasi animasi logo berkumpul (G); selebihnya mengikuti proses memuat yang asli
+    const cvs = document.getElementById('ldCanvas'), ctx = cvs.getContext('2d');
+    if(!ctx) throw new Error('canvas');
+    const hud = document.getElementById('ldHud'), ringEl = document.getElementById('ldRing');
+    const arc = document.getElementById('ldArc'), pct = document.getElementById('ldPct');
+    const w1 = document.getElementById('ldW1'), w2 = document.getElementById('ldW2');
+    const COLORS = ['#ffffff', '#ffe9a8', '#9fd0ff'];
+    const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    let W, H_, dpr, parts = [], logoImg, logoBox, cx, cy, sc, sx, glowCv = null, glowGp = 32, ringPx = 58;
+
+    // ---- progres memuat yang asli ----
+    const loaded = { dom: document.readyState !== 'loading', fonts: false, win: document.readyState === 'complete' };
+    if(document.fonts && document.fonts.ready){
+      Promise.all([document.fonts.ready, document.fonts.load('400 16px "Space Grotesk"').catch(() => {})]).then(() => { loaded.fonts = true; }, () => { loaded.fonts = true; });
+    } else loaded.fonts = true;
+    if(!loaded.win) addEventListener('load', () => { loaded.win = true; });
+    setTimeout(() => { loaded.fonts = true; }, 3500);                     // font lambat/tertahan jaringan: jangan menahan loading
+    setTimeout(() => { if(loaded.dom) loaded.win = true; }, 9000);        // sumber luar yang menggantung: jangan menahan event 'load' selamanya
+    if(!loaded.dom) document.addEventListener('DOMContentLoaded', () => { loaded.dom = true; });
+
+    // ---- sprite bintang 4 sudut ----
+    const sprites = COLORS.map(col => {
+      const s = 64, c = document.createElement('canvas'); c.width = c.height = s;
+      const x = c.getContext('2d'), m = s / 2;
+      const g = x.createRadialGradient(m, m, 0, m, m, m);
+      g.addColorStop(0, col); g.addColorStop(.25, col + '88'); g.addColorStop(1, 'transparent');
+      x.fillStyle = g; x.globalAlpha = .5; x.fillRect(0, 0, s, s); x.globalAlpha = 1;
+      x.fillStyle = col; x.beginPath();
+      for(let i = 0; i < 8; i++){ const r = i % 2 ? 9 : 30, a = i * Math.PI / 4 - Math.PI / 2; x.lineTo(m + Math.cos(a) * r, m + Math.sin(a) * r); }
+      x.closePath(); x.fill();
+      return c;
+    });
+
+    // ---- logo: aset yang sama dengan layar login (aset/skymeet/logo.svg|webp). Tanpa aset / gagal dibaca -> tulisan "Skymeet" ----
+    const loadImg = u => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = u; });
+    async function logoImage(){
+      const A = window.SkyAsset, u = A && await A.resolve('logo');   // skrip aset (SkyAsset) sengaja berada tepat sebelum loader ini
+      if(!u) return null;
+      let im = await loadImg(u);
+      if(!im.naturalWidth && /\.svg$/i.test(u)){   // SVG hanya ber-viewBox (tanpa width/height): beri ukuran supaya bisa digambar ke canvas
+        const txt = await (await fetch(u)).text(), vb = txt.match(/viewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/);
+        if(!vb) return null;
+        im = await loadImg(URL.createObjectURL(new Blob([txt.replace(/<svg\b/, `<svg width="${vb[1]}" height="${vb[2]}"`)], { type: 'image/svg+xml' })));
+      }
+      return im;
+    }
+    function crop(c){   // potong rapat ke bagian yang terisi, lalu jadikan siluet putih (hanya alfa gambar yang dipakai)
+      const w = c.width, h = c.height, d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data;
+      let x0 = w, y0 = h, x1 = -1, y1 = -1;
+      for(let y = 0; y < h; y++) for(let x = 0; x < w; x++) if(d[(y * w + x) * 4 + 3] > 16){ if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; }
+      if(x1 < 0) return null;
+      const o = document.createElement('canvas'); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
+      const ox = o.getContext('2d'); ox.drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+      ox.globalCompositeOperation = 'source-in'; ox.fillStyle = '#fff'; ox.fillRect(0, 0, o.width, o.height);
+      return o;
+    }
+    function fromImage(im){
+      const nw = im.naturalWidth || 300, nh = im.naturalHeight || 150, k = Math.min(1100 / nw, 1100 / nh);
+      const c = document.createElement('canvas'); c.width = Math.ceil(nw * k); c.height = Math.ceil(nh * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      return crop(c);
+    }
+    function textLogo(){
+      const c = document.createElement('canvas'); c.width = 1000; c.height = 300; const x = c.getContext('2d');
+      x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '600 200px "Space Grotesk", system-ui, sans-serif'; x.fillText('Skymeet', 500, 150);
+      return crop(c);
+    }
+    async function getLogo(){
+      try{ const im = await Promise.race([logoImage(), new Promise(r => setTimeout(() => r(null), 3000))]); const c = im && fromImage(im); if(c) return c; }catch(e){}
+      return textLogo();
+    }
+
+    const TN = 7, TA = [.5, .3, .14], TW = [1.8, 1.3, .8];
+    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const outQuart = v => 1 - Math.pow(1 - v, 4);
+    const rk = { x: 0, y: 0, vx: 0, vy: 0, hit: 0 };   // reaksi lingkaran: bergoyang + berpendar
+    let ring = { x: -999, y: -999, r: 0 }, ring0 = { x: -999, y: -999 }, ringK = 1, ringU = 0, ringT = 0, ringV = 0, lastHit = -1;   // ringT: target progres (dari jumlah bintang terserap), ringU: progres yang sudah dihaluskan; ring0: posisi asal; ringU: progres menyusut/bergeser (0..1)
+    const PULL = 1400, DRAG = 1.0, DRAG_IN = 2.5, REST_WALL = .9;
+
+    function measure(){
+      dpr = window.SkyGfx ? SkyGfx.dpr(2) : Math.min(window.devicePixelRatio || 1, 2);   // [perf] ikut pengaturan Grafis (Tinggi tetap 2x)
+      W = innerWidth; H_ = innerHeight;
+      cvs.width = W * dpr; cvs.height = H_ * dpr;
+      const hb = hud.getBoundingClientRect();
+      ringPx = ringEl.offsetWidth || 58;
+      ring = { x: hb.left + hb.width / 2, y: hb.top + hb.height / 2, r: ringPx * .45 + 4 };
+      ring0 = { x: ring.x, y: ring.y };
+    }
+    function build(){
+      measure();
+      const lw = Math.min(W * .72, 520), lh = lw * logoImg.height / logoImg.width;
+      cx = W / 2; cy = H_ * .44;
+      logoBox = { x: cx - lw / 2, y: cy - lh / 2, w: lw, h: lh };
+      sc = document.createElement('canvas'); sc.width = Math.ceil(lw * dpr); sc.height = Math.ceil(lh * dpr); sx = sc.getContext('2d');
+      glowCv = document.createElement('canvas'); glowCv.width = Math.ceil((lw + 2 * glowGp) * dpr); glowCv.height = Math.ceil((lh + 2 * glowGp) * dpr);   // lapisan cahaya logo dibuat sekali
+      { const gx = glowCv.getContext('2d'); gx.shadowColor = '#ffe9a8'; gx.shadowBlur = 24; gx.drawImage(logoImg, glowGp * dpr, glowGp * dpr, lw * dpr, lh * dpr); }
+      const off = document.createElement('canvas'); off.width = Math.ceil(lw); off.height = Math.ceil(lh);
+      const o = off.getContext('2d', { willReadFrequently: true });
+      o.drawImage(logoImg, 0, 0, lw, lh);
+      const data = o.getImageData(0, 0, off.width, off.height).data;
+      const step = Math.max(2, Math.round(lw / 175));   // partikel logo: lebih rapat (lebih banyak) dan kecil
+      parts = [];
+      for(let y = 0; y < off.height; y += step) for(let x = 0; x < off.width; x += step){
+        if(data[(y * off.width + x) * 4 + 3] < 128) continue;
+        const tx = logoBox.x + x + rnd(0, step), ty = logoBox.y + y + rnd(0, step);
+        const ang = Math.random() * Math.PI * 2, rad = Math.max(W, H_) * rnd(.55, .9), ci = (Math.random() * 3) | 0;
+        parts.push({
+          i: parts.length, tx, ty, sx: cx + Math.cos(ang) * rad, sy: cy + Math.sin(ang) * rad,
+          delay: Math.random() * .45, curve: rnd(-.6, .6),
+          size: rnd(step * 1.0, step * 2.1), ci, spr: sprites[ci], hx: new Float32Array(TN), hy: new Float32Array(TN), hn: 0,
+          rot: Math.random() * 6.28, spin: rnd(-1.5, 1.5), ph: Math.random() * 6.28,
+          ba: Math.atan2(ty - cy, tx - cx) + rnd(-.7, .7), bd: rnd(.35, 1) * Math.max(W, H_) * .5,
+          bdel: ((ty - logoBox.y) / lh) * 900 + Math.random() * 150, g: rnd(.8, 1.2)   // pecah menyapu dari atas ke bawah
+        });
+      }
+    }
+
+    // ---- fisika: menyebar, lalu ditarik ke lingkaran persen dan terserap ----
+    function step(p, dt){
+      if(p.done) return;
+      p.age += dt;
+      const dx = ring.x - p.x, dy = ring.y - p.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
+      p.d = d;
+      const k = clamp((p.age - .35) / .7);
+      const a = PULL * p.g * k * clamp(.6 + d / 800, .6, 1.5) * (1 + 3 / (d / 40 + 1));
+      p.vx += (nx * a - ny * a * .05) * dt;
+      p.vy += (ny * a + nx * a * .05) * dt;
+      const f = Math.exp(-(p.age > 1.5 ? DRAG_IN : DRAG) * dt); p.vx *= f; p.vy *= f;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if(p.x < 0){ p.x = -p.x; p.vx = Math.abs(p.vx) * REST_WALL; }
+      else if(p.x > W){ p.x = 2 * W - p.x; p.vx = -Math.abs(p.vx) * REST_WALL; }
+      if(d < ring.r * .8 * Math.max(ringK, .2)){ p.done = true; rk.hit = Math.min(1, rk.hit + .017); }
+    }
+
+    function whitehole(time, full, calm){   // di 100%: dua lingkaran bercahaya bergetar berlawanan arah
+      ringEl.classList.toggle('ld-full', full);
+      if(!full) return;
+      if(calm){
+        w1.style.transform = w2.style.transform = 'translate(-50%,-50%)';
+        w1.style.opacity = w2.style.opacity = (.65 + .35 * Math.sin(time * 3)).toFixed(2); return;
+      }
+      const jx = Math.sin(time * 47) * 1.4, jy = Math.cos(time * 53) * 1.4;
+      w1.style.opacity = w2.style.opacity = 1;
+      w1.style.transform = `translate(-50%,-50%) translate(${jx.toFixed(2)}px,${jy.toFixed(2)}px) scale(${(1 + .15 * Math.sin(time * 9)).toFixed(3)})`;
+      w2.style.transform = `translate(-50%,-50%) translate(${(-jx * 1.3).toFixed(2)}px,${(-jy * 1.3).toFixed(2)}px) scale(${(1 + .1 * Math.sin(time * 7 + 1)).toFixed(3)})`;
+    }
+
+    function drawShine(pr){   // pita cahaya menyapu logo dari atas ke bawah tepat sebelum pecah
+      const w = sc.width, h = sc.height, bh = h * .22, y = -bh + (h + 2 * bh) * pr;
+      const r0 = Math.max(0, Math.floor(y - bh)), r1 = Math.min(h, Math.ceil(y + bh));   // [perf] di luar pita gradiennya transparan: hanya baris pita yang diproses
+      if(r1 <= r0) return;
+      sx.globalCompositeOperation = 'source-over'; sx.clearRect(0, 0, w, h);
+      const g = sx.createLinearGradient(0, y - bh, 0, y + bh);
+      g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,248,220,1)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+      sx.fillStyle = g; sx.fillRect(0, r0, w, r1 - r0);
+      const ih = logoImg.height; sx.globalCompositeOperation = 'destination-in'; sx.drawImage(logoImg, 0, r0 / h * ih, logoImg.width, (r1 - r0) / h * ih, 0, r0, w, r1 - r0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1;
+      ctx.drawImage(sc, 0, r0, w, r1 - r0, logoBox.x, logoBox.y + r0 / h * logoBox.h, logoBox.w, (r1 - r0) / h * logoBox.h);
+    }
+    function drawStar(spr, x, y, size, rot, a){
+      if(a <= .01) return;
+      const c = Math.cos(rot) * size / 64 * dpr, s = Math.sin(rot) * size / 64 * dpr;
+      ctx.globalAlpha = a; ctx.setTransform(c, s, -s, c, x * dpr, y * dpr); ctx.drawImage(spr, -32, -32);
+    }
+    function logoGlow(a){
+      if(a <= 0) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = a;
+      if(glowCv) ctx.drawImage(glowCv, logoBox.x - glowGp, logoBox.y - glowGp, logoBox.w + 2 * glowGp, logoBox.h + 2 * glowGp);
+    }
+
+    const FLASH = (() => {   // [perf] gradien kilatan pusat dibuat sekali (dulu createRadialGradient tiap frame)
+      const z = 128, c = document.createElement('canvas'); c.width = c.height = z;
+      const x = c.getContext('2d'), m = z / 2, g = x.createRadialGradient(m, m, 0, m, m, m);
+      g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(.4, 'rgba(255,233,168,.35)'); g.addColorStop(1, 'rgba(255,233,168,0)');
+      x.fillStyle = g; x.fillRect(0, 0, z, z); return c;
+    })();
+    // ---- letusan titik bulat kecil dari tengah layar: menyebar ke seluruh layar, pecah saat menyentuh tepi ----
+    const DOTS = COLORS.map(col => {
+      const sz = 16, c = document.createElement('canvas'); c.width = c.height = sz;
+      const x = c.getContext('2d'), m = sz / 2, g = x.createRadialGradient(m, m, 0, m, m, m);
+      g.addColorStop(0, '#fff'); g.addColorStop(.45, col); g.addColorStop(.62, col + '99'); g.addColorStop(1, 'transparent');
+      x.fillStyle = g; x.fillRect(0, 0, sz, sz); return c;
+    });
+    // ---- ledakan bintang: bintang menyebar dari tengah dan mendarat tepat di posisi bintang latar (malam);
+    //      bila latar sedang siang (tanpa bintang), bintang menyebar lalu memudar pelan ----
+    let bg = null, nowAbs = 0;
+    const GLOWS = COLORS.map(col => {   // halo lembut berfalloff halus di belakang tiap bintang
+      const z = 64, c = document.createElement('canvas'); c.width = c.height = z;
+      const x = c.getContext('2d'), m = z / 2, g = x.createRadialGradient(m, m, 0, m, m, m);
+      g.addColorStop(0, col + 'cc'); g.addColorStop(.25, col + '66'); g.addColorStop(.6, col + '1a'); g.addColorStop(1, 'transparent');
+      x.fillStyle = g; x.fillRect(0, 0, z, z); return c;
+    });
+    const setBgOpacity = v => { if(bg && bg.cv && bg.last !== v){ bg.last = v; bg.cv.style.transition = 'none'; bg.cv.style.opacity = v; } };
+    function restoreBg(){ ['loginStars', 'stars'].forEach(id => { const b = document.getElementById(id), c = b && b.__nightStars && b.__nightStars().cv; if(c){ c.style.opacity = ''; c.style.transition = ''; } }); }
+    function spawnPop(){
+      popC = { x: W / 2, y: H_ / 2 };
+      const scr = document.getElementById('loginScreen'), loginVis = !!scr && !scr.classList.contains('hidden');
+      const box = document.getElementById(loginVis ? 'loginStars' : 'stars');
+      const info = box && box.__nightStars ? box.__nightStars() : null;
+      const night = !!info && info.stars.length > 0 && (loginVis || !window.SkyNight || SkyNight.visible());
+      let list;
+      if(night){
+        list = info.stars.map(q => ({ tx: q.x * W / info.W, ty: q.y * H_ / info.H, r: q.r, ph: q.ph, sp: q.sp, al: q.al }));
+        // tambahan bintang ledakan (mendarat acak lalu melebur saat bintang latar asli muncul)
+        const extra = clamp(Math.round(list.length * 1.3), 140, 420);
+        for(let i = 0; i < extra; i++) list.push({ tx: Math.random() * W, ty: Math.random() * H_, r: rnd(.25, 1.0), ph: Math.random() * 6.283, sp: rnd(.25, 1.15), al: rnd(.25, .7) });
+      } else list = Array.from({ length: clamp(Math.round(W * H_ / 2300), 320, 950) }, () => ({ tx: Math.random() * W, ty: Math.random() * H_ * .78, r: rnd(.25, 1.3), ph: Math.random() * 6.283, sp: rnd(.25, 1.15), al: rnd(.25, .8) }));
+      const maxD = Math.hypot(W / 2, H_ / 2) || 1;
+      dots = list.map(q => {
+        const d = Math.hypot(q.tx - popC.x, q.ty - popC.y);
+        return Object.assign(q, { ci: (Math.random() * 3) | 0, delay: d / maxD * .25 + rnd(0, .12), dur: rnd(1.0, 1.5), curve: rnd(-.25, .25), rot: Math.random() * 6.283, spin: rnd(-1.2, 1.2) });
+      });
+      pops = []; frags = []; popAlive = 1;
+      bg = { cv: night ? info.cv : null, night };
+      setBgOpacity('0');   // bintang latar yang asli disembunyikan dulu, lalu dimunculkan saat bintang ledakan sudah mendarat
+    }
+    function drawPop(t, time, dt){
+      const pa = (t - popAt) / 1000, cx0 = popC.x, cy0 = popC.y, night = bg && bg.night;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter';
+      if(pa < .6){   // kilatan cahaya di pusat
+        const k = pa / .6, R = 40 + 140 * k;
+        ctx.globalAlpha = 1 - k; ctx.drawImage(FLASH, cx0 - R, cy0 - R, R * 2, R * 2);
+      }
+      const LAND = 1.9, XF = .6, FADE0 = 1.6, FADE = 1.0;
+      const cf = night ? clamp((pa - LAND) / XF) : 0, fade = night ? 0 : clamp((pa - FADE0) / FADE);
+      if(night) setBgOpacity(cf.toFixed(3));
+      const own = (1 - cf) * (1 - fade);
+      if(own > .01) for(const d of dots){
+        const g = clamp((pa - d.delay) / d.dur); if(g <= 0) continue;
+        const e = 1 - Math.pow(1 - g, 3), dx = d.tx - cx0, dy = d.ty - cy0, k = Math.sin(Math.PI * e) * d.curve;
+        const x = cx0 + dx * e - dy * k, y = cy0 + dy * e + dx * k;
+        const tw = (Math.sin(nowAbs * .001 * d.sp + d.ph) + 1) / 2, base = d.al * (.35 + tw * .65);   // kelip sama seperti bintang latar
+        const sz = d.r * 3.3 + 3 * (1 - e);   // bintang 4 sudut: besar saat melesat, mengecil mendekati ukuran bintang latar
+        const al = Math.min(1, Math.max(base, .6 * (1 - e)) * clamp(g * 5)) * own, gs = sz * 3.0 + 3.5 * (1 - e);
+        ctx.globalAlpha = al * (.55 + .25 * (1 - e)); ctx.drawImage(GLOWS[d.ci], x - gs / 2, y - gs / 2, gs, gs);   // cahaya: lebih terang saat melesat, tetap lembut saat mendarat
+        drawStar(sprites[d.ci], x, y, sz, d.rot + time * d.spin, al);
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = 1;
+      return pa < (night ? LAND + XF + .05 : FADE0 + FADE + .05) ? 1 : 0;
+    }
+
+    function drawRingSpark(time, alpha, x0, y0, R){   // kepala percikan di ujung busur progres + ekor + percikan yang terus mengorbit
+      if(alpha <= .02) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter';
+      if(shown < .995){
+        const head = -Math.PI / 2 + shown * Math.PI * 2;
+        for(let k = 9; k >= 1; k--){ const a = head - k * .12, f = 1 - k / 10, sz = 4 + 6 * f; ctx.globalAlpha = alpha * f * .8; ctx.drawImage(DOTS[1], x0 + Math.cos(a) * R - sz / 2, y0 + Math.sin(a) * R - sz / 2, sz, sz); }
+        drawStar(sprites[1], x0 + Math.cos(head) * R, y0 + Math.sin(head) * R, 15, time * 3, alpha);
+      }
+      for(let i = 0; i < 0; i++){   // titik mengorbit dihapus; posisi dihitung dari waktu dinding: tetap berputar mulus walau frame tersendat
+        const dir = i % 2 ? -1 : 1, a = time * (1.6 + i * .37) * dir + i * 1.57, rr = R + 4 + (i % 2) * 5 + Math.sin(time * 2 + i) * 1.5, sz = 6 + (i % 2) * 2;
+        ctx.globalAlpha = alpha * (.5 + .4 * Math.sin(time * 5 + i * 2)); ctx.drawImage(DOTS[i % 3], x0 + Math.cos(a) * rr - sz / 2, y0 + Math.sin(a) * rr - sz / 2, sz, sz);
+      }
+    }
+
+    // ---- alur utama ----
+    let t0 = performance.now();
+    let fpsAvg = 16.7, stride = 1, prevPending = -1, lastAbsorb = 0, bStride = 1, bActive = 1;
+    let last = t0, raf = 0, bursting = false, BS = 0, tBurst = Infinity, realP = 0, shown = 0, realDoneAt = -1, revealed = false, finished = false, rmAt = 0, popAt = 0, popAlive = 1, dots = [], pops = [], frags = [], popC = { x: 0, y: 0 };
+    function reveal(){
+      if(revealed) return; revealed = true;
+      screenEl.classList.add('reveal');
+      emit('skymeetb:reveal');
+    }
+    function finish(){
+      if(finished) return; finished = true;
+      reveal();
+      restoreBg();
+      screenEl.classList.add('hidden');
+      emit('skymeetb:done');
+      cancelAnimationFrame(raf); removeEventListener('resize', onResize);
+      setTimeout(() => { cvs.width = cvs.height = 1; }, 800);
+    }
+
+    function frame(now){
+      if(finished) return;
+      const t = now - t0, time = t / 1000;
+      nowAbs = now;
+      const rdt = Math.max(0, (now - last) / 1000), dt = Math.min(.033, rdt), sdt = Math.min(.09, rdt); last = now;   // sdt: simulasi partikel mengejar waktu nyata setelah tersendat (tidak merayap lambat)
+      if(rdt < .25){ fpsAvg += (rdt * 1000 - fpsAvg) * .05; if(!bursting && t > 1500 && fpsAvg > 30 && stride < 3){ stride++; fpsAvg = 16.7; } }   // perangkat lambat: gambar lebih sedikit partikel, bukan membeku
+      const ns = Math.min(6, Math.max(2, Math.ceil(sdt / .0125)));
+
+      // persen = yang lebih lambat antara waktu (5 detik) dan proses memuat asli
+      const rt = (loaded.dom ? .3 : 0) + (loaded.fonts ? .35 : 0) + (loaded.win ? .35 : 0);
+      realP += (rt - realP) * (1 - Math.exp(-6 * dt));
+      const realDone = (loaded.dom && loaded.fonts && loaded.win) || t > SAFETY_MS;
+      if(realDone && realDoneAt < 0){ realDoneAt = t; tBurst = Math.max(MIN_MS, t + 900); }
+      const target = Math.min(t / MIN_MS, realDone ? 1 : Math.min(realP, .99));
+      shown += (target - shown) * (1 - Math.exp(-10 * dt));
+      if(target >= 1 && shown > .998) shown = 1;
+      if(!reduced && !bursting && t >= G && t >= tBurst && shown >= .995){ bursting = true; BS = t; bStride = stride; bActive = Math.max(1, parts.filter(q => !(bStride > 1 && (q.i % bStride))).length); }   // pecah memakai himpunan & ukuran partikel yang sama dengan yang tampil saat menyusun logo
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cvs.width, cvs.height);
+      ctx.globalCompositeOperation = 'lighter';
+      arc.style.strokeDashoffset = 213.63 * (1 - shown);
+      pct.textContent = Math.round(shown * 100) + '%';
+
+      if(reduced){   // mode tanpa gerak: logo diam, hanya berkelap-kelip
+        for(const p of parts){
+          const tw = Math.sin(time * 2.2 + p.ph) * .5 + .5;
+          drawStar(p.spr, p.tx, p.ty, p.size * (.7 + .4 * tw), p.rot, .3 + .7 * tw);
+        }
+        logoGlow(.3 + .15 * Math.sin(time * 1.6));
+        ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+        const full = shown >= .995;
+        whitehole(time, full, true);
+        if(full && t >= tBurst){
+          if(!rmAt) rmAt = t;
+          const k = t - rmAt;
+          ringEl.style.opacity = (1 - clamp((k - 800) / 900)).toFixed(3);
+          if(k > 800) reveal();
+          if(k > 1700){ finish(); return; }
+        }
+        raf = requestAnimationFrame(frame); return;
+      }
+
+      if(!bursting){ ringU = 0; ringV = 0; ringT = 0; }
+      else {   // target dari jumlah bintang terserap itu bergelombang -> dihaluskan dengan pegas teredam kritis supaya geraknya mulus
+        const RW = 6;
+        ringV += ((ringT - ringU) * RW * RW - 2 * RW * ringV) * dt; ringU = clamp(ringU + ringV * dt);
+        if(ringU <= 0 || ringU >= 1) ringV = 0;
+      }
+      { const e = ringU * ringU * (3 - 2 * ringU); ring.x = ring0.x + (W / 2 - ring0.x) * e; ring.y = ring0.y + (H_ / 2 - ring0.y) * e; ringK = 1 - ringU; }   // lingkaran bergeser ke tengah layar, bintang ikut mengejarnya
+      let pending = 0;
+      const tails = Array.from({ length: 9 }, () => new Path2D());
+      for(const p of parts){
+        const stp = bursting ? bStride : stride;
+        if(stp > 1 && (p.i % stp)){ if(bursting) p.done = true; continue; }   // partikel yang tidak tampil saat menyusun logo juga tidak ikut pecah
+        let x, y, a = 1, sz = p.size * (stp > 1 ? 1 + .3 * (stp - 1) : 1), rot = p.rot + time * p.spin;
+        const twk = Math.sin(time * 3 + p.ph) * .5 + .5, kb = clamp((t - G) / 500);   // tampilan kelip yang SAMA di fase menunggu & awal pecah (masuk halus dari tampilan menyusun)
+        const iz = 1 + (.85 + .35 * twk - 1) * kb, ia = 1 + (.7 + .3 * twk - 1) * kb;
+        if(t < G){   // berkumpul membentuk logo
+          p.sim = false; p.done = false;
+          const g = clamp((t / G - p.delay) / .55), e = outQuart(g);
+          const dx = p.tx - p.sx, dy = p.ty - p.sy, k = (1 - e) * Math.sin(e * Math.PI) * p.curve;
+          x = p.sx + dx * e - dy * k; y = p.sy + dy * e + dx * k; a = clamp(g * 3);
+        } else if(!bursting){   // menunggu persen 100%: berkelip
+          x = p.tx; y = p.ty; a = ia; sz *= iz;
+        } else {   // pecah
+          if(p.done) continue;
+          pending++;
+          const tb = t - BS - p.bdel;
+          if(tb < 0){ x = p.tx; y = p.ty; a = ia; sz *= iz; }
+          else {
+            if(!p.sim){
+              p.sim = true; p.age = 0; p.x = p.tx; p.y = p.ty; p.hn = 0;
+              const v0 = p.bd * DRAG * 1.25;
+              p.vx = Math.cos(p.ba) * v0; p.vy = Math.sin(p.ba) * v0;
+            }
+            for(let k = 0; k < ns; k++) step(p, sdt / ns);
+            x = p.x; y = p.y;
+            if(p.done || y > H_ + 200){ p.done = true; continue; }
+            { const bk = clamp(tb / 350); a = ia + (1 - ia) * bk; sz *= iz + (1 - iz) * bk; }   // dari tampilan kelip -> penuh, tanpa lompatan
+            sz *= .35 + .65 * clamp((p.d - 24 * Math.max(ringK, .2)) / 60);
+            for(let i = TN - 1; i > 0; i--){ p.hx[i] = p.hx[i - 1]; p.hy[i] = p.hy[i - 1]; }
+            p.hx[0] = x; p.hy[0] = y; if(p.hn < TN) p.hn++;
+            if(p.vx * p.vx + p.vy * p.vy > 400)
+              for(let i = 0; i < p.hn - 1; i++){ const tp = tails[p.ci * 3 + (i >> 1)]; tp.moveTo(p.hx[i], p.hy[i]); tp.lineTo(p.hx[i + 1], p.hy[i + 1]); }
+          }
+        }
+        drawStar(p.spr, x, y, sz, rot, a);
+      }
+
+      // lingkaran: bereaksi, mengecil setelah 20% bintang masuk, hilang bersama bintang terakhir
+      const om = 22;
+      rk.vx += (-om * om * rk.x - .36 * om * rk.vx) * dt; rk.vy += (-om * om * rk.y - .36 * om * rk.vy) * dt;
+      rk.x = clamp(rk.x + rk.vx * dt, -4, 4); rk.y = clamp(rk.y + rk.vy * dt, -4, 4); rk.hit *= Math.exp(-5 * dt);
+      let ro = t < G ? clamp(t / 700) : 1;
+      if(bursting){
+        ringT = clamp((1 - pending / bActive - .2) / .8);
+        ro = 1 - clamp((ringU - .8) / .2);
+      }
+      if(bursting){   // anti-macet: bila tak ada lagi bintang yang terserap selama 2 dtk, sisanya langsung dianggap masuk
+        if(prevPending < 0 || pending < prevPending) lastAbsorb = t;
+        prevPending = pending;
+        if(pending > 0 && t - Math.max(lastAbsorb, BS + 2500) > 2000) for(const p of parts) p.done = true;
+      }
+      const sh = 1 - ringU * .85;   // goyangan & denyut mereda saat lingkaran sedang bergerak ke tengah
+      ringEl.style.opacity = ro.toFixed(3);
+      whitehole(time, shown >= .995, false);
+      ringEl.style.transform = `translate3d(${(rk.x * sh + ring.x - ring0.x).toFixed(2)}px,${(rk.y * sh + ring.y - ring0.y).toFixed(2)}px,0) scale(${(ringK * (1 + rk.hit * .1 * sh)).toFixed(3)})`;
+      if(Math.abs(rk.hit - lastHit) > .015){ lastHit = rk.hit; ringEl.style.setProperty('--hit', rk.hit.toFixed(2)); }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.lineCap = 'round';
+      for(let i = 0; i < 9; i++){ ctx.globalAlpha = TA[i % 3]; ctx.lineWidth = TW[i % 3]; ctx.strokeStyle = COLORS[(i / 3) | 0]; ctx.stroke(tails[i]); }
+      drawRingSpark(time, ro, ring.x + rk.x * sh, ring.y + rk.y * sh, 34 / 84 * ringPx * ringK * (1 + rk.hit * .1 * sh));
+
+      if(isFinite(tBurst) && t > tBurst - 800 && t < tBurst + 150){ const k = (t - (tBurst - 800)) / 950; drawShine(k * k * (3 - 2 * k)); }
+      let la = 0;
+      if(!bursting){ if(t > G * .85) la = clamp((t - G * .85) / 1100) * .55; }
+      else if(t < BS + 350) la = .55 * (1 - (t - BS) / 350);
+      logoGlow(la);
+      if(popAt) popAlive = drawPop(t, time, sdt);
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+
+      // semua partikel logo sudah terhisap & lingkaran tepat di tengah -> langsung pecah jadi titik bulat kecil, dan form login muncul
+      if(bursting && !popAt && t > BS + 300 && ((pending === 0 && ringU > .985) || t > BS + 9000)){ popAt = t; reveal(); spawnPop(); }
+      if(popAt && t > popAt + 900 && popAlive === 0){ finish(); return; }
+      raf = requestAnimationFrame(frame);
+    }
+
+    let rz = 0;
+    function onResize(){ clearTimeout(rz); rz = setTimeout(() => { if(bursting || finished) measure(); else build(); }, 150); }
+
+    getLogo().then(c => { logoImg = c; t0 = performance.now(); last = t0; build(); addEventListener('resize', onResize); raf = requestAnimationFrame(frame); }).catch(() => bail());
+  }
+})();
+</script>
+<script>
 (function () {
 
 const scene = document.getElementById('skFront'), back = document.getElementById('skBack'), veil = document.getElementById('skVeil'),
@@ -3284,7 +3711,7 @@ function fxImpact(kind, x, y, u, out, dirx, now) {
   const E = out ? 1.35 : 1, SL = 1.45, lowG = !!(window.SkyGfx && SkyGfx.level() === 'low'), cap = lowG ? .5 : 1;   // cap: batas jumlah partikel (separuh di grafik rendah)   // SL: efek berlangsung lebih lama (lebih lambat dan lembut)
   const lw = .6 + 1.6 * clamp01((u - 14) / 200), ws = Math.max(.5, Math.min(2.4, u / 60));   // lw: tebal garis, ws: kuat goyangan; keduanya mengikuti ukuran kid
   if (kind === 'cloud') {
-    const spr = fogSprite((getComputedStyle(scene).getPropertyValue('--skfog') || '250,253,255').trim()), n = Math.round(Math.min(12 + u * .7, 70) * cap);
+    const spr = fogSprite((lastFog || getComputedStyle(scene).getPropertyValue('--skfog') || '250,253,255').trim()), n = Math.round(Math.min(12 + u * .7, 70) * cap);
     for (let i = 0; i < n; i++) {   // gumpalan terhambur ke atas dan menyamping, pelan dan menyebar
       const a = rnd(-Math.PI * .95, -Math.PI * .05), v = rnd(.4, 2.0) * u * 2.0 * E;
       fxs.push({ k: 'puff', spr, x: x + rnd(-.5, .5) * u, y: y + rnd(-.1, .3) * u, vx: Math.cos(a) * v + dirx * u * .5, vy: Math.sin(a) * v, r: rnd(.35, .8) * u, grow: rnd(1.4, 2.4), buoy: rnd(.1, .25) * u, life: rnd(1.1, 1.9) * SL, a: rnd(.4, .7), age: -rnd(0, .2) });
@@ -3359,7 +3786,17 @@ function puffList() {
 const puffAt = (pf, rx) => { const sr = scene.getBoundingClientRect(), r = pf.el.getBoundingClientRect(); return [Math.max(W * .06, Math.min(W * .94, r.left - sr.left + r.width / 2 + rx * r.width)), r.top - sr.top + r.height * .45]; };
 function setDiveMask(d, ys, u) {   // pudar di awan, tegas di air
   const soft = d.kind === 'cloud' ? Math.max(6, u * .6) : Math.max(2, u * .12), m = `linear-gradient(180deg,#000 0,#000 ${ys - soft}px,rgba(0,0,0,${d.fl || 0}) ${ys + soft * .4}px)`;   // d.fl > 0: di awan, kid kadang masih terlihat samar (belum 'nyemplung' sepenuhnya); air selalu tegas
-  d.clip.style.webkitMaskImage = d.clip.style.maskImage = m;
+  d.mStr = m; d.mYs = ys; d.mSoft = soft; d.mDirty = 1;   // [perf] hanya disimpan; dipasang oleh diveMaskGate
+  diveMaskGate(d, u);
+}
+// [perf] mask gradien pada .dclip (selebar scene) membuat browser merender lapisan itu lewat mask tiap frame selama kid bergerak di dalamnya.
+// Selama seluruh badan kid masih jauh di atas zona pudar, mask bernilai #000 penuh (tidak mengubah apa pun), jadi dilepas; dipasang hanya
+// saat kid mendekati/melewati permukaan (st 3 = di bawah permukaan selalu aktif). Hasil visual sama persis.
+function diveMaskGate(d, u) {
+  if (!d.clip) return;
+  const need = d.st === 3 || d.y + u * .75 + 4 >= d.mYs - d.mSoft;
+  if (!need) { if (d.mOn) { d.mOn = 0; d.clip.style.webkitMaskImage = d.clip.style.maskImage = ''; } return; }
+  if (!d.mOn || d.mDirty) { d.mOn = 1; d.mDirty = 0; d.clip.style.webkitMaskImage = d.clip.style.maskImage = d.mStr; }
 }
 // setelah muncul: jalur baru dari titik muncul (arah awal = arah mendongak), kecepatan dan tujuan keluar layar acak; jalur semula ditinggalkan
 function reroute(f, now, x, y, h, v, tOut, flip, bo) {   // bo: kuat dorongan kecepatan yang menyertai kepakan saat muncul
@@ -3437,6 +3874,7 @@ function diveStep(f, p, t, now, dt) {
     if (d.out && d.y + 150 * p.s * unit < d.ys2 - 2) { if (!d.fp) { d.fp = 1; d.tFp = now - 120; d.tF2 = T - .12; d.Ae = rnd(.5, .9); f.flaps.push(d.tF2); } const tOut = d.tFp, x = d.x, y = d.y, h = d.h, v = d.vb, Ae = d.Ae; diveEnd(f); reroute(f, now, x, y, h, v, tOut, false, Ae); p.x = x; p.y = y; p.rot = h - HEAD_ANGLE; return; }
     if (T - d.tU > (evBusy ? 40 : 12)) { diveEnd(f); return; }
   }
+  diveMaskGate(d, u);   // [perf] pasang/lepas mask sesuai jarak kid ke permukaan
   p.x = d.x; p.y = d.y; p.rot = d.h - HEAD_ANGLE + Math.sin(now / 650 + f.wob) * .05;
   f.under = d.st === 3 || (d.st === 2 ? d.y > d.ys - 2 : d.y > d.ys2 - 2);
 }
@@ -3797,6 +4235,7 @@ const WXF = { clear: 1, cloudy: .6, rain: .25, storm: .08, snow: .35, fog: .3 };
 // ---- Sunset: langit berubah warna menurut tinggi matahari, dan pandangan "turun" ke dataran rendah dengan lautan ----
 seaKc = 1;   // [perf] skala kanvas laut: 1 normal, .5 di halaman kosmetik (laut lembut; CSS meregangkan ke 100%)
 let seaFlip = 0, lastSkyV = null;   // [perf] pencacah frame laut; nilai warna langit terakhir yang ditulis
+const fogTargets = [document.querySelector('.skFog.bottom'), document.getElementById('skMistW'), document.getElementById('skWinds'), document.getElementById('skCover')].filter(Boolean);
 let lastBg = '', lastFog = '', lastMist = '', lastFogOp = '', lastWindOp = '';
 let cam = 0, sjOn = false, SP = null, MP = null, starK = 0, skyTick = 0, skyOwn = false;   // cam: 0 = pandangan tinggi, 1 = turun ke permukaan laut
 const HEX = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
@@ -3836,7 +4275,7 @@ function at(p) {
   const alt = Math.max(-.25, p.altitude) / (Math.PI / 2) * (1 + 2 * cam);   // dekat cakrawala diperbesar agar sunset terlihat
   return { x: W * (.5 + .46 * Math.sin(dz)), y: hy - Math.min(1, alt) * (hy - H * .1), behind: clamp01((Math.PI * .58 - Math.abs(dz)) / .26) };
 }
-const fogB = document.querySelector('.skFog.bottom'), mistB = document.querySelector('.skMist.bottom'), windsEl = document.getElementById('skWinds');
+const fogB = document.querySelector('.skFog.bottom'), mistB = document.querySelector('.skMist.bottom'), mistW = document.getElementById('skMistW'), windsEl = document.getElementById('skWinds');
 function updateSky(dt, now) {
   easeLoc(dt);
   if (evExtra !== evExtraT) { evExtra += (evExtraT - evExtra) * (1 - Math.exp(-dt * 1.1)); if (Math.abs(evExtra - evExtraT) < 20000) evExtra = evExtraT; }
@@ -3855,14 +4294,14 @@ function updateSky(dt, now) {
     const flat = [].concat(...k.sky, k.fog), moved = !lastBg || !lastSkyV || flat.some((v, i) => Math.abs(v - lastSkyV[i]) >= 1.5);
     if (moved) {
       if (bg !== lastBg) { back.style.background = bg; lastBg = bg; }
-      if (fg !== lastFog) { scene.style.setProperty('--skfog', fg); lastFog = fg; }
+      if (fg !== lastFog) { lastFog = fg; for (const el of fogTargets) el.style.setProperty('--skfog', fg); }   // [perf] --skfog ditulis hanya di elemen pemakai (kabut, mist, angin, penutup), bukan di root scene: subtree scene lain tidak dihitung ulang
       lastSkyV = flat;
     }
     skyOwn = true;
   }
-  { const fo = (1 - .92 * cam).toFixed(3), mi = `blur(34px) opacity(${(1 - cam).toFixed(3)})`, wo = (1 - .55 * cam).toFixed(3);
+  { const fo = (1 - .92 * cam).toFixed(3), mi = (1 - cam).toFixed(3), wo = (1 - .55 * cam).toFixed(3);
     if (fo !== lastFogOp) { fogB.style.opacity = fo; lastFogOp = fo; }
-    if (mi !== lastMist) { mistB.style.filter = mi; lastMist = mi; }
+    if (mi !== lastMist) { mistW.style.opacity = mi; lastMist = mi; }   // [perf] hanya opacity pembungkus yang berubah; filter blur tidak ditulis ulang
     if (wo !== lastWindOp) { windsEl.style.opacity = wo; lastWindOp = wo; } }
   if (cam > .01 && Forest.p < .995) { seaC.style.display = 'block'; { const wk = sjOn ? .5 : 1; if (wk !== seaKc) { const d1 = Math.min(window.SkyGfx ? SkyGfx.dpr(1.75) : Math.min(devicePixelRatio || 1, LOW ? 1 : 1.75), 1) * wk; seaC.width = Math.round(W * d1); seaC.height = Math.round(H * d1); seaX.setTransform(d1, 0, 0, d1, 0, 0); seaKc = wk; } } if (!evBusy || (seaFlip ^= 1)) drawSea(now, a); }   // [perf] saat event laut digambar tiap frame ke-2 else if (seaC.style.display !== 'none') seaC.style.display = 'none';
 }
@@ -9869,6 +10308,7 @@ initPerm(); startLoop();
   const profKey = uid => 'sky_prof_' + uid;
   const defProf = () => ({ avatar: AVATARS[0], status: '', vis: 'friends', mute: false, email: '', lang: '' });
   const readProf = uid => { try{ const o = Object.assign(defProf(), JSON.parse(lsGet(profKey(uid)) || '{}')); if(AVATARS.indexOf(o.avatar) < 0) o.avatar = AVATARS[0]; return o; }catch(e){ return defProf(); } };
+  let lastMetaJs = '', lastChatKey = '';
   let prof = defProf(), meta = {}, typingMap = {}, since = 0, pollTimer = null, lastUnread = 0, lastType = 0, lastTypeSend = 0;
 
   async function api(action, data, uid, opt){   // uid opsional: pakai token akun itu (mis. saat simpan data tertunda)
@@ -10274,12 +10714,22 @@ initPerm(); startLoop();
     let l = []; try{ l = JSON.parse(lsGet('sky_nudge_' + uid) || '[]'); }catch(e){}
     l.push({ from: myCode, ts: Date.now() }); lsSet('sky_nudge_' + uid, JSON.stringify(l.slice(-20)));
   }
+  // [perf] hold adaptif: 4 dtk normal; 2 dtk bila jaringan lambat/hemat data, atau tak ada ketikan dan pesan masuk >60 dtk (mengurangi eksekusi Apps Script yang menggantung)
+  let holdPid = null, holdAct = 0;
+  function holdMs(){
+    if(!chatVisible()) return 0;
+    const now = Date.now();
+    if(chatPid !== holdPid){ holdPid = chatPid; holdAct = now; }
+    const cn = navigator.connection, slow = !!(cn && (cn.saveData || /(^|-)2g$|^3g$/.test(cn.effectiveType || '') || cn.rtt > 800));
+    const idle = now - Math.max(lastType, holdAct) > 60000;
+    return (slow || idle) ? 2000 : 4000;
+  }
   async function pollNow(){
     if(!myUid || !myCode) return;
     const seq = ++pollSeq, me = myUid, rev0 = friendRev;
     let nudges = [], incoming = [];
     if(srv()){
-      const hold = chatVisible() ? 4000 : 0, t0 = Date.now();   // chat terbuka = long-poll: server menahan sampai ada yang baru
+      const hold = holdMs(), t0 = Date.now();   // chat terbuka = long-poll: server menahan sampai ada yang baru
       const r = await api('poll', { since, tz: tzNow(), sig: sigS, hold }, null, { timeout: hold + 15000, ref: c => { pollCtl = c; } });
       lastPollMs = Date.now() - t0;
       if(seq !== pollSeq || myUid !== me) return;   // sudah diganti poll baru / ganti akun: hasil lama dibuang
@@ -10299,7 +10749,7 @@ initPerm(); startLoop();
       }
       const ms = r.msgs || [];
       if(ms.length){ mergeBatch(ms); ms.forEach(m => { since = Math.max(since, m.id); if(m.from !== myCode && !m.ctl && !m.del) incoming.push(m); }); lsSet('sky_since_' + myUid, String(since)); }
-      lsSet('sky_meta_' + myUid, JSON.stringify(meta));   // cache: tampil instan saat app dibuka lagi
+      { const mj = JSON.stringify(meta); if(mj !== lastMetaJs){ lastMetaJs = mj; lsSet('sky_meta_' + myUid, mj); } }   // [perf] cache meta ditulis hanya bila isinya berubah (bukan tiap jawaban poll)
       nudges = r.nudges || [];
       if(Array.isArray(r.reqIn) && !friendOps && friendRev === rev0) setReqs(r.reqIn, r.reqOut);   // permintaan pertemanan
       let readNow = false;   // pesanku baru saja dibaca teman (chat yang sedang terbuka)
@@ -10315,8 +10765,9 @@ initPerm(); startLoop();
     nudges.forEach(n => { const f = friendsCache.find(x => x.code === n.from); toast(vt().flamed.replace('{n}', f ? fLabel(f) : n.from)); SFX.notify(); });
     if(chatVisible()){
       if(incoming.some(m => m.pid === chatPid)) SFX.recv();   // pesan masuk di chat yang sedang dibuka: nada pendek, langsung terbaca
-      renderChat(); markRead();
-    } else if(chatPid) renderChat();
+      { const ck = chatPid + '|' + (meta ? JSON.stringify(meta) : '') + '|' + JSON.stringify(typingMap) + '|' + sigS + '|' + friendsCache.length;
+        if(incoming.length || nudges.length || ck !== lastChatKey){ if(incoming.length) holdAct = Date.now(); lastChatKey = ck; renderChat(); markRead(); } }   // [perf] tidak ada yang berubah: lewati render ulang chat dan markRead
+    } else if(chatPid){ lastChatKey = ''; renderChat(); }
     const total = friendsCache.reduce((a, f) => a + unreadOf(f), 0);
     if(total > lastUnread) SFX.notify();   // pesan baru di tempat lain: bunyi berbeda dari suara UI biasa
     lastUnread = total; paintDots(total + reqIn.length); renderFriends(); updateChatSub();
@@ -10340,6 +10791,7 @@ initPerm(); startLoop();
     if(prof.lang && prof.lang !== window.SkyApp.getLang()) window.SkyApp.applyLang(prof.lang);   // pakai bahasa yang tersimpan di akun walau bahasa perangkat berbeda
     else if(!prof.lang) saveProf({ lang: window.SkyApp.getLang() }, true);   // akun lama: simpan bahasa saat ini sebagai bawaan
     try{ meta = JSON.parse(lsGet('sky_meta_' + myUid) || '{}'); }catch(e){ meta = {}; }
+    lastMetaJs = ''; lastChatKey = '';   // akun/sesi baru: paksa tulis dan render pertama
     since = parseInt(lsGet('sky_since_' + myUid), 10) || 0; sigS = ''; prevRd = {}; loadReads();
     Object.keys(meta).forEach(c => { prevRd[c] = meta[c].rd || 0; });
     lastUnread = friendsCache.reduce((a, f) => a + unreadOf(f), 0); paintDots(lastUnread);
@@ -10375,428 +10827,13 @@ initPerm(); startLoop();
 })();
 </script>
 <script>
-/* ===== Loading screen Skymeet: logo pecah jadi partikel bintang, persen mengikuti proses memuat asli =====
-   - Persen minimal 5 detik. Jika semua sudah termuat, 100% tepat di 5 detik.
-     Jika belum, persen tertahan di 99% sampai benar-benar selesai (jaring pengaman 20 dtk).
-   - Event: 'skymeetb:reveal' (20% bintang sudah terserap -> tampilkan login / masuk app)
-            'skymeetb:done'   (bintang terakhir terserap -> loading screen ditutup)  */
 (function(){
-  const screenEl = document.getElementById('loadingScreen');
-
-  // latar login = langit malam yang sama dengan beranda (dibuat oleh SkyNight di skrip utama); dipakai juga sebagai latar loading
-  (function(){
-    const box = document.getElementById('loginStars'), scr = document.getElementById('loginScreen');
-    if(!box || !scr || !window.SkyNight) return;
-    window.SkyNight.build(box, innerWidth < 600 ? 55 : 90, { on: () => !scr.classList.contains('hidden'), yMax: 1, watch: scr });
-  })();
-
-  function bail(){   // bila canvas/animasi gagal: jangan pernah mengunci pengguna di loading
-    screenEl.classList.add('reveal', 'hidden');
-    window.dispatchEvent(new Event('skymeetb:reveal'));
-    window.dispatchEvent(new Event('skymeetb:done'));
-  }
-  try{ init(); }catch(e){ console.error('loader', e); bail(); }
-
-  function init(){
-    const G = 2600, MIN_MS = G, SAFETY_MS = 20000;   // MIN_MS = durasi animasi logo berkumpul (G); selebihnya mengikuti proses memuat yang asli
-    const cvs = document.getElementById('ldCanvas'), ctx = cvs.getContext('2d');
-    if(!ctx) throw new Error('canvas');
-    const hud = document.getElementById('ldHud'), ringEl = document.getElementById('ldRing');
-    const arc = document.getElementById('ldArc'), pct = document.getElementById('ldPct');
-    const w1 = document.getElementById('ldW1'), w2 = document.getElementById('ldW2');
-    const COLORS = ['#ffffff', '#ffe9a8', '#9fd0ff'];
-    const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-    let W, H_, dpr, parts = [], logoImg, logoBox, cx, cy, sc, sx, glowCv = null, glowGp = 32, ringPx = 58;
-
-    // ---- progres memuat yang asli ----
-    const loaded = { dom: document.readyState !== 'loading', fonts: false, win: document.readyState === 'complete' };
-    if(document.fonts && document.fonts.ready){
-      Promise.all([document.fonts.ready, document.fonts.load('400 16px "Space Grotesk"').catch(() => {})]).then(() => { loaded.fonts = true; }, () => { loaded.fonts = true; });
-    } else loaded.fonts = true;
-    if(!loaded.win) addEventListener('load', () => { loaded.win = true; });
-    setTimeout(() => { loaded.fonts = true; }, 3500);                     // font lambat/tertahan jaringan: jangan menahan loading
-    setTimeout(() => { if(loaded.dom) loaded.win = true; }, 9000);        // sumber luar yang menggantung: jangan menahan event 'load' selamanya
-    if(!loaded.dom) document.addEventListener('DOMContentLoaded', () => { loaded.dom = true; });
-
-    // ---- sprite bintang 4 sudut ----
-    const sprites = COLORS.map(col => {
-      const s = 64, c = document.createElement('canvas'); c.width = c.height = s;
-      const x = c.getContext('2d'), m = s / 2;
-      const g = x.createRadialGradient(m, m, 0, m, m, m);
-      g.addColorStop(0, col); g.addColorStop(.25, col + '88'); g.addColorStop(1, 'transparent');
-      x.fillStyle = g; x.globalAlpha = .5; x.fillRect(0, 0, s, s); x.globalAlpha = 1;
-      x.fillStyle = col; x.beginPath();
-      for(let i = 0; i < 8; i++){ const r = i % 2 ? 9 : 30, a = i * Math.PI / 4 - Math.PI / 2; x.lineTo(m + Math.cos(a) * r, m + Math.sin(a) * r); }
-      x.closePath(); x.fill();
-      return c;
-    });
-
-    // ---- logo: aset yang sama dengan layar login (aset/skymeet/logo.svg|webp). Tanpa aset / gagal dibaca -> tulisan "Skymeet" ----
-    const loadImg = u => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = u; });
-    async function logoImage(){
-      const A = window.SkyAsset, u = A && await A.resolve('logo');
-      if(!u) return null;
-      let im = await loadImg(u);
-      if(!im.naturalWidth && /\.svg$/i.test(u)){   // SVG hanya ber-viewBox (tanpa width/height): beri ukuran supaya bisa digambar ke canvas
-        const txt = await (await fetch(u)).text(), vb = txt.match(/viewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/);
-        if(!vb) return null;
-        im = await loadImg(URL.createObjectURL(new Blob([txt.replace(/<svg\b/, `<svg width="${vb[1]}" height="${vb[2]}"`)], { type: 'image/svg+xml' })));
-      }
-      return im;
-    }
-    function crop(c){   // potong rapat ke bagian yang terisi, lalu jadikan siluet putih (hanya alfa gambar yang dipakai)
-      const w = c.width, h = c.height, d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data;
-      let x0 = w, y0 = h, x1 = -1, y1 = -1;
-      for(let y = 0; y < h; y++) for(let x = 0; x < w; x++) if(d[(y * w + x) * 4 + 3] > 16){ if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; }
-      if(x1 < 0) return null;
-      const o = document.createElement('canvas'); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
-      const ox = o.getContext('2d'); ox.drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
-      ox.globalCompositeOperation = 'source-in'; ox.fillStyle = '#fff'; ox.fillRect(0, 0, o.width, o.height);
-      return o;
-    }
-    function fromImage(im){
-      const nw = im.naturalWidth || 300, nh = im.naturalHeight || 150, k = Math.min(1100 / nw, 1100 / nh);
-      const c = document.createElement('canvas'); c.width = Math.ceil(nw * k); c.height = Math.ceil(nh * k);
-      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-      return crop(c);
-    }
-    function textLogo(){
-      const c = document.createElement('canvas'); c.width = 1000; c.height = 300; const x = c.getContext('2d');
-      x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '600 200px "Space Grotesk", system-ui, sans-serif'; x.fillText('Skymeet', 500, 150);
-      return crop(c);
-    }
-    async function getLogo(){
-      try{ const im = await Promise.race([logoImage(), new Promise(r => setTimeout(() => r(null), 3000))]); const c = im && fromImage(im); if(c) return c; }catch(e){}
-      return textLogo();
-    }
-
-    const TN = 7, TA = [.5, .3, .14], TW = [1.8, 1.3, .8];
-    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-    const rnd = (a, b) => a + Math.random() * (b - a);
-    const outQuart = v => 1 - Math.pow(1 - v, 4);
-    const rk = { x: 0, y: 0, vx: 0, vy: 0, hit: 0 };   // reaksi lingkaran: bergoyang + berpendar
-    let ring = { x: -999, y: -999, r: 0 }, ring0 = { x: -999, y: -999 }, ringK = 1, ringU = 0, ringT = 0, ringV = 0, lastHit = -1;   // ringT: target progres (dari jumlah bintang terserap), ringU: progres yang sudah dihaluskan; ring0: posisi asal; ringU: progres menyusut/bergeser (0..1)
-    const PULL = 1400, DRAG = 1.0, DRAG_IN = 2.5, REST_WALL = .9;
-
-    function measure(){
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = innerWidth; H_ = innerHeight;
-      cvs.width = W * dpr; cvs.height = H_ * dpr;
-      const hb = hud.getBoundingClientRect();
-      ringPx = ringEl.offsetWidth || 58;
-      ring = { x: hb.left + hb.width / 2, y: hb.top + hb.height / 2, r: ringPx * .45 + 4 };
-      ring0 = { x: ring.x, y: ring.y };
-    }
-    function build(){
-      measure();
-      const lw = Math.min(W * .72, 520), lh = lw * logoImg.height / logoImg.width;
-      cx = W / 2; cy = H_ * .44;
-      logoBox = { x: cx - lw / 2, y: cy - lh / 2, w: lw, h: lh };
-      sc = document.createElement('canvas'); sc.width = Math.ceil(lw * dpr); sc.height = Math.ceil(lh * dpr); sx = sc.getContext('2d');
-      glowCv = document.createElement('canvas'); glowCv.width = Math.ceil((lw + 2 * glowGp) * dpr); glowCv.height = Math.ceil((lh + 2 * glowGp) * dpr);   // lapisan cahaya logo dibuat sekali
-      { const gx = glowCv.getContext('2d'); gx.shadowColor = '#ffe9a8'; gx.shadowBlur = 24; gx.drawImage(logoImg, glowGp * dpr, glowGp * dpr, lw * dpr, lh * dpr); }
-      const off = document.createElement('canvas'); off.width = Math.ceil(lw); off.height = Math.ceil(lh);
-      const o = off.getContext('2d', { willReadFrequently: true });
-      o.drawImage(logoImg, 0, 0, lw, lh);
-      const data = o.getImageData(0, 0, off.width, off.height).data;
-      const step = Math.max(2, Math.round(lw / 175));   // partikel logo: lebih rapat (lebih banyak) dan kecil
-      parts = [];
-      for(let y = 0; y < off.height; y += step) for(let x = 0; x < off.width; x += step){
-        if(data[(y * off.width + x) * 4 + 3] < 128) continue;
-        const tx = logoBox.x + x + rnd(0, step), ty = logoBox.y + y + rnd(0, step);
-        const ang = Math.random() * Math.PI * 2, rad = Math.max(W, H_) * rnd(.55, .9), ci = (Math.random() * 3) | 0;
-        parts.push({
-          i: parts.length, tx, ty, sx: cx + Math.cos(ang) * rad, sy: cy + Math.sin(ang) * rad,
-          delay: Math.random() * .45, curve: rnd(-.6, .6),
-          size: rnd(step * 1.0, step * 2.1), ci, spr: sprites[ci], hx: new Float32Array(TN), hy: new Float32Array(TN), hn: 0,
-          rot: Math.random() * 6.28, spin: rnd(-1.5, 1.5), ph: Math.random() * 6.28,
-          ba: Math.atan2(ty - cy, tx - cx) + rnd(-.7, .7), bd: rnd(.35, 1) * Math.max(W, H_) * .5,
-          bdel: ((ty - logoBox.y) / lh) * 900 + Math.random() * 150, g: rnd(.8, 1.2)   // pecah menyapu dari atas ke bawah
-        });
-      }
-    }
-
-    // ---- fisika: menyebar, lalu ditarik ke lingkaran persen dan terserap ----
-    function step(p, dt){
-      if(p.done) return;
-      p.age += dt;
-      const dx = ring.x - p.x, dy = ring.y - p.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
-      p.d = d;
-      const k = clamp((p.age - .35) / .7);
-      const a = PULL * p.g * k * clamp(.6 + d / 800, .6, 1.5) * (1 + 3 / (d / 40 + 1));
-      p.vx += (nx * a - ny * a * .05) * dt;
-      p.vy += (ny * a + nx * a * .05) * dt;
-      const f = Math.exp(-(p.age > 1.5 ? DRAG_IN : DRAG) * dt); p.vx *= f; p.vy *= f;
-      p.x += p.vx * dt; p.y += p.vy * dt;
-      if(p.x < 0){ p.x = -p.x; p.vx = Math.abs(p.vx) * REST_WALL; }
-      else if(p.x > W){ p.x = 2 * W - p.x; p.vx = -Math.abs(p.vx) * REST_WALL; }
-      if(d < ring.r * .8 * Math.max(ringK, .2)){ p.done = true; rk.hit = Math.min(1, rk.hit + .017); }
-    }
-
-    function whitehole(time, full, calm){   // di 100%: dua lingkaran bercahaya bergetar berlawanan arah
-      ringEl.classList.toggle('ld-full', full);
-      if(!full) return;
-      if(calm){
-        w1.style.transform = w2.style.transform = 'translate(-50%,-50%)';
-        w1.style.opacity = w2.style.opacity = (.65 + .35 * Math.sin(time * 3)).toFixed(2); return;
-      }
-      const jx = Math.sin(time * 47) * 1.4, jy = Math.cos(time * 53) * 1.4;
-      w1.style.opacity = w2.style.opacity = 1;
-      w1.style.transform = `translate(-50%,-50%) translate(${jx.toFixed(2)}px,${jy.toFixed(2)}px) scale(${(1 + .15 * Math.sin(time * 9)).toFixed(3)})`;
-      w2.style.transform = `translate(-50%,-50%) translate(${(-jx * 1.3).toFixed(2)}px,${(-jy * 1.3).toFixed(2)}px) scale(${(1 + .1 * Math.sin(time * 7 + 1)).toFixed(3)})`;
-    }
-
-    function drawShine(pr){   // pita cahaya menyapu logo dari atas ke bawah tepat sebelum pecah
-      const w = sc.width, h = sc.height, bh = h * .22, y = -bh + (h + 2 * bh) * pr;
-      sx.globalCompositeOperation = 'source-over'; sx.clearRect(0, 0, w, h);
-      const g = sx.createLinearGradient(0, y - bh, 0, y + bh);
-      g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,248,220,1)'); g.addColorStop(1, 'rgba(255,255,255,0)');
-      sx.fillStyle = g; sx.fillRect(0, 0, w, h);
-      sx.globalCompositeOperation = 'destination-in'; sx.drawImage(logoImg, 0, 0, w, h);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1;
-      ctx.drawImage(sc, logoBox.x, logoBox.y, logoBox.w, logoBox.h);
-    }
-    function drawStar(spr, x, y, size, rot, a){
-      if(a <= .01) return;
-      const c = Math.cos(rot) * size / 64 * dpr, s = Math.sin(rot) * size / 64 * dpr;
-      ctx.globalAlpha = a; ctx.setTransform(c, s, -s, c, x * dpr, y * dpr); ctx.drawImage(spr, -32, -32);
-    }
-    function logoGlow(a){
-      if(a <= 0) return;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = a;
-      if(glowCv) ctx.drawImage(glowCv, logoBox.x - glowGp, logoBox.y - glowGp, logoBox.w + 2 * glowGp, logoBox.h + 2 * glowGp);
-    }
-
-    // ---- letusan titik bulat kecil dari tengah layar: menyebar ke seluruh layar, pecah saat menyentuh tepi ----
-    const DOTS = COLORS.map(col => {
-      const sz = 16, c = document.createElement('canvas'); c.width = c.height = sz;
-      const x = c.getContext('2d'), m = sz / 2, g = x.createRadialGradient(m, m, 0, m, m, m);
-      g.addColorStop(0, '#fff'); g.addColorStop(.45, col); g.addColorStop(.62, col + '99'); g.addColorStop(1, 'transparent');
-      x.fillStyle = g; x.fillRect(0, 0, sz, sz); return c;
-    });
-    // ---- ledakan bintang: bintang menyebar dari tengah dan mendarat tepat di posisi bintang latar (malam);
-    //      bila latar sedang siang (tanpa bintang), bintang menyebar lalu memudar pelan ----
-    let bg = null, nowAbs = 0;
-    const GLOWS = COLORS.map(col => {   // halo lembut berfalloff halus di belakang tiap bintang
-      const z = 64, c = document.createElement('canvas'); c.width = c.height = z;
-      const x = c.getContext('2d'), m = z / 2, g = x.createRadialGradient(m, m, 0, m, m, m);
-      g.addColorStop(0, col + 'cc'); g.addColorStop(.25, col + '66'); g.addColorStop(.6, col + '1a'); g.addColorStop(1, 'transparent');
-      x.fillStyle = g; x.fillRect(0, 0, z, z); return c;
-    });
-    const setBgOpacity = v => { if(bg && bg.cv && bg.last !== v){ bg.last = v; bg.cv.style.transition = 'none'; bg.cv.style.opacity = v; } };
-    function restoreBg(){ ['loginStars', 'stars'].forEach(id => { const b = document.getElementById(id), c = b && b.__nightStars && b.__nightStars().cv; if(c){ c.style.opacity = ''; c.style.transition = ''; } }); }
-    function spawnPop(){
-      popC = { x: W / 2, y: H_ / 2 };
-      const scr = document.getElementById('loginScreen'), loginVis = !!scr && !scr.classList.contains('hidden');
-      const box = document.getElementById(loginVis ? 'loginStars' : 'stars');
-      const info = box && box.__nightStars ? box.__nightStars() : null;
-      const night = !!info && info.stars.length > 0 && (loginVis || !window.SkyNight || SkyNight.visible());
-      let list;
-      if(night){
-        list = info.stars.map(q => ({ tx: q.x * W / info.W, ty: q.y * H_ / info.H, r: q.r, ph: q.ph, sp: q.sp, al: q.al }));
-        // tambahan bintang ledakan (mendarat acak lalu melebur saat bintang latar asli muncul)
-        const extra = clamp(Math.round(list.length * 1.3), 140, 420);
-        for(let i = 0; i < extra; i++) list.push({ tx: Math.random() * W, ty: Math.random() * H_, r: rnd(.25, 1.0), ph: Math.random() * 6.283, sp: rnd(.25, 1.15), al: rnd(.25, .7) });
-      } else list = Array.from({ length: clamp(Math.round(W * H_ / 2300), 320, 950) }, () => ({ tx: Math.random() * W, ty: Math.random() * H_ * .78, r: rnd(.25, 1.3), ph: Math.random() * 6.283, sp: rnd(.25, 1.15), al: rnd(.25, .8) }));
-      const maxD = Math.hypot(W / 2, H_ / 2) || 1;
-      dots = list.map(q => {
-        const d = Math.hypot(q.tx - popC.x, q.ty - popC.y);
-        return Object.assign(q, { ci: (Math.random() * 3) | 0, delay: d / maxD * .25 + rnd(0, .12), dur: rnd(1.0, 1.5), curve: rnd(-.25, .25), rot: Math.random() * 6.283, spin: rnd(-1.2, 1.2) });
-      });
-      pops = []; frags = []; popAlive = 1;
-      bg = { cv: night ? info.cv : null, night };
-      setBgOpacity('0');   // bintang latar yang asli disembunyikan dulu, lalu dimunculkan saat bintang ledakan sudah mendarat
-    }
-    function drawPop(t, time, dt){
-      const pa = (t - popAt) / 1000, cx0 = popC.x, cy0 = popC.y, night = bg && bg.night;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter';
-      if(pa < .6){   // kilatan cahaya di pusat
-        const k = pa / .6, R = 40 + 140 * k, g = ctx.createRadialGradient(cx0, cy0, 0, cx0, cy0, R);
-        g.addColorStop(0, `rgba(255,255,255,${(.9 * (1 - k)).toFixed(3)})`); g.addColorStop(.4, `rgba(255,233,168,${(.35 * (1 - k)).toFixed(3)})`); g.addColorStop(1, 'rgba(255,233,168,0)');
-        ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx0, cy0, R, 0, 6.283); ctx.fill();
-      }
-      const LAND = 1.9, XF = .6, FADE0 = 1.6, FADE = 1.0;
-      const cf = night ? clamp((pa - LAND) / XF) : 0, fade = night ? 0 : clamp((pa - FADE0) / FADE);
-      if(night) setBgOpacity(cf.toFixed(3));
-      const own = (1 - cf) * (1 - fade);
-      if(own > .01) for(const d of dots){
-        const g = clamp((pa - d.delay) / d.dur); if(g <= 0) continue;
-        const e = 1 - Math.pow(1 - g, 3), dx = d.tx - cx0, dy = d.ty - cy0, k = Math.sin(Math.PI * e) * d.curve;
-        const x = cx0 + dx * e - dy * k, y = cy0 + dy * e + dx * k;
-        const tw = (Math.sin(nowAbs * .001 * d.sp + d.ph) + 1) / 2, base = d.al * (.35 + tw * .65);   // kelip sama seperti bintang latar
-        const sz = d.r * 3.3 + 3 * (1 - e);   // bintang 4 sudut: besar saat melesat, mengecil mendekati ukuran bintang latar
-        const al = Math.min(1, Math.max(base, .6 * (1 - e)) * clamp(g * 5)) * own, gs = sz * 3.0 + 3.5 * (1 - e);
-        ctx.globalAlpha = al * (.55 + .25 * (1 - e)); ctx.drawImage(GLOWS[d.ci], x - gs / 2, y - gs / 2, gs, gs);   // cahaya: lebih terang saat melesat, tetap lembut saat mendarat
-        drawStar(sprites[d.ci], x, y, sz, d.rot + time * d.spin, al);
-      }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalAlpha = 1;
-      return pa < (night ? LAND + XF + .05 : FADE0 + FADE + .05) ? 1 : 0;
-    }
-
-    function drawRingSpark(time, alpha, x0, y0, R){   // kepala percikan di ujung busur progres + ekor + percikan yang terus mengorbit
-      if(alpha <= .02) return;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.globalCompositeOperation = 'lighter';
-      if(shown < .995){
-        const head = -Math.PI / 2 + shown * Math.PI * 2;
-        for(let k = 9; k >= 1; k--){ const a = head - k * .12, f = 1 - k / 10, sz = 4 + 6 * f; ctx.globalAlpha = alpha * f * .8; ctx.drawImage(DOTS[1], x0 + Math.cos(a) * R - sz / 2, y0 + Math.sin(a) * R - sz / 2, sz, sz); }
-        drawStar(sprites[1], x0 + Math.cos(head) * R, y0 + Math.sin(head) * R, 15, time * 3, alpha);
-      }
-      for(let i = 0; i < 0; i++){   // titik mengorbit dihapus; posisi dihitung dari waktu dinding: tetap berputar mulus walau frame tersendat
-        const dir = i % 2 ? -1 : 1, a = time * (1.6 + i * .37) * dir + i * 1.57, rr = R + 4 + (i % 2) * 5 + Math.sin(time * 2 + i) * 1.5, sz = 6 + (i % 2) * 2;
-        ctx.globalAlpha = alpha * (.5 + .4 * Math.sin(time * 5 + i * 2)); ctx.drawImage(DOTS[i % 3], x0 + Math.cos(a) * rr - sz / 2, y0 + Math.sin(a) * rr - sz / 2, sz, sz);
-      }
-    }
-
-    // ---- alur utama ----
-    let t0 = performance.now();
-    let fpsAvg = 16.7, stride = 1, prevPending = -1, lastAbsorb = 0, bStride = 1, bActive = 1;
-    let last = t0, raf = 0, bursting = false, BS = 0, tBurst = Infinity, realP = 0, shown = 0, realDoneAt = -1, revealed = false, finished = false, rmAt = 0, popAt = 0, popAlive = 1, dots = [], pops = [], frags = [], popC = { x: 0, y: 0 };
-    function reveal(){
-      if(revealed) return; revealed = true;
-      screenEl.classList.add('reveal');
-      window.dispatchEvent(new Event('skymeetb:reveal'));
-    }
-    function finish(){
-      if(finished) return; finished = true;
-      reveal();
-      restoreBg();
-      screenEl.classList.add('hidden');
-      window.dispatchEvent(new Event('skymeetb:done'));
-      cancelAnimationFrame(raf); removeEventListener('resize', onResize);
-      setTimeout(() => { cvs.width = cvs.height = 1; }, 800);
-    }
-
-    function frame(now){
-      if(finished) return;
-      const t = now - t0, time = t / 1000;
-      nowAbs = now;
-      const rdt = Math.max(0, (now - last) / 1000), dt = Math.min(.033, rdt), sdt = Math.min(.09, rdt); last = now;   // sdt: simulasi partikel mengejar waktu nyata setelah tersendat (tidak merayap lambat)
-      if(rdt < .25){ fpsAvg += (rdt * 1000 - fpsAvg) * .05; if(!bursting && t > 1500 && fpsAvg > 30 && stride < 3){ stride++; fpsAvg = 16.7; } }   // perangkat lambat: gambar lebih sedikit partikel, bukan membeku
-      const ns = Math.min(6, Math.max(2, Math.ceil(sdt / .0125)));
-
-      // persen = yang lebih lambat antara waktu (5 detik) dan proses memuat asli
-      const rt = (loaded.dom ? .3 : 0) + (loaded.fonts ? .35 : 0) + (loaded.win ? .35 : 0);
-      realP += (rt - realP) * (1 - Math.exp(-6 * dt));
-      const realDone = (loaded.dom && loaded.fonts && loaded.win) || t > SAFETY_MS;
-      if(realDone && realDoneAt < 0){ realDoneAt = t; tBurst = Math.max(MIN_MS, t + 900); }
-      const target = Math.min(t / MIN_MS, realDone ? 1 : Math.min(realP, .99));
-      shown += (target - shown) * (1 - Math.exp(-10 * dt));
-      if(target >= 1 && shown > .998) shown = 1;
-      if(!reduced && !bursting && t >= G && t >= tBurst && shown >= .995){ bursting = true; BS = t; bStride = stride; bActive = Math.max(1, parts.filter(q => !(bStride > 1 && (q.i % bStride))).length); }   // pecah memakai himpunan & ukuran partikel yang sama dengan yang tampil saat menyusun logo
-
-      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cvs.width, cvs.height);
-      ctx.globalCompositeOperation = 'lighter';
-      arc.style.strokeDashoffset = 213.63 * (1 - shown);
-      pct.textContent = Math.round(shown * 100) + '%';
-
-      if(reduced){   // mode tanpa gerak: logo diam, hanya berkelap-kelip
-        for(const p of parts){
-          const tw = Math.sin(time * 2.2 + p.ph) * .5 + .5;
-          drawStar(p.spr, p.tx, p.ty, p.size * (.7 + .4 * tw), p.rot, .3 + .7 * tw);
-        }
-        logoGlow(.3 + .15 * Math.sin(time * 1.6));
-        ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-        const full = shown >= .995;
-        whitehole(time, full, true);
-        if(full && t >= tBurst){
-          if(!rmAt) rmAt = t;
-          const k = t - rmAt;
-          ringEl.style.opacity = (1 - clamp((k - 800) / 900)).toFixed(3);
-          if(k > 800) reveal();
-          if(k > 1700){ finish(); return; }
-        }
-        raf = requestAnimationFrame(frame); return;
-      }
-
-      if(!bursting){ ringU = 0; ringV = 0; ringT = 0; }
-      else {   // target dari jumlah bintang terserap itu bergelombang -> dihaluskan dengan pegas teredam kritis supaya geraknya mulus
-        const RW = 6;
-        ringV += ((ringT - ringU) * RW * RW - 2 * RW * ringV) * dt; ringU = clamp(ringU + ringV * dt);
-        if(ringU <= 0 || ringU >= 1) ringV = 0;
-      }
-      { const e = ringU * ringU * (3 - 2 * ringU); ring.x = ring0.x + (W / 2 - ring0.x) * e; ring.y = ring0.y + (H_ / 2 - ring0.y) * e; ringK = 1 - ringU; }   // lingkaran bergeser ke tengah layar, bintang ikut mengejarnya
-      let pending = 0;
-      const tails = Array.from({ length: 9 }, () => new Path2D());
-      for(const p of parts){
-        const stp = bursting ? bStride : stride;
-        if(stp > 1 && (p.i % stp)){ if(bursting) p.done = true; continue; }   // partikel yang tidak tampil saat menyusun logo juga tidak ikut pecah
-        let x, y, a = 1, sz = p.size * (stp > 1 ? 1 + .3 * (stp - 1) : 1), rot = p.rot + time * p.spin;
-        const twk = Math.sin(time * 3 + p.ph) * .5 + .5, kb = clamp((t - G) / 500);   // tampilan kelip yang SAMA di fase menunggu & awal pecah (masuk halus dari tampilan menyusun)
-        const iz = 1 + (.85 + .35 * twk - 1) * kb, ia = 1 + (.7 + .3 * twk - 1) * kb;
-        if(t < G){   // berkumpul membentuk logo
-          p.sim = false; p.done = false;
-          const g = clamp((t / G - p.delay) / .55), e = outQuart(g);
-          const dx = p.tx - p.sx, dy = p.ty - p.sy, k = (1 - e) * Math.sin(e * Math.PI) * p.curve;
-          x = p.sx + dx * e - dy * k; y = p.sy + dy * e + dx * k; a = clamp(g * 3);
-        } else if(!bursting){   // menunggu persen 100%: berkelip
-          x = p.tx; y = p.ty; a = ia; sz *= iz;
-        } else {   // pecah
-          if(p.done) continue;
-          pending++;
-          const tb = t - BS - p.bdel;
-          if(tb < 0){ x = p.tx; y = p.ty; a = ia; sz *= iz; }
-          else {
-            if(!p.sim){
-              p.sim = true; p.age = 0; p.x = p.tx; p.y = p.ty; p.hn = 0;
-              const v0 = p.bd * DRAG * 1.25;
-              p.vx = Math.cos(p.ba) * v0; p.vy = Math.sin(p.ba) * v0;
-            }
-            for(let k = 0; k < ns; k++) step(p, sdt / ns);
-            x = p.x; y = p.y;
-            if(p.done || y > H_ + 200){ p.done = true; continue; }
-            { const bk = clamp(tb / 350); a = ia + (1 - ia) * bk; sz *= iz + (1 - iz) * bk; }   // dari tampilan kelip -> penuh, tanpa lompatan
-            sz *= .35 + .65 * clamp((p.d - 24 * Math.max(ringK, .2)) / 60);
-            for(let i = TN - 1; i > 0; i--){ p.hx[i] = p.hx[i - 1]; p.hy[i] = p.hy[i - 1]; }
-            p.hx[0] = x; p.hy[0] = y; if(p.hn < TN) p.hn++;
-            if(p.vx * p.vx + p.vy * p.vy > 400)
-              for(let i = 0; i < p.hn - 1; i++){ const tp = tails[p.ci * 3 + (i >> 1)]; tp.moveTo(p.hx[i], p.hy[i]); tp.lineTo(p.hx[i + 1], p.hy[i + 1]); }
-          }
-        }
-        drawStar(p.spr, x, y, sz, rot, a);
-      }
-
-      // lingkaran: bereaksi, mengecil setelah 20% bintang masuk, hilang bersama bintang terakhir
-      const om = 22;
-      rk.vx += (-om * om * rk.x - .36 * om * rk.vx) * dt; rk.vy += (-om * om * rk.y - .36 * om * rk.vy) * dt;
-      rk.x = clamp(rk.x + rk.vx * dt, -4, 4); rk.y = clamp(rk.y + rk.vy * dt, -4, 4); rk.hit *= Math.exp(-5 * dt);
-      let ro = t < G ? clamp(t / 700) : 1;
-      if(bursting){
-        ringT = clamp((1 - pending / bActive - .2) / .8);
-        ro = 1 - clamp((ringU - .8) / .2);
-      }
-      if(bursting){   // anti-macet: bila tak ada lagi bintang yang terserap selama 2 dtk, sisanya langsung dianggap masuk
-        if(prevPending < 0 || pending < prevPending) lastAbsorb = t;
-        prevPending = pending;
-        if(pending > 0 && t - Math.max(lastAbsorb, BS + 2500) > 2000) for(const p of parts) p.done = true;
-      }
-      const sh = 1 - ringU * .85;   // goyangan & denyut mereda saat lingkaran sedang bergerak ke tengah
-      ringEl.style.opacity = ro.toFixed(3);
-      whitehole(time, shown >= .995, false);
-      ringEl.style.transform = `translate3d(${(rk.x * sh + ring.x - ring0.x).toFixed(2)}px,${(rk.y * sh + ring.y - ring0.y).toFixed(2)}px,0) scale(${(ringK * (1 + rk.hit * .1 * sh)).toFixed(3)})`;
-      if(Math.abs(rk.hit - lastHit) > .015){ lastHit = rk.hit; ringEl.style.setProperty('--hit', rk.hit.toFixed(2)); }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.lineCap = 'round';
-      for(let i = 0; i < 9; i++){ ctx.globalAlpha = TA[i % 3]; ctx.lineWidth = TW[i % 3]; ctx.strokeStyle = COLORS[(i / 3) | 0]; ctx.stroke(tails[i]); }
-      drawRingSpark(time, ro, ring.x + rk.x * sh, ring.y + rk.y * sh, 34 / 84 * ringPx * ringK * (1 + rk.hit * .1 * sh));
-
-      if(isFinite(tBurst) && t > tBurst - 800 && t < tBurst + 150){ const k = (t - (tBurst - 800)) / 950; drawShine(k * k * (3 - 2 * k)); }
-      let la = 0;
-      if(!bursting){ if(t > G * .85) la = clamp((t - G * .85) / 1100) * .55; }
-      else if(t < BS + 350) la = .55 * (1 - (t - BS) / 350);
-      logoGlow(la);
-      if(popAt) popAlive = drawPop(t, time, sdt);
-      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-
-      // semua partikel logo sudah terhisap & lingkaran tepat di tengah -> langsung pecah jadi titik bulat kecil, dan form login muncul
-      if(bursting && !popAt && t > BS + 300 && ((pending === 0 && ringU > .985) || t > BS + 9000)){ popAt = t; reveal(); spawnPop(); }
-      if(popAt && t > popAt + 900 && popAlive === 0){ finish(); return; }
-      raf = requestAnimationFrame(frame);
-    }
-
-    let rz = 0;
-    function onResize(){ clearTimeout(rz); rz = setTimeout(() => { if(bursting || finished) measure(); else build(); }, 150); }
-
-    getLogo().then(c => { logoImg = c; t0 = performance.now(); last = t0; build(); addEventListener('resize', onResize); raf = requestAnimationFrame(frame); }).catch(() => bail());
-  }
+// latar login = langit malam yang sama dengan beranda (dibuat oleh SkyNight di skrip utama); dipakai juga sebagai latar loading
+(function(){
+  const box = document.getElementById('loginStars'), scr = document.getElementById('loginScreen');
+  if(!box || !scr || !window.SkyNight) return;
+  window.SkyNight.build(box, innerWidth < 600 ? 55 : 90, { on: () => !scr.classList.contains('hidden'), yMax: 1, watch: scr });
+})();
 })();
 </script>
 <script>
@@ -11193,11 +11230,7 @@ function f(t){sRaf=0;if(!sOk())return;const gap=(window.SkyGfx&&SkyGfx.level()==
 let sRun=false;function sKick(){if(!sRaf&&sOk())sRaf=requestAnimationFrame(f)}
 function starsRun(on){if(on===sRun)return;sRun=on;if(on)sKick()}
 addEventListener('sky:starsvis',sKick);document.addEventListener('visibilitychange',sKick);   // lanjut otomatis saat overlay ditutup / tab kembali terlihat
-function el(n,a){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e}
-function bl(px,by,w,h,f,o){const l=(Math.random()-.5)*h*.35;return el('path',{d:`M${px} ${by}L${px+w} ${by}L${px+w/2+l} ${by-h}Z`,fill:f,opacity:o})}
-const gb=document.getElementById('gb'),gd=document.getElementById('gd');
-const gtx=document.getElementById('gtx'),rg=(a,b)=>a+Math.random()*(b-a);
-const WM={};function wg(par,kx,ky,x){const k=par.id+kx+'_'+ky;let g=WM[k];if(!g){g=el('g',{class:'sj-wd'});g.style.cssText=`--sj-k:${(.6+Math.random()*.8).toFixed(2)};animation-delay:${(-(x+1000)*.005).toFixed(2)}s`;par.appendChild(g);WM[k]=g}return g}
+const rg=(a,b)=>a+Math.random()*(b-a);
 
 const mw=document.createElement('div');mw.id='sjMw';R.appendChild(mw);
 for(let i=0;i<30;i++){const m=document.createElement('div');m.className='sj-mote';const z=1.6+Math.random()*1.8;m.style.cssText=`width:${z}px;height:${z}px;left:${100+Math.random()*800}px;top:${170+Math.random()*120}px;--sj-d:${Math.random()*16-8}px;animation-duration:${5+Math.random()*7}s;animation-delay:${-Math.random()*8}s`;mw.appendChild(m)}
