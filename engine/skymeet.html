@@ -3531,6 +3531,56 @@ let night = false;
 let W, H, unit;
 let seaKc = 1;   // [perf] skala kanvas laut (dideklarasikan di sini karena resize() dipanggil sebelum bagian bawah skrip dijalankan)
 let bodySig = '';
+// ---- [item 1] Cuaca (hujan & salju) digambar di GPU lewat WebGL langsung (tanpa library) ----
+// Simulasi tetap di JS (drops/flakes di drawWx); GPU hanya menggambar: satu buffer, dua draw call. Bila WebGL tidak ada atau konteksnya hilang,
+// drawWx otomatis memakai jalur kanvas 2D yang lama, dan kembali ke GPU bila konteks pulih. Kanvas GL dibuat hanya saat ada hujan/salju.
+const WxGL = (() => {
+  let cv = null, gl = null, pr = null, bf = null, L = {}, ok = false, dead = false, vis = true, sw = 0, sh = 0, sd = 1, arr = new Float32Array(0);
+  const VS = 'attribute vec2 p;attribute vec3 l;uniform vec2 u_s;varying vec3 v;void main(){v=l;vec2 c=p/u_s*2.0-1.0;gl_Position=vec4(c.x,-c.y,0.0,1.0);}';
+  const FS = 'precision mediump float;varying vec3 v;uniform vec4 u_c;uniform float u_d;uniform float u_m;void main(){float a;if(u_m<.5){a=clamp(u_d*(v.z-abs(v.x))+.5,0.,1.);}else{a=clamp(u_d*(v.z-length(v.xy))+.5,0.,1.);}a*=u_c.a;gl_FragColor=vec4(u_c.rgb*a,a);}';
+  function sh_(t, src) { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return gl.getShaderParameter(o, gl.COMPILE_STATUS) ? o : null; }
+  function setup() {
+    const v = sh_(gl.VERTEX_SHADER, VS), f = sh_(gl.FRAGMENT_SHADER, FS); if (!v || !f) return false;
+    pr = gl.createProgram(); gl.attachShader(pr, v); gl.attachShader(pr, f); gl.linkProgram(pr); if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return false;
+    gl.useProgram(pr); L = { p: gl.getAttribLocation(pr, 'p'), l: gl.getAttribLocation(pr, 'l'), s: gl.getUniformLocation(pr, 'u_s'), c: gl.getUniformLocation(pr, 'u_c'), d: gl.getUniformLocation(pr, 'u_d'), m: gl.getUniformLocation(pr, 'u_m') };
+    bf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, bf); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.clearColor(0, 0, 0, 0);
+    ok = true; fit(); return true;
+  }
+  function kill() { dead = true; ok = false; if (cv) cv.remove(); cv = null; gl = null; }
+  function fit() { if (!cv || !sw) return; const w = Math.max(1, Math.round(sw * sd)), h = Math.max(1, Math.round(sh * sd)); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } if (gl && !gl.isContextLost()) gl.viewport(0, 0, w, h); }
+  function init() {
+    if (ok) return true; if (dead || cv) return false;   // cv ada tetapi belum ok = konteks hilang, menunggu pulih
+    try {
+      cv = document.createElement('canvas'); cv.id = 'skWxGL'; cv.setAttribute('aria-hidden', 'true'); wxc.after(cv);
+      cv.addEventListener('webglcontextlost', e => { e.preventDefault(); ok = false; });
+      cv.addEventListener('webglcontextrestored', () => { try { if (!setup()) kill(); } catch (e) { kill(); } });
+      gl = cv.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: 'low-power' });
+      if (!gl || !setup()) { kill(); return false; }
+    } catch (e) { kill(); return false; }
+    return ok;
+  }
+  function show(on) { if (cv && vis !== on) { vis = on; cv.style.visibility = on ? 'visible' : 'hidden'; } }
+  function draw(drops, flakes, night) {
+    if (!ok || gl.isContextLost()) return;
+    const hw = .5, m = 1 / sd, n = drops.length, k = flakes.length, need = (n + k) * 30;
+    if (arr.length < need) arr = new Float32Array(need + 600);
+    let o = 0;
+    for (let i = 0; i < n; i++) {   // garis hujan: (x,y) -> (x - .18 l, y - l), lebar 1 px, ujung tumpul seperti stroke 2D
+      const d = drops[i], x0 = d.x, y0 = d.y, x1 = d.x - d.l * .18, y1 = d.y - d.l, dx = x1 - x0, dy = y1 - y0, il = 1 / Math.hypot(dx, dy), nx = -dy * il * (hw + m), ny = dx * il * (hw + m), e = hw + m;
+      arr.set([x0 + nx, y0 + ny, -e, 0, hw, x0 - nx, y0 - ny, e, 0, hw, x1 + nx, y1 + ny, -e, 0, hw, x1 + nx, y1 + ny, -e, 0, hw, x0 - nx, y0 - ny, e, 0, hw, x1 - nx, y1 - ny, e, 0, hw], o); o += 30;
+    }
+    for (let i = 0; i < k; i++) {   // serpihan salju: cakram halus
+      const f = flakes[i], r = f.r, e = r + m, x = f.x, y = f.y;
+      arr.set([x - e, y - e, -e, -e, r, x + e, y - e, e, -e, r, x - e, y + e, -e, e, r, x + e, y - e, e, -e, r, x + e, y + e, e, e, r, x - e, y + e, -e, e, r], o); o += 30;
+    }
+    gl.useProgram(pr); gl.bindBuffer(gl.ARRAY_BUFFER, bf); gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, o), gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(L.p); gl.vertexAttribPointer(L.p, 2, gl.FLOAT, false, 20, 0); gl.enableVertexAttribArray(L.l); gl.vertexAttribPointer(L.l, 3, gl.FLOAT, false, 20, 8);
+    gl.uniform2f(L.s, sw, sh); gl.uniform1f(L.d, sd); gl.clear(gl.COLOR_BUFFER_BIT);
+    if (n) { gl.uniform1f(L.m, 0); if (night) gl.uniform4f(L.c, 170 / 255, 190 / 255, 235 / 255, .5); else gl.uniform4f(L.c, 225 / 255, 238 / 255, 1, .55); gl.drawArrays(gl.TRIANGLES, 0, n * 6); }
+    if (k) { gl.uniform1f(L.m, 1); gl.uniform4f(L.c, 1, 1, 1, .85); gl.drawArrays(gl.TRIANGLES, n * 6, k * 6); }
+  }
+  return { init, draw, show, size(w, h, d) { sw = w; sh = h; sd = d; fit(); } };
+})();
 function resize() {
   bodySig = '';
   const dpr = window.SkyGfx ? SkyGfx.dpr(1.75) : Math.min(devicePixelRatio || 1, LOW ? 1 : 1.75);
@@ -3539,7 +3589,7 @@ function resize() {
   cv.width = W * dpr1; cv.height = H * dpr1;
   ctx.setTransform(dpr1, 0, 0, dpr1, 0, 0);
   sv.width = W * dpr; sv.height = H * dpr; sx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  wxc.width = W * dpr; wxc.height = H * dpr; wx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  wxc.width = W * dpr; wxc.height = H * dpr; wx2.setTransform(dpr, 0, 0, dpr, 0, 0); WxGL.size(W, H, dpr);
   seaC.width = W * dpr1; seaC.height = H * dpr1; seaX.setTransform(dpr1, 0, 0, dpr1, 0, 0); seaKc = 1;
   hsv.width = W * dpr; hsv.height = H * dpr; hsx.setTransform(dpr, 0, 0, dpr, 0, 0);
   spc.width = W * dpr; spc.height = H * dpr; spx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -4463,6 +4513,15 @@ function setWx(type) {
 }
 let wxDrawn = false;
 function drawWx(dt, now) {
+  const has = drops.length > 0 || flakes.length > 0;
+  if (has && WxGL.init()) {   // [item 1] GPU: simulasi sama persis dengan jalur 2D di bawah, hanya penggambarannya di WebGL
+    if (wxDrawn) { wx2.clearRect(0, 0, W, H); wxDrawn = false; }
+    showCv(wxc, false);
+    for (const d of drops) { d.y += d.v * dt; d.x += d.v * .18 * dt; if (d.y > H) { d.y = -20; d.x = rnd(-.2, 1.2) * W; } }
+    for (const f of flakes) { f.y += f.v * dt; f.x += Math.sin(now / 1000 * f.w + f.p) * 14 * dt + 6 * dt; if (f.y > H) { f.y = -5; f.x = rnd(0, W); } if (f.x > W + 5) f.x = -5; }
+    WxGL.draw(drops, flakes, night); WxGL.show(true);
+  } else {
+    WxGL.show(false);
   { const has = drops.length > 0 || flakes.length > 0; if (has || wxDrawn) wx2.clearRect(0, 0, W, H); wxDrawn = has; showCv(wxc, has); }
   if (drops.length) {
     wx2.strokeStyle = night ? 'rgba(170,190,235,.5)' : 'rgba(225,238,255,.55)'; wx2.lineWidth = 1; wx2.beginPath();
@@ -4481,6 +4540,7 @@ function drawWx(dt, now) {
       if (f.x > W + 5) f.x = -5;
       wx2.beginPath(); wx2.arc(f.x, f.y, f.r, 0, 6.283); wx2.fill();
     }
+  }
   }
   if (wx === 'storm' && !REDUCE) {
     if (now > nextBolt) { boltAt = now; nextBolt = now + rnd(7000, 16000); }
@@ -4970,7 +5030,7 @@ body.evForest #skFront { visibility: visible !important; transition: none !impor
 /* penyesuaian elemen bawaan, tanpa mengubah CSS induk */
 #skFront.fmix.w-rain .skCover { opacity: calc(.9 * (1 - var(--fp, 0))); }
 #skFront.fmix.w-storm .skCover { opacity: calc(1 - var(--fp, 0)); }
-#skFront.fmix .skTint, #skFront.fmix #skWx { opacity: calc(1 - var(--fp, 0)); }   /* awan gelap dan hujan bawaan memudar saat hujan hutan menggantikan */
+#skFront.fmix .skTint, #skFront.fmix #skWx, #skFront.fmix #skWxGL { opacity: calc(1 - var(--fp, 0)); }   /* awan gelap dan hujan bawaan memudar saat hujan hutan menggantikan */
 
 `;
 document.head.appendChild(css);
