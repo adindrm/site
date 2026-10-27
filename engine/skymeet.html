@@ -246,6 +246,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
 
   /* ===== layar login (demo) ===== */
   #loginScreen{
+    --toast-bg:rgba(20,22,45,0.98); --toast-fg:#f4f5fb; --top:#0b1026;
     position:fixed; inset:0; z-index:9998; overflow-y:auto;
     display:flex; align-items:flex-start; justify-content:center; padding:24px;
     color:#f4f5fb;
@@ -1107,8 +1108,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @media (prefers-reduced-motion: reduce){ .flame.flk{ animation:none; } }
   .pill small.wx{ opacity:.6; font-size:11px; margin-left:5px; font-weight:400; }
   /* ikon melayang progres harian */
-  #fab{ display:none; position:fixed; z-index:30; width:52px; height:52px; padding:0; border:none; background:none; place-items:center; color:#ffd27a; cursor:pointer; touch-action:none; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.45)); -webkit-tap-highlight-color:transparent; }
-  body.ready.fabOn #fab{ display:grid; animation:fabIn .45s cubic-bezier(.2,.9,.3,1) both; }   /* tampil di semua halaman */
+  #fab{ display:none; position:relative; flex:none; z-index:1; width:44px; height:44px; padding:0; border:none; background:none; place-items:center; color:#ffd27a; cursor:pointer; touch-action:manipulation; pointer-events:auto; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.45)); -webkit-tap-highlight-color:transparent; }   /* ikon progres harian: tampil di header menggantikan tombol bahasa (tidak melayang/tidak bisa digeser) */
+  body.ready.fabOn #fab{ display:grid; animation:fabIn .45s cubic-bezier(.2,.9,.3,1) both, fabBob 5.5s ease-in-out .6s infinite; }   /* masuk + melayang naik-turun halus (properti translate terpisah dari transform) */
+  body.fabOn #langCurrent, #fab.out ~ #langCurrent, body.fabOn #langMenu{ display:none; }   /* ikon progres menggantikan tombol bahasa di header (bahasa tetap bisa diganti di Pengaturan) */
   #fab.out{ display:grid; animation:fabOut .3s ease-in both; pointer-events:none; }               /* menciut lalu hilang (JS lalu memicu ledakan partikel) */
   @keyframes fabIn{ 0%{ opacity:0; transform:scale(.05); } 65%{ opacity:1; transform:scale(1.12); } 100%{ opacity:1; transform:none; } }
   @keyframes fabOut{ 0%{ opacity:1; transform:none; } 100%{ opacity:0; transform:scale(.05); } }
@@ -1116,8 +1118,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   /* selesai harian: TANPA membesar. Cahaya perlahan makin terang (0-55%), lalu ikon perlahan luruh/memudar (55-100%) sambil melepas partikel api (JS) */
   @keyframes fabFin{ 0%{ opacity:1; transform:scale(1); filter:drop-shadow(0 2px 6px rgba(0,0,0,.45)) blur(0px); } 45%{ opacity:1; transform:scale(.88); filter:drop-shadow(0 2px 6px rgba(0,0,0,.45)) blur(0px); } 100%{ opacity:0; transform:scale(.18); filter:drop-shadow(0 0 0 rgba(0,0,0,0)) blur(4px); } }   /* perlahan mengecil sambil memudar */
   #fab.fin{ animation:fabFin 2.8s ease-in-out both; transform-origin:50% 86%; }
-  #fab.up, #fab.up.fin{ transform-origin:50% var(--oy,76%); }   /* titik pusat = dasar api = ujung tali: skala 1.3 & animasi mengecil tetap berpusat di ujung tali (tanpa bergeser) */
-  #fab.up.dn{ scale:1; }   /* di panel: ikon sudah ber-scale 1.3 — mengganti titik pusat saat animasi mulai membuatnya bergeser */   /* menciut ke tengah-bawah (dasar api) */
   @keyframes fabGlow{ 0%{ filter:var(--fin0, var(--fx-gray)); } 55%,100%{ filter:grayscale(0) opacity(1) brightness(2.4) drop-shadow(0 0 6px rgba(255,250,215,1)) drop-shadow(0 0 24px rgba(255,205,95,1)); } }
   #fab.fin .flame{ animation:fabGlow 2.8s ease-in-out both; }
   #fab .flame{ width:36px; height:36px; font-size:30px; pointer-events:none; filter:var(--fx-gray); transition:filter 1.8s ease; }   /* diam = abu-abu */
@@ -1128,25 +1128,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fab.gray{ color:#9aa0b4; }
   #fabOv .fp{ transition:filter 1.4s ease; }
   #fabOv.gry .fp{ filter:grayscale(1); }
-  /* ===== ikon melayang v2: bola kaca + aura berdenyut + cincin progres + percikan mengorbit + melayang halus + magnet ke tepi ===== */
-  #fab{ isolation:isolate; transition:scale .22s ease; }
-  #fab .flame{ position:relative; z-index:2; }
-  #fab .fabDeco{ position:absolute; inset:0; pointer-events:none; }
-  #fab .fAura{ position:absolute; inset:-14px; z-index:0; border-radius:50%; background:radial-gradient(closest-side, rgba(255,214,130,0.42), rgba(255,170,80,0.14) 55%, transparent 72%); opacity:.5; animation:fabAura 3.6s ease-in-out infinite; }
-  #fab .fOrbit{ position:absolute; inset:-4px; z-index:3; animation:fabSpin 9s linear infinite; }
-  #fab .fOrbit i{ position:absolute; top:0; left:50%; width:4px; height:4px; margin-left:-2px; border-radius:50%; background:#fff4cc; box-shadow:0 0 6px 1px rgba(255,214,130,0.95); opacity:.7; animation:fabTw 2.4s ease-in-out infinite; }
-  #fab .fOrbit.o2{ inset:3px; animation-duration:14s; animation-direction:reverse; }
-  #fab .fOrbit.o2 i{ top:auto; bottom:0; width:3px; height:3px; margin-left:-1.5px; animation-delay:-1.1s; }
-  @keyframes fabSpin{ to{ transform:rotate(360deg); } }
-  @keyframes fabTw{ 0%,100%{ opacity:.25; transform:scale(.7); } 50%{ opacity:1; transform:scale(1.15); } }
-  @keyframes fabAura{ 0%,100%{ transform:scale(.92); opacity:.4; } 50%{ transform:scale(1.08); opacity:.8; } }
+  /* ===== ikon progres di header: melayang naik-turun halus ===== */
   @keyframes fabBob{ 0%,100%{ translate:0 0; } 50%{ translate:0 -3px; } }
-  body.ready.fabOn #fab{ animation:fabIn .45s cubic-bezier(.2,.9,.3,1) both, fabBob 5.5s ease-in-out .6s infinite; }   /* masuk + melayang naik-turun halus (properti translate terpisah dari transform) */
-  #fab.drag{ scale:1.12; animation-play-state:running, paused; }
-  #fab.mag{ transition:left 2.4s cubic-bezier(.45,.05,.2,1), scale .22s ease; }   /* magnet: pelan di awal, makin cepat, lalu menempel */
-  #fab.lit .fAura{ opacity:1; animation-duration:1.8s; }
-  #fab.lit .fOrbit i{ opacity:1; }
-  @media (prefers-reduced-motion: reduce){ body.ready.fabOn #fab{ animation:none; } #fab .fAura, #fab .fOrbit, #fab .fOrbit i{ animation:none; } #fab.mag, #fab{ transition:none; } }
   /* panel ikon melayang v2: kaca gelap berpendar hangat, handle, bilah progres, baris berkartu */
   #fabOv{ backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
   #fabOv .fp{ position:relative; overflow:hidden; background:linear-gradient(180deg, rgba(42,50,98,0.97), rgba(18,22,48,0.985) 62%); border-color:rgba(255,226,160,0.22); box-shadow:0 -14px 40px rgba(0,0,0,0.5), 0 -1px 26px rgba(255,200,110,0.14); }
@@ -1295,7 +1278,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
   }
   body.ready #nav{ opacity:1; transform:none; pointer-events:none; }
-  #navBtn, #langCurrent{ pointer-events:auto; }
+  #navBtn, #langCurrent, #fab{ pointer-events:auto; }
   /* pemutar musik mini di header (tengah, antara Menu dan bahasa): ketuk = buka kontrol (jeda/lanjut + sebelumnya/berikutnya), tekan lama = daftar lagu */
   #musicBox{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 16px); left:50%; transform:translateX(-50%); z-index:10; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s; }
   body.ready.mz:not(.p2):not(.p3):not(.p4):not(.p5):not(.p6) #musicBox{   /* hanya di beranda */ opacity:1; visibility:visible; transition:opacity .5s ease .2s, visibility 0s; }
@@ -1541,9 +1524,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #hdrLogo{ display:inline-flex; align-items:center; height:28px; color:var(--ink); opacity:.92; pointer-events:none; }
   #hdrLogo svg{ width:22px; height:22px; } #hdrLogo img.ai{ height:28px; width:auto; max-width:96px; }
   #netInd svg path{ transition:opacity .3s ease; }
-  #netInd{ display:inline-flex; align-items:center; height:20px; padding-right:9px; margin-right:1px; border-right:1px solid rgba(128,128,128,0.35); color:var(--ok); transition:color .3s ease; }
-  #langCurrent #netInd svg{ width:16px; height:16px; transform:none; }
-  #langCurrent[aria-expanded="true"] #netInd svg{ transform:none; }
+  #netInd{ position:fixed; right:calc(env(safe-area-inset-right, 0px) + 10px); bottom:calc(env(safe-area-inset-bottom, 0px) + 10px); z-index:11; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; color:var(--ok); opacity:0; pointer-events:none; filter:drop-shadow(0 0 2px rgba(0,0,0,0.45)); transition:color .3s ease, opacity .6s ease .3s; }   /* indikator jaringan: kecil di sudut kanan bawah */
+  body.ready #netInd{ opacity:.85; }
+  #netInd svg{ width:13px; height:13px; }
   #hdrLogo{ margin-left:2px; }
   #netInd .sl{ opacity:0; }
   #netInd.weak{ color:var(--warn); } #netInd.weak .b2, #netInd.weak .b3{ opacity:.28; }
@@ -1594,9 +1577,21 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @keyframes gFade{ from{ opacity:0; } to{ opacity:1; } }
   @keyframes gPop{ from{ opacity:0; transform:translateY(10px) scale(.96); } to{ opacity:1; transform:none; } }
   @media (prefers-reduced-motion: reduce){ #guestOv, #guestBox{ animation:none !important; } }
+  /* login: dialog tamu tampil sebagai satu kartu solid yang rapi di tengah layar, tanpa kotak/form di belakang yang menembus */
+  #guestOv{ z-index:20; background:rgba(3,6,17,0.86); -webkit-backdrop-filter:none; backdrop-filter:none; overflow-y:auto; }   /* tanpa blur: blur di dalam kartu yang beranimasi terpotong dan tampak sebagai kotak */
+  #guestBox{ box-sizing:border-box; margin:auto; background:#141630; color:#f4f5fb; border:1px solid rgba(255,255,255,0.12); box-shadow:0 18px 50px rgba(0,0,0,0.55); }
+  #guestBox .lgWarn{ color:#f4f5fb; }
+  #gOk{ background:#f4f5fb; color:#0b1026; }
+  #gNo{ color:#f4f5fb; }
+
   img.ai.av{ display:inline-block; width:1em; height:1em; vertical-align:middle; animation:none; }
   /* aset berwarna dasar putih: malam tetap putih, siang jadi gelap mengikuti warna teks (var(--ink)) */
   #lgLogoBox img.ai, #hdrLogo img.ai, #navBtn img.ai, .nav-item img.ai, #addOpen img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
+  /* tombol menu: tanpa ikon hamburger & tulisan 'Menu' — hanya logo Skymeet */
+  #navBtn > svg, #navBtn > img, #navLabel{ display:none !important; }
+  #navBtn, #navBtn:not(#x){ width:auto; padding:0 14px; gap:0; justify-content:center; }
+  #hdrLogo{ display:inline-flex !important; margin-left:0; }
+
   .avI{ display:inline-grid; place-items:center; width:1em; height:1em; color:var(--ink-soft); vertical-align:middle; }
   .avI svg{ width:100%; height:100%; display:block; }
   img.ai.av{ filter:var(--logo-filter); }
@@ -1682,10 +1677,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #msgSheet .rxRow[hidden]{ display:none; }
   #msgSheet .rxRow button{ flex:1; padding:7px 0; font-size:24px; line-height:1; text-align:center; border-radius:12px; background:rgba(128,128,128,0.18); }
   #msgSheet .rxRow button.on{ background:rgba(255,200,90,0.35); box-shadow:0 0 0 1.5px rgba(255,200,90,0.9); }
-  /* ===== ikon melayang v3: terbang ke atas panel & kembali ===== */
-  #fab.fly{ transition:left .85s cubic-bezier(.45,.05,.2,1), top .85s cubic-bezier(.45,.05,.2,1), scale .22s ease; }
-  #fab.up{ z-index:205; }
-  body:has(#friendOverlay.open) #fab, body:has(#chatOverlay.open) #fab{ z-index:61; }   /* ikon melayang tetap tampak di profil teman & room chat (di bawah kartu tambah teman/pengaturan) */
+  /* ===== petunjuk ikon progres ===== */
   #fabHint{ position:fixed; inset:0; z-index:300; opacity:0; transition:opacity .35s ease; cursor:pointer; }
   #fabHint.on{ opacity:1; }
   #fabHint .hdim{ position:absolute; inset:0; background:rgba(4,7,18,.62); -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);
@@ -1711,7 +1703,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #fabOv .fmb::after{ content:''; position:absolute; inset:0; width:calc(var(--q,0) * 100%); border-radius:3px; background:linear-gradient(90deg,#ffb04a,#ffe08a); transition:width .5s ease; }
   #fabOv .pill{ min-height:36px; padding:0 12px; border-radius:12px; border-color:rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#f4f5fb; }
   #fabOv .pill[aria-pressed="true"]{ background:linear-gradient(135deg,#ffe9a8,#ffc86a); color:#2a2140; border-color:transparent; box-shadow:0 0 12px rgba(255,200,100,0.45); }
-  @media (prefers-reduced-motion: reduce){ #fab.fly{ transition-duration:.01s !important; } }
 
   /* ===== ikon ajakan/momen dari aset: warna ikut tema ===== */
   .ic2{ display:inline-grid; place-items:center; width:1.2em; height:1.2em; margin-right:6px; vertical-align:-.22em; flex:none; }
@@ -1725,19 +1716,6 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .momH{ display:flex; align-items:center; }
   .momLock b{ display:grid; place-items:center; } .momLock b .ic2{ width:42px; height:42px; margin:0; vertical-align:baseline; }
   #chatHead .hb img.ai, #chatAttach img.ai{ filter:var(--logo-filter); transition:filter .6s linear; }
-  /* ===== ikon melayang: hiasan hanya saat panel terbuka; panel = lilin putih, ikon = nyala di ujung sumbu ===== */
-  #fab .fabDeco{ opacity:0; transition:opacity .35s ease; }
-  #fab:not(.up) .fabDeco, #fab:not(.up) .fabDeco *{ animation-play-state:paused !important; }   /* [perf] hiasan (aura, orbit, kelip) tak terlihat saat panel tertutup: jangan dianimasikan terus-menerus */
-  #fab.up .fabDeco{ opacity:1; transition:opacity .9s ease .45s; }
-  #fab.up .fAura{ inset:-22px; }
-  #fab.fly{ transition:left .85s cubic-bezier(.45,.05,.2,1), top .85s cubic-bezier(.45,.05,.2,1), scale .85s cubic-bezier(.45,.05,.2,1); }
-  #fab.up{ scale:1.3; translate:0 0 !important; }
-  #fab.up:not(.gray) .flame{ filter:var(--fx-lit); }
-  /* api di sumbu panel mengikuti progres realm (--lv 0..1, diisi JS): 0 = abu-abu & redup & kecil; makin banyak area selesai = makin berwarna, terang, besar; lilin abu-abu (20) = paling terang */
-  #fab.up .flame, #fab.up:not(.gray) .flame{ scale:var(--fu,1); transform-origin:50% calc(var(--fy,.88) * 100%); filter:grayscale(var(--fg,1)) opacity(var(--fo,.42)) brightness(var(--fb,1)) drop-shadow(0 0 var(--fr,0px) rgba(255,214,90,var(--fa,0))); transition:filter 1.6s ease, scale 1.6s ease; }
-  #fab.up.dn .flame, #fab.up.dn:not(.gray) .flame{ scale:1; transition:filter 1.6s ease, scale .85s cubic-bezier(.45,.05,.2,1); }   /* panel ditutup: api kembali ke ukuran normal selama terbang pulang */
-  #fab.up .fabDeco{ opacity:calc(.1 + .9 * var(--lv,0)); transition:opacity 1.2s ease; }
-  @media (prefers-reduced-motion: reduce){ #fab.up .flame, #fab.up .fabDeco{ transition:none; } }
   /* ===== panel progres harian: 8 kategori = ikon + nama kecil; urutan 1 2 3 [0] 4 5 6, lalu 20 di bawah ===== */
   #fabOv .fgrid{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:3px; padding:2px 0 4px; }
   #fabOv .fic{ position:relative; display:flex; flex-direction:column; align-items:center; gap:3px; min-width:0; padding:8px 1px 6px; border:1px solid transparent; border-radius:14px; background:none; color:var(--ink); font:inherit; cursor:pointer; touch-action:manipulation; transition:background .2s ease, border-color .2s ease; }
@@ -1846,8 +1824,8 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #skKid svg, .skKid svg{ display:block; width:100%; height:100%; overflow:visible; }
   /* nama akun di atas kepala tiap Sky kid di Beranda */
   .skNm{ position:absolute; left:0; top:0; z-index:2; opacity:0; pointer-events:none; white-space:nowrap; will-change:transform, opacity; max-width:90px; overflow:hidden; text-overflow:ellipsis;
-    font:600 11px/1.2 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; letter-spacing:.02em; color:#fff; text-shadow:0 0 3px rgba(10,14,40,.85), 0 1px 2px rgba(10,14,40,.7); }
-  .skNm.me{ font-weight:700; color:#fff4c2; }
+    font:300 9px/1.2 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; letter-spacing:.03em; color:#fff; text-shadow:0 0 3px rgba(10,14,40,.85), 0 1px 2px rgba(10,14,40,.7); }
+  .skNm.me{ font-weight:300; color:#fff4c2; }
   .skWinds{ position:absolute; left:0; right:0; bottom:0; height:46%; pointer-events:none; overflow:hidden; }
   .skCover{ position:absolute; left:0; right:0; top:0; height:62%; overflow:hidden; pointer-events:none; opacity:0; transition:opacity 2.5s; }
   .skPuff{ position:absolute; left:0; will-change:transform; animation:skWindMove var(--dur) linear infinite; animation-delay:var(--delay); }
@@ -1874,10 +1852,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   #wxLine svg{ width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
   #wxLine .wt{ color:var(--ink); font-weight:500; }
   @media (max-height:420px) and (orientation:landscape){ #wxLine{ display:none; } }
-  /* grafik: sedang = tanpa partikel debu & hiasan ikon melayang; rendah = juga tanpa kabut, nebula, blur kaca, dan kedip awan */
+  /* grafik: sedang = tanpa partikel debu; rendah = juga tanpa kabut, nebula, blur kaca, dan kedip awan */
   html.gfx-medium #stars .motes, html.gfx-medium #loginStars .motes, html.gfx-low #stars .motes, html.gfx-low #loginStars .motes,
-  html.gfx-low #stars .nebula, html.gfx-low #loginStars .nebula, html.gfx-low .skMist, html.gfx-low .skFog, html.gfx-low #fab .fabDeco{ display:none !important; }
-  html.gfx-medium #fab .fOrbit, html.gfx-medium #fab .fAura{ animation:none; }
+  html.gfx-low #stars .nebula, html.gfx-low #loginStars .nebula, html.gfx-low .skMist, html.gfx-low .skFog{ display:none !important; }
   html.gfx-low .skPuff i{ animation:none !important; }
   html.gfx-low *, html.gfx-low *::before, html.gfx-low *::after{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
   html.gfx-low #setOv, html.gfx-low #rsOv, html.gfx-low #avOv{ background:rgba(0,0,0,0.62); }
@@ -2330,19 +2307,19 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 <svg class="gcL" viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg">
   <g transform="translate(0 36)">
     <g class="gc-rock gc-castle" style="animation-delay:.4s;animation-duration:6.5s;--dx:2px;--dy:-6px;--r:5deg">
-      <g transform="translate(348.00 114.52) scale(0.330)">
+      <g transform="translate(348.00 118.52) scale(0.330)">
         <use href="#gc-castle-p" fill="#7a5090"/>
       </g>
     </g>
     <g transform="translate(0 -36)">
     <g class="gc-rock" style="animation-delay:0s;animation-duration:6s;--dx:2.4px;--dy:-6.4px;--r:10deg">
-      <polygon points="365.4,209.4 369.0,202.8 375.6,204.0 377.4,210.0 372.6,213.6" fill="#7a5090"/>
+      <polygon points="365.7,213.2 369.3,206.6 375.9,207.8 377.7,213.8 372.9,217.4" fill="#7a5090"/>
     </g>
     <g class="gc-rock" style="animation-delay:2.1s;animation-duration:6.5s;--dx:-1.6px;--dy:-4.0px;--r:-9deg">
-      <polygon points="382.7,184.7 384.5,181.4 387.8,182.0 388.7,185.0 386.3,186.8" fill="#7a5090"/>
+      <polygon points="398.5,178.6 400.3,175.3 403.6,175.9 404.5,178.9 402.1,180.7" fill="#7a5090"/>
     </g>
     <g class="gc-rock" style="animation-delay:0.3s;animation-duration:7.5s;--dx:2.4px;--dy:-4.8px;--r:8deg">
-      <polygon points="415.1,205.9 417.2,202.0 421.1,202.8 422.1,206.3 419.3,208.4" fill="#7a5090"/>
+      <polygon points="413.3,205.9 415.4,202.0 419.3,202.8 420.3,206.3 417.5,208.4" fill="#7a5090"/>
     </g>
     </g>
   </g>
@@ -2724,18 +2701,18 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
       <button type="button" id="regBtn"></button>
       <button type="button" id="regBack"></button>
     </div>
-    <div id="guestOv" hidden>
-      <div id="guestBox" role="dialog" aria-modal="true" aria-labelledby="gTitle">
-        <h2 id="gTitle"></h2>
-        <p class="lgWarn" id="lgWarn"></p>
-        <button type="button" id="gOk"></button>
-        <button type="button" id="gNo"></button>
-      </div>
-    </div>
     <div id="loginLang" role="group" aria-label="Language">
       <button type="button" data-l="en">EN</button>
       <button type="button" data-l="id">ID</button>
       <button type="button" data-l="es">ES</button>
+    </div>
+  </div>
+  <div id="guestOv" hidden>
+    <div id="guestBox" role="dialog" aria-modal="true" aria-labelledby="gTitle">
+      <h2 id="gTitle"></h2>
+      <p class="lgWarn" id="lgWarn"></p>
+      <button type="button" id="gOk"></button>
+      <button type="button" id="gNo"></button>
     </div>
   </div>
 </div>
@@ -2847,7 +2824,6 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
   <div id="topRow">
   <button id="addOpen" type="button" aria-label="Add friend"><svg data-asset="header/tambah-teman.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9.5" cy="8" r="3.5"/><path d="M2.8 20c.4-3.6 3.2-5.8 6.7-5.8s6.3 2.2 6.7 5.8M19 7v6M16 10h6"/></svg><small id="addOpenT">Add friend</small></button>
   <button id="langCurrent" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
-    <span id="netInd" class="ok" role="img" aria-label="Online" title="Online"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path class="b1" d="M6 19v-3"/><path class="b2" d="M12 19v-7"/><path class="b3" d="M18 19V6"/><path class="sl" d="M4 4l16 16"/></svg></span>
     <span id="langCurrentLabel">EN</span>
     <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
   </button>
@@ -2858,6 +2834,9 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
     <button class="lang-btn" type="button" role="option" data-lang="es" aria-selected="false"><span>ES</span><span>Español</span></button>
   </div>
 </div>
+
+<!-- indikator jaringan: kecil di sudut kanan bawah -->
+<span id="netInd" class="ok" role="img" aria-label="Online" title="Online"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path class="b1" d="M6 19v-3"/><path class="b2" d="M12 19v-7"/><path class="b3" d="M18 19V6"/><path class="sl" d="M4 4l16 16"/></svg></span>
 
 <div id="musicBox" role="group" aria-label="Music">
   <div id="mzBar">
@@ -7164,7 +7143,7 @@ initPerm(); startLoop();
     paintFab();
   }
   Store.onChange(k => { if(k === '*' || k === 'pg' || k === 'fab') paintPg(); });
-  // ---------- ikon melayang progres harian (saklar di kiri tombol lilin abu-abu) ----------
+  // ---------- ikon progres harian di header (saklar di kiri tombol lilin abu-abu); tampil menggantikan tombol bahasa ----------
   var fabReady = false;
   // animasi api: aset/skymeet/aksi/nyalakan-api-1 sampai -12 (berurutan). Tanpa frame dipakai nyalakan-api tunggal, tanpa aset dipakai emoji; keduanya digoyang lewat CSS
   const flames = new Set(); let flameTimer = null;
@@ -7279,14 +7258,14 @@ initPerm(); startLoop();
   } };
   const flameCenter = () => { const f = fabBtn.querySelector('.flame'), r = (f || fabBtn).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };   // posisi api saat ini (ikut mengecil)
   const fabCenter = () => { const r = fabBtn.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
-  // ---- ikon melayang: muncul (kecil -> normal) dan hilang (menciut -> ledakan partikel kecil) ----
-  let fabWas = null, fabFinT = null;
+  // ---- ikon header: muncul (kecil -> normal) dan hilang (menciut -> ledakan partikel kecil) ----
+  let fabWas = null;
   function fabShow(vis, kind){
     if(fabWas === vis) return;
     const first = fabWas === null; fabWas = vis;
     const b = document.body.classList;
-    if(!vis) fabMagDisarm();
-    if(vis){ fabBtn.classList.remove('out', 'fin'); b.add('fabOn'); fabMagArm(); return; }
+    { const lm = document.getElementById('langMenu'), lc = document.getElementById('langCurrent'); if(lm) lm.classList.remove('open'); if(lc) lc.setAttribute('aria-expanded', 'false'); }   // menu bahasa tertutup saat ikon progres mengambil tempatnya
+    if(vis){ fabBtn.classList.remove('out', 'fin'); b.add('fabOn'); return; }
     if(first || reduceFlame.matches || getComputedStyle(fabBtn).display === 'none'){ fabBtn.classList.remove('out', 'fin'); b.remove('fabOn'); return; }
     const fin = kind === 'finish';
     if(fin){ const fl0 = fabBtn.querySelector('.flame'); if(fl0) fabBtn.style.setProperty('--fin0', getComputedStyle(fl0).filter); }   // animasi selesai mulai dari warna api saat ini (bukan loncat ke abu-abu)
@@ -7312,7 +7291,7 @@ initPerm(); startLoop();
     const fl = fabBtn.querySelector('.flame'), from = fl ? getComputedStyle(fl).filter : null;   // warna api sekarang (abu-abu / sedang menyala) = titik awal animasi
     fabBtn.classList.add('lit'); clearTimeout(fabBtn._litT); fabBtn._litT = setTimeout(() => fabBtn.classList.remove('lit'), LIT_MS);
     if(fl) fxGlowPulse(fl, 3400, null, from);   // abu-abu -> kuning perlahan -> puncak terang; lalu kelas .lit dilepas = meredup perlahan ke abu-abu (seperti sebelumnya)
-    const [x, y] = fabCenter(); fxRise(x, y - 10, { n:Math.min(8, 4 + delta), rise:64, life:1750, size:[1.8, 3.4], sway:10, delay:800 });
+    const [x, y] = fabCenter(); fxRise(x, y - 6, { n:Math.min(8, 4 + delta), rise:38, life:1750, size:[1.8, 3.4], sway:10, delay:800 });
   }
   async function mkFlame(cls){
     const f = document.createElement('span'); f.className = 'flame flk ' + (cls || ''); f.textContent = '\ud83d\udd25';
@@ -7333,17 +7312,15 @@ initPerm(); startLoop();
   }
   window.SkyFlame = { into: flameInto, setFrame };   // dipakai tombol nyalakan api di daftar teman
   const FAB_TXT = {
-    en:{ tog:'Floating daily-progress icon', ttl:'Daily progress', all:'Select all', cap:'Grey candle (~20/day)', close:'Close', hintT:'Floating icon', hintB:'Turn this on to open your Candle run from any page. Tick areas, track daily progress and use the grey candle right from the floating icon.', hintOk:'Got it' },
-    id:{ tog:'Ikon melayang progres harian', ttl:'Progres harian', all:'Pilih semua', cap:'Lilin abu-abu (\u00b120/hari)', close:'Tutup', hintT:'Ikon melayang', hintB:'Aktifkan ini agar progres Candle run bisa dibuka dari halaman mana pun. Centang area, pantau progres harian, dan pakai lilin abu-abu langsung dari ikon melayang.', hintOk:'Mengerti' },
-    es:{ tog:'Icono flotante del progreso diario', ttl:'Progreso diario', all:'Seleccionar todo', cap:'Vela gris (~20/d\u00eda)', close:'Cerrar', hintT:'Icono flotante', hintB:'Activa esto para abrir tu Candle run desde cualquier p\u00e1gina. Marca \u00e1reas, sigue el progreso diario y usa la vela gris desde el icono flotante.', hintOk:'Entendido' }
+    en:{ tog:'Daily-progress icon (header)', ttl:'Daily progress', all:'Select all', cap:'Grey candle (~20/day)', close:'Close', hintT:'Header icon', hintB:'Turn this on to open your Candle run from any page. The icon replaces the language button in the header: tick areas, track daily progress and use the grey candle from there.', hintOk:'Got it' },
+    id:{ tog:'Ikon progres harian (header)', ttl:'Progres harian', all:'Pilih semua', cap:'Lilin abu-abu (\u00b120/hari)', close:'Tutup', hintT:'Ikon header', hintB:'Aktifkan ini agar progres Candle run bisa dibuka dari halaman mana pun. Ikon menggantikan tombol bahasa di header: centang area, pantau progres harian, dan pakai lilin abu-abu dari sana.', hintOk:'Mengerti' },
+    es:{ tog:'Icono del progreso diario (cabecera)', ttl:'Progreso diario', all:'Seleccionar todo', cap:'Vela gris (~20/d\u00eda)', close:'Cerrar', hintT:'Icono de cabecera', hintB:'Activa esto para abrir tu Candle run desde cualquier p\u00e1gina. El icono sustituye al bot\u00f3n de idioma en la cabecera: marca \u00e1reas, sigue el progreso diario y usa la vela gris desde ah\u00ed.', hintOk:'Entendido' }
   };
   const mkTx = (tag, cls, txt) => { const e = document.createElement(tag); if(cls) e.className = cls; if(txt !== undefined) e.textContent = txt; return e; };
   const fabBtn = mkTx('button'); fabBtn.id = 'fab'; fabBtn.type = 'button'; flameInto(fabBtn);
-  { const dc = mkTx('span', 'fabDeco'); dc.setAttribute('aria-hidden', 'true');   // dekorasi: aura, bola kaca, cincin progres, percikan mengorbit
-    dc.innerHTML = '<i class="fAura"></i><span class="fOrbit"><i></i></span><span class="fOrbit o2"><i></i></span>';
-    fabBtn.insertBefore(dc, fabBtn.firstChild); }
   const fabOv = mkTx('div'); fabOv.id = 'fabOv'; fabOv.hidden = true; fabOv.innerHTML = '<div class="fp" role="dialog" aria-modal="true"><i class="wick" aria-hidden="true"></i><div class="fh"><b></b><button type="button" class="fx">\u2715</button></div><div class="fs"></div><div class="fl"></div></div>';
-  document.body.append(fabBtn, fabOv);
+  document.body.append(fabOv);
+  { const tr = document.getElementById('topRow'), lc = document.getElementById('langCurrent'); if(tr && lc) tr.insertBefore(fabBtn, lc); else document.body.appendChild(fabBtn); }   // di header, tepat di tempat tombol bahasa
   const fabSwitch = mkTx('button', 'pill fabTog'); fabSwitch.type = 'button';
   flameInto(fabSwitch, 'sm'); const swSync = f => { if(fabSwitch.getAttribute('aria-pressed') === 'true') delete f.dataset.hold; else { f.dataset.hold = '1'; setFrame(f, 0); } };   // aktif = animasi api berulang terus; nonaktif = diam di frame awal
   fabSwitch._onFlame = swSync;
@@ -7381,76 +7358,14 @@ initPerm(); startLoop();
     const track = () => { if(fhEl !== el0) return; const r = fabSwitch.getBoundingClientRect(); if(Math.abs(r.left - tkX) < .5 && Math.abs(r.top - tkY) < .5) tkStable++; else { tkStable = 0; tkX = r.left; tkY = r.top; fhPlace(); } if(++tkN < 300 && tkStable < 30) requestAnimationFrame(track); }; track();   // ikut posisi tombol selama halaman masih bergeser/animasi masuk, jadi lingkaran selalu tepat di tengah
   }
   window.addEventListener('sky:page', e => { clearTimeout(fhT); if(e.detail.page === 3) fhT = setTimeout(fhShow, 1100); else fhClose(); });
-  let fabHome = null, flyT = null;
-  let fabArt = .88;   // posisi dasar gambar api (0..1 dari tinggi kotak api); diukur dari piksel frame api
-  function artFy(){
-    const fl = fabBtn.querySelector('.flame'); if(!fl) return; let best = -1;
-    try{ fl.querySelectorAll('img').forEach(im => {
-      if(!im.complete || !im.naturalWidth) return;
-      const w = Math.min(im.naturalWidth, 128), h = Math.max(1, Math.round(w * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = w; c.height = h;
-      const x = c.getContext('2d'); x.drawImage(im, 0, 0, w, h); const d = x.getImageData(0, 0, w, h).data; let row = -1;
-      for(let y = h - 1; y >= 0 && row < 0; y--) for(let k = 0; k < w; k++) if(d[(y * w + k) * 4 + 3] > 24){ row = y; break; }
-      if(row >= 0) best = Math.max(best, (im.offsetTop + (row + 1) / h * im.offsetHeight) / fl.offsetHeight);
-    }); }catch(e){ return; }
-    if(best > .3 && best <= 1.1) fabArt = best;
-  }
-  const fabFly = up => {   // ikon pindah pelan ke tepi atas panel; saat panel ditutup kembali ke tempat semula
-    const fp = fabOv.querySelector('.fp');
-    clearTimeout(flyT); fabBtn.classList.add('fly'); fabBtn.classList.toggle('dn', !up);
-    if(up){
-      fabBtn.classList.add('up');
-      fabBtn.style.left = Math.round(innerWidth / 2 - FAB_SZ / 2) + 'px';
-      artFy(); const fl = fabBtn.querySelector('.flame'), py = fl ? fl.offsetTop + fabArt * fl.offsetHeight : 8 + fabArt * 36;   // py: dasar gambar api di dalam ikon
-      fabBtn.style.setProperty('--fy', fabArt); fabBtn.style.setProperty('--oy', (py / FAB_SZ * 100).toFixed(2) + '%');
-      fabBtn.style.top = Math.round(innerHeight - fp.offsetHeight - 26 - py + 1) + 'px';   // dasar api tepat di ujung tali (ujung tali = 26px di atas panel)   // api duduk di ujung sumbu (sumbu 26px di atas panel; ikon diperbesar 1.3x)
-    } else if(fabHome){
-      fabBtn.style.left = fabHome.l + 'px'; fabBtn.style.top = fabHome.t + 'px';
-      flyT = setTimeout(() => { fabBtn.classList.remove('fly', 'up', 'dn'); fabHome = null; fabMagArm(); }, 950);
-    }
-  };
-  const openFab = () => {
-    fabMagDisarm(); clearTimeout(magEnd); fabBtn.classList.remove('mag');
-    if(!fabHome) fabHome = { l: fabBtn.offsetLeft, t: fabBtn.offsetTop };
-    fabOpen = -1; fabOv.classList.add('first'); setTimeout(() => fabOv.classList.remove('first'), 1100); fabOv.hidden = false; paintFab();
-    requestAnimationFrame(() => { if(!fabOv.hidden) fabFly(true); });
-  }, closeFab = () => { if(fabOv.hidden) return; fabOv.hidden = true; fabFly(false); };
+  const openFab = () => { fabOpen = -1; fabOv.classList.add('first'); setTimeout(() => fabOv.classList.remove('first'), 1100); fabOv.hidden = false; paintFab(); },
+    closeFab = () => { if(!fabOv.hidden) fabOv.hidden = true; };
   fabOv.querySelector('.fp').addEventListener('click', e => { if(fabOpen >= 0 && !e.target.closest('.fblk, .fic, .fx')) fabToggle(fabOpen); }, true);   // menekan elemen lain = dropdown yang terbuka menutup
   fabOv.querySelector('.fx').onclick = closeFab; fabOv.addEventListener('click', e => { if(e.target === fabOv) closeFab(); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !fabOv.hidden) closeFab(); });
   window.addEventListener('sky:page', closeFab);
-  let fabPos = null; try{ fabPos = JSON.parse(localStorage.getItem('sky_fab_pos') || 'null'); }catch(e){}
-  const FAB_SZ = 52, FAB_EDGE = 8, FAB_MAG_WAIT = 3000;
-  const fabSave = () => { try{ localStorage.setItem('sky_fab_pos', JSON.stringify(fabPos)); }catch(e){} };
-  const fabPlace = () => {
-    const w = innerWidth, h = innerHeight; let x = fabPos ? fabPos.x * w : w - 66, y = fabPos ? fabPos.y * h : h - 170;
-    if(fabPos && fabPos.s === 'l') x = FAB_EDGE; else if(fabPos && fabPos.s === 'r') x = w - FAB_SZ - FAB_EDGE;   // sudah menempel ke tepi: tetap menempel walau ukuran layar berubah
-    fabBtn.style.left = Math.max(6, Math.min(w - 58, x)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(h - 58, y)) + 'px';
-  };
-  fabPlace(); window.addEventListener('resize', () => { if(!fabOv.hidden){ paintFab(); fabFly(true); return; } if(fabHome) return; fabPlace(); fabMagArm(); });
-  // magnet: kalau ikon dibiarkan bebas 10 detik (tidak disentuh, panel tertutup, tab terlihat), ia meluncur PELAN ke tepi kiri/kanan yang lebih dekat
-  let magT = null, magEnd = null;
-  function fabMagDisarm(){ clearTimeout(magT); magT = null; }
-  function fabMagArm(){ fabMagDisarm(); magT = setTimeout(fabMagnet, FAB_MAG_WAIT); }
-  function fabMagnet(){
-    magT = null;
-    const on = document.body.classList.contains('fabOn');
-    if(!on) return;
-    if(fabBtn.classList.contains('out') || fabDrag || !fabOv.hidden || document.hidden){ fabMagArm(); return; }   // belum "bebas": tunggu 10 detik lagi
-    const w = innerWidth, l = fabBtn.offsetLeft, side = l + FAB_SZ / 2 < w / 2 ? 'l' : 'r', tx = side === 'l' ? FAB_EDGE : w - FAB_SZ - FAB_EDGE;
-    if(Math.abs(l - tx) < 3){ fabPos = { x: l / w, y: fabBtn.offsetTop / innerHeight, s: side }; fabSave(); return; }   // sudah menempel
-    fabBtn.classList.add('mag'); fabBtn.style.left = tx + 'px';
-    clearTimeout(magEnd); magEnd = setTimeout(() => { fabBtn.classList.remove('mag'); fabPos = { x: tx / innerWidth, y: fabBtn.offsetTop / innerHeight, s: side }; fabSave(); }, 2500);
-  }
-  let fabDrag = null;
-  fabBtn.addEventListener('pointerdown', e => {
-    fabMagDisarm(); clearTimeout(magEnd);
-    if(fabBtn.classList.contains('mag')){ fabBtn.style.left = fabBtn.offsetLeft + 'px'; fabBtn.classList.remove('mag'); }   // sedang meluncur: tahan di posisi sekarang
-    fabDrag = { x:e.clientX, y:e.clientY, l:fabBtn.offsetLeft, t:fabBtn.offsetTop, m:false }; try{ fabBtn.setPointerCapture(e.pointerId); }catch(x){}
-  });
-  fabBtn.addEventListener('pointermove', e => { if(!fabDrag || !fabOv.hidden) return; const dx = e.clientX - fabDrag.x, dy = e.clientY - fabDrag.y; if(!fabDrag.m && Math.hypot(dx, dy) > 6){ fabDrag.m = true; fabBtn.classList.add('drag'); } if(fabDrag.m){ fabBtn.style.left = Math.max(6, Math.min(innerWidth - 58, fabDrag.l + dx)) + 'px'; fabBtn.style.top = Math.max(6, Math.min(innerHeight - 58, fabDrag.t + dy)) + 'px'; } });
-  fabBtn.addEventListener('pointerup', () => { if(!fabDrag) return; const m = fabDrag.m; fabDrag = null; fabBtn.classList.remove('drag'); if(m){ fabPos = { x: fabBtn.offsetLeft / innerWidth, y: fabBtn.offsetTop / innerHeight }; fabSave(); fabMagArm(); } else (fabOv.hidden ? openFab() : closeFab()); });
-  fabBtn.addEventListener('pointercancel', () => { fabDrag = null; fabBtn.classList.remove('drag'); fabMagArm(); });
-  fabBtn.addEventListener('click', e => { if(e.detail === 0) (fabOv.hidden ? openFab() : closeFab()); });
+  window.addEventListener('resize', () => { if(!fabOv.hidden) paintFab(); });
+  fabBtn.addEventListener('click', () => (fabOv.hidden ? openFab() : closeFab()));
   const flipArea = (ri, ai) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0); r[ri] ^= 1 << ai; if(r.every(x => !x)) delete d.runs[k]; });
   const flipRealm = (ri, len) => pgWrite(d => { const k = dayK(); d.runs = d.runs || {}; const r = d.runs[k] = d.runs[k] || AREAS.map(() => 0), full = (1 << len) - 1; r[ri] = r[ri] === full ? 0 : full; if(r.every(x => !x)) delete d.runs[k]; });
   let fabOpen = -1;   // indeks dropdown area yang terbuka (-1 = semua tertutup); hanya satu yang boleh terbuka
@@ -7482,26 +7397,19 @@ initPerm(); startLoop();
     let mx = 0; fl.querySelectorAll('.fblk').forEach(k => { const h = k.hidden; k.hidden = false; mx = Math.max(mx, k.offsetHeight + 8); k.hidden = h; });   // ukur tiap blok isi (8px = jarak atasnya)
     const need = Math.ceil(fp.offsetHeight - fl.clientHeight + grid.offsetHeight + mx + 10), cap = Math.round(innerHeight * .86), lo = Math.round(Math.min(innerHeight * .56, cap));
     const h = Math.max(lo, Math.min(need, cap));   // layar pendek: dibatasi 86% tinggi layar, sisanya baru menggulir
-    if(fp.style.height !== h + 'px'){ fp.style.height = h + 'px'; if(fabBtn.classList.contains('up')) fabFly(true); }
+    if(fp.style.height !== h + 'px') fp.style.height = h + 'px';
   }
   function paintFab(){
     if(!fabReady) return;
     const on = !!Store.get('fab', 0), d = pgData(), t = FAB_TXT[lang] || FAB_TXT.en, today = (d.runs || {})[dayK()] || [], cap = !!(d.cap || {})[dayK()], wu = lang === 'es' ? 'cera' : 'wax';
-    { const lv0 = parseFloat(fabBtn.style.getPropertyValue('--lv')) || 0;
-      if(cap && fabWas === true && on && (fabFinT || (fabBtn.classList.contains('up') && lv0 < .97))){   // ikon masih kecil: tumbuh perlahan dulu sampai penuh, baru animasi selesai
-        if(!fabFinT) fabFinT = setTimeout(() => { fabFinT = null; fabShow(false, 'finish'); }, 1700);
-      } else { clearTimeout(fabFinT); fabFinT = null; fabShow(on && !cap, cap ? 'finish' : 'off'); } }
+    fabShow(on && !cap, cap ? 'finish' : 'off');
     { const st = fabSwitch.querySelector('.fabSt'); if(st) st.textContent = on ? 'ON' : 'OFF'; }
     { fabSwitch.setAttribute('aria-pressed', String(on)); const sf = fabSwitch.querySelector('.flame'); if(sf) swSync(sf); } fabSwitch.title = t.tog; fabSwitch.setAttribute('aria-label', t.tog);
     let tot = 0, all = 0; AREAS.forEach(([r, l], ri) => { tot += pop(today[ri] || 0); all += l.length; });
     if(prevTot !== null && tot > prevTot && on && performance.now() - lastAct < 1500) fabCelebrate(tot - prevTot); prevTot = tot;
     if(!cap) fabOv.classList.remove('gry');
     fabBtn.classList.toggle('gray', cap); fabBtn.setAttribute('aria-label', t.ttl + ' ' + tot + '/' + all); fabBtn.title = t.ttl;
-    const lv = cap ? 1 : (all ? Math.min(1, tot / all) : 0), sp = (k, v) => fabBtn.style.setProperty(k, v);   // lv: progres 0..1; lilin abu-abu (20) = langsung puncak terang
-    sp('--lv', lv.toFixed(3)); sp('--fg', Math.max(0, 1 - lv / .45).toFixed(3)); sp('--fo', (.42 + .58 * Math.min(1, lv / .55)).toFixed(3)); sp('--fb', (1 + .9 * lv).toFixed(3));
-    sp('--fr', (lv * 18).toFixed(1) + 'px'); sp('--fa', lv ? (.25 + .75 * lv).toFixed(3) : '0'); sp('--fs', (.78 + .42 * lv).toFixed(3)); sp('--fu', (.85 + 1.5 * lv).toFixed(3));   // --fu: ukuran api di panel terbuka (kecil -> sangat besar mengikuti progres)
-    
-    fabBtn.style.setProperty('--p', all ? tot / all : 0); fabOv.style.setProperty('--p', all ? tot / all : 0);   // cincin progres di ikon + bilah di panel
+    fabOv.style.setProperty('--p', all ? tot / all : 0);   // bilah progres di panel
     if(fabOv.hidden) return;
     fabOv.querySelector('b').textContent = t.ttl; fabOv.querySelector('.fx').setAttribute('aria-label', t.close);
     fabOv.querySelector('.fs').textContent = tot + '/' + all + ' ' + I18N[lang].pg.ar;
@@ -7641,7 +7549,7 @@ initPerm(); startLoop();
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
   }
 
-  // ---------- indikator jaringan (header, kiri tombol bahasa) ----------
+  // ---------- indikator jaringan (kecil, sudut kanan bawah) ----------
   const NETT = {
     en:{ ok:'Online', weak:'Weak connection', off:'Offline', back:'Back online', lost:'You are offline. Some features need internet.' },
     id:{ ok:'Online', weak:'Koneksi lemah', off:'Offline', back:'Kembali online', lost:'Kamu sedang offline. Beberapa fitur butuh internet.' },
@@ -11689,7 +11597,7 @@ function go(t){cancelAnimationFrame(raf);if(mv){endMv();svgL.setAttribute('prese
     // posisi panel: rata tengah, sisi bawah card item berjarak setengah kotak dari tepi atas batu gerbang
     const hallC={};function hallY(x){if(hallC[x]!==undefined)return hallC[x];const E=document.getElementById('edge'),L=E.getTotalLength();let d=1e9,y=90;for(let l=0;l<=L;l+=1){const p=E.getPointAtLength(l);if(p.y<200&&Math.abs(p.x-x)<d){d=Math.abs(p.x-x);y=p.y}}return hallC[x]=y}
 
-    function topReserve(){ let b = 0; ['navBtn', 'langCurrent'].forEach(id => { const e = $(id); if(e){ const r = e.getBoundingClientRect(); if(r.height) b = Math.max(b, r.bottom); } }); return Math.max(12, b + 8); }
+    function topReserve(){ let b = 0; ['navBtn', 'langCurrent', 'fab'].forEach(id => { const e = $(id); if(e){ const r = e.getBoundingClientRect(); if(r.height) b = Math.max(b, r.bottom); } }); return Math.max(12, b + 8); }
     function layoutKp(i){
       const H = innerHeight, tc = focusCam(i), TOP = topReserve(), Y = H - (tc.yb - hallY(GC[i])) * tc.sc, hh = gc.querySelector('.sj-hd').offsetHeight + 18,
         qq = Math.max(64, Math.min(96, (gc.clientWidth - 40) / 3, Y - TOP - hh - 16 - 28 - 3.5 * 44)), fx = hh + qq + 8 + 8;
