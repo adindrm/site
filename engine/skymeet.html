@@ -205,6 +205,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     transform: translate(-50%,-50%);
   }
 
+  /* [snap] pergantian latar event/hujan: bintang & matahari ikut cepat; pergantian siang-malam nyata tidak tersentuh */
+  body.evSnap #stars{ transition-duration:2.4s; transition-timing-function:ease-in-out; }
+  body.evSnap #celestial{ transition-duration:2.4s; transition-timing-function:ease-in-out; }
+
   /* siluet bukit, penanda horizon minimal */
   #horizon{
     position:absolute;
@@ -1840,6 +1844,10 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .skWinds{ transform-origin:50% 100%; }   /* goyangan awan bawah saat ada yang menyelam */
   #skKid, .skKid{ position:absolute; left:-155px; top:-150px; width:300px; height:300px; transform-origin:155px 150px; opacity:0; pointer-events:none; will-change:transform, opacity; filter:drop-shadow(0 6px 10px rgba(20,60,130,.28)); }
   #skKid svg, .skKid svg{ display:block; width:100%; height:100%; overflow:visible; }
+  /* nama akun di atas kepala tiap Sky kid di Beranda */
+  .skNm{ position:absolute; left:0; top:0; z-index:2; opacity:0; pointer-events:none; white-space:nowrap; will-change:transform, opacity; max-width:90px; overflow:hidden; text-overflow:ellipsis;
+    font:600 11px/1.2 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; letter-spacing:.02em; color:#fff; text-shadow:0 0 3px rgba(10,14,40,.85), 0 1px 2px rgba(10,14,40,.7); }
+  .skNm.me{ font-weight:700; color:#fff4c2; }
   .skWinds{ position:absolute; left:0; right:0; bottom:0; height:46%; pointer-events:none; overflow:hidden; }
   .skCover{ position:absolute; left:0; right:0; top:0; height:62%; overflow:hidden; pointer-events:none; opacity:0; transition:opacity 2.5s; }
   .skPuff{ position:absolute; left:0; will-change:transform; animation:skWindMove var(--dur) linear infinite; animation-delay:var(--delay); }
@@ -1954,7 +1962,7 @@ html.gfx-low #gcM.gcStorm .gc-bolt{ filter:none; }
 #gcM.gcStorm .gc-bolt.gc-b3{animation-delay:.45s;animation-duration:1s}
 #gcM.gcStorm .gc-peakglow{animation-duration:1.15s}
 #gcM .gc-bolt use[fill="#ffb830"]{fill:var(--gcB1,#ffb830);stroke:var(--gcB1,#ffb830)}#gcM .gc-bolt use[fill="#ffee90"]{fill:var(--gcB2,#ffee90)}
-#gcM{position:absolute;left:0;top:0;width:810px;height:520px;transform-origin:0 0;pointer-events:none;opacity:0;visibility:hidden}#gcM svg{display:block;width:810px;height:520px;overflow:visible}  .gc-beam{transform-box:fill-box;transform-origin:center;animation:gcRingzap 3.6s cubic-bezier(.45,.05,.35,1) infinite}@keyframes gcRingzap{0%,6%{opacity:.38;transform:scale(1)}8.5%{opacity:.85;transform:scale(1.008)}10.5%{opacity:.62;transform:scale(1.004)}13%{opacity:1;transform:scale(1.012)}15%{opacity:.78;transform:scale(1.007)}18%{opacity:.92;transform:scale(1.009)}24%{opacity:.66;transform:scale(1.004)}34%{opacity:.5;transform:scale(1.002)}48%{opacity:.41;transform:scale(1)}62%,100%{opacity:.38;transform:scale(1)}}@keyframes gcRingzap2{0%,6%{opacity:.82}8.5%{opacity:.95}10.5%{opacity:.88}13%{opacity:1}20%{opacity:.93}34%{opacity:.85}50%,100%{opacity:.82}}.gc-bolt{opacity:0;filter:blur(.6px);animation:gcZap 3.6s ease-in-out infinite}.gc-bolt.gc-b2{animation-delay:.18s;animation-duration:3.6s}.gc-bolt.gc-b3{animation-delay:1.7s;animation-duration:4.1s}.gc-peakglow{animation:gcZapglow 3.6s ease-in-out infinite}@keyframes gcZap{0%,5.5%,100%{opacity:0}8%{opacity:.85}9.5%{opacity:.5}11.5%{opacity:1}14%{opacity:.45}18%{opacity:.12}23%{opacity:0}}@keyframes gcZapglow{0%,5.5%,100%{opacity:.25}8%{opacity:.85}9.5%{opacity:.6}11.5%{opacity:1}14%{opacity:.6}20%{opacity:.35}30%{opacity:.25}}.gc-rock{transform-box:fill-box;transform-origin:center;animation:gcFloatR 6s ease-in-out infinite}@keyframes gcFloatR{0%,100%{transform:translate(0,0) rotate(0deg) scale(.55)}50%{transform:translate(var(--dx,2px),var(--dy,-7px)) rotate(var(--r,8deg)) scale(.55)}}.gc-ringsway{mix-blend-mode:screen;transform-box:fill-box;transform-origin:center;animation:gcRingSway 7s ease-in-out infinite,gcRingzap2 4.1s ease-in-out 1.7s infinite backwards}@keyframes gcRingSway{0%,100%{transform:translate(0,0) rotate(0deg) scale(1)}33%{transform:translate(1.8px,-2.5px) rotate(.6deg) scale(1.015)}66%{transform:translate(-1.6px,-1px) rotate(-.5deg) scale(.99)}}.gc-sway{transform-origin:409px 230px;animation:gcSway 3.2s ease-in-out infinite}@keyframes gcSway{0%,100%{transform:rotate(-0.7deg) scaleY(1)}50%{transform:rotate(0.7deg) scaleY(1.02)}}.gc-st{fill:none;stroke:var(--gcSt,#fff3d2);stroke-linecap:round;animation:gcFlowUp linear infinite}@keyframes gcFlowUp{to{stroke-dashoffset:var(--p)}}.gc-streaks{animation:gcStreakzap 3.6s cubic-bezier(.45,.05,.35,1) infinite}@keyframes gcStreakzap{0%,6%{opacity:.5}8.5%{opacity:.9}10.5%{opacity:.7}13%{opacity:1}15%{opacity:.8}18%{opacity:.92}24%{opacity:.7}34%{opacity:.58}48%{opacity:.5}62%,100%{opacity:.5}}@media (prefers-reduced-motion:reduce){#gcM *{animation:none!important}}
+#gcM{position:absolute;left:0;top:0;width:810px;height:520px;transform-origin:0 0;pointer-events:none;opacity:0;visibility:hidden}#gcM svg{display:block;width:810px;height:520px;overflow:visible}  .gc-beam{transform-box:fill-box;transform-origin:center;animation:gcRingzap 3.6s cubic-bezier(.45,.05,.35,1) infinite}@keyframes gcRingzap{0%,6%{opacity:.38;transform:scale(1)}8.5%{opacity:.85;transform:scale(1.008)}10.5%{opacity:.62;transform:scale(1.004)}13%{opacity:1;transform:scale(1.012)}15%{opacity:.78;transform:scale(1.007)}18%{opacity:.92;transform:scale(1.009)}24%{opacity:.66;transform:scale(1.004)}34%{opacity:.5;transform:scale(1.002)}48%{opacity:.41;transform:scale(1)}62%,100%{opacity:.38;transform:scale(1)}}@keyframes gcRingzap2{0%,6%{opacity:.82}8.5%{opacity:.95}10.5%{opacity:.88}13%{opacity:1}20%{opacity:.93}34%{opacity:.85}50%,100%{opacity:.82}}.gc-bolt{opacity:0;filter:blur(.6px);animation:gcZap 3.6s ease-in-out infinite}.gc-bolt.gc-b2{animation-delay:.18s;animation-duration:3.6s}.gc-bolt.gc-b3{animation-delay:1.7s;animation-duration:4.1s}.gc-peakglow{animation:gcZapglow 3.6s ease-in-out infinite}@keyframes gcZap{0%,5.5%,100%{opacity:0}8%{opacity:.85}9.5%{opacity:.5}11.5%{opacity:1}14%{opacity:.45}18%{opacity:.12}23%{opacity:0}}@keyframes gcZapglow{0%,5.5%,100%{opacity:.25}8%{opacity:.85}9.5%{opacity:.6}11.5%{opacity:1}14%{opacity:.6}20%{opacity:.35}30%{opacity:.25}}.gc-rock{transform-box:fill-box;transform-origin:center;animation:gcFloatR 6s ease-in-out infinite}@keyframes gcFloatR{0%,100%{transform:translate(0,0) rotate(0deg) scale(.55)}50%{transform:translate(var(--dx,2px),var(--dy,-7px)) rotate(var(--r,8deg)) scale(.55)}}.gc-ringsway{mix-blend-mode:screen;transform-box:fill-box;transform-origin:center;animation:gcRingSway 7s ease-in-out infinite,gcRingzap2 4.1s ease-in-out 1.7s infinite backwards}@keyframes gcRingSway{0%,100%{transform:translate(0,0) rotate(0deg) scale(1)}33%{transform:translate(1.8px,-2.5px) rotate(.6deg) scale(1.015)}66%{transform:translate(-1.6px,-1px) rotate(-.5deg) scale(.99)}}.gc-sway{transform-origin:409px 230px}@keyframes gcSway{0%,100%{transform:rotate(-0.7deg) scaleY(1)}50%{transform:rotate(0.7deg) scaleY(1.02)}}.gc-st{fill:none;stroke:var(--gcSt,#fff3d2);stroke-linecap:round;animation:gcFlowUp linear infinite}@keyframes gcFlowUp{to{stroke-dashoffset:var(--p)}}.gc-streaks{animation:gcStreakzap 3.6s cubic-bezier(.45,.05,.35,1) infinite}@keyframes gcStreakzap{0%,6%{opacity:.5}8.5%{opacity:.9}10.5%{opacity:.7}13%{opacity:1}15%{opacity:.8}18%{opacity:.92}24%{opacity:.7}34%{opacity:.58}48%{opacity:.5}62%,100%{opacity:.5}}@media (prefers-reduced-motion:reduce){#gcM *{animation:none!important}}
   /* ===== [event] pengingat chat masuk di Beranda: gelembung + balas cepat (dari skymeetberandaevent) ===== */
   /* ===== pengingat chat masuk di Beranda: gelembung di titik-titik tertentu + balas cepat ===== */
   #chatDots{ position:absolute; inset:0; z-index:2; pointer-events:none; transition:opacity .6s ease; }
@@ -2102,7 +2110,7 @@ body.p5 #nav, body.p5 #control{--ink:#f4f5fb;--ink-soft:rgba(244,245,251,.62);--
 /* langit scene Senja = langit dinamis web utama (#skBack, bintang, matahari/bulan, laut, awan, cuaca): lapisan langit milik scene dimatikan agar langit utama tembus */
 #snj{background:transparent;--sj-sea:transparent}
 #snj #sjSky,#snj #sjStars,#snj .sj-fog,#snj .sj-tint{display:none}
-body.p5 #skKid, body.p5 .skKid, body.p5 .dclip, body.p5 #skTrail{display:none!important}   /* halaman kosmetik: Sky kid (asli + klon yang terpause) beserta jejak kondensasinya disembunyikan; scene punya anak sendiri */
+body.p5 #skKid, body.p5 .skKid, body.p5 .skNm, body.p5 .dclip, body.p5 #skTrail{display:none!important}   /* halaman kosmetik: Sky kid (asli + klon yang terpause) beserta jejak kondensasinya disembunyikan; scene punya anak sendiri */
 
 /* ===== Daftar Kosmetik / Daftar Milikmu + Wish ===== */
 #snj .sj-md{position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 84px);width:min(420px,calc(100% - 24px));display:grid;grid-template-columns:1fr 1fr;gap:10px;z-index:5;transition:opacity .5s,visibility .5s}
@@ -2279,6 +2287,8 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
     <filter id="gc-blur4" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4"/></filter>
     <filter id="gc-blur2" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="1.6"/></filter>
     <filter id="gc-blur05" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation=".5"/></filter>
+  <path id="gc-castle-p" d="M182.6,159.6c2.5-36.1,19,41.1,18.8,50.6c4.8,7.1,3.5-10,3.3-13c8.8-3.2,8.9,7.6,9.4,13.7c0.8,2.6,5.1,5.1,0.9,8.8c-4.1,3.6-8.3,7.1-12.4,10.7c-13.8,8.8-27.6,17.7-41.4,26.5c-16.6-2.4-33.2-4.7-49.8-7.1c-3,1.9-6,3.7-9,5.6c-1.2-5.3-2.3-10.5-3.5-15.8c-11.2-10.1-5.2-70.3,1-55.5c6.6,17.3-0.6-33.8,7.3-39.6c3.1,59.4,12.8,14.1,12.8-18.9c7.6-20,0.6,35.9,12.3,6.2c1.2-12.6,2.8-31.7,4.3-55.1c2.5-38.4,2.6-58.1,4.3-58.2c1.3-0.1,3.6,10.7,7.9,62.3c5.7,25.8,11.4,51.7,17.1,77.5C172.6,100.4,165.2,131.3,182.6,159.6zM153.8,183.2c14.1-4.5,6.5-17.5-2.1-23.3C150.9,168.1,153.5,175.5,153.8,183.2zM155.4,210.6c6.4-2.7,11.2-14.1,1.7-15.6C151.6,194.5,155.9,207.3,155.4,210.6zM131.7,150.6c-7.4,9.4-6.8,20.8-4.2,31.1C126.2,171.1,132.9,161.8,131.7,150.6zM182.4,176.3c3.5-6.6-7-22.3-4-9.1C181.4,169.9,177.1,176.3,182.4,176.3zM115.6,188c-1.7,2.6-5,5.5-5.2,8.5C116,199,121,191.6,115.6,188zM101.2,203.6c-1.8,1.9-3.7,7.5-1.2,8.9C102.1,210.6,101.5,206.6,101.2,203.6z"/>
+  <clipPath id="gc-castle-lit"><polygon points="-10,-10 310,-10 150,150 -10,310"/></clipPath>
   <polygon id="gc-b10" points="400.15,221.91 399.60,213.26 398.99,204.90 394.84,197.17 397.35,189.80 393.20,181.20 389.76,173.00 393.09,165.73 387.13,158.48 383.16,151.96 383.92,143.72 386.14,135.96 389.23,128.63 398.73,120.07 400.56,112.73 400.46,112.71 398.49,119.89 388.80,128.29 385.38,135.67 382.85,143.51 381.80,152.23 385.75,159.44 391.12,166.03 387.45,172.99 390.79,182.24 394.40,190.02 391.57,197.46 395.50,205.86 395.65,213.44 395.85,222.09"/><polygon id="gc-b11" points="394.13,196.21 391.52,194.46 390.04,191.58 387.76,189.01 386.41,185.92 384.13,183.33 384.06,183.38 385.92,186.19 386.78,189.53 388.58,192.40 389.68,195.81 392.28,198.42"/><polygon id="gc-b12" points="392.60,166.67 395.55,164.57 396.88,161.25 398.48,158.39 401.31,156.61 403.55,154.01 403.49,153.95 401.08,156.31 397.98,157.86 395.91,160.73 394.44,163.60 391.62,165.09"/><polygon id="gc-b13" points="383.75,143.20 381.08,141.01 378.05,139.51 375.85,137.01 373.89,134.22 371.07,132.27 371.03,132.33 373.70,134.39 375.49,137.27 377.63,140.02 380.58,141.73 383.02,144.03"/><polygon id="gc-b20" points="401.33,219.86 395.18,213.13 397.29,206.93 390.08,199.50 387.06,193.32 385.17,187.77 386.78,181.18 383.18,173.95 387.88,166.69 384.63,159.33 386.17,151.89 382.52,144.75 380.97,138.89 377.63,132.79 380.50,126.28 380.41,126.24 377.37,132.80 380.54,139.06 381.89,144.99 385.27,152.00 383.49,159.45 386.50,166.53 381.55,173.80 384.91,181.41 383.03,187.78 384.82,194.20 387.92,201.08 394.51,207.90 392.09,214.06 398.67,222.14"/><polygon id="gc-b21" points="386.72,194.50 388.88,191.91 391.16,189.50 393.99,187.54 395.67,184.46 397.24,181.44 397.17,181.40 395.30,184.24 393.41,186.95 390.41,188.50 387.69,190.70 385.17,193.02"/><polygon id="gc-b22" points="387.76,166.27 385.84,163.33 382.95,161.34 380.09,159.57 378.14,156.86 376.57,153.85 376.49,153.89 377.88,157.00 379.72,159.94 382.49,161.98 385.06,164.04 386.62,166.95"/><polygon id="gc-b30" points="398.46,220.49 396.42,215.18 397.60,210.23 393.54,205.51 395.67,200.34 396.33,195.46 397.56,190.68 399.89,185.10 398.36,179.79 390.86,174.63 384.53,169.80 385.26,165.16 393.71,159.68 397.03,154.73 388.90,148.97 388.84,149.05 396.80,154.83 393.43,159.36 384.80,164.75 383.82,170.19 390.25,175.45 397.43,180.59 398.44,184.94 395.98,190.11 394.47,195.05 393.62,199.74 391.20,205.89 395.08,210.92 393.57,215.35 395.54,221.51"/><polygon id="gc-b31" points="396.20,194.94 394.68,191.65 391.59,189.97 389.59,187.33 387.25,184.85 385.40,182.01 385.34,182.05 386.96,185.06 389.05,187.74 390.90,190.71 393.64,192.53 394.60,195.57"/><polygon id="gc-b32" points="390.85,175.44 393.61,173.24 394.51,169.88 396.37,167.11 398.60,164.57 401.13,162.31 401.08,162.24 398.44,164.40 396.05,166.85 393.98,169.62 392.96,172.79 390.26,174.64"/></defs>
 </svg>
 <svg class="gcL" viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg">
@@ -2318,38 +2328,22 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
   </g>
 </svg>
 <svg class="gcL" viewBox="40 -60 810 520" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(0 20)">
+  <g transform="translate(0 36)">
+    <g class="gc-rock gc-castle" style="animation-delay:.4s;animation-duration:6.5s;--dx:2px;--dy:-6px;--r:5deg">
+      <g transform="translate(348.00 114.52) scale(0.330)">
+        <use href="#gc-castle-p" fill="#7a5090"/>
+      </g>
+    </g>
+    <g transform="translate(0 -36)">
     <g class="gc-rock" style="animation-delay:0s;animation-duration:6s;--dx:2.4px;--dy:-6.4px;--r:10deg">
-      <polygon points="386.7,209.2 390.3,202.6 396.9,203.8 398.7,209.8 393.9,213.4" fill="#7a5090"/>
-      <polygon points="386.7,209.2 390.3,202.6 396.9,203.8 392.7,208.0" fill="#ffe3c8" opacity=".55"/>
-    </g>
-    <g class="gc-rock" style="animation-delay:1.2s;animation-duration:7s;--dx:-2.4px;--dy:-7.2px;--r:-12deg">
-      <polygon points="400.3,206.6 403.3,201.1 408.8,202.1 410.3,207.1 406.3,210.1" fill="#7a5090"/>
-      <polygon points="400.3,206.6 403.3,201.1 408.8,202.1 405.3,205.6" fill="#ffe3c8" opacity=".55"/>
-    </g>
-    <g class="gc-rock" style="animation-delay:0.6s;animation-duration:5.5s;--dx:1.6px;--dy:-4.8px;--r:14deg">
-      <polygon points="394.1,199.2 396.5,194.8 400.9,195.6 402.1,199.6 398.9,202.0" fill="#7a5090"/>
-      <polygon points="394.1,199.2 396.5,194.8 400.9,195.6 398.1,198.4" fill="#ffe3c8" opacity=".55"/>
+      <polygon points="365.4,209.4 369.0,202.8 375.6,204.0 377.4,210.0 372.6,213.6" fill="#7a5090"/>
     </g>
     <g class="gc-rock" style="animation-delay:2.1s;animation-duration:6.5s;--dx:-1.6px;--dy:-4.0px;--r:-9deg">
-      <polygon points="385.8,201.4 387.6,198.1 390.9,198.7 391.8,201.7 389.4,203.5" fill="#7a5090"/>
-      <polygon points="385.8,201.4 387.6,198.1 390.9,198.7 388.8,200.8" fill="#ffe3c8" opacity=".55"/>
+      <polygon points="382.7,184.7 384.5,181.4 387.8,182.0 388.7,185.0 386.3,186.8" fill="#7a5090"/>
     </g>
     <g class="gc-rock" style="animation-delay:0.3s;animation-duration:7.5s;--dx:2.4px;--dy:-4.8px;--r:8deg">
-      <polygon points="406.6,212.3 408.7,208.4 412.6,209.2 413.6,212.7 410.8,214.8" fill="#7a5090"/>
-      <polygon points="406.6,212.3 408.7,208.4 412.6,209.2 410.1,211.6" fill="#ffe3c8" opacity=".55"/>
+      <polygon points="415.1,205.9 417.2,202.0 421.1,202.8 422.1,206.3 419.3,208.4" fill="#7a5090"/>
     </g>
-    <g class="gc-rock" style="animation-delay:1.8s;animation-duration:5s;--dx:-1.6px;--dy:-6.4px;--r:16deg">
-      <polygon points="399.0,190.2 400.8,186.9 404.1,187.5 405.0,190.5 402.6,192.3" fill="#7a5090"/>
-      <polygon points="399.0,190.2 400.8,186.9 404.1,187.5 402.0,189.6" fill="#ffe3c8" opacity=".55"/>
-    </g>
-    <g class="gc-rock" style="animation-delay:2.6s;animation-duration:6s;--dx:1.6px;--dy:-4.0px;--r:-10deg">
-      <polygon points="392.6,185.2 393.9,182.8 396.3,183.3 397.0,185.5 395.2,186.8" fill="#7a5090"/>
-      <polygon points="392.6,185.2 393.9,182.8 396.3,183.3 394.8,184.8" fill="#ffe3c8" opacity=".55"/>
-    </g>
-    <g class="gc-rock" style="animation-delay:0.9s;animation-duration:6.8s;--dx:-1.6px;--dy:-5.6px;--r:12deg">
-      <polygon points="405.1,197.3 406.7,194.5 409.5,195.0 410.3,197.6 408.2,199.1" fill="#7a5090"/>
-      <polygon points="405.1,197.3 406.7,194.5 409.5,195.0 407.7,196.8" fill="#ffe3c8" opacity=".55"/>
     </g>
   </g>
 </svg>
@@ -3757,14 +3751,16 @@ kid.style.display = 'none';
 // Satu kali muncul: sendirian atau berdua, arah dan jalurnya acak
 // Jumlah yang terbang bersama: 1 sampai 8. Makin banyak, makin langka.
 const GROUP_W = [64, 30, 6, 3, 1.5, .8, .4, .2];
-function pickCount() { let r = Math.random() * GROUP_W.reduce((a, b) => a + b, 0); for (let i = 0; i < GROUP_W.length; i++) { r -= GROUP_W[i]; if (r < 0) return i + 1; } return 1; }
+function pickCount() { let r = Math.random() * GROUP_W.reduce((a, b) => a + b, 0); for (let i = 0; i < GROUP_W.length; i++) { r -= GROUP_W[i]; if (r < 0) return i + 1; } return 1; }   // (tidak dipakai lagi: jumlah mengikuti friend list)
+// Rombongan = pemilik akun (pemimpin, i = 0) + teman dari friend list, maksimal 8. Tanpa teman: hanya diri sendiri.
+function roster() { try { const r = window.SkyVisit && SkyVisit.roster && SkyVisit.roster(); if (Array.isArray(r) && r.length) return r.slice(0, 8); } catch (e) {} return [{ name: '', me: true }]; }
 function spawn(now) {
-  const count = pickCount(), dir = Math.random() < .5 ? 1 : -1;
+  const RO = roster(), count = RO.length, dir = Math.random() < .5 ? 1 : -1;
   // mulai dan berakhir di luar layar
   const x0 = dir > 0 ? rnd(-.1, -.05) : rnd(1.05, 1.1), x2 = dir > 0 ? rnd(1.05, 1.12) : rnd(-.12, -.05);
   const y0 = rnd(.25, .7), y2 = rnd(.15, .6);
   const P = [x0, y0, (x0 + x2) / 2 + rnd(-.1, .1), Math.max(.08, Math.min(y0, y2) - rnd(.05, .25)), x2, y2];
-  const depth = rnd(.3, 1.2), dur = Math.min(45000, rnd(13000, 18000) / depth), prof = makeProfile(dur / 1000);   // kedalaman merata dari jauh (.3, kecil) sampai dekat (1.2, besar); durasi dibatasi 45 dtk
+  const depth = 1.2, dur = Math.min(45000, rnd(13000, 18000) / depth), prof = makeProfile(dur / 1000);   // kedalaman merata dari jauh (.3, kecil) sampai dekat (1.2, besar); durasi dibatasi 45 dtk
   // ukuran dasar dibagi seluruh kelompok (selisih kecil), supaya jarak antarkid bisa dinyatakan dalam lebar jubah
   const kFar = clamp01(1 - (depth - .3) / .3), FAR_PX = 15;   // titik terjauh (depth .3): ukuran SELALU tepat FAR_PX px di layar mana pun; variasi acak memudar menjelang terjauh
   const gD = d => d * (1 + 1.1 * d * d * d), scFar = FAR_PX / (300 * unit), scNear = rnd(.03, .042) * gD(1.2), hD = (gD(depth) - gD(.3)) / (gD(1.2) - gD(.3));   // interpolasi naik terus dari terjauh (FAR_PX) ke terdekat (ukuran semula): tidak pernah terbalik
@@ -3773,17 +3769,19 @@ function spawn(now) {
   let pathPx = 0; { let px_ = P[0] * W, py_ = P[1] * H; for (let q = 1; q <= 24; q++) { const u_ = q / 24, nx = bez(u_, P[0] * W, P[2] * W, P[4] * W), ny = bez(u_, P[1] * H, P[3] * H, P[5] * H); pathPx += Math.hypot(nx - px_, ny - py_); px_ = nx; py_ = ny; } }
   const speedPx = pathPx / (dur / 1000), grp = [];
   const devIdx = new Set();   // kelompok kadang punya satu (jarang dua) kid yang keluar jalur lalu kembali
-  if (Math.random() < (count > 1 ? .5 : .4)) devIdx.add(Math.floor(Math.random() * count));   // kelompok maupun yang sendirian bisa menyimpang lalu kembali
-  if (count >= 5 && Math.random() < .4) devIdx.add(Math.floor(Math.random() * count));
+  const pickF = () => count > 1 ? 1 + Math.floor(Math.random() * (count - 1)) : 0;   // pemimpin (pemilik akun) tetap di jalur; yang menyimpang hanya pengikut
+  if (Math.random() < (count > 1 ? .5 : .4)) devIdx.add(pickF());   // kelompok maupun yang sendirian bisa menyimpang lalu kembali
+  if (count >= 5 && Math.random() < .4) devIdx.add(pickF());
   // kadang satu kid (dari rombongan atau yang sendirian) menyelam ke awan di bawah, atau ke air bila laut sedang tampil, lalu muncul lagi
   // [event-dive] Event aktif di Beranda (selain Grandma, yang memang tanpa kid): SETIAP kid yang muncul menyelam. Air bila laut tampil, awan bila langit tinggi.
   const allDive = evBusy && !REDUCE && Forest.p < .02;
   if (allDive) devIdx.clear();   // kid yang menyimpang tidak ikut menyelam, jadi tidak ada penyimpangan saat event
   let diveIdx = -1;
-  if (!allDive && !REDUCE && Forest.p < .02 && Math.random() < DIVE_P) { const c = []; for (let i = 0; i < count; i++) if (!devIdx.has(i)) c.push(i); if (c.length) diveIdx = c[Math.floor(Math.random() * c.length)]; }
+  if (!allDive && !REDUCE && Forest.p < .02 && Math.random() < DIVE_P) { const c = []; for (let i = count > 1 ? 1 : 0; i < count; i++) if (!devIdx.has(i)) c.push(i); if (c.length) diveIdx = c[Math.floor(Math.random() * c.length)]; }
   for (let i = 0; i < count; i++) {
     const el = kid.cloneNode(true); uniqIds(el);
     el.removeAttribute('id'); el.className = 'skKid'; el.style.display = ''; scene.insertBefore(el, veil);
+    const lab = document.createElement('div'); lab.className = 'skNm' + (i === 0 ? ' me' : ''); lab.textContent = (RO[i] && RO[i].name) || ''; lab.setAttribute('aria-hidden', 'true'); scene.insertBefore(lab, veil);
     const rank = (i + 1) >> 1;   // formasi V: pemimpin di depan, lalu berpasangan kiri-kanan makin ke belakang
     const side = i ? (i % 2 ? 1 : -1) : 0, gl = side * rank * LAT_K, gt = rank * TRL_K;   // posisi dalam satuan lebar jubah
     const dev = devIdx.has(i) ? { t0: rnd(.2, .5), len: rnd(.3, .42), amp: rnd(.16, .28) * (Math.random() < .5 ? 1 : -1) } : null;
@@ -3794,7 +3792,7 @@ function spawn(now) {
       flaps = flaps.filter(v => dT.every(d => Math.abs(v - d) > 3)).concat(dT).sort((a, b) => a - b);
       xsT = xsT.filter(v => dT.every(d => Math.abs(v - d) > 3)).concat(dT);
     }
-    flyers.push({ el, depth, cape: el.querySelector('.cape'), hd: el.querySelector('path:not(.cape)'), l1: el.querySelectorAll('path:not(.cape)')[1], l2: el.querySelectorAll('path:not(.cape)')[2], la: 0, tips: [[57.5, 110.2], [234.5, 58.8]], start: now + (gt * capePx / speedPx) * 1000, dur, g: 0, flapAt: 0, prof, flaps, xs: xsT.map(t => ({ t, a: rnd(.5, .9) })), tw: 0,
+    flyers.push({ el, lab, depth, cape: el.querySelector('.cape'), hd: el.querySelector('path:not(.cape)'), l1: el.querySelectorAll('path:not(.cape)')[1], l2: el.querySelectorAll('path:not(.cape)')[2], la: 0, tips: [[57.5, 110.2], [234.5, 58.8]], start: now + (gt * capePx / speedPx) * 1000, dur, g: 0, flapAt: 0, prof, flaps, xs: xsT.map(t => ({ t, a: rnd(.5, .9) })), tw: 0,
       dev, dv, dvDone: !!dv, cx: rnd(.65, 1.35), cf: rnd(.75, 1.35), fs: rnd(.85, 1.15), lean: rnd(-.12, .12),   // variasi kain per kid: besar ayunan, kecepatan riak, kuat kepakan, kemiringan dasar
       P: P.slice(), lat: gl * capePx, gl, gt, grp,   // jalur sama untuk semua; formasi lewat offset samping tetap dan jeda waktu
       sc: scB * (1 + (rnd(.97, 1.03) - 1) * (1 - kFar)), wob: rnd(0, 6.28), far: 1 + .4 * (1 - Math.max(0, Math.min(1, (depth - .4) / .6))),   // yang paling dekat jauh lebih besar (sampai sekitar 2,1 kali)
@@ -4075,7 +4073,7 @@ function frame(now) {
       if (b > 0) f.tw = (f.tw || 0) + dt * b;
     }
     if (t >= 1 && !(f.dv && f.dv.on)) {
-      f.el.remove(); if (f.dv && f.dv.clip) f.dv.clip.remove(); flyers.splice(i, 1); for (const e of f.em) e.endAt = now;
+      f.el.remove(); if (f.lab) f.lab.remove(); if (f.dv && f.dv.clip) f.dv.clip.remove(); flyers.splice(i, 1); for (const e of f.em) e.endAt = now;
       if (!flyers.length) nextAt = now + (evBusy ? rnd(1200, 3500) : rnd(6000, 14000));   // sebentar jeda, lalu muncul lagi (lebih sering saat ada event)
       continue;
     }
@@ -4140,6 +4138,11 @@ function frame(now) {
       if (flt !== f.flt) { f.el.style.filter = flt; f.flt = flt; } }
     let rs = Math.cos(TR.roll); if (Math.abs(rs) < .05) rs = rs < 0 ? -.05 : .05;
     f.el.style.transform = `translate(${p.x}px,${p.y}px) rotate(${p.rot}rad) scale(${p.s * unit})` + (TR.roll ? ` rotate(${HEAD_ANGLE}rad) scale(1,${rs.toFixed(3)}) rotate(${-HEAD_ANGLE}rad)` : '');
+    if (f.lab) {   // nama di atas kepala: ikut posisi kid, tetap tegak; disembunyikan saat di luar layar / di bawah permukaan awan-air
+      const show = !f.skW && !f.under, lx2 = p.x, ly2 = p.y - Math.max(16, f.sz * .3);
+      if (show) { f.lab.style.transform = `translate(${lx2.toFixed(1)}px,${ly2.toFixed(1)}px) translate(-50%,-100%)`; }
+      const lo = show ? '.92' : '0'; if (f.lab._o !== lo) { f.lab._o = lo; f.lab.style.opacity = lo; }
+    }
     let ei = -1;
     for (const e of f.em) {
       ei++;
@@ -4274,6 +4277,11 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) stopL
 let timeShift = 0;
 { const m = /[?&]jam=(\d{1,2}):(\d{2})/.exec(location.search); if (m) { const d = new Date(); d.setHours(+m[1], +m[2], 0, 0); timeShift = d.getTime() - Date.now(); } }
 let extra = 0;   // offset sementara untuk animasi intro (langit berputar menuju waktu sekarang)
+let snapUntil = 0, snapT0 = 0, snapTm = 0;   // [snap] jendela (~3 dtk) setelah pergantian latar event/hujan: semua easing dipercepat sehingga semua lapisan tiba di titik normal bersamaan
+const snapOn = () => performance.now() < snapUntil, snapMark = () => { snapT0 = performance.now(); snapUntil = snapT0 + 4000; };
+const SNAP_K = .4, SNAP_FP = 6.5, SNAP_NL = 3.2;   // [snap] SNAP_K: percepatan maks easing (0 = kecepatan asli); SNAP_FP: detik hujan<->hutan; SNAP_NL: detik siang-malam hutan
+const kr = r => { if (!snapOn()) return r; const u = Math.min(1, (performance.now() - snapT0) / 600); return r * (1 + SNAP_K * u * u * (3 - 2 * u)); };   // percepat ~2,2x dengan awal lembut (0,6 dtk), bukan langsung penuh
+const snapUI = () => { const b = document.body; if (!b) return; b.classList.add('evSnap'); clearTimeout(snapTm); snapTm = setTimeout(() => b.classList.remove('evSnap'), 3500); dispatchEvent(new Event('sky:snap')); };   // warna halaman & bintang/matahari ikut langsung (~1,2 dtk)
 let evExtra = 0, evExtraT = 0;   // offset layar event (Turtle: langit bergeser pelan ke senja, lalu kembali)
 const simNow = () => Date.now() + timeShift + extra + evExtra;
 
@@ -4390,7 +4398,7 @@ function at(p) {
 const fogB = document.querySelector('.skFog.bottom'), mistB = document.querySelector('.skMist.bottom'), mistW = document.getElementById('skMistW'), windsEl = document.getElementById('skWinds');
 function updateSky(dt, now) {
   easeLoc(dt);
-  if (evExtra !== evExtraT) { evExtra += (evExtraT - evExtra) * (1 - Math.exp(-dt * 1.1)); if (Math.abs(evExtra - evExtraT) < 20000) evExtra = evExtraT; }
+  if (evExtra !== evExtraT) { evExtra += (evExtraT - evExtra) * (1 - Math.exp(-dt * kr(1.1))); if (Math.abs(evExtra - evExtraT) < 20000) evExtra = evExtraT; }
   const ms = simNow(), d = toDays(ms);
   SP = getPos(ms, sunCoords(d)); MP = getPos(ms, moonCoords(d));
   const a = SP.altitude / RAD, nn = SP.altitude < -.05;
@@ -4398,7 +4406,7 @@ function updateSky(dt, now) {
   // turun saat matahari mendekati cakrawala (sekitar 14 derajat), naik lagi saat senja berakhir (sekitar -8 sampai -16 derajat)
   sjOn = document.body.classList.contains('p5') && window.SJ_HZ > 0;   // halaman kosmetik: cakrawala laut mengikuti cakrawala scene Senja
   const target = camForce != null ? camForce : document.body.classList.contains('p5') ? 1 : smooth(clamp01((14 - a) / 11)) * (1 - smooth(clamp01((-8 - a) / 8)));   // camForce: layar event memaksa pandangan turun ke laut
-  cam += (target - cam) * (1 - Math.exp(-dt * 3)); if (Math.abs(cam - target) < .001) cam = target;
+  cam += (target - cam) * (1 - Math.exp(-dt * kr(3))); if (Math.abs(cam - target) < .001) cam = target;
   if (++skyTick % 3 === 0 || !skyOwn) {
     const k = turtleSky(skyAt(evMode === 'grandma' ? -15 : a)), c = k.sky.map(rgb);   // Grandma: langit malam
     const bg = `linear-gradient(180deg, ${c[0]} 0%, ${c[1]} 35%, ${c[2]} 70%, ${c[3]} 100%)`, fg = k.fog.map(Math.round).join(',');
@@ -4813,9 +4821,32 @@ function drawMeteors(now) {
 }
 // ===== Gunung Cahaya: kecil di langit normal (tengah bawah), di sisi kiri cakrawala saat laut; tampil di Geyser/Turtle, tersembunyi di event lain =====
 let gcA = 0, gcPose = null; const gcEl = document.getElementById('gcM'), gcTint = document.getElementById('gcTint');
+// [gc-occlude] bintang / matahari / bulan / elemen langit di BELAKANG Gunung Cahaya disembunyikan sesuai siluet gunung (semua kondisi: langit, laut, hutan)
+let gcOccPath = null, gcOccOut = null, gcOccA = 0, gcOccKey = '', gcOccBase = null, gcOccD = '';
+const gcPtCtx = document.createElement('canvas').getContext('2d'), GC_OCC_EL = ['stars', 'skBodies'].map(id => document.getElementById(id));
+function gcOcclude(x, b, s, a) {
+  const qa = a < .02 ? 0 : Math.round(a * 25) / 25, key = qa ? [x.toFixed(1), b.toFixed(1), s.toFixed(4), qa, W, H].join('|') : '';
+  if (key === gcOccKey) return; gcOccKey = key;   // hanya dihitung ulang saat pose / ukuran / fade berubah
+  if (!qa) { gcOccPath = gcOccOut = null; gcOccA = 0; for (const el of GC_OCC_EL) if (el) el.style.webkitMaskImage = el.style.maskImage = ''; return; }
+  try {
+    if (!gcOccBase) { gcOccD = document.getElementById('gc-gunung').getAttribute('d'); gcOccBase = new Path2D(gcOccD); }
+    const m = [2.98 * s, 0, 0, 1.94 * s, x - 438 * s, b - 398 * s];   // koordinat path gunung -> piksel layar (viewBox 40,-60 + transform gcM + transform path)
+    gcOccPath = new Path2D(); gcOccPath.addPath(gcOccBase, new DOMMatrix(m)); gcOccA = qa;
+    gcOccOut = new Path2D(); gcOccOut.rect(-50, -50, W + 100, H + 100); gcOccOut.addPath(gcOccPath);   // dipakai clip evenodd: area DI LUAR gunung
+    const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='" + W + "' height='" + H + "' viewBox='0 0 " + W + " " + H + "'><defs>"
+      + "<linearGradient id='g' gradientUnits='userSpaceOnUse' x1='0' y1='180.4' x2='0' y2='203.6'><stop offset='0' stop-color='#000' stop-opacity='" + qa + "'/><stop offset='1' stop-color='#000' stop-opacity='0'/></linearGradient>"
+      + "<mask id='m' maskUnits='userSpaceOnUse' x='0' y='0' width='" + W + "' height='" + H + "'><rect width='" + W + "' height='" + H + "' fill='#fff'/>"
+      + "<path d='" + gcOccD + "' transform='matrix(" + m.join(' ') + ")' fill='url(#g)'/></mask></defs><rect width='" + W + "' height='" + H + "' fill='#000' mask='url(#m)'/></svg>";
+    const u = 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+    for (const el of GC_OCC_EL) if (el) { const st = el.style; st.webkitMaskImage = st.maskImage = u; st.webkitMaskSize = st.maskSize = '100% 100%'; st.webkitMaskRepeat = st.maskRepeat = 'no-repeat'; }
+  } catch (e) { gcOccPath = gcOccOut = null; }
+}
 // ===== Cahaya puncak Gunung Cahaya =====
 // Eden: merah terus selama Eden mingguan belum dinonaktifkan; 2 detik sebelum meteor Eden jatuh, cahayanya memanjang sedikit ke atas.
 // Shard: 2 detik sebelum meteor jatuh, cahaya berubah merah (shard merah) atau jingga (shard hitam), bertahan sampai meteor selesai, lalu kembali normal. Tanpa perubahan panjang.
+const GC_TALL = 1.7;   // faktor tinggi pancaran cahaya lurus ke atas
+const GC_RED_TALL = .22;   // tambahan tinggi pancaran saat cahaya berwarna (merah / jingga): +22% di atas GC_TALL, naik-turun halus mengikuti intensitas warna (k)
+const GC_LIFT = .12;   // gunung dinaikkan 12% tinggi layar pada latar normal (langit); pose laut & hutan tidak berubah (dipudarkan dengan (1 - e))
 const GC_LEAD = 2000;   // ms: jeda dari pemicu meteor sampai meteor pertama benar-benar jatuh
 let gcEdenOn = false, gcRed = 0, gcRedA = -1, gcOrA = -1, gcBoostA = -1, gcBoostT = -1e12, gcPulseT = -1e12, gcPulseHold = 0, gcPulseOr = 0, gcStormA = 0, gcStormB = 0, gcStormOn = false, gcShaft = null, gcStops = null;
 function gcHex(h) { h = String(h || '#fff').replace('#', ''); if (h.length === 3) h = h.replace(/./g, '$&$&'); return [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) || 0); }
@@ -4841,10 +4872,12 @@ function gcEdenStep() {
     for (const q of gcStops) q.st.style.stopColor = mx(q.o, q.t, q.u);
     gcEl.style.setProperty('--gcSt', mx([255, 243, 210], [255, 130, 100], [255, 200, 140])); gcEl.style.setProperty('--gcB1', mx([255, 184, 48], [255, 52, 36], [255, 140, 20])); gcEl.style.setProperty('--gcB2', mx([255, 238, 144], [255, 150, 118], [255, 205, 130]));
   }
-  if (Math.abs(boost - gcBoostA) > .003 || (boost === 0) !== (gcBoostA === 0)) {
-    gcBoostA = boost;
-    if (gcShaft) gcShaft.setAttribute('transform', boost > 0 ? 'translate(0 230) scale(1 ' + (1 + .32 * boost).toFixed(4) + ') translate(0 -230)' : '');
-    const pg = gcEl.querySelector('.gc-peakglow'); if (pg) { pg.style.transformBox = 'fill-box'; pg.style.transformOrigin = 'center'; pg.style.transform = boost > 0 ? 'scale(' + (1 + .45 * boost).toFixed(3) + ')' : ''; }
+  // tinggi pancaran: normal = GC_TALL (tetap seperti semula); saat berwarna (k) ikut memanjang sedikit, dan boost Eden menambah di atasnya
+  const tall = 1 + .32 * boost + GC_RED_TALL * k;
+  if (Math.abs(tall - gcBoostA) > .003 || (tall === 1) !== (gcBoostA === 1)) {
+    gcBoostA = tall;
+    if (gcShaft) gcShaft.setAttribute('transform', 'translate(0 230) scale(1 ' + (GC_TALL * tall).toFixed(4) + ') translate(0 -230)');   // GC_TALL: pancaran lurus ke atas dibuat lebih tinggi secara permanen (warna merah & boost Eden menambah di atasnya)
+    const pg = gcEl.querySelector('.gc-peakglow'); if (pg) { pg.style.transformBox = 'fill-box'; pg.style.transformOrigin = 'center'; const ps = 1 + .45 * boost + .12 * k; pg.style.transform = ps > 1.001 ? 'scale(' + ps.toFixed(3) + ')' : ''; }   // pendar puncak ikut membesar tipis agar serasi dengan pancaran yang lebih tinggi
   }
 }
 const GCK = 1.18;   // Gunung Cahaya sedikit lebih besar; ukurannya hanya mengikuti TINGGI layar, jadi layar sempit tidak mengecilkannya
@@ -4854,7 +4887,7 @@ function gcUpdate() {
   let fp = 0, rt = NaN, fnk = 0; try { fp = Forest.p; rt = Forest.ridge; fnk = Forest.nk; } catch (e) {}
   const show = evMode === 'grandma' || !evMode || evMode === 'turtle' || evMode === 'geyser';   // hutan (Grandma / hujan) kini ikut menampilkan Gunung Cahaya
   gcA += ((show ? 1 : 0) - gcA) * .06;
-  if (gcA < .01) { gcEl.style.visibility = 'hidden'; gcEl.style.display = 'none'; return; }   // [perf] display:none: 15 animasi CSS & filter SVG berhenti saat gunung tersembunyi
+  if (gcA < .01) { gcEl.style.visibility = 'hidden'; gcEl.style.display = 'none'; gcOcclude(0, 0, 0, 0); return; }   // [perf] display:none: 15 animasi CSS & filter SVG berhenti saat gunung tersembunyi
   gcEl.style.display = '';
   const L = (p, q, k) => p + (q - p) * k, ef = smooth(clamp01(fp));   // ef: 0 = langit/laut, 1 = dasar hutan
   // pose langit/laut. Saat tujuannya hutan (Grandma / hujan), pose terakhir DITAHAN: dari laut gunung bergeser pelan ke hutan (kebalikan hutan → laut),
@@ -4862,8 +4895,8 @@ function gcUpdate() {
   const toForest = evMode === 'grandma' || (!evMode && (wx === 'rain' || wx === 'storm'));
   if (!toForest || !gcPose) {
     const e = evMode === 'grandma' ? 0 : smooth(clamp01(cam)), yh = H * (1 - .34 * cam);   // ukuran & posisi sama untuk Turtle, Geyser, dan latar laut
-    const wS = Math.min(H * .3 * GCK, W * .86), wE = H * .22 * GCK;   // wS: langit (tengah), wE: laut (kiri); batas W*.86 hanya mencegah melebihi lebar layar yang ekstrem sempit
-    gcPose = { w: wS * (1 - e) + wE * e, x: W * .5 * (1 - e) + Math.max(W * .15, wE * .45) * e, b: H * .76 * (1 - e) + (yh + 1) * e, W, H };   // laut: kiri, di belakang bukit/pulau kiri; langit & Grandma: tepat di tengah, sejajar jam
+    const GC_NEAR = 2.2, wS = Math.min(H * .3 * GCK * GC_NEAR, W * 1.1), wE = H * .22 * GCK;   // GC_NEAR: latar langit biasa dibuat lebih dekat (lebih besar); pose laut & hutan tidak berubah   // wS: langit (tengah), wE: laut (kiri); batas W*.86 hanya mencegah melebihi lebar layar yang ekstrem sempit
+    gcPose = { w: wS * (1 - e) + wE * e, x: W * .5 * (1 - e) + Math.max(W * .15, wE * .45) * e, b: H * (.9 - GC_LIFT) * (1 - e) + (yh + 1) * e, W, H };   // laut: kiri, di belakang bukit/pulau kiri; langit & Grandma: tepat di tengah, sejajar jam
   }
   if (gcPose.W !== W || gcPose.H !== H) { gcPose.x *= W / gcPose.W; gcPose.w *= W / gcPose.W; gcPose.b *= H / gcPose.H; gcPose.W = W; gcPose.H = H; }   // layar berubah ukuran saat pose ditahan
   const wSky = gcPose.w, xSky = gcPose.x, bSky = gcPose.b;
@@ -4880,6 +4913,7 @@ function gcUpdate() {
   const wk = ({ clear: 1, cloudy: .92, rain: .82, storm: .7, snow: .85, fog: .6 })[wx] ?? 1;   // hujan/kabut meredupkan pendar, tetapi tidak menghilangkannya
   gcEl.style.visibility = 'visible'; gcEl.style.opacity = (gcA * L(1, wk, ef)).toFixed(3);
   gcEl.style.transform = 'translate(' + x.toFixed(1) + 'px,' + b.toFixed(1) + 'px) scale(' + s.toFixed(4) + ') translate(-358px,-508px)';
+  gcOcclude(x, b, s, gcA);
 }
 // [perf] loop Gunung Cahaya: dibatasi ~60 fps (layar 90/120 Hz tidak 2x lebih sering), berhenti saat tab tersembunyi
 let gcLast = 0, gcLoopOn = false;
@@ -4943,10 +4977,10 @@ gcLoopStart();
 const MFX_CAP = () => Math.round(700 * (window.SkyGfx ? SkyGfx.scale() : 1));   // [perf] jumlah partikel meteor ikut Grafis (1 / .65 / .35)
 function drawEvt(dt, now) {
   const want = evMode === 'turtle' || evMode === 'geyser';
-  evEnv += ((want ? 1 : 0) - evEnv) * (1 - Math.exp(-dt * 1.4)); if (evEnv < .003 && !want) evEnv = 0;
+  evEnv += ((want ? 1 : 0) - evEnv) * (1 - Math.exp(-dt * kr(1.4))); if (evEnv < .003 && !want) evEnv = 0;
   // [hitung-mundur] suasana (senja / laut / hutan) tampil saat hitung mundur, tetapi elemen event (kura-kura, semburan geyser, spirit Grandma) baru muncul saat event benar-benar berlangsung
-  evFx += ((want && evLive ? 1 : 0) - evFx) * (1 - Math.exp(-dt * 1.4)); if (evFx < .003 && !(want && evLive)) evFx = 0;
-  evSp += ((evMode === 'grandma' && !evLive ? 0 : 1) - evSp) * (1 - Math.exp(-dt * 1.2)); if (evSp > .997) evSp = 1;
+  evFx += ((want && evLive ? 1 : 0) - evFx) * (1 - Math.exp(-dt * kr(1.4))); if (evFx < .003 && !(want && evLive)) evFx = 0;
+  evSp += ((evMode === 'grandma' && !evLive ? 0 : 1) - evSp) * (1 - Math.exp(-dt * kr(1.2))); if (evSp > .997) evSp = 1;
   if (!evEnv && !meteors.length && !plume.length) { if (evc._dirty) { evx.clearRect(0, 0, W, H); evc._dirty = false; } evc.style.display = 'none'; return; }   // [perf] kanvas efek disembunyikan saat tak ada efek
   evc._dirty = true; evc.style.display = ''; evx.clearRect(0, 0, W, H);
   if (evEnv) {
@@ -4983,7 +5017,7 @@ window.SkyScene = {
     camForce = (mode === 'turtle' || mode === 'geyser') ? 1 : null;
     if (mode === 'geyser') { gNext = live ? performance.now() / 1000 + 3 : 1e12; gBurst = null; plume.length = 0; }   // semburan pertama 3 detik setelah event BERLANGSUNG, lalu tiap 1 menit
     evExtraT = mode === 'turtle' ? duskOffset() : 0;
-    evPause = false; document.body.classList.toggle('evForest', mode === 'grandma'); startLoop();   // [forest-addon] Grandma: #evForest tetap jadi latar di belakang hutan addon; loop tetap jalan
+    evPause = false; document.body.classList.toggle('evForest', mode === 'grandma'); snapMark(); snapUI(); startLoop();   // [forest-addon] Grandma: #evForest tetap jadi latar di belakang hutan addon; loop tetap jalan
   },
   setBusy(on) {   // saat event berlangsung (kecuali Grandma): Sky kid lebih sering muncul dan dominan menyelam
     on = !!on; if (on === evBusy) return; evBusy = on;
@@ -5034,7 +5068,8 @@ body.evForest #skFront { visibility: visible !important; transition: none !impor
 
 `;
 document.head.appendChild(css);
-let FP = 0;   // progres kamera: 0 = langit/laut, 1 = dasar hutan
+let FP = 0, FPr = 0;   // FPr = progres linear; FP = FPr yang di-ease (pelan di awal/akhir, jadi pergantian lapisan di ambang .003/.55/.995 tidak terlihat sebagai kedip)
+// progres kamera: 0 = langit/laut, 1 = dasar hutan
 const cvB = document.createElement('canvas'), cvF = document.createElement('canvas'); cvB.id = 'forest'; cvF.id = 'forestFront'; document.getElementById('skEvt').after(cvB, cvF); const cvS = document.createElement('canvas'); cvS.id = 'forestSky'; (document.getElementById('gcM') || document.getElementById('skSea')).before(cvS);   // [gunung-cahaya] lapisan langit hutan: di bawah Gunung Cahaya, sedangkan gunung/bukit hutan (#forest) di atasnya sehingga kaki gunung tersembunyi di balik punggung bukit   // lapisan belakang (di bawah Sky kid) dan depan (di atas, tempat pohon)
 // Ikon spirit di sisi kiri air terjun. Gambar dimuat dari URL; bila gagal, dipakai siluet spirit sederhana sebagai cadangan.
 const SPIRIT_URL = 'https://static.wikia.nocookie.net/sky-children-of-the-light/images/6/68/Belonging-Guide-Spirit.png/revision/latest?cb=20240119030159';
@@ -5234,6 +5269,7 @@ function buildForest() {
   const [c0n, g0n] = mk();   // langit malam: biru tua pekat, cahaya cakrawala, bintang
   gr = g0n.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#050d26'); gr.addColorStop(.3, '#0c1f4a'); gr.addColorStop(.55, '#1d4478'); gr.addColorStop(.8, '#3a6ea0'); gr.addColorStop(1, '#4f86b4');
   g0n.fillStyle = gr; g0n.fillRect(0, 0, W, H);
+  const [c0g, g0g] = mk(); g0g.fillStyle = gr; g0g.fillRect(0, 0, W, H);   // [gc-occlude] langit malam polos (tanpa bintang) untuk area di balik gunung
   for (let i = 0; i < 260; i++) {
     const x = R() * W, y = Math.pow(R(), 1.4) * H * .66, rr = .4 + Math.pow(R(), 3) * 1.4;
     g0n.fillStyle = `rgba(232,242,255,${.3 + R() * .7})`; g0n.beginPath(); g0n.arc(x, y, rr, 0, 6.283); g0n.fill();
@@ -5336,7 +5372,7 @@ function buildForest() {
     scx, shw, sy, glints: Array.from({ length: 40 }, () => ({ u: .04 + R() * .96, off: (R() - .5) * 1.5, ph: R() * 6.28, sp: .8 + R() * 2 })),
     slots, yglow: spr('255,240,170', .95), sglow: sprSoft('170,215,255', .95),
     door: D, spirit: { x: D.x + D.w * .03, y: D.y - D.h * .012, h: D.h * .6 },   // spirit berdiri di dalam ruang pohon (pintu batang kiri-tengah)
-    vg, E, msil, c0n, c0m, cf, wf: WF, fallS: Array.from({ length: 26 }, () => ({ x: (R() * 2 - 1) * .9, sp: 150 + R() * 140, len: 10 + R() * 22, ph: R() })),
+    vg, E, msil, c0n, c0g, c0m, cf, wf: WF, fallS: Array.from({ length: 26 }, () => ({ x: (R() * 2 - 1) * .9, sp: 150 + R() * 140, len: 10 + R() * 22, ph: R() })),
     flow: Array.from({ length: 90 }, () => ({ u: R(), off: (R() - .5) * 1.6, l: .5 + R() * .9, sp: .7 + R() * .6 })), mc: Object.assign(document.createElement('canvas'), { width: Math.round(W * dp), height: Math.round(H * dp) }),
     twinkle: Array.from({ length: 46 }, () => ({ x: R() * W, y: Math.pow(R(), 1.4) * H * .6, ph: R() * 6.28, sp: .6 + R() * 2 })),
     bc: Object.assign(document.createElement('canvas'), { width: Math.round(W * dp), height: Math.round(H * dp) }), c0a, c0, c1, c2, fogS: spr('150,205,225', .9), glowS: spr('195,238,242', .8),
@@ -5400,19 +5436,21 @@ function drawForest(dt, now) {
   sgx.setTransform(F.rp, 0, 0, F.rp, 0, 0); sgx.globalCompositeOperation = 'source-over'; sgx.clearRect(0, 0, W, H);   // [gunung-cahaya] langit terpisah dari gunung/bukit
   const sa = smooth(clamp01((FP - .05) / .55)), ba = smooth(clamp01((FP - .55) / .4));
   if (F.nl === undefined) F.nl = (night || evMode === 'grandma') ? 1 : 0;
-  F.nl += Math.sign((night || evMode === 'grandma' ? 1 : 0) - F.nl) * Math.min(Math.abs((night || evMode === 'grandma' ? 1 : 0) - F.nl), dt / 2.8);   // peralihan siang <-> malam sekitar 2,8 detik
+  F.nl += Math.sign((night || evMode === 'grandma' ? 1 : 0) - F.nl) * Math.min(Math.abs((night || evMode === 'grandma' ? 1 : 0) - F.nl), dt / (snapOn() ? SNAP_NL : 2.8));   // peralihan siang <-> malam sekitar 2,8 detik
   const nk = F.nk = smooth(F.nl);
   sgx.globalAlpha = sa * (evMode === 'grandma' ? .45 : 1); sgx.drawImage(F.c0a, 0, 0, W, H);
   if (nk > .01) {
-    sgx.globalAlpha = sa * nk * (evMode === 'grandma' ? .45 : 1); sgx.drawImage(F.c0n, 0, 0, W, H);
+    sgx.globalAlpha = sa * nk * (evMode === 'grandma' ? .45 : 1); if (gcOccOut) { sgx.save(); sgx.clip(gcOccOut, 'evenodd'); sgx.drawImage(F.c0n, 0, 0, W, H); sgx.restore(); sgx.save(); sgx.clip(gcOccPath); sgx.drawImage(F.c0g, 0, 0, W, H); sgx.restore(); } else sgx.drawImage(F.c0n, 0, 0, W, H);   // bintang statis tidak digambar di dalam siluet gunung
+    if (F.occK !== gcOccKey) { F.occK = gcOccKey; for (const st of F.twinkle) st.occ = !!gcOccPath && gcPtCtx.isPointInPath(gcOccPath, st.x, st.y); }
     for (const st of F.twinkle) {   // bintang berkelip
+      if (st.occ) continue;
       sgx.globalAlpha = sa * nk * (evMode === 'grandma' ? .45 : 1) * (.25 + .75 * Math.pow(.5 + .5 * Math.sin(t * st.sp + st.ph), 2));
       sgx.fillStyle = 'rgb(240,247,255)'; sgx.beginPath(); sgx.arc(st.x, st.y, 1.15, 0, 6.283); sgx.fill();
     }
   }
   if (ba > .01) {   // matahari / bulan hutan muncul belakangan, setelah matahari/bulan asli tertutup
     F.bg.setTransform(F.dp, 0, 0, F.dp, 0, 0); F.bg.clearRect(0, 0, W, H); bodies(F.bg);
-    F.bg.globalCompositeOperation = 'destination-out'; F.bg.drawImage(F.msil, 0, y0, W, H); F.bg.globalCompositeOperation = 'source-over';   // gunung menutupi benda langit sepenuhnya
+    F.bg.globalCompositeOperation = 'destination-out'; F.bg.drawImage(F.msil, 0, y0, W, H); if (gcOccPath) { F.bg.fillStyle = '#000'; F.bg.fill(gcOccPath); } F.bg.globalCompositeOperation = 'source-over';   // gunung menutupi benda langit sepenuhnya
     sgx.globalAlpha = ba; sgx.drawImage(F.bc, 0, 0, W, H);
   } else F.sun = null;
   const ma_ = smooth(clamp01((ef - .05) / .5));
@@ -5579,10 +5617,14 @@ function bodies(g) {
 }
 
 // ---------- API untuk HTML induk ----------
+let fLast = 0;
 function tick(dt) {   // panggil sekali per frame setelah updateSky(): hujan -> kamera turun ke hutan (sekitar 5 detik), reda -> naik kembali
   const FPt = (evMode === 'grandma' || (!evMode && (wx === 'rain' || wx === 'storm'))) ? 1 : 0;
   if (FPt && !fBuilt) buildForest();   // event lain punya pemandangannya sendiri; Grandma memakai hutan (tanpa hujan, selalu malam)
-  FP = REDUCE ? FPt : FP + Math.sign(FPt - FP) * Math.min(Math.abs(FPt - FP), dt / 5.5);
+  if (FPt !== fLast) { fLast = FPt; snapMark(); }   // hujan <-> hutan: langsung ke titik normal (jeda ~0,2 dtk), bukan 5,5 dtk
+  if (REDUCE) FP = FPr = FPt;
+  else { if (Math.abs(FP - FPr * FPr * (3 - 2 * FPr)) > .002) FPr = FP;   // FP diubah dari luar (setter): selaraskan
+    FPr += Math.sign(FPt - FPr) * Math.min(Math.abs(FPt - FPr), dt / (snapOn() ? SNAP_FP : 5.5)); FP = FPr * FPr * (3 - 2 * FPr); }
   scene.classList.toggle('fmix', FP > .003); scene.classList.toggle('fdeep', FP > .55); scene.classList.toggle('bg-forest', FP >= .995); scene.style.setProperty('--fp', FP.toFixed(3));
   scene.classList.toggle('fnight', evMode === 'grandma'); scene.classList.toggle('fgrand', evMode === 'grandma');
   const fo = 1 - smooth(clamp01(FP));   // awan, kabut, dan angin bawaan memudar seiring kamera turun
@@ -6251,6 +6293,8 @@ initPerm(); startLoop();
   evXEl.addEventListener('click', () => { if(evCur) evDismissed = (evDismissed === evCur.id) ? '' : evCur.id; evRemind(new Date(), I18N[lang]); });
   window.SkyEvTest = k => { EV_PREVIEW = k || ''; evDismissed = ''; evEdenHour = ''; evMeteorAt = 0; for(const q in evShardKey) delete evShardKey[q]; evRemind(new Date(), I18N[lang]); };   // UJI-EVENT (dipakai kontrol uji sementara; hapus bersama blok #evTest)
   /* latar hijau Grandma (#evForest) dihapus */
+
+  addEventListener('sky:snap', () => { if(introActive && introStarted) return; const n = new Date(); applySky(n.getHours() + n.getMinutes()/60 + n.getSeconds()/3600); });   // [snap] terapkan warna langit baru segera, tanpa menunggu tick berikutnya
 
   function tick(){
     const now = new Date();
@@ -10963,7 +11007,17 @@ initPerm(); startLoop();
   });
 
   applyVisitLang();
-  window.SkyVisit = { render: renderFriends };
+  // Rombongan Sky kid di Beranda: pemilik akun memimpin, lalu teman dari friend list (favorit, lalu online, lalu sisanya). Maks. 8 termasuk diri sendiri.
+  function skyRoster(){
+    const me = { name: myUid ? dispName(myUid) : vt().guestName, me: true }, out = [me];
+    try{
+      const rank = f => (favSet.has(f.code) ? 0 : (fMeta(f).online ? 1 : 2));
+      friendsCache.map((f, i) => ({ f, i, r: rank(f) })).sort((a, b) => a.r - b.r || a.i - b.i)
+        .slice(0, 7).forEach(x => out.push({ name: fLabel(x.f), code: x.f.code }));
+    }catch(e){}
+    return out;
+  }
+  window.SkyVisit = { render: renderFriends, roster: skyRoster };
 })();
 </script>
 <script>
