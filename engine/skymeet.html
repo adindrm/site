@@ -1108,10 +1108,14 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @media (prefers-reduced-motion: reduce){ .flame.flk{ animation:none; } }
   .pill small.wx{ opacity:.6; font-size:11px; margin-left:5px; font-weight:400; }
   /* ikon melayang progres harian */
-  #fab{ display:none; position:relative; flex:none; z-index:1; width:44px; height:44px; padding:0; border:none; background:none; place-items:center; color:#ffd27a; cursor:pointer; touch-action:manipulation; pointer-events:auto; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.45)); -webkit-tap-highlight-color:transparent; }   /* ikon progres harian: tampil di header menggantikan tombol bahasa (tidak melayang/tidak bisa digeser) */
-  body.ready.fabOn #fab{ display:grid; animation:fabIn .45s cubic-bezier(.2,.9,.3,1) both, fabBob 5.5s ease-in-out .6s infinite; }   /* masuk + melayang naik-turun halus (properti translate terpisah dari transform) */
+  #fab{ display:grid; position:relative; flex:none; z-index:1; max-width:0; height:42px; padding:0; margin:0; border:none; border-radius:999px; background:none; place-items:center; color:#ffd27a; cursor:pointer; touch-action:manipulation; overflow:hidden; opacity:0; visibility:hidden; pointer-events:none; -webkit-tap-highlight-color:transparent; transition:opacity .2s ease, max-width .38s cubic-bezier(.4,0,.2,1), padding .38s cubic-bezier(.4,0,.2,1), visibility 0s linear .38s; }   /* ikon progres harian: tinggal di kartu header yang sama dengan tombol bahasa; keduanya bertukar halus (lebar + pudar) */
+  body.fabOn #fab{ max-width:64px; padding:0 12px; overflow:visible; opacity:1; visibility:visible; pointer-events:auto; transition:opacity .3s ease .12s, max-width .38s cubic-bezier(.4,0,.2,1), padding .38s cubic-bezier(.4,0,.2,1), visibility 0s; }
+  body.ready.fabOn #fab{ animation:fabIn .45s cubic-bezier(.2,.9,.3,1) .1s both; }   /* masuk: muncul membesar halus */
+  #langCurrent{ max-width:150px; overflow:hidden; white-space:nowrap; transition:opacity .3s ease .12s, max-width .38s cubic-bezier(.4,0,.2,1), padding .38s cubic-bezier(.4,0,.2,1), visibility 0s; }
+  body.fabOn #langCurrent, #fab.out ~ #langCurrent{ max-width:0; padding-left:0; padding-right:0; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .2s ease, max-width .38s cubic-bezier(.4,0,.2,1), padding .38s cubic-bezier(.4,0,.2,1), visibility 0s linear .38s; }   /* tombol bahasa menyusut & memudar saat ikon progres masuk (dan sebaliknya); bahasa tetap bisa diganti di Pengaturan */
+  body.fabOn #langMenu{ display:none; }
   body.fabOn #langCurrent, #fab.out ~ #langCurrent, body.fabOn #langMenu{ display:none; }   /* ikon progres menggantikan tombol bahasa di header (bahasa tetap bisa diganti di Pengaturan) */
-  #fab.out{ display:grid; animation:fabOut .3s ease-in both; pointer-events:none; }               /* menciut lalu hilang (JS lalu memicu ledakan partikel) */
+  #fab.out{ max-width:64px; padding:0 12px; overflow:visible; opacity:0; visibility:visible; animation:fabOut .3s ease-in both; pointer-events:none; }               /* menciut lalu hilang (JS lalu memicu ledakan partikel) */
   @keyframes fabIn{ 0%{ opacity:0; transform:scale(.05); } 65%{ opacity:1; transform:scale(1.12); } 100%{ opacity:1; transform:none; } }
   @keyframes fabOut{ 0%{ opacity:1; transform:none; } 100%{ opacity:0; transform:scale(.05); } }
   /* harian selesai (lilin abu-abu): api berdenyut makin terang, membengkak, lalu pecah jadi partikel (JS) */
@@ -1119,12 +1123,14 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   @keyframes fabFin{ 0%{ opacity:1; transform:scale(1); filter:drop-shadow(0 2px 6px rgba(0,0,0,.45)) blur(0px); } 45%{ opacity:1; transform:scale(.88); filter:drop-shadow(0 2px 6px rgba(0,0,0,.45)) blur(0px); } 100%{ opacity:0; transform:scale(.18); filter:drop-shadow(0 0 0 rgba(0,0,0,0)) blur(4px); } }   /* perlahan mengecil sambil memudar */
   #fab.fin{ animation:fabFin 2.8s ease-in-out both; transform-origin:50% 86%; }
   @keyframes fabGlow{ 0%{ filter:var(--fin0, var(--fx-gray)); } 55%,100%{ filter:grayscale(0) opacity(1) brightness(2.4) drop-shadow(0 0 6px rgba(255,250,215,1)) drop-shadow(0 0 24px rgba(255,205,95,1)); } }
-  #fab.fin .flame{ animation:fabGlow 2.8s ease-in-out both; }
+  #fab .flame{ animation:fabBob 5.5s ease-in-out .6s infinite; }   /* melayang naik-turun halus: hanya apinya, kartu diam */
+  #fab .flame.flk{ animation:flameFlick .9s ease-in-out infinite, fabBob 5.5s ease-in-out .6s infinite; }
+  #fab.fin .flame, #fab.fin .flame.flk{ animation:fabGlow 2.8s ease-in-out both; }
   #fab .flame{ width:36px; height:36px; font-size:30px; pointer-events:none; filter:var(--fx-gray); transition:filter 1.8s ease; }   /* diam = abu-abu */
   #fab.lit .flame{ filter:var(--fx-lit); transition:filter 1.8s ease-in-out; }                                                                    /* poin selesai = menyala */
   #fxLayer{ position:fixed; inset:0; z-index:210; pointer-events:none; overflow:hidden; }
   .fxp{ position:absolute; border-radius:50%; will-change:transform,opacity; }
-  @media (prefers-reduced-motion: reduce){ .flame.fanim img.fr{ transition:none; } #fab.fin .flame{ animation:none; } body.ready.fabOn #fab, #fab.out, #fab.fin{ animation:none; } #fab .flame, .fabTog .flame{ transition:none; } }
+  @media (prefers-reduced-motion: reduce){ .flame.fanim img.fr{ transition:none; } #fab.fin .flame{ animation:none; } body.ready.fabOn #fab, #fab.out, #fab.fin{ animation:none; } #fab .flame, #fab .flame.flk{ animation:none; } #fab .flame, .fabTog .flame{ transition:none; } }
   #fab.gray{ color:#9aa0b4; }
   #fabOv .fp{ transition:filter 1.4s ease; }
   #fabOv.gry .fp{ filter:grayscale(1); }
@@ -1215,15 +1221,24 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     border:none;
     touch-action: manipulation;
   }
-  #langCurrent{
-    display:flex; align-items:center; gap:8px;
+  /* kartu header: [lampu event] + (bahasa | ikon progres harian); satu kartu, isinya bertukar halus */
+  #hdrCard{
+    display:flex; align-items:center;
     min-height:44px;
-    padding:0 14px 0 16px;
     border-radius:999px;
     border:1px solid rgba(255,255,255,0.18);
     background: rgba(0,0,0,0.15);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+  }
+  #hdrSwap{ display:grid; align-items:center; justify-items:center; }
+  #hdrSwap > #langCurrent, #hdrSwap > #fab{ grid-area:1 / 1; }
+  #langCurrent{
+    display:flex; align-items:center; gap:8px;
+    min-height:42px;
+    padding:0 14px 0 16px;
+    border-radius:999px;
+    background:none;
   }
   #langCurrent svg{ width:12px; height:12px; transition: transform 0.25s ease; }
   #langCurrent[aria-expanded="true"] svg{ transform: rotate(180deg); }
@@ -1278,7 +1293,7 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
   }
   body.ready #nav{ opacity:1; transform:none; pointer-events:none; }
-  #navBtn, #langCurrent, #fab{ pointer-events:auto; }
+  #navBtn, #langCurrent, #fab, #evX{ pointer-events:auto; }
   /* pemutar musik mini di header (tengah, antara Menu dan bahasa): ketuk = buka kontrol (jeda/lanjut + sebelumnya/berikutnya), tekan lama = daftar lagu */
   #musicBox{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 16px); left:50%; transform:translateX(-50%); z-index:10; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .5s ease, visibility 0s linear .5s; }
   body.ready.mz:not(.p2):not(.p3):not(.p4):not(.p5):not(.p6) #musicBox{   /* hanya di beranda */ opacity:1; visibility:visible; transition:opacity .5s ease .2s, visibility 0s; }
@@ -1770,10 +1785,31 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
     box-shadow:0 -18px 50px rgba(0,0,0,0.42), 0 -2px 42px rgba(255,205,120,0.38), inset 0 2px 0 rgba(255,255,255,0.95), inset 0 -12px 26px rgba(208,176,126,0.2); }
   #fabOv .fp::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:linear-gradient(100deg, rgba(255,255,255,0.55) 0, transparent 18%, transparent 80%, rgba(170,130,70,0.1)); }
   #fabOv .fh, #fabOv .fs, #fabOv .fl{ z-index:2; }
-  #fabOv .wick{ position:absolute; left:50%; top:-26px; width:4px; height:28px; margin-left:-2px; border-radius:3px 3px 1px 1px; z-index:3; pointer-events:none;
+  #fabOv .wick{ position:absolute; left:50%; top:-26px; width:4px; height:28px; margin-left:-2px; border-radius:3px 3px 1px 1px; z-index:20; pointer-events:none;
     background:linear-gradient(180deg,#1c1612,#4a3b2f 70%,#7a6450); transform-origin:50% 100%; animation:wickSway 4.2s ease-in-out infinite; }
   #fabOv .wick::after{ content:''; position:absolute; left:50%; bottom:-4px; width:40px; height:9px; margin-left:-20px; border-radius:50%; background:radial-gradient(closest-side, rgba(204,166,104,0.6), transparent); }
   @keyframes wickSway{ 0%,100%{ transform:rotate(-2deg); } 50%{ transform:rotate(2deg); } }
+  /* ===== api di ujung sumbu lilin (panel progres): selalu di depan; ukuran/warna/cahaya mengikuti progres harian (--lv 0..1, diisi JS): 0 = abu-abu, redup, kecil; makin banyak area selesai = makin berwarna, terang, besar; lilin abu-abu (20) = paling terang ===== */
+  #fabOv .wf{ position:absolute; z-index:30; left:50%; bottom:calc(100% - (1 - var(--fy, .88)) * 36px); width:36px; height:36px; margin-left:-18px; scale:1.3; transform-origin:50% calc(var(--fy, .88) * 100%); pointer-events:none; isolation:isolate; }   /* dasar gambar api (--fy) tepat di ujung sumbu */
+  #fabOv .wf.gone{ visibility:hidden; }
+  #fabOv .wf.out{ animation:fabOut .3s ease-in both; }
+  #fabOv .wf.fin{ animation:fabFin 2.8s ease-in-out both; }
+  #fabOv .wf .flame{ position:relative; z-index:2; width:36px; height:36px; font-size:30px; scale:var(--fu, 1); transform-origin:50% calc(var(--fy, .88) * 100%); filter:grayscale(var(--fg, 1)) opacity(var(--fo, .42)) brightness(var(--fb, 1)) drop-shadow(0 0 var(--fr, 0px) rgba(255,214,90,var(--fa, 0))); transition:filter 1.6s ease, scale 1.6s ease; }
+  #fabOv .wf.fin .flame, #fabOv .wf.fin .flame.flk{ animation:fabGlow 2.8s ease-in-out both; }
+  #fabOv .wf .fabDeco{ position:absolute; inset:0; pointer-events:none; opacity:calc(.1 + .9 * var(--lv, 0)); transition:opacity 1.2s ease; }
+  #fabOv .wf .fAura{ position:absolute; inset:-22px; z-index:0; border-radius:50%; background:radial-gradient(closest-side, rgba(255,214,130,0.42), rgba(255,170,80,0.14) 55%, transparent 72%); opacity:.5; animation:fabAura 3.6s ease-in-out infinite; }
+  #fabOv .wf .fOrbit{ position:absolute; inset:-4px; z-index:3; animation:fabSpin 9s linear infinite; }
+  #fabOv .wf .fOrbit i{ position:absolute; top:0; left:50%; width:4px; height:4px; margin-left:-2px; border-radius:50%; background:#fff4cc; box-shadow:0 0 6px 1px rgba(255,214,130,0.95); opacity:.7; animation:fabTw 2.4s ease-in-out infinite; }
+  #fabOv .wf .fOrbit.o2{ inset:3px; animation-duration:14s; animation-direction:reverse; }
+  #fabOv .wf .fOrbit.o2 i{ top:auto; bottom:0; width:3px; height:3px; margin-left:-1.5px; animation-delay:-1.1s; }
+  #fabOv .wf.lit .fAura{ opacity:1; animation-duration:1.8s; }
+  #fabOv .wf.lit .fOrbit i{ opacity:1; }
+  @keyframes fabSpin{ to{ transform:rotate(360deg); } }
+  @keyframes fabTw{ 0%,100%{ opacity:.25; transform:scale(.7); } 50%{ opacity:1; transform:scale(1.15); } }
+  @keyframes fabAura{ 0%,100%{ transform:scale(.92); opacity:.4; } 50%{ transform:scale(1.08); opacity:.8; } }
+  html.gfx-low #fabOv .wf .fabDeco{ display:none !important; }
+  html.gfx-medium #fabOv .wf .fOrbit, html.gfx-medium #fabOv .wf .fAura{ animation:none; }
+  @media (prefers-reduced-motion: reduce){ #fabOv .wf .flame, #fabOv .wf .fabDeco{ transition:none; } #fabOv .wf .fAura, #fabOv .wf .fOrbit, #fabOv .wf .fOrbit i, #fabOv .wf.out, #fabOv .wf.fin, #fabOv .wf.fin .flame{ animation:none; } }
   #fabOv .fh b{ background:linear-gradient(90deg,#8a5a14,#d3912a); -webkit-background-clip:text; background-clip:text; color:transparent; }
   #fabOv .fx{ background:rgba(110,80,40,0.1); color:#3a2f26; }
   #fabOv .fs::after{ background:rgba(110,80,40,0.14); }
@@ -1917,9 +1953,9 @@ window.addEventListener('error', function(e){ var m = document.getElementById('l
   .evMid{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; }
   #evName{ font-size:11px; font-weight:600; letter-spacing:2.2px; text-transform:uppercase; color:var(--ink-soft); }
   #evCd{ font-size:clamp(34px, 10vw, 56px); font-weight:200; font-variant-numeric:tabular-nums; line-height:1; color:var(--ink); }
-  /* [event] tombol lampu: tetap ada selama event (hitung mundur / berlangsung); ketuk = sembunyikan layar event, ketuk lagi = tampilkan. Di bawah tombol bahasa (top 16px + tinggi 44px) */
-  #evX{ position:absolute; z-index:4; top:calc(env(safe-area-inset-top, 0px) + 70px); right:16px; width:36px; height:36px; display:grid; place-items:center; padding:0; border-radius:50%; background:rgba(0,0,0,.15); border:1px solid rgba(255,255,255,.18); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--ink-soft); cursor:pointer; touch-action:manipulation; opacity:0; visibility:hidden; pointer-events:none; transform:scale(.9); transition:opacity .4s ease, transform .35s cubic-bezier(.2,.9,.3,1.2), color .3s ease, visibility 0s linear .4s; }
-  body.evAvail #evX{ opacity:1; visibility:visible; pointer-events:auto; transform:none; transition:opacity .4s ease .2s, transform .35s cubic-bezier(.2,.9,.3,1.2) .2s, color .3s ease, visibility 0s; }
+  /* [event] tombol lampu: tetap ada selama event (hitung mundur / berlangsung); ketuk = sembunyikan layar event, ketuk lagi = tampilkan. Letaknya di kartu header, kiri tombol bahasa/ikon progres */
+  #evX{ position:relative; flex:none; width:36px; max-width:0; height:36px; margin:0; display:grid; place-items:center; padding:0; border:0; border-radius:50%; background:none; color:var(--ink-soft); cursor:pointer; touch-action:manipulation; overflow:hidden; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .25s ease, max-width .38s cubic-bezier(.4,0,.2,1), margin .38s cubic-bezier(.4,0,.2,1), color .3s ease, visibility 0s linear .38s; }
+  body.evAvail #evX{ max-width:36px; margin:0 0 0 4px; overflow:visible; opacity:1; visibility:visible; pointer-events:auto; transition:opacity .3s ease .12s, max-width .38s cubic-bezier(.4,0,.2,1), margin .38s cubic-bezier(.4,0,.2,1), color .3s ease, visibility 0s; }   /* lampu event: di dalam kartu bahasa/api, di sebelah kirinya */
   #evX svg{ width:18px; height:18px; }
   #evX .bd{ fill:transparent; transition:fill .3s ease; }
   #evX.on{ color:#ffd76a; } #evX.on .bd{ fill:rgba(255,215,106,.32); } #evX.on svg{ filter:drop-shadow(0 0 5px rgba(255,205,90,.65)); }
@@ -2054,6 +2090,18 @@ body.p5 #nav, body.p5 #control{--ink:#f4f5fb;--ink-soft:rgba(244,245,251,.62);--
 #snj .sj-search::placeholder{color:var(--sj-ink-soft)}
 #snj .sj-it.own{border-color:#8fe3a8;box-shadow:inset 0 0 0 1px #8fe3a8}
 #snj .sj-it{position:relative;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+/* tekan lama / tekan 3x item: tanpa bayangan pada item; kartu perlahan memutih dari tengah sampai keluar ke semua sisi */
+#snj .sj-it{touch-action:manipulation}
+#snj .sj-it img{-webkit-user-drag:none;pointer-events:none}
+#snj .sj-it:not(:disabled):active{filter:none;box-shadow:none}   /* matikan bayangan inset + kecerahan bawaan saat ditekan */
+#snj .sj-it.own:not(:disabled):active{box-shadow:inset 0 0 0 1px #8fe3a8}
+#snj .sj-it.wish:not(:disabled):active{filter:grayscale(1)}
+#snj .sj-it::after{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,.78);clip-path:circle(0% at 50% 50%);opacity:0;pointer-events:none;z-index:1;transition:clip-path .22s ease-in,opacity .2s ease}
+#snj .sj-it.lp::after,#snj .sj-it.lpq::after,#snj .sj-it.lpd::after{clip-path:circle(75% at 50% 50%)}   /* 75% > jarak tengah ke sudut (~71%): putih mencapai semua sisi */
+#snj .sj-it.lp::after{opacity:1;transition:clip-path .43s linear .12s,opacity .12s ease .12s}   /* mulai setelah 0,12 dtk (ketukan biasa tidak berkedip), penuh tepat di 0,55 dtk */
+#snj .sj-it.lpq::after{opacity:1;transition:clip-path .28s ease-out,opacity .1s ease}   /* tekan 3x: putih menyebar cepat */
+#snj .sj-it.lpd::after{opacity:0;transition:opacity .45s ease}   /* setelah berhasil: memudar */
+@media (prefers-reduced-motion: reduce){ #snj .sj-it::after{ transition-duration:.01s !important; transition-delay:0s !important; } }
 #sjTip{color:#f4f5fb}
 #snj .sj-sc{padding:6px;align-items:stretch;text-align:center}
 #snj .sj-sc .sj-tw{position:relative;flex:1 1 auto;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
@@ -2424,7 +2472,6 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
         <div class="evMid"><div id="evName"></div><div id="evCd">--:--</div></div>
         
       </div>
-      <button type="button" id="evX" aria-label="Event" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="bd" d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1.1 1.3 1.1 2.2h5c0-.9.5-1.7 1.1-2.2A6 6 0 0 0 12 3Z"/><path d="M9.8 18.5h4.4M10.6 21h2.8"/></svg></button>
       <div class="page-in">
         <div id="greet" class="in" style="--d:0.1s"><span class="gh" id="greetH"></span><span class="gs" id="greetS"></span><div id="wxLine" hidden></div></div>
         <div id="clock">
@@ -2823,10 +2870,15 @@ body.ovActive #track #momW .sp, body.ovActive #track .row .lv::before, body.ovAc
 <div id="control">
   <div id="topRow">
   <button id="addOpen" type="button" aria-label="Add friend"><svg data-asset="header/tambah-teman.svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9.5" cy="8" r="3.5"/><path d="M2.8 20c.4-3.6 3.2-5.8 6.7-5.8s6.3 2.2 6.7 5.8M19 7v6M16 10h6"/></svg><small id="addOpenT">Add friend</small></button>
-  <button id="langCurrent" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
+  <div id="hdrCard">
+    <button type="button" id="evX" aria-label="Event" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="bd" d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1.1 1.3 1.1 2.2h5c0-.9.5-1.7 1.1-2.2A6 6 0 0 0 12 3Z"/><path d="M9.8 18.5h4.4M10.6 21h2.8"/></svg></button>
+    <div id="hdrSwap">
+    <button id="langCurrent" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
     <span id="langCurrentLabel">EN</span>
     <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
   </button>
+    </div>
+  </div>
   </div>
   <div id="langMenu" role="listbox" aria-label="Language">
     <button class="lang-btn" type="button" role="option" data-lang="en" aria-selected="true"><span>EN</span><span>English</span></button>
@@ -7256,8 +7308,9 @@ initPerm(); startLoop();
     if(!el) return; fxGlowPulse(el, 3200, FX_REST_F);
     const r = el.getBoundingClientRect(); fxRise(r.left + r.width / 2, r.top + r.height * .3, { n:6, rise:56, life:1700, size:[1.8, 3.2], sway:9, delay:450 });
   } };
-  const flameCenter = () => { const f = fabBtn.querySelector('.flame'), r = (f || fabBtn).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };   // posisi api saat ini (ikut mengecil)
-  const fabCenter = () => { const r = fabBtn.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+  const fabHost = () => (!fabOv.hidden ? wf : fabBtn);   // panel terbuka: api di sumbu lilin yang beranimasi; tertutup: ikon di header
+  const flameCenter = () => { const h = fabHost(), f = h.querySelector('.flame'), r = (f || h).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };   // posisi api saat ini (ikut mengecil)
+  const fabCenter = () => { const r = fabHost().getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
   // ---- ikon header: muncul (kecil -> normal) dan hilang (menciut -> ledakan partikel kecil) ----
   let fabWas = null;
   function fabShow(vis, kind){
@@ -7265,18 +7318,19 @@ initPerm(); startLoop();
     const first = fabWas === null; fabWas = vis;
     const b = document.body.classList;
     { const lm = document.getElementById('langMenu'), lc = document.getElementById('langCurrent'); if(lm) lm.classList.remove('open'); if(lc) lc.setAttribute('aria-expanded', 'false'); }   // menu bahasa tertutup saat ikon progres mengambil tempatnya
-    if(vis){ fabBtn.classList.remove('out', 'fin'); b.add('fabOn'); return; }
-    if(first || reduceFlame.matches || getComputedStyle(fabBtn).display === 'none'){ fabBtn.classList.remove('out', 'fin'); b.remove('fabOn'); return; }
+    if(vis){ fabBtn.classList.remove('out', 'fin'); wf.classList.remove('out', 'fin', 'gone'); b.add('fabOn'); return; }
+    if(first || reduceFlame.matches || !fabBtn.offsetWidth){ fabBtn.classList.remove('out', 'fin'); wf.classList.add('gone'); b.remove('fabOn'); return; }
     const fin = kind === 'finish';
-    if(fin){ const fl0 = fabBtn.querySelector('.flame'); if(fl0) fabBtn.style.setProperty('--fin0', getComputedStyle(fl0).filter); }   // animasi selesai mulai dari warna api saat ini (bukan loncat ke abu-abu)
-    fabBtn.classList.add('out'); if(fin) fabBtn.classList.add('fin'); b.remove('fabOn');
+    const wfOn = !fabOv.hidden;   // panel terbuka: api di sumbu ikut beranimasi (ikon header di bawah overlay juga)
+    if(fin){ const fl0 = fabBtn.querySelector('.flame'); if(fl0) fabBtn.style.setProperty('--fin0', getComputedStyle(fl0).filter); const fw = wf.querySelector('.flame'); if(wfOn && fw) wf.style.setProperty('--fin0', getComputedStyle(fw).filter); }   // animasi selesai mulai dari warna api saat ini (bukan loncat ke abu-abu)
+    fabBtn.classList.add('out'); if(fin) fabBtn.classList.add('fin'); if(wfOn){ wf.classList.add('out'); if(fin) wf.classList.add('fin'); } b.remove('fabOn');
     const emit = [];
     if(fin){   // saat ikon luruh (55%-95% dari 2,1 dtk): lepaskan partikel api kecil sedikit demi sedikit; tiap partikel nanti pecah lagi
       for(let t = 1300; t <= 2600; t += 100) emit.push(setTimeout(() => { if(!fabBtn.classList.contains('out')) return; const [cx, cy] = flameCenter(); fxDrift(cx, cy, { n:2, dist:30, life:2000, size:[1.2, 2.6], up:24, wob:5, spread:14 }); }, t));
     }
     const done = () => {
       if(!fabBtn.classList.contains('out')) return;
-      emit.forEach(clearTimeout); const [x, y] = fin ? flameCenter() : fabCenter(); fabBtn.classList.remove('out', 'fin');
+      emit.forEach(clearTimeout); const [x, y] = fin ? flameCenter() : fabCenter(); fabBtn.classList.remove('out', 'fin'); wf.classList.remove('out', 'fin'); wf.classList.add('gone');
       if(fin){ fabOv.classList.add('gry'); setTimeout(() => fxSmoke(x, y + 4, { n:4, rise:46, life:2200, size:[12, 20], sway:8 }), 200); }   // api padam: sedikit asap tipis naik dari ujung tali   // ikon sudah hilang: seluruh isi overlay ikut abu-abu
       if(fin){ fxDrift(x, y, { n:16, dist:56, life:2300, size:[1.3, 3], up:26, wob:7, spread:8 }); }
       else fxSmoke(x, y - 6);   // dinonaktifkan: asap, bukan partikel
@@ -7288,8 +7342,8 @@ initPerm(); startLoop();
   let prevTot = null, lastAct = 0; const LIT_MS = 3600;
   ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { lastAct = performance.now(); }, true));
   function fabCelebrate(delta){
-    const fl = fabBtn.querySelector('.flame'), from = fl ? getComputedStyle(fl).filter : null;   // warna api sekarang (abu-abu / sedang menyala) = titik awal animasi
-    fabBtn.classList.add('lit'); clearTimeout(fabBtn._litT); fabBtn._litT = setTimeout(() => fabBtn.classList.remove('lit'), LIT_MS);
+    const host = fabHost(), fl = host.querySelector('.flame'), from = fl ? getComputedStyle(fl).filter : null;   // warna api sekarang (abu-abu / sedang menyala) = titik awal animasi
+    host.classList.add('lit'); clearTimeout(host._litT); host._litT = setTimeout(() => host.classList.remove('lit'), LIT_MS);
     if(fl) fxGlowPulse(fl, 3400, null, from);   // abu-abu -> kuning perlahan -> puncak terang; lalu kelas .lit dilepas = meredup perlahan ke abu-abu (seperti sebelumnya)
     const [x, y] = fabCenter(); fxRise(x, y - 6, { n:Math.min(8, 4 + delta), rise:38, life:1750, size:[1.8, 3.4], sway:10, delay:800 });
   }
@@ -7320,7 +7374,25 @@ initPerm(); startLoop();
   const fabBtn = mkTx('button'); fabBtn.id = 'fab'; fabBtn.type = 'button'; flameInto(fabBtn);
   const fabOv = mkTx('div'); fabOv.id = 'fabOv'; fabOv.hidden = true; fabOv.innerHTML = '<div class="fp" role="dialog" aria-modal="true"><i class="wick" aria-hidden="true"></i><div class="fh"><b></b><button type="button" class="fx">\u2715</button></div><div class="fs"></div><div class="fl"></div></div>';
   document.body.append(fabOv);
-  { const tr = document.getElementById('topRow'), lc = document.getElementById('langCurrent'); if(tr && lc) tr.insertBefore(fabBtn, lc); else document.body.appendChild(fabBtn); }   // di header, tepat di tempat tombol bahasa
+  { const lc = document.getElementById('langCurrent'); if(lc && lc.parentNode) lc.parentNode.insertBefore(fabBtn, lc); else document.body.appendChild(fabBtn); }   // di kartu header, bertukar tempat dengan tombol bahasa
+  const wf = mkTx('span', 'wf'); wf.setAttribute('aria-hidden', 'true'); fabOv.querySelector('.wick').appendChild(wf); flameInto(wf);   // api di ujung sumbu lilin, di depan panel
+  { const dc = mkTx('span', 'fabDeco'); dc.innerHTML = '<i class="fAura"></i><span class="fOrbit"><i></i></span><span class="fOrbit o2"><i></i></span>'; wf.insertBefore(dc, wf.firstChild); }
+  let fabLv = 0, wfHold = false;
+  const wfSet = lv => { const sp = (k, v) => wf.style.setProperty(k, v);
+    sp('--lv', lv.toFixed(3)); sp('--fg', Math.max(0, 1 - lv / .45).toFixed(3)); sp('--fo', (.42 + .58 * Math.min(1, lv / .55)).toFixed(3)); sp('--fb', (1 + .9 * lv).toFixed(3));
+    sp('--fr', (lv * 18).toFixed(1) + 'px'); sp('--fa', lv ? (.25 + .75 * lv).toFixed(3) : '0'); sp('--fu', (.85 + 1.5 * lv).toFixed(3)); };   // --fu: ukuran api di sumbu (kecil -> sangat besar mengikuti progres)
+  let fabArt = .88;   // posisi dasar gambar api (0..1 dari tinggi kotak api); diukur dari piksel frame api
+  function artFy(){
+    const fl = wf.querySelector('.flame'); if(!fl) return; let best = -1;
+    try{ fl.querySelectorAll('img').forEach(im => {
+      if(!im.complete || !im.naturalWidth) return;
+      const w = Math.min(im.naturalWidth, 128), h = Math.max(1, Math.round(w * im.naturalHeight / im.naturalWidth)), c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.drawImage(im, 0, 0, w, h); const d = x.getImageData(0, 0, w, h).data; let row = -1;
+      for(let y = h - 1; y >= 0 && row < 0; y--) for(let k = 0; k < w; k++) if(d[(y * w + k) * 4 + 3] > 24){ row = y; break; }
+      if(row >= 0) best = Math.max(best, (im.offsetTop + (row + 1) / h * im.offsetHeight) / fl.offsetHeight);
+    }); }catch(e){ return; }
+    if(best > .3 && best <= 1.1){ fabArt = best; wf.style.setProperty('--fy', fabArt); }
+  }
   const fabSwitch = mkTx('button', 'pill fabTog'); fabSwitch.type = 'button';
   flameInto(fabSwitch, 'sm'); const swSync = f => { if(fabSwitch.getAttribute('aria-pressed') === 'true') delete f.dataset.hold; else { f.dataset.hold = '1'; setFrame(f, 0); } };   // aktif = animasi api berulang terus; nonaktif = diam di frame awal
   fabSwitch._onFlame = swSync;
@@ -7358,7 +7430,9 @@ initPerm(); startLoop();
     const track = () => { if(fhEl !== el0) return; const r = fabSwitch.getBoundingClientRect(); if(Math.abs(r.left - tkX) < .5 && Math.abs(r.top - tkY) < .5) tkStable++; else { tkStable = 0; tkX = r.left; tkY = r.top; fhPlace(); } if(++tkN < 300 && tkStable < 30) requestAnimationFrame(track); }; track();   // ikut posisi tombol selama halaman masih bergeser/animasi masuk, jadi lingkaran selalu tepat di tengah
   }
   window.addEventListener('sky:page', e => { clearTimeout(fhT); if(e.detail.page === 3) fhT = setTimeout(fhShow, 1100); else fhClose(); });
-  const openFab = () => { fabOpen = -1; fabOv.classList.add('first'); setTimeout(() => fabOv.classList.remove('first'), 1100); fabOv.hidden = false; paintFab(); },
+  const openFab = () => { fabOpen = -1; fabOv.classList.add('first'); setTimeout(() => fabOv.classList.remove('first'), 1100); wfHold = true; fabOv.hidden = false; paintFab(); artFy(); wfSet(0);
+      requestAnimationFrame(() => requestAnimationFrame(() => { wfHold = false; wfSet(fabLv); })); },   // api di sumbu mulai kecil/abu-abu, lalu tumbuh perlahan ke level progres
+   
     closeFab = () => { if(!fabOv.hidden) fabOv.hidden = true; };
   fabOv.querySelector('.fp').addEventListener('click', e => { if(fabOpen >= 0 && !e.target.closest('.fblk, .fic, .fx')) fabToggle(fabOpen); }, true);   // menekan elemen lain = dropdown yang terbuka menutup
   fabOv.querySelector('.fx').onclick = closeFab; fabOv.addEventListener('click', e => { if(e.target === fabOv) closeFab(); });
@@ -7410,6 +7484,7 @@ initPerm(); startLoop();
     if(!cap) fabOv.classList.remove('gry');
     fabBtn.classList.toggle('gray', cap); fabBtn.setAttribute('aria-label', t.ttl + ' ' + tot + '/' + all); fabBtn.title = t.ttl;
     fabOv.style.setProperty('--p', all ? tot / all : 0);   // bilah progres di panel
+    fabLv = cap ? 1 : (all ? Math.min(1, tot / all) : 0); if(!wfHold) wfSet(fabLv);   // lilin abu-abu (20) = langsung puncak terang
     if(fabOv.hidden) return;
     fabOv.querySelector('b').textContent = t.ttl; fabOv.querySelector('.fx').setAttribute('aria-label', t.close);
     fabOv.querySelector('.fs').textContent = tot + '/' + all + ' ' + I18N[lang].pg.ar;
@@ -11533,17 +11608,30 @@ function go(t){cancelAnimationFrame(raf);if(mv){endMv();svgL.setAttribute('prese
       b.title = i.name || ''; b.setAttribute('aria-label', i.name || ''); b.appendChild(th); b._it = i;
       tiles[i.guid] = b; decorate(b, i);   // lencana sama dengan menu lama: tangan (spirit/toko), musim, dimiliki, tidak akan kembali
       if(sel === i) selBtn = b;
-      // tekan lama item (~0,55 dtk) = tandai / batal tandai dimiliki; ketukan singkat tetap memilih item
+      // tekan lama item (~0,55 dtk) ATAU ketuk 3x cepat = tandai / batal tandai dimiliki; ketukan singkat tetap memilih item
+      // umpan balik: tanpa bayangan pada item; kartu perlahan memutih dari tengah ke semua sisi (CSS .lp) + suara kecil
       let lpT = 0, lpX = 0, lpY = 0;
-      const lpStop = () => { clearTimeout(lpT); lpT = 0; };
+      const lpStop = () => { clearTimeout(lpT); lpT = 0; b.classList.remove('lp'); };
+      const markOwn = quick => {
+        toggleOwn(i, b);
+        try{ navigator.vibrate && navigator.vibrate(18); }catch(_){}
+        try{ const X = window.SkyFX; if(X) own[i.id] ? X.success() : X.tap(); }catch(_){}   // suara kecil
+        if(quick) b.classList.add('lpq');
+        setTimeout(() => b.classList.add('lpd'), quick ? 300 : 40);
+        setTimeout(() => b.classList.remove('lp', 'lpq', 'lpd'), quick ? 800 : 560);
+      };
       b.addEventListener('pointerdown', e => {
         if(e.button > 0) return; b._lp = false; lpStop(); lpX = e.clientX; lpY = e.clientY;
-        lpT = setTimeout(() => { lpT = 0; b._lp = true; toggleOwn(i, b); try{ navigator.vibrate && navigator.vibrate(18); }catch(_){} }, 550);
+        b.classList.remove('lpq', 'lpd'); b.classList.add('lp');
+        lpT = setTimeout(() => { lpT = 0; b._lp = true; markOwn(false); }, 550);
       });
       b.addEventListener('pointermove', e => { if(lpT && Math.hypot(e.clientX - lpX, e.clientY - lpY) > 10) lpStop(); });
       ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => b.addEventListener(ev, lpStop));
       b.addEventListener('contextmenu', e => e.preventDefault());   // Android: tekan lama memicu menu konteks
-      b.onclick = () => { if(b._lp){ b._lp = false; return; } if(selBtn && selBtn !== b) selBtn.setAttribute('aria-pressed', 'false'); sel = i; selBtn = b; vw = 'normal'; b.setAttribute('aria-pressed', 'true'); renderPv(); an(b, [{ scale:'1' }, { scale:'1.14' }, { scale:'1' }], { duration:280, fill:'none' }); if(isWishOnly(i)) note(t().wishNote); };
+      b.onclick = () => { if(b._lp){ b._lp = false; return; }
+        const nw = performance.now(); b._tn = (nw - (b._tt || 0) < 480) ? (b._tn || 0) + 1 : 1; b._tt = nw;   // ketuk 3x cepat = fungsi yang sama dengan tekan lama
+        if(b._tn >= 3){ b._tn = 0; b._tt = 0; markOwn(true); return; }
+        if(selBtn && selBtn !== b) selBtn.setAttribute('aria-pressed', 'false'); sel = i; selBtn = b; vw = 'normal'; b.setAttribute('aria-pressed', 'true'); renderPv(); an(b, [{ scale:'1' }, { scale:'1.14' }, { scale:'1' }], { duration:280, fill:'none' }); if(isWishOnly(i)) note(t().wishNote); };
       return b;
     }
     function more(d){
@@ -11597,15 +11685,15 @@ function go(t){cancelAnimationFrame(raf);if(mv){endMv();svgL.setAttribute('prese
     // posisi panel: rata tengah, sisi bawah card item berjarak setengah kotak dari tepi atas batu gerbang
     const hallC={};function hallY(x){if(hallC[x]!==undefined)return hallC[x];const E=document.getElementById('edge'),L=E.getTotalLength();let d=1e9,y=90;for(let l=0;l<=L;l+=1){const p=E.getPointAtLength(l);if(p.y<200&&Math.abs(p.x-x)<d){d=Math.abs(p.x-x);y=p.y}}return hallC[x]=y}
 
-    function topReserve(){ let b = 0; ['navBtn', 'langCurrent', 'fab'].forEach(id => { const e = $(id); if(e){ const r = e.getBoundingClientRect(); if(r.height) b = Math.max(b, r.bottom); } }); return Math.max(12, b + 8); }
+    function topReserve(){ let b = 0; ['navBtn', 'hdrCard'].forEach(id => { const e = $(id); if(e){ const r = e.getBoundingClientRect(); if(r.height) b = Math.max(b, r.bottom); } }); return Math.max(12, b + 8); }
     function layoutKp(i){
       const H = innerHeight, tc = focusCam(i), TOP = topReserve(), Y = H - (tc.yb - hallY(GC[i])) * tc.sc, hh = gc.querySelector('.sj-hd').offsetHeight + 18,
         qq = Math.max(64, Math.min(96, (gc.clientWidth - 40) / 3, Y - TOP - hh - 16 - 28 - 3.5 * 44)), fx = hh + qq + 8 + 8;
       // ukuran kotak item mengikuti sisa tinggi card: tumpukan memenuhi ruang dari bawah header sampai setengah kotak di atas batu gerbang
       let SS = Math.max(30, Math.min(84, (Y - TOP - fx - 28) / 3.5));
-      // kotak item memenuhi lebar card kiri-kanan: jumlah kolom dibulatkan ke atas, ukuran kotak disesuaikan (hanya mengecil sedikit, tinggi tetap muat)
-      const LW = gc.clientWidth - 2, NC = Math.max(3, Math.ceil((LW + 6) / (SS + 6)));
-      SS = Math.floor((LW - (NC - 1) * 6) / NC * 100) / 100;
+      // kotak item memenuhi lebar card kiri-kanan: jumlah kolom dibulatkan ke atas (maks. 4), ukuran kotak disesuaikan (hanya mengecil sedikit, tinggi tetap muat)
+      const LW = gc.clientWidth - 2, NC = Math.min(4, Math.max(3, Math.ceil((LW + 6) / (SS + 6))));   // kolom: 3-4 (maksimal 4)
+      SS = Math.min(SS, Math.floor((LW - (NC - 1) * 6) / NC * 100) / 100);   // kartu lebar: kotak tidak melebihi batas tinggi, deretan kolom rata tengah
       gc.style.setProperty('--sj-q', qq.toFixed(1) + 'px'); gc.style.setProperty('--sj-s', SS.toFixed(2) + 'px'); gc.style.setProperty('--sj-kb', (H - (Y - SS / 2)) + 'px');
       PH = 3 * NC;
       listE.classList.add('sj-v');   // selalu scroll atas-bawah di semua lebar layar
