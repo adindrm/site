@@ -205,6 +205,10 @@ kbd{font:inherit;color:var(--ink);border:1px solid var(--line);padding:0 .45rem;
 /* RODA KEAHLIAN */
 .wheel{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:1.4rem 2.4rem;--wseg:#17161b;--whover:#2a2831}
 .wstage{position:relative;width:clamp(250px,min(94vw,400px),400px);width:clamp(250px,min(94vw,400px,calc((100dvh - 12.5rem)*.526)),400px);animation:fade .7s .35s both}
+/* HP (layar < 480px, tampilan diskalakan): ukuran roda dihitung dari area aplikasi yang sudah diskalakan (--ah), bukan dari vw/dvh layar asli; dipusatkan horizontal dan vertikal */
+.sm .wb{flex:1;display:flex;align-items:center;justify-content:center;margin-top:0}
+.sm .wb .wheel{width:100%;justify-content:center;align-items:center}
+.sm .wstage{width:clamp(250px,min(100%,calc((var(--ah) - 9.5rem)*.526)),640px)}
 .wstage svg{display:block;width:100%;height:auto;position:relative;z-index:1;user-select:none}
 .wvid{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .wvid canvas{position:absolute;left:var(--vx,-1.6%);top:var(--vy,11.2%);width:var(--vw,117.3%);height:auto;aspect-ratio:1080/1350;display:block;pointer-events:none;clip-path:inset(.4% 0 .4% 0)}
@@ -805,7 +809,7 @@ function toMenu(){if(!busy)SFX.back();go(()=>{
 function openPage(i){
  SFX.confirm();go(()=>{
   const m=D.menu[i];window.AVAT&&AVAT.page(m.id);
-  $('#ptitle').textContent=m.t;$('#pbody').innerHTML=pages[m.id]();
+  $('#ptitle').textContent=m.t;$('#pbody').classList.toggle('wb',m.id==='skills');$('#pbody').innerHTML=pages[m.id]();
   show('page');$('#page').scrollTop=0;if(m.id==='skills')mountWheel($('#pbody'));countUps();pageSnd();$('#back').focus({preventScroll:true});
  });
 }
@@ -895,6 +899,7 @@ function fitScale(){
  const a=$('#app').style;S=Math.min(1,innerWidth/MINW);
  if(S<1){a.width=MINW+'px';a.height=innerHeight/S+'px';a.transformOrigin='0 0';a.transform=`scale(${S})`}
  else a.width=a.height=a.transform=a.transformOrigin='';
+ $('#app').classList.toggle('sm',S<1);a.setProperty('--ah',(innerHeight/S)+'px');
 }
 addEventListener('resize',deb(fitScale,60));fitScale();
 /* Gerbang pilihan -> loader nama -> layar awal */
@@ -969,11 +974,11 @@ select(0);
  let xf=0,xfPending=false,hasSn=false,parked=false,hid0=0,pl0=0,vis=false,warm=0;
  const snapF=()=>{if(sn.width!==OW||sn.height!==OH){sn.width=OW;sn.height=OH}sn.getContext('2d').drawImage(css?v:gc,0,0,OW,OH);hasSn=true};
  /* status mesin frame */
- let pend=false,pmt=-1,lmt=-1,ct0=-1,fi=1000/30,tn=0,ia=0,ib=0,jump=true,settled=false;
- let F=[],TX=[],vt=null,pgK=null,pgB=null,kLoc=null,kpLoc=null;
+ let pend=false,pmt=-1,lmt=-1,ct0=-1,fi=1000/30,tn=0,ia=0,ib=0,jump=true,settled=false,hold=false,holdT=0; /* hold: kanvas tidak digambar sampai frame pertama klip baru siap (mencegah frame lama berkedip) */
+ let F=[],TX=[],vt=null,pgK=null,pgB=null,kLoc=null,kpLoc=null,chLoc=null;
  /* parameter kunci hijau: [ambang bawah, ambang atas, ambang kabut alfa, ambang pemotongan sisa hijau]. Klip skill memakai nilai lunak: hanya hijau pekat yang dibuang, sedikit sisa hijau dibiarkan */
- const KEY_N=[.02,.14,HAZE,.015],KEY_S=[.10,.26,.15,.10];
- const setKey=el=>{if(gl&&!css&&kpLoc){gl.useProgram(pgK);gl.uniform4fv(kpLoc,el===V4?KEY_S:KEY_N)}};
+ const KEY_N=[.02,.14,HAZE,.015],KEY_S=[.10,.26,.15,.10],CH_N=0,CH_S=.85; /* CH: pangkas pita tipis setengah transparan di tepi siluet (sisa putih), 0 = mati */
+ const setKey=el=>{if(gl&&!css&&kpLoc){gl.useProgram(pgK);gl.uniform4fv(kpLoc,el===V4?KEY_S:KEY_N);gl.uniform1f(chLoc,el===V4?CH_S:CH_N)}};
  /* Tiga klip: avatar (dasar), avatarskl1 (memakai kacamata), avatarskl2 (kacamata, diam/idle). v = klip yang sedang dipakai mesin */
  const mkVid=b=>{const e=document.createElement('video');
   e.muted=e.playsInline=true;e.loop=false;e.preload='auto';e.disableRemotePlayback=true;e.setAttribute('playsinline','');
@@ -998,11 +1003,13 @@ select(0);
   clearTimeout(pt);
   /* klip dengan ukuran berbeda (skill.mp4 = 4:5, avatar = 9:16): kanvas diukur ulang, tanpa fade dari gambar lama */
   const same=!(el.videoWidth&&el.videoHeight)||(el.videoWidth===VW&&el.videoHeight===VH);
-  if(OW&&same){try{snapF()}catch(e){}}
+  const big=el===V4;
+  if(OW&&same&&!big){try{snapF()}catch(e){}}
   if(el!==v)v.pause();
   v=el;setKey(el);
+  if(big||!same){hold=true;clearTimeout(holdT);holdT=setTimeout(()=>{hold=false},1500)}
   if(!same){resizeTo(el);hasSn=false}
-  jump=true;xfPending=same;settled=false;pend=false;lmt=-1;ct0=-1;
+  jump=true;xfPending=same&&!big;settled=false;pend=false;lmt=-1;ct0=-1;
  }
  function resizeTo(el){
   VW=el.videoWidth;VH=el.videoHeight;
@@ -1048,7 +1055,7 @@ select(0);
    /* Kunci hijau: selisih hijau terhadap merah/biru, tepi dihaluskan, sisa pantulan hijau ditekan */
    pgK=prog('attribute vec2 a;varying vec2 uv;void main(){uv=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}',
     P+
-    'varying vec2 uv;uniform sampler2D T;uniform vec2 px;uniform vec4 K;'+
+    'varying vec2 uv;uniform sampler2D T;uniform vec2 px;uniform vec4 K;uniform float Ch;'+
     'float E(vec2 u){vec3 q=texture2D(T,u).rgb;return q.g-max(q.r,q.b);}'+
     /* tetangga bersih: bobot 0 jika berwarna hijau */
     'vec4 tp(vec2 u){vec3 q=texture2D(T,u).rgb;float w=1.-smoothstep(-.03,.03,q.g-max(q.r,q.b));return vec4(q*w,w);}'+
@@ -1063,6 +1070,7 @@ select(0);
     'for(int i=-1;i<=1;i++){for(int j=-1;j<=1;j++){if(i==0&&j==0)continue;vec2 d=vec2(float(i),float(j))*px;'+
     'nr=max(nr,smoothstep(.08,.16,E(uv+d*2.)));nr=max(nr,smoothstep(.08,.16,E(uv+d*3.)));'+
     'ac+=tp(uv+d*3.)+tp(uv+d*5.)+tp(uv+d*8.);}}'+
+    'al*=1.-Ch*nr*(1.-smoothstep(.5,.95,al));'+
     'vec3 c=c0;float cc=max(smoothstep(-.02,.04,e0),nr)*clamp(ac.w/4.,0.,1.);c=mix(c0,ac.rgb/max(ac.w,1e-4),cc);'+
     /* despill sisa hijau, kecerahan dikembalikan ke merah/biru */
     'float sp=max(0.,c.g-max(c.r,c.b));c.g-=sp;c.r+=sp*.45;c.b+=sp*.15;c=clamp(c,0.,1.);'+
@@ -1090,7 +1098,7 @@ select(0);
     if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw 0;
    }
    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
-   gl.useProgram(pgK);gl.uniform2f(gl.getUniformLocation(pgK,'px'),1/VW,1/VH);gl.uniform1i(gl.getUniformLocation(pgK,'T'),0);kpLoc=gl.getUniformLocation(pgK,'K');setKey(v);
+   gl.useProgram(pgK);gl.uniform2f(gl.getUniformLocation(pgK,'px'),1/VW,1/VH);gl.uniform1i(gl.getUniformLocation(pgK,'T'),0);kpLoc=gl.getUniformLocation(pgK,'K');chLoc=gl.getUniformLocation(pgK,'Ch');setKey(v);
    gl.useProgram(pgB);gl.uniform1i(gl.getUniformLocation(pgB,'A'),1);gl.uniform1i(gl.getUniformLocation(pgB,'B'),2);kLoc=gl.getUniformLocation(pgB,'k');
   }catch(e){gl=null;useCss()}
  }
@@ -1156,6 +1164,7 @@ select(0);
    }
    if(jump&&xfPending){xf=now;xfPending=false}
    if(warm>0)warm--;
+   if(hold){hold=false;clearTimeout(holdT)}
    jump=false;tn=now;settled=false;fc++;
    if(!ready){ready=true;done();if(reduce)setTimeout(()=>v.pause(),100)}
   }
@@ -1170,6 +1179,7 @@ select(0);
   if(xf&&hasSn){fx=1-(now-xf)/XF;if(fx<=0){xf=0;fx=0;force=true}}
   const src=css?v:gc;
   for(const t of VC){
+   if(hold)break;
    if(!t.offsetParent)continue;
    if(t._f===fc&&!(fx>0)&&!force)continue;
    if(t.width!==OW||t.height!==OH){t.width=OW;t.height=OH;t.naturalWidth=VW;t.naturalHeight=VH}
