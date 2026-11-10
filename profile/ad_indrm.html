@@ -45,6 +45,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .item.sel{transform:skewX(-14deg) translateX(18px);box-shadow:inset 6px 0 0 var(--gold)}
 .item.sel::before{transform:none}
 .item.sel .t{color:var(--on)}.item.sel .s{color:#4a4a55}
+.item .s.hint,.item.sel .s.hint{color:var(--gold);font-weight:700;letter-spacing:.02em;text-shadow:none}
 .item.sel::after{content:"";position:absolute;top:0;bottom:0;width:30%;left:-40%;background:linear-gradient(90deg,transparent,rgba(140,140,160,.45),transparent);animation:sheen 1.4s cubic-bezier(.22,1,.36,1)}
 .item:focus-visible,.cl:focus-visible,.back:focus-visible,.mb:focus-visible,#press:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .preview{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0}
@@ -88,7 +89,7 @@ kbd{font:inherit;color:var(--ink);border:1px solid var(--line);padding:0 .45rem;
 .card:hover{transform:translateY(-6px);background:#15141a}
 .th{height:130px;position:relative;background:linear-gradient(135deg,hsl(var(--h) var(--sat,80%) 38%),hsl(calc(var(--h) + 60) var(--sat,60%) 12%))}
 .th::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 12px,rgba(255,255,255,.07) 12px 14px)}
-.rank{position:absolute;top:.4rem;right:.9rem;font-family:'Bebas Neue',Impact,sans-serif;font-size:3.6rem;line-height:1;color:var(--gold);text-shadow:0 0 18px rgba(246,196,83,.6)}
+.rank{position:absolute;top:.4rem;right:.9rem;font-family:'Bebas Neue',Impact,sans-serif;font-size:3.6rem;line-height:1;color:var(--gold);text-shadow:0 0 18px rgba(209,154,46,.6)}
 .cb{padding:1rem 1.2rem 1.4rem}
 .cb h3{font-size:2rem;line-height:1}
 .cb p{margin:.4rem 0 .8rem;color:#cfc9d6;line-height:1.3;font-size:1rem}
@@ -121,7 +122,7 @@ kbd{font:inherit;color:var(--ink);border:1px solid var(--line);padding:0 .45rem;
 .fighter .np strong{display:block;font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:2.2rem;line-height:1}
 .fighter em{z-index:1}
 /* FOTO LAYAR AWAL */
-.hero{position:absolute;left:50%;top:0;bottom:0;width:min(100%,calc(100vh*.8));translate:-50% 0;overflow:hidden;pointer-events:none;--rev-delay:2.1s;--rev-dur:3.8s;will-change:opacity,filter;animation:heroIn var(--rev-dur) var(--rev-delay) cubic-bezier(.4,0,.2,1) both}
+.hero{position:absolute;left:50%;top:0;bottom:0;width:min(100%,calc(100vh*.8));translate:-50% 0;overflow:hidden;pointer-events:none;--rev-delay:1.4s;--rev-dur:3.2s;will-change:opacity,filter;animation:heroIn var(--rev-dur) var(--rev-delay) cubic-bezier(.4,0,.2,1) both}
 .hero canvas{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0;filter:none}
 #start>:not(.hero){position:relative;z-index:1}
 .copy{position:absolute!important}
@@ -201,6 +202,47 @@ kbd{font:inherit;color:var(--ink);border:1px solid var(--line);padding:0 .45rem;
 @media(min-width:761px) and (max-width:1100px){
  .list{width:min(290px,34vw)}
 }
+/* RODA KEAHLIAN */
+.wheel{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:1.4rem 2.4rem;--wseg:#17161b;--whover:#2a2831}
+.wstage{position:relative;width:clamp(250px,min(94vw,400px),400px);width:clamp(250px,min(94vw,400px,calc((100dvh - 12.5rem)*.526)),400px);animation:fade .7s .35s both}
+.wstage svg{display:block;width:100%;height:auto;position:relative;z-index:1;user-select:none}
+.wvid{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.wvid canvas{position:absolute;left:var(--vx,-1.6%);top:var(--vy,11.2%);width:var(--vw,117.3%);height:auto;aspect-ratio:1080/1350;display:block;pointer-events:none;clip-path:inset(.4% 0 .4% 0)}
+.wvid.wcast{animation:wcast .45s ease-out}
+@keyframes wcast{30%{filter:drop-shadow(0 0 9px rgba(209,154,46,.95))}}
+.wseg{cursor:pointer;outline:none;transform-box:fill-box;transform-origin:center}
+.whub,.whubi{transform-box:fill-box;transform-origin:center}
+.wseg>path{fill:var(--wseg);stroke:var(--wseg);stroke-linejoin:round;transition:fill .15s,stroke .15s}
+.wseg:hover>path,.wseg:focus-visible>path{fill:var(--whover);stroke:var(--whover)}
+.wseg.on>path{fill:var(--gold);stroke:var(--gold)}
+.wseg text,.wseg .wic{pointer-events:none}
+/* ikon garis minimalis: putih di latar gelap (kapsul, overlay), hitam di latar emas (kapsul terpilih) */
+.wic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:#fff;transition:color .15s}
+.wic .fl{fill:currentColor;stroke:none}
+.wseg.on .wic{color:#08070a}
+.woi{color:#fff;display:flex;justify-content:center}
+.woi svg{width:1em;height:1em;display:block;overflow:visible}
+.woi .wic{stroke-width:1.5}
+.wlock .wseg{pointer-events:none}
+.wsep{stroke:var(--gold);stroke-width:2;stroke-linecap:round}
+.wlbl{font-family:'Bebas Neue',Impact,'Arial Narrow',sans-serif;font-size:14px;fill:var(--mute);letter-spacing:3px;text-anchor:middle;transition:transform .45s ease,opacity .3s}
+.wcab{transition:opacity .35s,visibility 0s}
+.wcab.off{opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+.wcb{fill:none;stroke:#3a3842;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.wcp{fill:none;stroke:var(--gold);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.whub{fill:#000;stroke:var(--gold);stroke-width:2}
+.whubi{fill:var(--gold)}
+.whalo{fill:none;stroke:var(--gold);stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center}
+.wov{position:absolute;left:19.875%;top:7.171%;width:60.25%;height:84.342%;z-index:2;box-sizing:border-box;border-radius:50%/18.79%;background:rgba(5,4,7,.93);box-shadow:inset 0 0 0 1px rgba(209,154,46,.38);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 calc(var(--u,1px)*22);opacity:0;transform-origin:50% 0;transform:scale(.3);pointer-events:none;cursor:pointer}
+.wov.show{pointer-events:auto}
+.woi{font-size:calc(var(--u,1px)*58);line-height:1}
+.won{font-family:'Bebas Neue',Impact,'Arial Narrow',sans-serif;font-weight:400;font-size:calc(var(--u,1px)*36);letter-spacing:.04em;line-height:1;margin-top:calc(var(--u,1px)*8)}
+.wot{margin-top:calc(var(--u,1px)*10);padding:calc(var(--u,1px)*2) calc(var(--u,1px)*14);background:var(--gold);color:var(--on);font-size:calc(var(--u,1px)*13);letter-spacing:.16em;transform:skewX(-14deg)}
+.wot span{display:block;transform:skewX(14deg)}
+.wlv{width:72%;height:calc(var(--u,1px)*6);margin-top:calc(var(--u,1px)*14);background:rgba(255,255,255,.08);transform:skewX(-20deg);overflow:hidden}
+.wlv i{display:block;height:100%;width:var(--w,0%);background:linear-gradient(90deg,var(--red),var(--gold))}
+.wov p{font-size:calc(var(--u,1px)*15);line-height:1.4;color:var(--ink);opacity:.85;margin:calc(var(--u,1px)*14) 0 0}
+.wov small{font-size:calc(var(--u,1px)*11);letter-spacing:.14em;color:var(--mute);margin-top:calc(var(--u,1px)*22)}
 </style>
 </head>
 <body>
@@ -261,6 +303,38 @@ const D={
  bio:'Saya membangun situs web yang cepat, rapi, dan terasa hidup. Dari desain di Figma sampai rilis, seluruh alurnya saya pegang sendiri.',
  stats:[[24,'Proyek selesai'],[12,'Klien puas'],[3,'Tahun pengalaman']],
  skills:[['HTML dan CSS',95],['JavaScript',90],['React',85],['UI Design',82],['Figma',85],['Node.js',70]],
+
+ /* RODA KEAHLIAN (contoh, ganti sesuai kebutuhan). Format tiap skill: [nama-ikon, nama, deskripsi, level 0-100]. Nama ikon: lihat WICON (html, css, js, ts, react, git, ...); nama lain tampil sebagai ikon lingkaran
+    dasar = lengkungan atas (8 skill), khusus = lengkungan bawah (15 skill). Jumlah boleh diubah, roda menyesuaikan. */
+ wheel:{
+  dasar:[
+   ['html','HTML','Struktur halaman yang semantik dan mudah diakses.',95],
+   ['css','CSS','Tata letak responsif, animasi, dan detail visual.',95],
+   ['js','JavaScript','Logika antarmuka yang cepat dan rapi.',90],
+   ['ts','TypeScript','Kode lebih aman dengan tipe data yang jelas.',80],
+   ['react','React','Komponen yang bisa dipakai ulang dan mudah dirawat.',85],
+   ['git','Git','Alur kerja versi dan kolaborasi tim.',80],
+   ['responsive','Responsif','Tampilan konsisten dari HP sampai layar lebar.',90],
+   ['access','Aksesibilitas','Situs yang bisa dipakai semua orang.',75]
+  ],
+  khusus:[
+   ['figma','Figma','Dari wireframe sampai prototipe interaktif.',85],
+   ['ui','UI Design','Antarmuka rapi dengan hierarki yang jelas.',82],
+   ['motion','Animasi UI','Gerak antarmuka yang halus dan bermakna.',85],
+   ['node','Node.js','Server dan API untuk kebutuhan aplikasi.',70],
+   ['next','Next.js','Situs cepat dengan render di server.',75],
+   ['wind','Tailwind CSS','Gaya konsisten tanpa menulis banyak CSS.',85],
+   ['cube','WebGL','Efek visual real-time di browser.',60],
+   ['pwa','PWA','Aplikasi web yang tetap jalan tanpa internet.',70],
+   ['map','Mapbox','Peta interaktif dan data lokasi.',65],
+   ['fire','Firebase','Autentikasi dan database tanpa server sendiri.',65],
+   ['card','Midtrans','Pembayaran online untuk toko web.',70],
+   ['socket','WebSocket','Data real-time dua arah.',65],
+   ['gauge','Performa Web','Muat cepat dan skor Lighthouse tinggi.',80],
+   ['grid','Design System','Komponen dan token yang seragam.',78],
+   ['search','SEO','Struktur yang mudah ditemukan mesin pencari.',70]
+  ]
+ },
  projects:[
   {n:'Kopi Daeng',r:'S',h:355,s:0,d:'Toko online kopi lokal dengan pembayaran Midtrans.',t:['Next.js','Midtrans']},
   {n:'LogiTrack',r:'A',h:210,d:'Dashboard pelacakan pengiriman secara real-time.',t:['React','Node.js','WebSocket']},
@@ -296,11 +370,18 @@ const SFX=(()=>{
   o.type=p.w;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+p.a);g.gain.exponentialRampToValueAtTime(.0001,t+d);
   o.connect(g).connect(mx);o.start(t);o.stop(t+d+.02);
  }
- function sweep(d,v,a,b){
-  if(!ac||!on)return;const t=ac.currentTime,s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
+ function sweep(d,v,a,b,at=0){
+  if(!ac||!on)return;const t=ac.currentTime+at,s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
   s.buffer=nb;f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(a,t);f.frequency.exponentialRampToValueAtTime(b,t+d);
   g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+d*.4);g.gain.exponentialRampToValueAtTime(.0001,t+d);
   s.connect(f).connect(g);dst(g);s.start(t);s.stop(t+d+.05);
+ }
+/* dengung nada naik (kabel mengisi daya): segitiga yang nadanya merayap naik */
+ function glide(f0,f1,d,v,at=0){
+  if(!ac||!on)return;const t=ac.currentTime+at,o=ac.createOscillator(),g=ac.createGain();
+  o.type='triangle';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+d);
+  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+d*.3);g.gain.linearRampToValueAtTime(v*.8,t+d*.8);g.gain.exponentialRampToValueAtTime(.0001,t+d+.12);
+  o.connect(g).connect(mx);o.start(t);o.stop(t+d+.16);
  }
  /* dentuman bertekanan: sinus yang nadanya jatuh cepat */
  function thump(f0,f1,d,v){
@@ -348,6 +429,13 @@ const SFX=(()=>{
   /* tabrakan terakhir: lebih dalam dan lebih lama, ditutup desis asap */
   crash(){wet=true;click(.06,.09,1800);thump(150,38,.5,.15);ring(1100,1.1,.045);ring(1650,.9,.03,.02);ring(2500,.7,.02,.03);sweep(.5,.045,3800,500);sweep(1.1,.03,2200,260);wet=false},
   puff:()=>sweep(1,.05,2200,260),
+  /* intro roda keahlian: semua bisa dijadwalkan dengan 'at' (detik dari sekarang) */
+  wire(at,d){glide(150,520,d,.026,at);sweep(d,.03,260,2400,at)},
+  ping(at=0){note(sc(4)*2,.22,.035,at);note(sc(2)*2,.3,.025,at+.06)},
+  pop(i,at=0){note(sc(i)*2,.07,.03,at)},
+  link(at=0){note(sc(5)*2,.08,.025,at);note(sc(3)*2,.1,.02,at+.05)},
+  reveal(at=0){sweep(.9,.05,180,2200,at)},
+  ready(at=0){[0,2,4].forEach((n,i)=>note(sc(n)*2,.55,.04,at+i*.08))},
   intro(){[0,2,4].forEach((n,i)=>note(sc(n),.7,.05,i*.09))},
   open(){sweep(.9,.08,180,3000);[0,2,4].forEach((n,i)=>note(sc(n)/(i?1:2),.8,.05,i*.05))}
  };
@@ -360,11 +448,14 @@ $('#copy').textContent='© 2026 Adi Indra Muliani, Aiidentity. Semua hak dilindu
 const HOLD='Tahan untuk melihat detail',list=$('#list');
 list.innerHTML=D.menu.map((m,i)=>`<button class="item" style="--d:${.15+i*.09}s" data-i="${i}"><span class="t">${m.t}</span><span class="s">${m.s}</span><i></i></button>`).join('');
 const items=[...list.children];
+/* petunjuk "Tahan untuk melihat detail": hanya satu yang tampil, yaitu di item yang terakhir diketuk */
+let hintI=-1,hintT=0;
+function clearHint(){clearTimeout(hintT);if(hintI>=0){const s=items[hintI].querySelector('.s');s.classList.remove('hint');s.textContent=D.menu[hintI].s;hintI=-1}}
 items.forEach((el,i)=>{
  el.addEventListener('mouseenter',()=>select(i));
  el.addEventListener('focus',()=>select(i));
  /* Ketuk sekali: ganti preview dan tampilkan petunjuk 2 detik. Tahan: masuk ke halaman */
- let tm=0,fired=false,pk=0;const sub=el.querySelector('.s');
+ let tm=0,fired=false,lastUp=0;const sub=el.querySelector('.s');
  const stop=()=>{clearTimeout(tm);el.classList.remove('hold')};
  el.addEventListener('pointerdown',e=>{
   if(e.button>0||busy)return;
@@ -374,13 +465,19 @@ items.forEach((el,i)=>{
  el.addEventListener('pointerup',()=>{
   if(!el.classList.contains('hold'))return;
   stop();if(fired||busy)return;
-  clearTimeout(pk);sub.textContent=HOLD;pk=setTimeout(()=>sub.textContent=D.menu[i].s,2000);
+  /* ketuk/klik dua kali cepat = masuk ke halaman, sama seperti menahan */
+  const now=performance.now();
+  if(now-lastUp<380){lastUp=0;clearHint();openPage(i);return}
+  lastUp=now;
+  window.AVAT&&AVAT.pick(D.menu[i].id);
+  clearHint();sub.textContent=HOLD;sub.classList.add('hint');hintI=i;hintT=setTimeout(clearHint,2000);
  });
  ['pointerleave','pointercancel'].forEach(t=>el.addEventListener(t,stop));
  el.addEventListener('contextmenu',e=>e.preventDefault());
  el.addEventListener('click',e=>{if(!e.detail){select(i);openPage(i)}});
 });
 function select(i){
+ if(hintI>=0&&hintI!==i)clearHint();
  if(i===sel&&$('#pv').innerHTML)return;
  sel=i;SFX.hover(i);const m=D.menu[i];
  items.forEach((el,k)=>el.classList.toggle('sel',k===i));
@@ -396,10 +493,286 @@ const pages={
   <div class="row" style="--d:.7s"><span>Senjata utama</span><span>${D.weapon}</span></div>
   <div class="row" style="--d:.8s"><span>Perusahaan utama</span><span>${D.company}</span></div>
   <div class="stats">${D.stats.map((s,i)=>`<div class="stat" style="--d:${.95+i*.12}s"><b data-count="${s[0]}">0</b><span>${s[1]}</span></div>`).join('')}</div></div></div>`,
- skills:()=>`<div class="skills">${D.skills.map((s,i)=>`<div class="sk" style="--d:${.1+i*.1}s"><div><span>${s[0]}</span><b data-count="${s[1]}">0</b></div><div class="bar" style="--w:${s[1]}%"><i></i></div></div>`).join('')}</div>`,
+ skills:()=>`<div class="wheel"><div class="wstage" data-w="stage">
+  <div class="wvid whero" data-w="hero"><canvas class="vc" data-vid role="img" aria-label="${D.first} ${D.last} membaca buku skill"></canvas></div>
+  <svg viewBox="0 0 400 760" role="group" aria-label="Roda keahlian">
+   <text class="wlbl" data-w="lb1" x="200" y="12">SKILL DASAR</text>
+   <text class="wlbl" data-w="lb2" x="200" y="752">SKILL KHUSUS</text>
+   <text class="wlbl" data-w="lb3" x="200" y="12" style="opacity:0">SKILL KHUSUS</text>
+   <defs><filter id="wglow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="760"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+   <g class="wcab" data-w="cab" pointer-events="none"></g><g data-w="sep" pointer-events="none"></g><g data-w="top"></g><g data-w="bot"></g>
+  </svg>
+  <div class="wov" data-w="ov" role="dialog" aria-hidden="true"><div class="woi" data-w="oi"></div><div class="won" data-w="on"></div><div class="wot"><span data-w="ot"></span></div><div class="wlv" data-w="lv"><i></i></div><p data-w="od"></p><small>KETUK UNTUK MENUTUP</small></div>
+ </div></div>`,
  projects:()=>`<div class="grid">${D.projects.map((p,i)=>`<article class="card" style="--d:${.1+i*.12}s"><div class="th" style="--h:${p.h};--sat:${p.s??80}%"><span class="rank">${p.r}</span></div><div class="cb"><h3 class="d">${p.n}</h3><p>${p.d}</p><div class="tags">${p.t.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div></article>`).join('')}</div>`,
  contact:()=>`<div class="links">${D.links.map((l,i)=>`<a class="cl" style="--d:${.1+i*.1}s" href="${l[2]}"><span class="d">${l[0]}</span><span><small>${l[1]}</small></span></a>`).join('')}</div>`
 };
+
+/* ===== RODA KEAHLIAN: dipasang ke halaman Keahlian; orang di tengah = file/skill (video), dikunci hijau lewat mesin avatar ===== */
+/* Ikon garis minimalis (24x24). Isi kolom pertama data wheel dengan nama ikon ini. */
+const WICON={
+ html:'<path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/>',
+ css:'<path d="M9 4L7 20M17 4l-2 16M4 9h16M3.5 15h16"/>',
+ js:'<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+ ts:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 10h6M12 10v7"/>',
+ react:'<ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)"/><circle class="fl" cx="12" cy="12" r="1.3"/>',
+ git:'<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="9" r="2"/><path d="M6 8v8M18 11c0 4-5 4-12 6"/>',
+ responsive:'<rect x="3" y="5" width="14" height="10" rx="1.5"/><path d="M7 19h6M10 15v4"/><rect x="17.5" y="9" width="3.5" height="8" rx="1"/>',
+ access:'<circle cx="12" cy="5" r="1.8"/><path d="M5 9l7 1.5L19 9M12 10.5V15l-3 5M12 15l3 5"/>',
+ figma:'<path d="M12 3l6 8-6 10-6-10z"/><circle cx="12" cy="11" r="1.3"/><path d="M12 12.3V21"/>',
+ ui:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/>',
+ motion:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/>',
+ node:'<path d="M12 2.5l8 4.5v10l-8 4.5-8-4.5V7z"/><circle class="fl" cx="12" cy="12" r="1.3"/>',
+ next:'<path d="M12 4l9 16H3z"/>',
+ wind:'<path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/>',
+ cube:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12L4 7.5M12 12v9"/>',
+ pwa:'<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M12 8v6M9.5 11.5L12 14l2.5-2.5"/>',
+ map:'<path d="M12 21s-6-5.6-6-10.5a6 6 0 1 1 12 0C18 15.4 12 21 12 21z"/><circle cx="12" cy="10.5" r="2"/>',
+ fire:'<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.3 1 2 2 2 0-3-.5-5 1-8z"/>',
+ card:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10.5h18M7 15h3"/>',
+ socket:'<path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/>',
+ gauge:'<path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4-5"/><circle class="fl" cx="12" cy="17" r="1.3"/>',
+ grid:'<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>',
+ search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.2-4.2"/>'
+};
+const wicon=k=>'<g class="wic">'+(WICON[k]||'<circle cx="12" cy="12" r="7"/><circle class="fl" cx="12" cy="12" r="1.6"/>')+'</g>';
+let wheelInst=null;
+function mountWheel(root){
+ if(wheelInst)wheelInst.dispose();
+ const w=n=>root.querySelector('[data-w="'+n+'"]');
+ const basic=D.wheel.dasar,special=D.wheel.khusus;
+ const CORNER=8,GP=6,THICK=30,MERGE=-0.8; // CORNER = radius sudut ujung kapsul
+ const NS='http://www.w3.org/2000/svg',hero=w('hero'),stage=w('stage'),ov=w('ov');
+ const R=135,CX=200,TOP=40,CYT=TOP+R,CYB=710-R,H=CYB-CYT,Q=Math.PI*R/2,L=4*Q+2*H;
+ let G=14,cur=null,busy=true,open=false,dead=false,started=false,introAnims=[],introT=0,goT=0;
+ stage.classList.add('wlock'); // terkunci sampai animasi muncul selesai
+ // sembunyikan semuanya sampai intro dimulai
+ ['top','bot','sep'].forEach(n=>w(n).style.visibility='hidden');hero.style.opacity='0';
+ const S={m:0,tv:0,ov:0,r0:0,r1:0}; // m: kapsul menyatu, tv: perjalanan ikon, ov: overlay
+ const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+ function P(s){s=((s%L)+L)%L;let a;
+  if(s<Q){a=-Math.PI/2+s/R;return[CX+R*Math.cos(a),CYT+R*Math.sin(a)]}s-=Q;
+  if(s<H)return[CX+R,CYT+s];s-=H;
+  if(s<2*Q){a=s/R;return[CX+R*Math.cos(a),CYB+R*Math.sin(a)]}s-=2*Q;
+  if(s<H)return[CX-R,CYB-s];s-=H;
+  a=Math.PI+s/R;return[CX+R*Math.cos(a),CYT+R*Math.sin(a)]}
+ function capsule(lo,hi,rr){const hw=THICK/2-rr,a=lo+rr,b=Math.max(a,hi-rr),n=Math.max(2,Math.ceil((b-a)/3)),Lf=[],Rt=[];
+  for(let i=0;i<=n;i++){const s=a+(b-a)*i/n,p=P(s),q=P(s-.5),ww=P(s+.5);let tx=ww[0]-q[0],ty=ww[1]-q[1];const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;
+   Lf.push([p[0]-ty*hw,p[1]+tx*hw]);Rt.push([p[0]+ty*hw,p[1]-tx*hw])}
+  const f=p=>p[0].toFixed(1)+' '+p[1].toFixed(1);
+  return'M'+Lf.map(f).join('L')+'L'+Rt.reverse().map(f).join('L')+'Z'}
+ const entries=[];
+ function make(it,group,idx){
+  const el=document.createElementNS(NS,'g');el.setAttribute('class','wseg');el.setAttribute('tabindex','0');el.setAttribute('role','button');el.setAttribute('aria-label',it[1]);
+  const path=document.createElementNS(NS,'path');el.appendChild(path);
+  const txt=document.createElementNS(NS,'g');txt.innerHTML=wicon(it[0]);txt.style.pointerEvents='none';el.appendChild(txt);
+  const e={it,group,idx,el,path,txt};entries.push(e);
+  el.addEventListener('click',()=>select(e));
+  el.addEventListener('keydown',k=>{if(k.key==='Enter'||k.key===' '){k.preventDefault();k.stopPropagation();select(e)}});
+  w(group==='basic'?'top':'bot').appendChild(el)}
+ basic.forEach((it,i)=>make(it,'basic',i));special.forEach((it,i)=>make(it,'special',i));
+ const SEPHL=(G+GP)/2+7,SEPOFF=3.6; /* garis dibuat lebih panjang dari celah, ujungnya masuk ke bawah kapsul (urutan gambar: garis di belakang kapsul) */
+ // setengah panjang garis, jarak tiap garis dari tengah
+ const seps=[0,1].map(()=>{const g=document.createElementNS(NS,'g'),ls=[0,1].map(()=>{const l=document.createElementNS(NS,'line');l.setAttribute('class','wsep');g.appendChild(l);return l});w('sep').appendChild(g);return{g,ls}});
+ function geom(group,m,rot){const nb=basic.length,ns=special.length,hb=nb/2,SEG=(L-2*G)/(nb+ns),n=group==='basic'?nb:ns;
+  let A0,B0,A1,B1;
+  if(group==='basic'){A0=-hb*SEG;B0=hb*SEG;A1=-L/2;B1=L/2}else{A0=hb*SEG+G;B0=L-hb*SEG-G;A1=0;B1=L}
+  const A=A0+(A1-A0)*m+rot,B=B0+(B1-B0)*m+rot;
+  return{A,W:(B-A)/n,gp:GP*(1-m)+MERGE*m,rr:CORNER*(1-m),ns}}
+ function slot(e,g){const q=e.group==='basic'?e.idx:g.ns-1-e.idx,lo=g.A+q*g.W,hi=lo+g.W;return{lo:lo+g.gp/2,hi:hi-g.gp/2,c:(lo+hi)/2}}
+ const lb1=w('lb1'),lb2=w('lb2'),lb3=w('lb3'),cab=w('cab');
+ const LB=26,D0=18.5,GS=4,STUB=9,V=.32,PL=34;
+ let lw1=95,lw2=95,cabAnims=[],wasOff=false;
+ function render(){
+  const grp=cur?cur.group:null,hb=basic.length/2,SEG=(L-2*G)/entries.length,rot=S.r0+(S.r1-S.r0)*S.tv;
+  const gs={basic:geom('basic',grp==='basic'?S.m:0,grp==='basic'?rot:0),special:geom('special',grp==='special'?S.m:0,grp==='special'?rot:0)};
+  const fade=cur?Math.max(0,1-S.m*2.5):1;
+  entries.forEach(e=>{const g=gs[e.group],c=slot(e,g);
+   e.path.setAttribute('d',capsule(c.lo,c.hi,g.rr));e.path.setAttribute('stroke-width',g.rr*2);
+   const p=P(c.c);e.txt.setAttribute('transform','translate('+p[0].toFixed(1)+' '+p[1].toFixed(1)+') scale(.85) translate(-12 -12)');e.el.classList.toggle('on',cur===e);
+   e.el.style.opacity=(cur&&e.group!==grp)?fade:1;
+   e.el.style.pointerEvents=(cur&&e.group!==grp)?'none':''});
+  [hb*SEG+G/2,-hb*SEG-G/2].forEach((s,i)=>{const c=P(s),a=P(s-.5),b=P(s+.5);let tx=b[0]-a[0],ty=b[1]-a[1];const n=Math.hypot(tx,ty)||1;tx/=n;ty/=n;
+   /* dua garis sejajar, searah lengkungan; titik awal (A) di sisi kapsul dasar, ujung (B) di sisi kapsul khusus */
+   const sg=i===0?-1:1,sp=seps[i];
+   sp.ls.forEach((l,k)=>{const o=(k?1:-1)*SEPOFF,ox=-ty*o,oy=tx*o;
+    l.setAttribute('x1',(c[0]+sg*tx*SEPHL+ox).toFixed(1));l.setAttribute('y1',(c[1]+sg*ty*SEPHL+oy).toFixed(1));
+    l.setAttribute('x2',(c[0]-sg*tx*SEPHL+ox).toFixed(1));l.setAttribute('y2',(c[1]-sg*ty*SEPHL+oy).toFixed(1))});
+   sp.g.style.opacity=fade});
+  ov.style.opacity=S.ov;ov.style.transform='scale('+(0.3+0.7*S.ov).toFixed(3)+')';
+  const gb=!!cur&&cur.group==='basic',gsp=!!cur&&cur.group==='special';
+  lb1.style.transform=cur?'translateX(0px)':'translateX('+(LB+lw1/2-CX)+'px)';
+  lb1.style.opacity=(!cur||gb)?1:0;
+  lb2.style.transform='translateX('+(400-LB-lw2/2-CX)+'px)';
+  lb2.style.opacity=cur?0:1;
+  lb3.style.opacity=gsp?1:0;
+  cab.classList.toggle('off',!!cur);
+  const off=!!cur;if(off!==wasOff){wasOff=off;if(off)cabAnims.forEach(a=>a.cancel());else buildCables()}}
+ function tween(key,from,to,dur){return new Promise(res=>{
+  if(dead)return res();
+  if(reduce||dur<=0){S[key]=to;render();return res()}
+  const t0=performance.now();(function f(now){if(dead)return res();const t=Math.max(0,Math.min(1,(now-t0)/dur));S[key]=from+(to-from)*ease(t);render();t<1?requestAnimationFrame(f):res()})(t0)})}
+ const travelDur=d=>Math.min(1500,420+Math.abs(d)*.7);
+ const ringPos=e=>{const c=slot(e,geom(e.group,1,0)).c;return(L-(((c%L)+L)%L))%L};
+ function setOverlay(it){w('oi').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+wicon(it[0])+'</svg>';w('on').textContent=it[1];
+  w('ot').textContent='LEVEL '+it[3];w('od').textContent=it[2];w('lv').style.setProperty('--w',it[3]+'%')}
+ function castHero(){hero.classList.remove('wcast');void hero.getBoundingClientRect();hero.classList.add('wcast')}
+ async function openSkill(e){
+  cur=e;const it=e.it;SFX.confirm();
+  S.r0=0;S.r1=ringPos(e);S.tv=0;
+  setOverlay(it);render();
+  await tween('m',0,1,560);
+  await tween('tv',0,1,travelDur(S.r1));
+  if(dead)return;
+  open=true;ov.classList.add('show');ov.setAttribute('aria-hidden','false');
+  castHero();
+  await tween('ov',0,1,380)}
+ async function switchSkill(e){
+  const from=S.r1,target=ringPos(e);
+  let d=((target-from)%L+L)%L;if(d>L/2)d-=L;
+  ov.classList.remove('show');
+  cur=e;SFX.hover(e.idx);render();
+  await tween('ov',1,0,160);
+  setOverlay(e.it);
+  S.r0=from;S.r1=from+d;S.tv=0;
+  await tween('tv',0,1,Math.min(900,260+Math.abs(d)*.5));
+  if(dead)return;
+  S.r0=0;S.r1=((target%L)+L)%L;S.tv=1;render();
+  ov.classList.add('show');castHero();
+  await tween('ov',0,1,320)}
+ async function closeSkill(){
+  SFX.back();ov.classList.remove('show');ov.setAttribute('aria-hidden','true');
+  await tween('ov',1,0,240);await tween('tv',1,0,travelDur(S.r1));await tween('m',1,0,520);
+  if(dead)return;
+  cur=null;open=false;S.r0=S.r1=0;render()}
+ async function select(e){
+  if(busy||dead)return;busy=true;stage.classList.add('wlock');
+  try{
+   if(!open)await openSkill(e);
+   else if(cur===e)await closeSkill();
+   else if(cur.group===e.group)await switchSkill(e);
+   else{await closeSkill();await openSkill(e)}
+  }finally{busy=false;stage.classList.remove('wlock')}}
+ function requestClose(){if(busy||!open||dead)return;busy=true;stage.classList.add('wlock');closeSkill().finally(()=>{busy=false;stage.classList.remove('wlock')})}
+ ov.addEventListener('click',requestClose);
+ function onKey(k){
+  if(k.key==='Escape')requestClose();
+  else if(open&&!busy&&/^Arrow(Left|Right|Up|Down)$/.test(k.key)){
+   k.preventDefault();const list=entries.filter(x=>x.group===cur.group),n=list.length,
+    step=(k.key==='ArrowRight'||k.key==='ArrowDown')?1:-1;
+   select(list[(cur.idx+step+n)%n])}}
+ document.addEventListener('keydown',onKey);
+ // skala font overlay mengikuti lebar kartu
+ const setU=()=>stage.style.setProperty('--u',(stage.clientWidth/400)+'px');
+ setU();let ro=null;if(window.ResizeObserver){ro=new ResizeObserver(setU);ro.observe(stage)}else addEventListener('resize',setU);
+ // ---- label + kabel jaringan (hanya tampil saat overlay tidak aktif) ----
+ const mk=t=>document.createElementNS(NS,t);
+ function measure(){lw1=lb1.getComputedTextLength()||95;lw2=lb2.getComputedTextLength()||95}
+ function T(s,d){const p=P(s),q=P(s-.5),ww=P(s+.5);let tx=ww[0]-q[0],ty=ww[1]-q[1];const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;return[p[0]+ty*d,p[1]-tx*d]}
+ function sp(a,b,d){const n=Math.max(2,Math.ceil(Math.abs(b-a)/3)),o=[];for(let i=0;i<=n;i++)o.push(T(a+(b-a)*i/n,d));return o}
+ const pstr=pts=>'M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join('L');
+ const plen=pts=>{let l=0;for(let i=1;i<pts.length;i++)l+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);return l};
+ function tg(s){const q=P(s-.5),ww=P(s+.5),l=Math.hypot(ww[0]-q[0],ww[1]-q[1])||1;return[(ww[0]-q[0])/l,(ww[1]-q[1])/l]}
+ function bez(p0,p1,p2,p3,n){const o=[];for(let i=0;i<=n;i++){const t=i/n,u=1-t,a=u*u*u,b=3*u*u*t,c=3*u*t*t,d=t*t*t;
+  o.push([a*p0[0]+b*p1[0]+c*p2[0]+d*p3[0],a*p0[1]+b*p1[1]+c*p2[1]+d*p3[1]])}return o}
+ function buildCables(intro){
+  if(dead)return;
+  cabAnims.forEach(a=>a.cancel());cabAnims=[];cab.innerHTML='';
+  const base=mk('g'),glow=mk('g'),nodes=mk('g'),hubs=mk('g');glow.setAttribute('filter','url(#wglow)');
+  cab.append(base,glow,nodes,hubs);
+  const jobs=[],halos=[],hubEls=[];
+  ['basic','special'].forEach(group=>{
+   const g=geom(group,0,0),es=entries.filter(e=>e.group===group).map(e=>({e,c:slot(e,g).c}));
+   let hx,hy,sj;
+   if(group==='basic'){hx=LB+lw1+13;hy=8;sj=R*Math.asin((hx-CX)/(R+40))}
+   else{hx=400-LB-lw2-13;hy=748.5;sj=Q+H+R*Math.acos((hx-CX)/(R+40))}
+   const hub=[hx,hy],dMax=group==='basic'?33:38,
+    left=es.filter(o=>o.c<sj).sort((x,y)=>y.c-x.c),right=es.filter(o=>o.c>=sj).sort((x,y)=>x.c-y.c),
+    nmax=Math.max(left.length,right.length),step=nmax>1?(dMax-D0)/(nmax-1):0;
+   [[left,-1],[right,1]].forEach(([arr,dir])=>arr.forEach((o,r)=>{const c=o.c;
+    const d=D0+r*step,off=Math.min(GS*(r+1),Math.abs(c-sj)*.5),se=sj+dir*off,E=T(se,d),
+     tv=tg(se),T0=T(sj,D0),dist=Math.hypot(E[0]-hx,E[1]-hy),u=[T0[0]-hx,T0[1]-hy],ul=Math.hypot(u[0],u[1])||1;
+    const link=bez(hub,[hx+u[0]/ul*dist*.45,hy+u[1]/ul*dist*.45],[E[0]-dir*tv[0]*dist*.4,E[1]-dir*tv[1]*dist*.4],E,14);
+    const drop=d-STUB,b0=Math.min(drop*.9,Math.abs(c-se)*.85),sa=c-dir*b0,A=T(sa,d),B=T(c,STUB),ta=tg(sa),tc=tg(c),nc=[tc[1],-tc[0]],
+     bend=bez(A,[A[0]+dir*ta[0]*b0*.55,A[1]+dir*ta[1]*b0*.55],[B[0]+nc[0]*drop*.55,B[1]+nc[1]*drop*.55],B,12);
+    const pts=link.concat(sp(se,sa,d).slice(1),bend.slice(1)),dd=pstr(pts),len=plen(pts);
+    const b=mk('path');b.setAttribute('class','wcb');b.setAttribute('d',dd);base.appendChild(b);
+    const p=mk('path');p.setAttribute('class','wcp');p.setAttribute('d',dd);
+    p.style.strokeDasharray=PL+' '+(len+2*PL);p.style.strokeDashoffset=PL+4;glow.appendChild(p);
+    jobs.push({p,b,len,el:o.e.el,r,g:group});
+   }));
+   const hg=mk('g');hg.setAttribute('transform','translate('+hx.toFixed(1)+' '+hy+')');
+   const halo=mk('circle');halo.setAttribute('class','whalo');halo.setAttribute('r',5);
+   const hc=mk('circle');hc.setAttribute('class','whub');hc.setAttribute('r',5);
+   const hi2=mk('circle');hi2.setAttribute('class','whubi');hi2.setAttribute('r',1.9);
+   hg.append(halo,hc,hi2);hubs.appendChild(hg);halos.push(halo);hubEls.push({hc,hi2})});
+  if(reduce)return;
+  const t0=intro?runIntro(jobs,hubEls):0; // jeda sebelum animasi berulang dimulai
+  const SPREAD=2600,trav=j=>(j.len+PL+8)/V,period=Math.max(...jobs.map(trav))+SPREAD+1000;
+  jobs.forEach((j,i)=>{const delay=((i*.6180339)%1)*SPREAD;
+   cabAnims.push(j.p.animate([
+    {strokeDashoffset:PL+4,offset:0},{strokeDashoffset:PL+4,offset:delay/period},
+    {strokeDashoffset:-(j.len+4),offset:(delay+trav(j))/period},{strokeDashoffset:-(j.len+4),offset:1}],{duration:period,iterations:Infinity,delay:t0}));
+   const ta=delay+(j.len+4)/V,GL0='drop-shadow(0 0 0 rgba(209,154,46,0))',GL1='drop-shadow(0 0 5px rgba(209,154,46,.7))';
+   cabAnims.push(j.el.animate([{filter:GL0,offset:0},{filter:GL0,offset:Math.max(0,(ta-100)/period)},{filter:GL1,offset:(ta+150)/period},
+    {filter:GL0,offset:(ta+900)/period},{filter:GL0,offset:1}],{duration:period,iterations:Infinity,delay:t0}))});
+  seps.forEach((sp,i)=>sp.ls.forEach((l,k)=>cabAnims.push(l.animate([
+   {opacity:k?.4:1,offset:0},{opacity:k?1:.4,offset:.5},{opacity:k?.4:1,offset:1}],{duration:2200,iterations:Infinity,delay:t0+i*350,easing:'ease-in-out'}))));
+  halos.forEach(h=>cabAnims.push(h.animate([
+   {transform:'scale(1)',opacity:.8,offset:0},{transform:'scale(1.9)',opacity:0,offset:.5},{transform:'scale(1.9)',opacity:0,offset:1}],{duration:2000,iterations:Infinity,delay:t0})))}
+
+ /* ---- INTRO: hub + label muncul, kabel memanjang pelan dari hub, lalu tiap kapsul muncul saat kabelnya tiba, lalu orang di tengah ---- */
+ function runIntro(jobs,hubEls){
+  const IT0=380,SPD=.36,EA='cubic-bezier(.45,0,.25,1)',s=ms=>ms/1000;
+  const A=(el,kf,o)=>{const a=el.animate(kf,Object.assign({fill:'backwards'},o));introAnims.push(a);return a};
+  // 1) titik hub membesar + label
+  const popK=[{transform:'scale(0)',opacity:0},{transform:'scale(1.45)',opacity:1,offset:.6},{transform:'scale(1)',opacity:1}];
+  hubEls.forEach((h,i)=>{A(h.hc,popK,{duration:480,delay:IT0+i*90,easing:'ease-out'});A(h.hi2,popK,{duration:480,delay:IT0+60+i*90,easing:'ease-out'})});
+  [lb1,lb2].forEach((l,i)=>A(l,[{opacity:0},{opacity:1}],{duration:650,delay:IT0+140+i*90,easing:'ease-out'}));
+  // 2) kabel memanjang (kecepatan tetap, jadi kabel yang lebih panjang tiba belakangan) + percikan di ujungnya; 3) kapsul muncul saat kabel tiba
+  let first=IT0+300,last=0;
+  jobs.forEach(j=>{
+   const st=first+j.r*55+(j.g==='special'?110:0),dur=Math.max(700,j.len/SPD);
+   j.arr=st+dur;last=Math.max(last,j.arr);
+   j.b.style.strokeDasharray=j.len+' '+j.len;
+   A(j.b,[{strokeDashoffset:j.len},{strokeDashoffset:0}],{duration:dur,delay:st,easing:EA});
+   A(j.p,[{strokeDashoffset:PL+4,opacity:1,offset:0},{strokeDashoffset:PL-j.len,opacity:1,offset:.88},{strokeDashoffset:PL-j.len,opacity:0,offset:1}],{duration:dur,delay:st,easing:EA});
+   A(j.el,[{opacity:0,transform:'scale(.3)'},{opacity:1,transform:'scale(1.14)',offset:.62},{opacity:1,transform:'scale(1)'}],{duration:480,delay:j.arr-90,easing:'cubic-bezier(.22,1,.36,1)'});
+  });
+  // dua garis penghubung: tiap sambungan baru menjalar setelah DUA kapsul yang diapitnya selesai muncul (dari kapsul dasar ke kapsul khusus), disertai kilau
+  const arrOf=e=>(jobs.find(j=>j.el===e.el)||{arr:last}).arr,nb=basic.length,ns=special.length;
+  const adj=[[entries[nb-1],entries[nb+ns-1]],[entries[0],entries[nb]]]; // [kapsul dasar, kapsul khusus] di tiap sambungan
+  const GL0='drop-shadow(0 0 0 rgba(209,154,46,0))',GL1='drop-shadow(0 0 4px rgba(209,154,46,.95))',SLEN=SEPHL*2;
+  let sepEnd=0;
+  seps.forEach((sp,i)=>{
+   const t=Math.max(arrOf(adj[i][0]),arrOf(adj[i][1]))+300; // kapsul sudah menetap (animasi kapsul 480 ms dimulai 90 ms sebelum kabel tiba)
+   sp.ls.forEach((l,k)=>{const st=t+k*110;l.style.strokeDasharray=SLEN+' '+SLEN;
+    A(l,[{strokeDashoffset:SLEN,opacity:.25,filter:GL0},{strokeDashoffset:0,opacity:1,filter:GL1,offset:.55},{strokeDashoffset:0,opacity:1,filter:GL0}],{duration:620,delay:st,easing:'cubic-bezier(.22,1,.36,1)'});
+    sepEnd=Math.max(sepEnd,st+620)});
+   SFX.link(s(t))});
+  // 4) orang di tengah naik pelan sambil memudar masuk
+  A(hero,[{opacity:0,transform:'translateY(22px) scale(.97)'},{opacity:1,transform:'none'}],{duration:1300,delay:IT0+650,easing:'cubic-bezier(.22,1,.36,1)'});
+  const end=Math.max(last+510,sepEnd+40);
+  // suara: ping hub, dengung kabel, nada naik tiap kapsul, desir saat orang muncul, dentang siap
+  SFX.ping(s(IT0));SFX.wire(s(first),s(last-first));
+  jobs.map(j=>j.arr).sort((a,b)=>a-b).forEach((t,i)=>SFX.pop(i,s(t-90)));
+  SFX.reveal(s(IT0+650));SFX.ready(s(end-260));
+  introT=setTimeout(()=>{busy=false;stage.classList.remove('wlock')},end);
+  return end;
+ }
+ function go(){
+  if(started||dead)return;started=true;clearTimeout(goT);
+  lb1.style.visibility=lb2.style.visibility='hidden';
+  [lb1,lb2].forEach(l=>l.style.transition='none');
+  measure();render();buildCables(!reduce);
+  void lb1.getBoundingClientRect();[lb1,lb2].forEach(l=>l.style.transition='');
+  ['top','bot','sep'].forEach(n=>w(n).style.visibility='');
+  lb1.style.visibility=lb2.style.visibility='';hero.style.opacity='';
+  if(reduce){busy=false;stage.classList.remove('wlock')}
+ }
+ Promise.resolve(document.fonts&&document.fonts.ready).then(go);goT=setTimeout(go,900);
+ return wheelInst={isOpen:()=>open,dispose(){dead=true;document.removeEventListener('keydown',onKey);if(ro)ro.disconnect();else removeEventListener('resize',setU);cabAnims.forEach(a=>a.cancel());cabAnims=[];introAnims.forEach(a=>a.cancel());clearTimeout(introT);clearTimeout(goT)}};
+}
 
 function countUps(){
  document.querySelectorAll('[data-count]').forEach(el=>{
@@ -423,15 +796,17 @@ function go(fn){
  };
 }
 function toMenu(){if(!busy)SFX.back();go(()=>{
+ if(wheelInst){wheelInst.dispose();wheelInst=null}
+ window.AVAT&&AVAT.reset();
  $('#menu').style.setProperty('--o','0s');
  show('menu');items[sel].focus({preventScroll:true});
  if(!reduce)$('.actor').animate([{opacity:0,transform:'translateX(90px) skewX(-6deg)',offset:0},{opacity:1,transform:'none'}],{duration:1100,delay:150,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'});
 })}
 function openPage(i){
  SFX.confirm();go(()=>{
-  const m=D.menu[i];
+  const m=D.menu[i];window.AVAT&&AVAT.page(m.id);
   $('#ptitle').textContent=m.t;$('#pbody').innerHTML=pages[m.id]();
-  show('page');$('#page').scrollTop=0;countUps();pageSnd();$('#back').focus({preventScroll:true});
+  show('page');$('#page').scrollTop=0;if(m.id==='skills')mountWheel($('#pbody'));countUps();pageSnd();$('#back').focus({preventScroll:true});
  });
 }
 /* Transisi layar awal <-> menu: foto berpindah ke posisi menu, elemen lain menyesuaikan */
@@ -468,6 +843,7 @@ function enterMenu(){
 }
 function leaveMenu(){
  if(busy||scr!=='menu')return;
+ window.AVAT&&AVAT.reset();
  busy=true;SFX.back();
  const hero=$('.hero'),him=$('#hero'),start=$('#start'),menu=$('#menu'),actor=$('.actor');
  if(reduce){show('start');busy=false;return}
@@ -510,7 +886,7 @@ addEventListener('keydown',e=>{
   else if(k==='Enter'||k===' '){e.preventDefault();openPage(sel)}
   else if(k==='Escape'||k==='Backspace'){leaveMenu()}
  }else if(scr==='page'){
-  if(k==='Escape'||k==='Backspace'){e.preventDefault();toMenu()}
+  if(k==='Escape'||k==='Backspace'){if(wheelInst&&wheelInst.isOpen())return;e.preventDefault();toMenu()}
  }
 });
 /* Layar sempit: di bawah MINW layout tidak bergeser lagi, seluruh tampilan diperkecil proporsional */
@@ -594,16 +970,73 @@ select(0);
  const snapF=()=>{if(sn.width!==OW||sn.height!==OH){sn.width=OW;sn.height=OH}sn.getContext('2d').drawImage(css?v:gc,0,0,OW,OH);hasSn=true};
  /* status mesin frame */
  let pend=false,pmt=-1,lmt=-1,ct0=-1,fi=1000/30,tn=0,ia=0,ib=0,jump=true,settled=false;
- let F=[],TX=[],vt=null,pgK=null,pgB=null,kLoc=null;
- const v=document.createElement('video');
- v.muted=v.playsInline=true;v.loop=false;v.preload='auto';v.disableRemotePlayback=true;v.setAttribute('playsinline','');
- v.style.cssText='position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1';
+ let F=[],TX=[],vt=null,pgK=null,pgB=null,kLoc=null,kpLoc=null;
+ /* parameter kunci hijau: [ambang bawah, ambang atas, ambang kabut alfa, ambang pemotongan sisa hijau]. Klip skill memakai nilai lunak: hanya hijau pekat yang dibuang, sedikit sisa hijau dibiarkan */
+ const KEY_N=[.02,.14,HAZE,.015],KEY_S=[.10,.26,.15,.10];
+ const setKey=el=>{if(gl&&!css&&kpLoc){gl.useProgram(pgK);gl.uniform4fv(kpLoc,el===V4?KEY_S:KEY_N)}};
+ /* Tiga klip: avatar (dasar), avatarskl1 (memakai kacamata), avatarskl2 (kacamata, diam/idle). v = klip yang sedang dipakai mesin */
+ const mkVid=b=>{const e=document.createElement('video');
+  e.muted=e.playsInline=true;e.loop=false;e.preload='auto';e.disableRemotePlayback=true;e.setAttribute('playsinline','');
+  e.style.cssText='position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1';
+  [[b+'.webm','video/webm'],[b+'.mp4','video/mp4']].forEach(([u,t])=>{const x=document.createElement('source');x.src=u;x.type=t;e.appendChild(x)});
+  return e};
+ const V0=mkVid('file/avatar'),V1=mkVid('file/avatarskl1'),V2=mkVid('file/avatarskl2'),V3=mkVid('file/avatar1rv'),V4=mkVid('file/skill');
+ let v=V0,mode='base',bad={}; /* mode: base | skl1 | skl2 | rev (memutar avatar1rv, yaitu skl1 versi mundur) | skill (file/skill, di halaman Keahlian) */
  const play=()=>v.play().catch(()=>{});
  let pt=0;
- v.addEventListener('ended',()=>{if(reduce)return;clearTimeout(pt);pt=setTimeout(()=>{jump=true;xfPending=true;v.currentTime=0;play()},PAUSE_MS)});
+ const loopNow=()=>{clearTimeout(pt);pt=setTimeout(()=>{jump=true;xfPending=true;v.currentTime=0;play()},PAUSE_MS)};
+ const rw=e=>{if(e.currentTime>.02||e.ended)e.currentTime=0}; /* ulang dari awal hanya jika perlu, supaya tidak ada seek yang tertahan */
+ const toBase=()=>{mode='base';swapTo(V0);rw(V0);play()};
+ V0.addEventListener('ended',()=>{if(reduce||v!==V0)return;loopNow()});
+ V1.addEventListener('ended',()=>{if(mode!=='skl1'||v!==V1)return;if(bad[2]){toBase();return}mode='skl2';swapTo(V2);rw(V2);play()});
+ V2.addEventListener('ended',()=>{if(reduce||mode!=='skl2'||v!==V2)return;loopNow()});
+ V3.addEventListener('ended',()=>{if(mode!=='rev'||v!==V3)return;toBase()});
+ V4.addEventListener('ended',()=>{if(reduce||mode!=='skill'||v!==V4)return;loopNow()});
+ V4.addEventListener('loadedmetadata',()=>{if(v===V4&&(V4.videoWidth!==VW||V4.videoHeight!==VH)){resizeTo(V4);hasSn=false;xfPending=false;jump=true}});
+ /* ganti klip: simpan gambar terakhir untuk fade, lalu pakai klip baru dari frame pertamanya */
+ function swapTo(el){
+  clearTimeout(pt);
+  /* klip dengan ukuran berbeda (skill.mp4 = 4:5, avatar = 9:16): kanvas diukur ulang, tanpa fade dari gambar lama */
+  const same=!(el.videoWidth&&el.videoHeight)||(el.videoWidth===VW&&el.videoHeight===VH);
+  if(OW&&same){try{snapF()}catch(e){}}
+  if(el!==v)v.pause();
+  v=el;setKey(el);
+  if(!same){resizeTo(el);hasSn=false}
+  jump=true;xfPending=same;settled=false;pend=false;lmt=-1;ct0=-1;
+ }
+ function resizeTo(el){
+  VW=el.videoWidth;VH=el.videoHeight;
+  const Hd=Math.max(innerHeight,innerWidth*VH/VW),sc=Math.min(1,Hd*Math.min(window.devicePixelRatio||1,2)/VH);
+  OW=Math.max(2,Math.min(Math.round(VW*sc),innerWidth<760?720:1080));OH=Math.round(OW*VH/VW);
+  gc.width=OW;gc.height=OH;
+  if(gl&&!css){
+   TX.forEach(t=>{gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,OW,OH,0,gl.RGBA,gl.UNSIGNED_BYTE,null)});
+   gl.useProgram(pgK);gl.uniform2f(gl.getUniformLocation(pgK,'px'),1/VW,1/VH);
+  }
+ }
+ function startRev(){
+  if(bad[3]){toBase();return}
+  mode='rev';swapTo(V3);rw(V3);play();
+ }
+ /* dipanggil dari menu: klik sekali pada item. Skills -> skl1 lalu skl2; item lain -> skl1 mundur lalu avatar */
+ window.AVAT={
+  pick(id){
+   if(reduce||!ready)return;
+   if(id==='skills'){
+    if(mode!=='base'||bad[1])return;
+    mode='skl1';swapTo(V1);rw(V1);play();
+   }else if(mode==='skl1'||mode==='skl2')startRev();
+  },
+  /* dipanggil saat halaman dibuka: Keahlian memakai klip skill (loop), halaman lain kembali ke avatar */
+  page(id){
+   if(id==='skills'&&!bad[4]){if(mode!=='skill'){mode='skill';swapTo(V4);rw(V4);play()}}
+   else if(mode!=='base')toBase()
+  },
+  reset(){if(mode!=='base')toBase()}
+ };
  ['pointerdown','keydown','touchstart'].forEach(e=>addEventListener(e,play,{once:true}));
  const rvfc='requestVideoFrameCallback' in v;
- if(rvfc){const arm=()=>v.requestVideoFrameCallback((_,m)=>{pend=true;pmt=m.mediaTime;arm()});arm()}
+ if(rvfc)[V0,V1,V2,V3,V4].forEach(e=>{const arm=()=>e.requestVideoFrameCallback((_,m)=>{if(e===v){pend=true;pmt=m.mediaTime}arm()});arm()});
  const useCss=()=>{css=true;root.classList.add('ck')};
  function initGL(){
   try{
@@ -615,16 +1048,16 @@ select(0);
    /* Kunci hijau: selisih hijau terhadap merah/biru, tepi dihaluskan, sisa pantulan hijau ditekan */
    pgK=prog('attribute vec2 a;varying vec2 uv;void main(){uv=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}',
     P+
-    'varying vec2 uv;uniform sampler2D T;uniform vec2 px;'+
+    'varying vec2 uv;uniform sampler2D T;uniform vec2 px;uniform vec4 K;'+
     'float E(vec2 u){vec3 q=texture2D(T,u).rgb;return q.g-max(q.r,q.b);}'+
     /* tetangga bersih: bobot 0 jika berwarna hijau */
     'vec4 tp(vec2 u){vec3 q=texture2D(T,u).rgb;float w=1.-smoothstep(-.03,.03,q.g-max(q.r,q.b));return vec4(q*w,w);}'+
     'void main(){vec3 c0=texture2D(T,uv).rgb;float e0=c0.g-max(c0.r,c0.b);'+
     /* alfa: kunci hijau + rata-rata 3x3 (1px). Ambang bawah HAZE memotong alfa tipis (kabut di layar hijau) */
-    'float s=0.;for(int i=-1;i<=1;i++){for(int j=-1;j<=1;j++){s+=1.-smoothstep(.02,.14,E(uv+vec2(float(i),float(j))*px));}}'+
-    'float A0=1.-smoothstep(.02,.14,e0);float al=smoothstep('+HAZE.toFixed(2)+',.96,min(s/9.,A0));'+
+    'float s=0.;for(int i=-1;i<=1;i++){for(int j=-1;j<=1;j++){s+=1.-smoothstep(K.x,K.y,E(uv+vec2(float(i),float(j))*px));}}'+
+    'float A0=1.-smoothstep(K.x,K.y,e0);float al=smoothstep(K.z,.96,min(s/9.,A0));'+
     /* piksel kehijauan yang setengah transparan = sisa kabut, dibuang; bagian padat tidak terpengaruh */
-    'al*=1.-smoothstep(.015,.06,e0)*(1.-smoothstep(.55,.9,al));'+
+    'al*=1.-smoothstep(K.w,K.w+.045,e0)*(1.-smoothstep(.55,.9,al));'+
     /* warna tepi: piksel yang dekat hijau diganti rata-rata warna bersih di sekitarnya (menghapus garis hitam/olive di kulit) */
     'float nr=smoothstep(.08,.16,e0);vec4 ac=vec4(0.);'+
     'for(int i=-1;i<=1;i++){for(int j=-1;j<=1;j++){if(i==0&&j==0)continue;vec2 d=vec2(float(i),float(j))*px;'+
@@ -657,7 +1090,7 @@ select(0);
     if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw 0;
    }
    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
-   gl.useProgram(pgK);gl.uniform2f(gl.getUniformLocation(pgK,'px'),1/VW,1/VH);gl.uniform1i(gl.getUniformLocation(pgK,'T'),0);
+   gl.useProgram(pgK);gl.uniform2f(gl.getUniformLocation(pgK,'px'),1/VW,1/VH);gl.uniform1i(gl.getUniformLocation(pgK,'T'),0);kpLoc=gl.getUniformLocation(pgK,'K');setKey(v);
    gl.useProgram(pgB);gl.uniform1i(gl.getUniformLocation(pgB,'A'),1);gl.uniform1i(gl.getUniformLocation(pgB,'B'),2);kLoc=gl.getUniformLocation(pgB,'k');
   }catch(e){gl=null;useCss()}
  }
@@ -675,8 +1108,8 @@ select(0);
   gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,TX[ib]);
   gl.uniform1f(kLoc,k);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);
  }
- v.addEventListener('loadedmetadata',()=>{
-  VW=v.videoWidth;VH=v.videoHeight;
+ V0.addEventListener('loadedmetadata',()=>{
+  VW=V0.videoWidth;VH=V0.videoHeight;
   /* resolusi kerja mengikuti ukuran tampilan sebenarnya (bukan selalu ukuran asli video) agar beban GPU kecil */
   const Hd=Math.max(innerHeight,innerWidth*VH/VW),sc=Math.min(1,Hd*Math.min(window.devicePixelRatio||1,2)/VH);
   OW=Math.max(2,Math.min(Math.round(VW*sc),innerWidth<760?720:1080));OH=Math.round(OW*VH/VW);
@@ -684,9 +1117,11 @@ select(0);
   root.style.setProperty('--ar',VW+'/'+VH);
   ph.forEach(c=>{c.naturalWidth=VW;c.naturalHeight=VH});initGL();
  });
- [['file/avatar.webm','video/webm'],['file/avatar.mp4','video/mp4']].forEach(([u,t])=>{const e=document.createElement('source');e.src=u;e.type=t;v.appendChild(e)});
- v.lastChild.addEventListener('error',()=>done());
- document.body.appendChild(v);play();
+ V0.lastChild.addEventListener('error',()=>done());
+ /* jika file kacamata tidak ada, tetap pakai avatar biasa */
+ [V1,V2,V3].forEach((e,i)=>e.lastChild.addEventListener('error',()=>{bad[i+1]=1;if(v===e)toBase()}));
+ V4.lastChild.addEventListener('error',()=>{bad[4]=1});
+ [V0,V1,V2,V3,V4].forEach(e=>document.body.appendChild(e));play();
  const VC=document.getElementsByClassName('vc');
  run(now=>{
   /* 0. tidak ada kanvas video yang terlihat (mis. di halaman Profil/Keahlian): video TETAP berjalan (agar saat kembali tidak perlu mulai dari nol), tetapi kerja GPU dihentikan. Baru dijeda jika tersembunyi lebih dari 30 detik */
