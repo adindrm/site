@@ -292,6 +292,10 @@ html{min-width:320px;overflow-x:auto}
 .cartov.on .ittile .i{animation:popIn .7s cubic-bezier(.34,1.56,.64,1) .2s backwards}
 .cartov.on .sheet .meta,.cartov.on .sheet .price,.cartov.on .sheet .acts{animation:rise .6s cubic-bezier(.22,1,.36,1) .25s backwards}
 .sheet .meta{font-size:13px}.sheet .price{font-size:22px;margin:6px 0 4px}.sheet .acts{margin-top:14px}
+#itemov .sheet>*{flex:none}
+.itdesc{margin:10px 0 0;font-size:13.5px;line-height:1.6;color:var(--ink);white-space:pre-line;overflow:auto;min-height:0;flex:0 1 auto!important;overscroll-behavior:contain}
+.itdesc[hidden]{display:none}
+.cartov.on .sheet .itdesc{animation:rise .6s cubic-bezier(.22,1,.36,1) .3s backwards}
 .sheet .acts .wa-btn{height:44px;padding:0 14px;flex:none;font-size:14px}.sheet .acts .cta{flex:1}
 @media(max-width:639px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.info{padding:8px}.name{font-size:12px}.meta{font-size:10px;gap:2px}.meta span+span{display:none;margin:0}.price{font-size:13px}.acts{gap:6px}.wa-btn{height:30px;font-size:11px;gap:3px}.wa-btn .i{width:14px;height:14px}.add{width:30px;height:30px}.tile .i{width:34px;height:34px}.sheet .meta span+span{display:inline;margin-left:8px}}
 @media(max-width:420px){.brand{font-size:15px;gap:8px}.logo{width:34px;height:34px}.hact .cartbtn{width:40px;height:40px}.search{width:40px}.search:not(.open) input{height:40px}.search:not(.open) .i{top:9px}}
@@ -339,7 +343,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
 
 <div class="cartov" id="mapov" role="dialog" aria-modal="true" aria-label="Lokasi toko"><aside class="sheet"><div class="sh-h"><b>Lokasi Kedai Pramuka Carangki</b><button type="button" data-x aria-label="Tutup peta">&times;</button></div><p class="maddr">Jl. Poros Kariango-Carangki, Selatan, Lekopancing, Kec. Tanralili, Kabupaten Maros, Sulawesi Selatan 90553 (VJP3+CJ2)</p><div class="mapbox"><iframe id="mapf" title="Peta lokasi Kedai Pramuka Carangki" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div><a class="cta" id="mapgo" target="_blank" rel="noopener">Buka di Google Maps</a></aside></div>
 
-<div class="cartov" id="itemov" role="dialog" aria-modal="true" aria-label="Detail produk"><aside class="sheet"><div class="sh-h"><b id="itname"></b><button type="button" data-x aria-label="Tutup detail">&times;</button></div><div class="ittile" id="ittile"></div><div class="meta" id="itmeta"></div><div class="price" id="itprice"></div><div class="acts"><a class="wa-btn" id="itwa" target="_blank" rel="noopener"><svg class="i"><use href="#i-chat"/></svg>Chat</a><button type="button" class="cta" id="itadd">Tambah ke keranjang</button></div></aside></div>
+<div class="cartov" id="itemov" role="dialog" aria-modal="true" aria-label="Detail produk"><aside class="sheet"><div class="sh-h"><b id="itname"></b><button type="button" data-x aria-label="Tutup detail">&times;</button></div><div class="ittile" id="ittile"></div><div class="meta" id="itmeta"></div><div class="price" id="itprice"></div><p class="itdesc" id="itdesc" hidden></p><div class="acts"><a class="wa-btn" id="itwa" target="_blank" rel="noopener"><svg class="i"><use href="#i-chat"/></svg>Chat</a><button type="button" class="cta" id="itadd">Tambah ke keranjang</button></div></aside></div>
 
 <div class="cartov" id="cartov" role="dialog" aria-modal="true" aria-label="Keranjang"><aside class="sheet"><div class="sh-h"><b>Keranjang</b><button type="button" data-x aria-label="Tutup keranjang">&times;</button></div><ul class="citems" id="citems"></ul><div class="sh-f" id="cfoot" hidden><div class="tot"><span>Total</span><b id="ctot"></b></div><a class="cta" id="cwa" target="_blank" rel="noopener">Pesan via WhatsApp</a></div></aside></div>
 
@@ -437,6 +441,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
   function openItem(i){var p=P[i],cl=cats.filter(function(c){return c[0]===p[1]})[0]||[0,'Lainnya'];cur=i;closeP('');
     $('itname').textContent=p[0];$('ittile').innerHTML=ic(icon[p[1]])+pic(p);$('itprice').textContent=rp(p[2]);
     $('itmeta').innerHTML=ic('star')+'<span>'+String(p[3]).replace('.',',')+'</span>'+(p[6]>=0?'<span>Tersisa '+p[6]+'</span>':'')+'<span>Terjual '+p[4]+'</span><span>'+cl[1]+'</span>';
+    var dd=$('itdesc');dd.textContent=p[7]||'';dd.hidden=!p[7];dd.scrollTop=0;
     $('itwa').href=wa('Halo Kedai Pramuka Carangki, saya ingin menanyakan '+p[0]+' ('+rp(p[2])+').');
     $('itemov').classList.add('on');document.body.classList.add('cartopen')}
   $('itadd').addEventListener('click',function(){addCart(cur,$('ittile'));closeCart()});
@@ -518,7 +523,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
     cats=(d.kategori||[]).map(function(k,i){return ['c'+i,clean(k.nama),k.ikon||'badge']});
     cat='';drawCats();icon['']='badge';
     P=(d.produk||[]).filter(function(p){return p.aktif!==false&&p.nama}).map(function(p){var k=kt.indexOf(clean(p.kategori));
-      return [clean(p.nama),k<0?'':'c'+k,Number(p.harga)||0,Number(p.rating)||0,Number(p.terjual)||0,clean(p.gambar).replace(/["'\s]/g,''),(p.stok===''||p.stok==null||isNaN(Number(p.stok)))?-1:Number(p.stok)]});
+      return [clean(p.nama),k<0?'':'c'+k,Number(p.harga)||0,Number(p.rating)||0,Number(p.terjual)||0,clean(p.gambar).replace(/["'\s]/g,''),(p.stok===''||p.stok==null||isNaN(Number(p.stok)))?-1:Number(p.stok),clean(p.deskripsi).trim()]});
     cart={};setCart();render();
     T=(d.lagu||[]).filter(function(l){return l.file}).map(function(l){return{n:clean(l.judul||l.file),src:l.file}});
     $('musicbtn').style.display=T.length?'':'none';if(tk>=T.length)tk=0;ui();
