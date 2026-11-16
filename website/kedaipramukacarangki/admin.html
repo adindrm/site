@@ -46,7 +46,7 @@ label{font-size:12.5px;font-weight:600;margin:0 0 5px}
 .row{gap:10px 12px}.row .btn.x{align-self:end;margin-bottom:1px}
 .row.prod{grid-template-columns:140px repeat(4,minmax(0,1fr))!important;align-items:end}
 .row.prod>:nth-child(1){grid-row:1/4;align-self:start}.row.prod>:nth-child(2){grid-column:2/-1}
-.row.prod>:nth-child(7){grid-column:2/4}.row.prod>:nth-child(8){grid-column:5;justify-self:end}
+.row.prod>:nth-child(8){grid-column:3/5}.row.prod>:nth-child(9){grid-column:5;justify-self:end}
 .row.prod .pv{width:140px;height:140px}
 .row.prod .btn.sm{margin-bottom:2px}
 .grp summary{justify-content:flex-start;gap:8px;border-radius:var(--rad)}.grp summary span{margin-left:auto}
@@ -56,7 +56,7 @@ label{font-size:12.5px;font-weight:600;margin:0 0 5px}
 @media(max-width:640px){
  .fg{grid-template-columns:1fr}
  .row.prod{grid-template-columns:1fr 1fr!important}.row.prod>*{grid-column:auto!important;grid-row:auto!important}
- .row.prod>:nth-child(-n+3),.row.prod>:nth-child(8){grid-column:1/-1!important;justify-self:stretch}
+ .row.prod>:nth-child(-n+3),.row.prod>:nth-child(9){grid-column:1/-1!important;justify-self:stretch}
  .row.prod .pv{width:100%;height:160px}
  .tabs button{padding:9px 14px}
 }
@@ -99,8 +99,8 @@ const GROUPS=[['Identitas toko',['nama_toko','alamat','lokasi_peta','nomor_wa']]
 const IKON=['shirt','badge','gear','tent','book'];
 const TABLES={
  kategori:{judul:'Kategori',baru:()=>({nama:'',ikon:'badge'}),cols:[['nama','Nama kategori'],['ikon','Ikon','s',IKON]],g:'2fr 1fr auto'},
- produk:{judul:'Produk',baru:()=>({nama:'',kategori:(D.kategori[0]||{}).nama||'',harga:0,rating:4.8,terjual:0,aktif:true,gambar:''}),
-  cols:[['gambar','Gambar','i'],['nama','Nama produk'],['kategori','Kategori','s',()=>D.kategori.map(k=>k.nama)],['harga','Harga (Rp)','n'],['rating','Rating','n'],['terjual','Terjual','n'],['aktif','Tampil','c']],g:'140px repeat(4,minmax(0,1fr))'},
+ produk:{judul:'Produk',baru:()=>({nama:'',kategori:(D.kategori[0]||{}).nama||'',harga:0,rating:4.8,terjual:0,stok:0,aktif:true,gambar:''}),
+  cols:[['gambar','Gambar','i'],['nama','Nama produk'],['kategori','Kategori','s',()=>D.kategori.map(k=>k.nama)],['harga','Harga (Rp)','n'],['rating','Rating','n'],['terjual','Terjual','n'],['stok','Tersisa (stok)','n'],['aktif','Tampil','c']],g:'140px repeat(4,minmax(0,1fr))'},
  lagu:{judul:'Lagu',baru:()=>({judul:'',file:'musik/'}),cols:[['judul','Judul lagu'],['file','Lokasi file (mis. musik/lagu-1.mp3)']],g:'1fr 1.4fr auto',
   hint:'Upload file mp3 ke folder <b>musik/</b> di samping Kedai_Pramuka_Carangki.html, lalu isi lokasinya di sini.'}};
 const toast=t=>{const m=$('msg');m.textContent=t;m.classList.add('on');setTimeout(()=>m.classList.remove('on'),2200)};
