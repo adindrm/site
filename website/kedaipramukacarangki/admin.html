@@ -6,7 +6,8 @@
 :root{--p:#550194;--g:#fbbe15;--ink:#2a0b47;--line:#e6dcf2;--tile:#f0e7fa;--bg:#f8f4fd}
 *{box-sizing:border-box}body{margin:0;font:15px "Bricolage Grotesque",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
 header{background:var(--p);color:var(--g);padding:12px 16px;border-bottom:3px solid var(--g);display:flex;justify-content:space-between;align-items:center;gap:10px;position:sticky;top:0;z-index:2}
-header b{font-size:17px}main{max-width:960px;margin:auto;padding:16px}
+header b{font-size:17px}header{flex-wrap:wrap}textarea{resize:vertical}
+a.btn{text-decoration:none;display:inline-block}.btn.lnk{background:transparent;border:1.5px solid var(--g);color:var(--g);padding:7px 16px}main{max-width:960px;margin:auto;padding:16px}
 button,input,select,textarea{font:inherit;color:inherit}
 input,select,textarea{width:100%;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;background:#fff}
 input:focus,select:focus,textarea:focus{outline:3px solid rgba(251,190,21,.5);border-color:var(--g)}
@@ -45,8 +46,8 @@ main{max-width:1000px;padding:20px 16px 80px}
 label{font-size:12.5px;font-weight:600;margin:0 0 5px}
 .row{gap:10px 12px}.row .btn.x{align-self:end;margin-bottom:1px}
 .row.prod{grid-template-columns:140px repeat(4,minmax(0,1fr))!important;align-items:end}
-.row.prod>:nth-child(1){grid-row:1/4;align-self:start}.row.prod>:nth-child(2){grid-column:2/-1}
-.row.prod>:nth-child(8){grid-column:3/5}.row.prod>:nth-child(9){grid-column:5;justify-self:end}
+.row.prod>:nth-child(1){grid-row:1/5;align-self:start}.row.prod>:nth-child(2){grid-column:2/-1}
+.row.prod>:nth-child(7){grid-column:2/-1}.row.prod>:nth-child(8){grid-column:2/4}.row.prod>:nth-child(9){grid-column:5;justify-self:end}
 .row.prod .pv{width:140px;height:140px}
 .row.prod .btn.sm{margin-bottom:2px}
 .grp summary{justify-content:flex-start;gap:8px;border-radius:var(--rad)}.grp summary span{margin-left:auto}
@@ -56,7 +57,7 @@ label{font-size:12.5px;font-weight:600;margin:0 0 5px}
 @media(max-width:640px){
  .fg{grid-template-columns:1fr}
  .row.prod{grid-template-columns:1fr 1fr!important}.row.prod>*{grid-column:auto!important;grid-row:auto!important}
- .row.prod>:nth-child(-n+3),.row.prod>:nth-child(9){grid-column:1/-1!important;justify-self:stretch}
+ .row.prod>:nth-child(-n+3),.row.prod>:nth-child(7),.row.prod>:nth-child(9){grid-column:1/-1!important;justify-self:stretch}
  .row.prod .pv{width:100%;height:160px}
  .tabs button{padding:9px 14px}
 }
@@ -67,9 +68,9 @@ label{font-size:12.5px;font-weight:600;margin:0 0 5px}
       <defs><mask id="m0" maskUnits="userSpaceOnUse" x="0" y="0" width="238.4" height="238.4"><path class="mp" id="mp0" d="M161.02,108.19 L162.73,105.13 L163.48,103.84 L164.20,102.51 L164.87,101.15 L165.49,99.76 L166.05,98.34 L166.54,96.89 L166.95,95.42 L167.28,93.93 L167.53,92.42 L167.70,90.89 L167.78,89.37 L167.78,87.84 L167.72,86.31 L167.57,84.78 L167.36,83.27 L167.10,81.76 L166.83,80.25 L166.56,78.74 L166.28,77.23 L166.01,75.72 L165.76,74.21 L165.57,72.69 L165.43,71.17 L165.36,69.64 L165.33,68.11 L165.38,66.58 L165.50,65.05 L165.70,63.54 L165.98,62.03 L166.35,60.55 L166.80,59.09 L167.34,57.66 L167.96,56.27 L168.67,54.93 L169.46,53.62 L170.29,52.36 L171.18,51.13 L173.35,48.39" fill="none" stroke="#fff" stroke-width="18" pathLength="100" stroke-dasharray="100"/></mask><mask id="m1" maskUnits="userSpaceOnUse" x="0" y="0" width="238.4" height="238.4"><path class="mp" id="mp1" d="M161.24,117.39 L164.17,115.46 L165.40,114.56 L166.58,113.61 L167.73,112.62 L168.84,111.57 L169.91,110.49 L170.95,109.37 L171.93,108.21 L172.87,107.00 L173.76,105.76 L174.60,104.48 L175.38,103.17 L176.11,101.82 L176.78,100.44 L177.40,99.04 L177.95,97.61 L178.44,96.16 L178.88,94.69 L179.25,93.20 L179.56,91.70 L179.81,90.18 L180.00,88.66 L180.13,87.13 L180.23,85.61 L180.26,84.08 L180.23,82.55 L180.14,81.03 L179.98,79.51 L179.74,78.00 L179.43,76.51 L179.04,75.04 L178.58,73.58 L178.04,72.15 L177.45,70.74 L176.78,69.37 L176.05,68.02 L175.26,66.71 L174.40,65.45 L172.26,62.65" fill="none" stroke="#fff" stroke-width="18" pathLength="100" stroke-dasharray="100"/></mask><mask id="m2" maskUnits="userSpaceOnUse" x="0" y="0" width="238.4" height="238.4"><path class="mp" id="mp2" d="M157.45,127.91 L160.58,128.21 L161.72,128.37 L162.85,128.59 L163.97,128.86 L165.08,129.19 L166.17,129.58 L167.25,130.02 L168.30,130.50 L169.33,131.04 L170.33,131.63 L171.30,132.27 L172.24,132.96 L173.13,133.71 L173.99,134.49 L174.80,135.33 L175.56,136.21 L176.27,137.13 L176.93,138.09 L177.54,139.09 L178.10,140.11 L178.60,141.16 L179.05,142.24 L179.44,143.34 L179.77,144.45 L180.03,145.59 L180.24,146.73 L180.38,147.89 L180.47,149.05 L180.49,150.21 L180.45,151.37 L180.35,152.53 L180.20,153.68 L180.00,154.82 L179.74,155.95 L179.42,157.06 L179.05,158.15 L178.63,159.23 L178.16,160.28 L176.73,163.08" fill="none" stroke="#fff" stroke-width="18" pathLength="100" stroke-dasharray="100"/></mask></defs><g class="lit" id="lit"><path class="s" style="--i:0" d="M205.2,133.72a87.14,87.14,0,1,1-49-93.5A82.72,82.72,0,1,0,203,94.8,86.83,86.83,0,0,1,205.2,133.72Z"/><path class="s" style="--i:1" d="M156.09,172a65.49,65.49,0,0,1-40.24,13.85c-31.54,0-58-22.52-65.55-53l-.36-1.52c-.09-.43-.19-.86-.27-1.29-.12-.6-.24-1.2-.34-1.8a74.9,74.9,0,0,1-1.14-13.06,76.49,76.49,0,0,1,.58-9.39c.08-.62.17-1.23.26-1.84s.19-1.22.3-1.83.22-1.19.34-1.78c.07-.37.15-.74.23-1.11,6.93-31.35,33.83-54.72,65.95-54.72A65.47,65.47,0,0,1,156,58.24,66.19,66.19,0,1,0,156.09,172Z"/><path class="s" style="--i:4" d="M148.28,159.39A50.94,50.94,0,0,1,117,170.16c-25.45,0-46.69-18.86-51.6-43.92-.08-.43-.16-.85-.23-1.27s-.16-1-.23-1.44c-.12-.83-.22-1.67-.31-2.51s-.17-1.94-.22-2.92-.07-2-.07-2.95,0-2,.07-3,.13-2,.22-2.92.19-1.68.31-2.51c.07-.48.14-1,.23-1.44s.15-.84.23-1.27C70.29,79,91.53,60.15,117,60.15a51,51,0,0,1,31.24,10.72,51.51,51.51,0,1,0,.06,88.52Z"/><path class="s" style="--i:6" d="M48.19,115.15a74.9,74.9,0,0,0,1.14,13.06,73.74,73.74,0,0,1-1.16-13.05,72.76,72.76,0,0,1,.6-9.4A76.49,76.49,0,0,0,48.19,115.15Z"/><path class="s" style="--i:7" d="M155,91a41.74,41.74,0,0,0-68,0c7-13.45,19.6-22.43,34-22.43S148,77.53,155,91Z"/><path class="s" style="--i:8" d="M64.61,109.28c-.09,1-.17,1.94-.22,2.92C64.43,111.22,64.51,110.24,64.61,109.28Z"/><path class="s" style="--i:9" d="M155,139.31c-7,13.45-19.61,22.44-34,22.44s-27-9-34-22.39a41.74,41.74,0,0,0,68-.05Z"/><path class="s" style="--i:10" d="M64.32,115.15c0,1,0,2,.07,2.95,0-1-.08-2-.08-2.95s0-2,.08-3C64.34,113.17,64.32,114.16,64.32,115.15Z"/><path class="s" style="--i:11" d="M64.39,118.1c0,1,.13,2,.22,2.92C64.51,120.06,64.43,119.08,64.39,118.1Z"/><path class="s" style="--i:12" d="M150.22,98.42C143.81,90.67,133.1,85.6,121,85.6S98.11,90.67,91.71,98.4c5.6-11.09,16.6-18.63,29.24-18.63S144.61,87.32,150.22,98.42Z"/><path class="s" style="--i:13" d="M150.22,131.86c-5.6,11.11-16.6,18.66-29.27,18.66S97.3,143,91.7,131.89c6.41,7.73,17.12,12.8,29.25,12.8S143.83,139.61,150.22,131.86Z"/><path class="s" style="--i:14" d="M97.53,125a9.94,9.94,0,0,1-6.1,2.1,10.38,10.38,0,0,1-10.05-8.56c0-.08,0-.17,0-.25a2.36,2.36,0,0,1,0-.28,3.86,3.86,0,0,1-.06-.49c0-.19,0-.38,0-.57s0-.38,0-.57,0-.39,0-.58,0-.38,0-.56a3.86,3.86,0,0,1,.06-.49,2.36,2.36,0,0,1,0-.28c0-.09,0-.17,0-.25a10.38,10.38,0,0,1,10.05-8.56,10,10,0,0,1,6.09,2.09,10,10,0,1,0,0,17.25Z"/><path class="s" style="--i:15" d="M153.78,117.37a5.69,5.69,0,0,1-1.89,9.08,5,5,0,0,0,1.89-9.08Z"/><path class="s" style="--i:16" d="M155.57,116.34a2.2,2.2,0,0,0-3.24,0,1.79,1.79,0,0,1,3.24,0Z"/><path class="s" style="--i:17" d="M149,115.31a7.53,7.53,0,0,0-6.13,10.62A6.67,6.67,0,0,1,149,115.31Z"/><path class="s" style="--i:18" d="M144.87,121.48a3.53,3.53,0,0,1,2.89,5,3.14,3.14,0,0,0-2.89-5Z"/><path class="s" style="--i:19" d="M141.92,121.3a3.64,3.64,0,0,0,5.13-3,3.22,3.22,0,0,1-5.13,3Z"/><path class="s" style="--i:20" d="M100.52,115.31a7.53,7.53,0,0,0-6.14,10.62,6.68,6.68,0,0,1,6.14-10.62Z"/><path class="s" style="--i:21" d="M100.9,119.54a3.73,3.73,0,0,1-6.75,0A4.39,4.39,0,0,0,97.53,121,4.34,4.34,0,0,0,100.9,119.54Z"/><path class="s" style="--i:22" d="M96.68,116.75a6.61,6.61,0,0,1,5.38,9.33,5.86,5.86,0,0,0-5.38-9.33Z"/><path class="s" style="--i:23" d="M140.25,115.66a5,5,0,0,0-4.1,7.09,4.45,4.45,0,0,1,4.1-7.09Z"/><path class="s" style="--i:24" d="M129.64,116.75a6.62,6.62,0,0,1,5.39,9.33,5.86,5.86,0,0,0-5.39-9.33Z"/><path class="s" style="--i:25" d="M135.47,115.31a7.53,7.53,0,0,0-6.14,10.62,6.68,6.68,0,0,1,6.14-10.62Z"/><path class="s" style="--i:26" d="M113.48,115.31a7.52,7.52,0,0,0-6.13,10.62,6.67,6.67,0,0,1,6.13-10.62Z"/><path class="s" style="--i:27" d="M118.68,116.75a6.62,6.62,0,0,1,5.39,9.33,5.86,5.86,0,0,0-5.39-9.33Z"/><path class="s" style="--i:28" d="M122.52,115.31a7.52,7.52,0,0,0-6.13,10.62,6.67,6.67,0,0,1,6.13-10.62Z"/><path class="s" style="--i:29" d="M122.52,119.54a3.72,3.72,0,0,1-6.74,0,4.59,4.59,0,0,0,6.74,0Z"/><g class="s txt" style="--i:30"><text class="lt" transform="translate(93.11 112.7)">KE<tspan  x="8.25" y="0">D</tspan><tspan  x="13.17" y="0">AI PRAMUKA</tspan></text></g><path class="s w" data-m="mp0" mask="url(#m0)" d="M169.9,86.24a28.25,28.25,0,0,1-.59,7c-.09.4-.18.79-.28,1.18A26.37,26.37,0,0,1,167.35,99a23.24,23.24,0,0,1-5.08,7,2.57,2.57,0,0,0-.28.45c1-3.18,2.06-6.09,2.85-9.08a28.13,28.13,0,0,0,.7-3.57,30,30,0,0,0,.22-5.68,36.38,36.38,0,0,0-1.06-6.89c-.29-1.16-.55-2.33-.76-3.49A37.46,37.46,0,0,1,163.53,65c.06-.44.14-.88.23-1.33,0-.18.07-.36.11-.54A23.26,23.26,0,0,1,166,57.21a22.6,22.6,0,0,1,6.13-7.3c-1,2.11-2.05,4.18-2.89,6.36a25.83,25.83,0,0,0-.92,2.87,29.7,29.7,0,0,0-1,7.64h0c0,.88,0,1.75.1,2.63a45.78,45.78,0,0,0,.95,6.4A58.84,58.84,0,0,1,169.9,86.24Z"/><path class="s w" data-m="mp1" mask="url(#m1)" d="M182.46,87.83a31.18,31.18,0,0,1-.66,5.51c-.21,1-.46,2-.74,2.87h0a31.1,31.1,0,0,1-4.34,8.79,33.56,33.56,0,0,1-7.14,7.34,31,31,0,0,1-6.72,4,47.92,47.92,0,0,0,6.47-7.24,41.88,41.88,0,0,0,2.95-4.65,42.69,42.69,0,0,0,2.82-6.18h0a48.6,48.6,0,0,0,2.56-10.47c.05-.35.1-.71.14-1.07v0a47.7,47.7,0,0,0,.54-6.56,28.1,28.1,0,0,0-1-7.46,29.06,29.06,0,0,0-3.89-8.51C174.09,64.8,182.91,74.07,182.46,87.83Z"/><path class="s w" data-m="mp2" mask="url(#m2)" d="M177.64,161.3a29.26,29.26,0,0,0,1.22-12,25,25,0,0,0-1.24-5.26,25.46,25.46,0,0,0-1.56-3.48,22.86,22.86,0,0,0-2.6-3.86,22.3,22.3,0,0,0-3.38-3.35,24.56,24.56,0,0,0-2.78-1.93,31.36,31.36,0,0,0-6.78-3l-1.11-.33c.41,0,.83-.08,1.25-.09a20.24,20.24,0,0,1,7.29,1.05,21.58,21.58,0,0,1,6.9,3.79,19,19,0,0,1,3.64,4,21.15,21.15,0,0,1,1.16,1.91h0a20.28,20.28,0,0,1,2,5.43v0A21.1,21.1,0,0,1,177.64,161.3Z"/></g></g></symbol></defs></svg>
 <div id="login" class="card"><h2 style="margin:0 0 12px">Admin Kedai</h2>
 <div id="apibox" hidden><label>URL Web App (…/exec)</label><input id="api"></div>
-<label>Password</label><input id="pw" type="password"><p></p><button class="btn" id="go">Masuk</button> <span id="lstat" class="stat" style="margin-left:6px"></span></div>
+<label>Password</label><input id="pw" type="password"><p></p><button class="btn" id="go">Masuk</button> <span id="lstat" class="stat" style="margin-left:6px"></span><p style="margin:14px 0 0"><a href="index.html" style="color:var(--p);font-size:13px">← Kembali ke toko</a></p></div>
 <div id="app" hidden>
-<header><b>Admin Kedai Pramuka Carangki</b><div class="hr"><span id="stat" class="stat"></span><button class="btn" id="save">Simpan ke Spreadsheet</button></div></header>
+<header><b>Admin Kedai Pramuka Carangki</b><div class="hr"><span id="stat" class="stat"></span><a class="btn lnk" href="index.html">Lihat toko</a><button class="btn" id="save">Simpan ke Spreadsheet</button><button class="btn lnk" id="out" type="button">Keluar</button></div></header>
 <main><div class="tabs" id="tabs"></div><div id="pane"></div></main></div>
 <div id="msg"></div>
 <script>
@@ -78,6 +79,9 @@ const $=i=>document.getElementById(i);
 let url=API||localStorage.getItem('kpc-api')||'',pw='',D={settings:{},kategori:[],produk:[],lagu:[]},tab='tampilan';
 const FIELDS=[['nama_toko','Nama toko'],['alamat','Alamat (tampil di header & peta)'],['lokasi_peta','Kata kunci / Plus Code untuk Google Maps'],['nomor_wa','Nomor WhatsApp (format 62812…, tanpa +)'],['judul_hero','Judul beranda'],['teks_hero','Teks beranda','t'],['tombol_belanja','Teks tombol belanja'],['tombol_wa','Teks tombol WhatsApp'],['kutipan_1','Kutipan layar pembuka baris 1'],['kutipan_2','Kutipan layar pembuka baris 2']];
 let FILT='';
+const SES='kpc-sess',JAM=3600000;/* sesi login 1 jam */
+function sesGet(){try{const s=JSON.parse(localStorage.getItem(SES));if(s&&s.pw&&s.exp>Date.now())return s.pw}catch(e){}try{localStorage.removeItem(SES)}catch(e){}return ''}
+function sesSet(p){try{localStorage.setItem(SES,JSON.stringify({pw:p,exp:Date.now()+JAM}))}catch(e){}}
 const PREV=new WeakMap(),OPEN=new Set(),UP=new WeakMap(),LG='<span class="lgw"><svg class="lg" aria-hidden="true"><use href="#i-lit"/></svg></span>';
 /* animasi logo: bentuk logo muncul satu per satu (sama seperti loading screen web utama), diulang selama ada proses */
 (function(){const sh=[...document.querySelectorAll('#i-lit .s')],n=sh.length,C=119.2,red=matchMedia('(prefers-reduced-motion:reduce)').matches;let run=false,t0=0;
@@ -99,8 +103,8 @@ const GROUPS=[['Identitas toko',['nama_toko','alamat','lokasi_peta','nomor_wa']]
 const IKON=['shirt','badge','gear','tent','book'];
 const TABLES={
  kategori:{judul:'Kategori',baru:()=>({nama:'',ikon:'badge'}),cols:[['nama','Nama kategori'],['ikon','Ikon','s',IKON]],g:'2fr 1fr auto'},
- produk:{judul:'Produk',baru:()=>({nama:'',kategori:(D.kategori[0]||{}).nama||'',harga:0,rating:4.8,terjual:0,stok:0,aktif:true,gambar:''}),
-  cols:[['gambar','Gambar','i'],['nama','Nama produk'],['kategori','Kategori','s',()=>D.kategori.map(k=>k.nama)],['harga','Harga (Rp)','n'],['rating','Rating','n'],['terjual','Terjual','n'],['stok','Tersisa (stok)','n'],['aktif','Tampil','c']],g:'140px repeat(4,minmax(0,1fr))'},
+ produk:{judul:'Produk',baru:()=>({nama:'',kategori:(D.kategori[0]||{}).nama||'',harga:0,rating:4.8,terjual:0,aktif:true,gambar:'',deskripsi:''}),
+  cols:[['gambar','Gambar','i'],['nama','Nama produk'],['kategori','Kategori','s',()=>D.kategori.map(k=>k.nama)],['harga','Harga (Rp)','n'],['rating','Rating','n'],['terjual','Terjual','n'],['deskripsi','Deskripsi produk (tampil di detail produk)','t'],['aktif','Tampil','c']],g:'140px repeat(4,minmax(0,1fr))'},
  lagu:{judul:'Lagu',baru:()=>({judul:'',file:'musik/'}),cols:[['judul','Judul lagu'],['file','Lokasi file (mis. musik/lagu-1.mp3)']],g:'1fr 1.4fr auto',
   hint:'Upload file mp3 ke folder <b>musik/</b> di samping Kedai_Pramuka_Carangki.html, lalu isi lokasinya di sini.'}};
 const toast=t=>{const m=$('msg');m.textContent=t;m.classList.add('on');setTimeout(()=>m.classList.remove('on'),2200)};
@@ -111,6 +115,7 @@ function draw(){tabs();const p=$('pane');
  const T=TABLES[tab],R=D[tab];
  const card=(r,i)=>`<div class="card row${tab==='produk'?' prod':''}" style="grid-template-columns:${T.g}">`+T.cols.map(c=>{const v=r[c[0]];
   if(c[2]==='i'){const u=PREV.get(r)||v;return `<div><div class="pv">${u?`<img src="${esc(u)}" alt="">`:'Belum ada gambar'}${stHtml(r)}</div><label class="btn o sm">Pilih gambar<input type="file" accept="image/*" data-up="${i}"></label>${u?` <button class="btn x sm" data-noimg="${i}">Hapus</button>`:''}<input placeholder="atau tempel URL gambar" data-i="${i}" data-k="gambar" value="${esc(v)}" style="margin-top:6px;font-size:12px"></div>`}
+  if(c[2]==='t')return `<div><label>${c[1]}</label><textarea rows="3" data-i="${i}" data-k="${c[0]}" placeholder="Ukuran, bahan, isi paket, dll.">${esc(v)}</textarea></div>`;
   if(c[2]==='c')return `<label class="chk"><input type="checkbox" data-i="${i}" data-k="${c[0]}" ${v!==false?'checked':''}>${c[1]}</label>`;
   if(c[2]==='s'){let o=typeof c[3]==='function'?c[3]():c[3];if(v&&!o.includes(v))o=o.concat(v);return `<div><label>${c[1]}</label><select data-i="${i}" data-k="${c[0]}">${o.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('')}</select></div>`}
   return `<div><label>${c[1]}</label><input ${c[2]==='n'?'type="number" step="any"':''} data-i="${i}" data-k="${c[0]}" value="${esc(v)}"></div>`}).join('')+`<button class="btn x" data-del="${i}">Hapus</button></div>`;
@@ -142,17 +147,19 @@ $('pane').addEventListener('change',e=>{const t=e.target;
  if(t.dataset.up==null||!t.files[0])return;const r=D.produk[+t.dataset.up];
  unggah(r,u=>r.gambar=u,t.files[0],false,(r.nama||'produk').replace(/[^\w-]+/g,'-'))});
 async function post(b){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({password:pw},b))});const x=await r.text();try{return JSON.parse(x)}catch(e){throw new Error('respon server tidak valid (izin Drive/versi deployment belum diperbarui?)')}}
-$('go').onclick=async()=>{const b=$('go');if(b.disabled)return;
- try{if(!API){url=$('api').value.trim()||url;localStorage.setItem('kpc-api',url)}
+async function masuk(auto){const b=$('go');if(b.disabled)return;
+ try{if(!API&&!auto){url=$('api').value.trim()||url;localStorage.setItem('kpc-api',url)}
   if(!url){$('apibox').hidden=false;return setStat($('lstat'),'err','Isi URL Web App dulu')}
   b.disabled=true;setStat($('lstat'),'load','Memeriksa password…');
-  pw=$('pw').value;const c=await post({action:'cek'});if(!c.ok)throw new Error(c.error||'Gagal masuk');
+  pw=auto||$('pw').value;const c=await post({action:'cek'});if(!c.ok)throw new Error(c.error||'Gagal masuk');
   setStat($('lstat'),'load','Memuat data dari spreadsheet…');
   const d=await (await fetch(url+'?t='+Date.now())).json();if(!d.ok)throw new Error('Data tidak bisa dibaca');
   D={settings:d.settings||{},kategori:d.kategori||[],produk:d.produk||[],lagu:d.lagu||[]};
-  $('login').hidden=true;$('app').hidden=false;draw();setStat($('stat'),'ok','Data dimuat')}
- catch(e){if(!API&&(e.message==='Failed to fetch'||/tidak valid/.test(e.message)))$('apibox').hidden=false;setStat($('lstat'),'err',e.message==='Failed to fetch'?'Tidak tersambung, cek URL Web App':e.message)}
- b.disabled=false};
+  if(!auto)sesSet(pw);$('login').hidden=true;$('app').hidden=false;draw();setStat($('stat'),'ok','Data dimuat')}
+ catch(e){if(auto&&/password/i.test(e.message)){try{localStorage.removeItem(SES)}catch(x){}}if(!API&&(e.message==='Failed to fetch'||/tidak valid/.test(e.message)))$('apibox').hidden=false;setStat($('lstat'),'err',e.message==='Failed to fetch'?'Tidak tersambung, cek URL Web App':e.message)}
+ b.disabled=false}
+$('go').onclick=()=>masuk();
+$('out').onclick=()=>{try{localStorage.removeItem(SES)}catch(e){}location.reload()};
 $('pw').onkeydown=e=>{if(e.key==='Enter')$('go').click()};
 $('save').onclick=async()=>{const b=$('save');b.disabled=true;setStat($('stat'),'load','Menyimpan…');
  try{const r=await post({action:'save',data:D});if(!r.ok)throw new Error(r.error||'Server menolak');
@@ -164,4 +171,5 @@ $('save').onclick=async()=>{const b=$('save');b.disabled=true;setStat($('stat'),
  catch(e){setStat($('stat'),'err','Gagal menyimpan: '+e.message);toast('Gagal menyimpan')}
  b.disabled=false};
 if(!API){$('apibox').hidden=!!url;$('api').value=url;$('apibox').hidden=false}
+{const s=sesGet();if(s)masuk(s)}
 </script></body></html>
