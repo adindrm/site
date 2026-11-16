@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#550194">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kedai Pramuka">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>try{var t=localStorage.getItem("kpc-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <title>Kedai Pramuka Carangki</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -238,7 +246,8 @@ body.cartopen{overflow:hidden}.toast{z-index:30}
 .prow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0 6px}
 .card .meta{flex-direction:column;align-items:flex-end;gap:0;font-size:11px;line-height:1.3}
 .card .meta span+span{margin:0}
-.rt{display:inline-flex;align-items:center;gap:3px}
+.rtb{position:absolute;top:6px;right:6px;z-index:1;display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.94);color:var(--ink);font-size:11px;font-weight:600;line-height:1.2;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.tile .rtb .i{width:12px;height:12px;fill:#d9a21f;stroke:none}
 .card .acts{margin-top:2px}
 /* gambar di sisi kanan hero */
 .hero>.hero-img{position:absolute;right:20px;top:0;bottom:0;display:flex;align-items:center;pointer-events:none;z-index:1}
@@ -401,7 +410,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
   function render(){
     var q=$('q').value.trim().toLowerCase();
     var L=P.filter(function(p){return(!cat||p[1]===cat)&&p[0].toLowerCase().indexOf(q)>-1});
-    $('grid').innerHTML=L.length?L.map(function(p,i){return '<article class="card rv" tabindex="0" data-p="'+P.indexOf(p)+'" style="--d:'+Math.min(i,10)*70+'ms"><div class="tile">'+ic(icon[p[1]])+pic(p)+'</div><div class="info"><div class="name">'+p[0]+'</div><div class="prow"><div class="price">'+rp(p[2])+'</div><div class="meta"><span class="rt">'+ic('star')+String(p[3]).replace('.',',')+'</span><span>Terjual '+p[4]+'</span></div></div><div class="acts"><a class="wa-btn" target="_blank" rel="noopener" href="'+wa('Halo Kedai Pramuka Carangki, saya ingin menanyakan '+p[0]+' ('+rp(p[2])+').')+'">'+ic('chat')+'Chat</a><button class="add" type="button" aria-label="Tambah '+p[0]+' ke keranjang">'+ic('plus')+'</button></div></div></article>'}).join(''):'<p class="empty">Produk tidak ditemukan. Coba kata kunci lain.</p>';
+    $('grid').innerHTML=L.length?L.map(function(p,i){return '<article class="card rv" tabindex="0" data-p="'+P.indexOf(p)+'" style="--d:'+Math.min(i,10)*70+'ms"><div class="tile">'+ic(icon[p[1]])+pic(p)+'<span class="rtb">'+ic('star')+String(p[3]).replace('.',',')+'</span></div><div class="info"><div class="name">'+p[0]+'</div><div class="prow"><div class="price">'+rp(p[2])+'</div><div class="meta">'+(p[6]>=0?'<span>Tersisa '+p[6]+'</span>':'')+'<span>Terjual '+p[4]+'</span></div></div><div class="acts"><a class="wa-btn" target="_blank" rel="noopener" href="'+wa('Halo Kedai Pramuka Carangki, saya ingin menanyakan '+p[0]+' ('+rp(p[2])+').')+'">'+ic('chat')+'Chat</a><button class="add" type="button" aria-label="Tambah '+p[0]+' ke keranjang">'+ic('plus')+'</button></div></div></article>'}).join(''):'<p class="empty">Produk tidak ditemukan. Coba kata kunci lain.</p>';
     watchAll();
   }
   var tt;function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){e.classList.remove('on')},1800)}
@@ -427,7 +436,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
   var cur=0;
   function openItem(i){var p=P[i],cl=cats.filter(function(c){return c[0]===p[1]})[0]||[0,'Lainnya'];cur=i;closeP('');
     $('itname').textContent=p[0];$('ittile').innerHTML=ic(icon[p[1]])+pic(p);$('itprice').textContent=rp(p[2]);
-    $('itmeta').innerHTML=ic('star')+'<span>'+String(p[3]).replace('.',',')+'</span><span>Terjual '+p[4]+'</span><span>'+cl[1]+'</span>';
+    $('itmeta').innerHTML=ic('star')+'<span>'+String(p[3]).replace('.',',')+'</span>'+(p[6]>=0?'<span>Tersisa '+p[6]+'</span>':'')+'<span>Terjual '+p[4]+'</span><span>'+cl[1]+'</span>';
     $('itwa').href=wa('Halo Kedai Pramuka Carangki, saya ingin menanyakan '+p[0]+' ('+rp(p[2])+').');
     $('itemov').classList.add('on');document.body.classList.add('cartopen')}
   $('itadd').addEventListener('click',function(){addCart(cur,$('ittile'));closeCart()});
@@ -509,13 +518,14 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
     cats=(d.kategori||[]).map(function(k,i){return ['c'+i,clean(k.nama),k.ikon||'badge']});
     cat='';drawCats();icon['']='badge';
     P=(d.produk||[]).filter(function(p){return p.aktif!==false&&p.nama}).map(function(p){var k=kt.indexOf(clean(p.kategori));
-      return [clean(p.nama),k<0?'':'c'+k,Number(p.harga)||0,Number(p.rating)||0,Number(p.terjual)||0,clean(p.gambar).replace(/["'\s]/g,'')]});
+      return [clean(p.nama),k<0?'':'c'+k,Number(p.harga)||0,Number(p.rating)||0,Number(p.terjual)||0,clean(p.gambar).replace(/["'\s]/g,''),(p.stok===''||p.stok==null||isNaN(Number(p.stok)))?-1:Number(p.stok)]});
     cart={};setCart();render();
     T=(d.lagu||[]).filter(function(l){return l.file}).map(function(l){return{n:clean(l.judul||l.file),src:l.file}});
     $('musicbtn').style.display=T.length?'':'none';if(tk>=T.length)tk=0;ui();
   }
   var cache=null;try{cache=JSON.parse(localStorage.getItem('kpc-data'))}catch(e){}
   if(cache)applyData(cache);else applyData({});
+  if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
   if(API)fetch(API+'?t='+Date.now()).then(function(r){return r.json()}).then(function(d){
     if(d&&d.ok){var j=JSON.stringify(d);if(!cache||JSON.stringify(cache)!==j){applyData(d);try{localStorage.setItem('kpc-data',j)}catch(e){}}}}).catch(function(){});
 })();
