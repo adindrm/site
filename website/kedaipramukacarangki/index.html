@@ -201,7 +201,7 @@ h2::after{content:"";display:block;height:3px;width:36px;margin-top:6px;border-r
 .sw{width:34px;height:34px;border-radius:10px;flex:none}
 .ctl{display:flex;align-items:center;gap:6px}.ctl button{width:38px;height:38px;border:0;border-radius:50%;background:var(--tile);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
 .ctl .big{background:var(--red);color:var(--gold)}.ctl input{flex:1;min-width:0;accent-color:var(--red)}
-#plist{margin-top:6px}.trk{padding:8px 10px}
+#plist{margin-top:6px;max-height:min(52vh,340px);overflow-y:auto;overscroll-behavior:contain;padding-right:2px;-webkit-overflow-scrolling:touch}.trk{padding:8px 10px}
 .eq{position:absolute;right:6px;bottom:7px;display:none;gap:2px;align-items:flex-end;height:10px}
 .eq i{width:2px;background:var(--gold);height:3px;border-radius:1px}
 .playing .eq{display:flex}
@@ -505,6 +505,12 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
   theme(document.documentElement.dataset.theme==='brown'?'brown':'purple');
   /* musik: daftar lagu dari sheet "Lagu"; file mp3 ada di folder musik/ */
   var T=[],tk=0,on=false,AU=new Audio();
+  /* alamat lagu: boleh memakai spasi/apostrof; tanpa awalan musik/ otomatis ditambahkan; hanya https atau file lokal */
+  function songSrc(f){f=String(f==null?'':f).trim().replace(/^\.?\//,'');if(!f||/[<>"\\]/.test(f))return '';
+    if(/^https:\/\//i.test(f))return f.replace(/[ ']/g,function(c){return encodeURIComponent(c)});
+    if(/^[a-z][a-z0-9+.-]*:/i.test(f)||f.indexOf('//')===0)return '';
+    if(!/^musik\//i.test(f))f='musik/'+f;
+    return f.split('/').map(function(x){return /%[0-9a-f]{2}/i.test(x)?x.replace(/ /g,'%20'):encodeURIComponent(x)}).join('/')}
   function ui(){$('mplay').innerHTML=ic(on?'pause':'play');$('musicbtn').classList.toggle('playing',on);$('now').textContent=on&&T[tk]?'Sedang diputar: '+T[tk].n:'Playlist';
     $('plist').innerHTML=T.map(function(t,i){return '<button type="button" class="trk'+(i===tk?' sel':'')+'" data-i="'+i+'"><span>'+t.n+'<small>Lagu '+(i+1)+'</small></span></button>'}).join('')}
   function play(){if(!T.length)return;AU.src=T[tk].src;AU.volume=$('vol').value/100;AU.onended=function(){nxt(1)};AU.play().then(function(){on=true;ui()}).catch(function(){on=false;ui()})}
@@ -540,7 +546,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
     P=(d.produk||[]).filter(function(p){return p.aktif!==false&&p.nama}).map(function(p){var k=kt.indexOf(clean(p.kategori));
       return [clean(p.nama),k<0?'':'c'+k,Number(p.harga)||0,Number(p.rating)||0,Number(p.terjual)||0,clean(p.gambar).replace(/["'\s]/g,''),(p.stok===''||p.stok==null||isNaN(Number(p.stok)))?-1:Number(p.stok),clean(p.deskripsi).trim(),String(p.spesifikasi==null?'':p.spesifikasi).replace(/\r/g,'').trim()]});
     cart={};setCart();render();
-    T=(d.lagu||[]).filter(function(l){return /^(musik\/|https:\/\/)[^"'<>\s]+$/.test(String(l.file||'').trim())}).map(function(l){return{n:clean(l.judul||l.file),src:String(l.file).trim()}});
+    T=[];(d.lagu||[]).forEach(function(l){var s=songSrc(l.file);if(s)T.push({n:clean(l.judul||String(l.file).split('/').pop().replace(/\.[a-z0-9]+$/i,'')),src:s})});
     $('musicbtn').style.display=T.length?'':'none';if(tk>=T.length)tk=0;ui();
   }
   var cache=null;try{cache=JSON.parse(localStorage.getItem('kpc-data'))}catch(e){}
