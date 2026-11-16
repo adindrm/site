@@ -311,6 +311,7 @@ html{min-width:320px;overflow-x:auto}
 *::-webkit-scrollbar{display:none;width:0;height:0}
 body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
 .himg{height:auto;max-height:150px;object-fit:contain;border-radius:14px}
+.add:disabled{opacity:.4;cursor:not-allowed}.add:disabled:hover{transform:none;background:var(--addbg);color:var(--sand)}.soldout{color:#c4231f;font-weight:700}#itadd:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body class="lock">
@@ -414,7 +415,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
   function render(){
     var q=$('q').value.trim().toLowerCase();
     var L=P.filter(function(p){return(!cat||p[1]===cat)&&p[0].toLowerCase().indexOf(q)>-1});
-    $('grid').innerHTML=L.length?L.map(function(p,i){return '<article class="card rv" tabindex="0" data-p="'+P.indexOf(p)+'" style="--d:'+Math.min(i,10)*70+'ms"><div class="tile">'+ic(icon[p[1]])+pic(p)+'<span class="rtb">'+ic('star')+String(p[3]).replace('.',',')+'</span></div><div class="info"><div class="name">'+p[0]+'</div><div class="prow"><div class="price">'+rp(p[2])+'</div><div class="meta">'+(p[6]>=0?'<span>Tersisa '+p[6]+'</span>':'')+'<span>Terjual '+p[4]+'</span></div></div><div class="acts"><a class="wa-btn" target="_blank" rel="noopener" href="'+wa('Halo Kedai Pramuka Carangki, saya ingin menanyakan '+p[0]+' ('+rp(p[2])+').')+'">'+ic('chat')+'Chat</a><button class="add" type="button" aria-label="Tambah '+p[0]+' ke keranjang">'+ic('plus')+'</button></div></div></article>'}).join(''):'<p class="empty">Produk tidak ditemukan. Coba kata kunci lain.</p>';
+    $('grid').innerHTML=L.length?L.map(function(p,i){return '<article class="card rv" tabindex="0" data-p="'+P.indexOf(p)+'" style="--d:'+Math.min(i,10)*70+'ms"><div class="tile">'+ic(icon[p[1]])+pic(p)+'<span class="rtb">'+ic('star')+String(p[3]).replace('.',',')+'</span></div><div class="info"><div class="name">'+p[0]+'</div><div class="prow"><div class="price">'+rp(p[2])+'</div><div class="meta">'+stk(p)+'<span>Terjual '+p[4]+'</span></div></div><div class="acts"><a class="wa-btn" target="_blank" rel="noopener" href="'+wa('Halo Kedai Pramuka Carangki, saya ingin menanyakan '+p[0]+' ('+rp(p[2])+').')+'">'+ic('chat')+'Chat</a><button class="add" type="button"'+(p[6]===0?' disabled':'')+' aria-label="Tambah '+p[0]+' ke keranjang">'+ic('plus')+'</button></div></div></article>'}).join(''):'<p class="empty">Produk tidak ditemukan. Coba kata kunci lain.</p>';
     watchAll();
   }
   var tt;function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){e.classList.remove('on')},1800)}
@@ -426,7 +427,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
       h+='<li class="ci" style="--d:'+i*60+'ms"><span class="cit">'+ic(icon[p[1]])+'</span><div><div class="name">'+p[0]+'</div><b>'+rp(p[2]*q)+'</b></div><div class="qty"><button type="button" data-k="'+k+'" data-d="-1" aria-label="Kurangi">\u2212</button><span>'+q+'</span><button type="button" data-k="'+k+'" data-d="1" aria-label="Tambah">+</button></div></li>'});
     $('citems').innerHTML=h||'<p class="empty">Keranjang masih kosong.</p>';$('ctot').textContent=rp(tot);$('cfoot').hidden=!ks.length;
     $('cwa').href=wa('Halo Kedai Pramuka Carangki, saya ingin memesan:\n'+m.join('\n')+'\nTotal: '+rp(tot))}
-  function addCart(id,el){cart[id]=(cart[id]||0)+1;
+  function addCart(id,el){var s=P[id]?P[id][6]:-1;if(s>=0&&(cart[id]||0)>=s){toast(s===0?'Stok habis':'Stok hanya tersisa '+s);return}cart[id]=(cart[id]||0)+1;
     var done=function(){setCart();toast('Ditambahkan ke keranjang');var c=$('cartbtn');c.classList.remove('hit');void c.offsetWidth;c.classList.add('hit')};
     var a=el.getBoundingClientRect(),t=$('cartbtn').getBoundingClientRect();
     if(!el.animate||window.matchMedia('(prefers-reduced-motion:reduce)').matches||!a.width){done();return}
@@ -440,8 +441,8 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
   var cur=0;
   function openItem(i){var p=P[i],cl=cats.filter(function(c){return c[0]===p[1]})[0]||[0,'Lainnya'];cur=i;closeP('');
     $('itname').textContent=p[0];$('ittile').innerHTML=ic(icon[p[1]])+pic(p);$('itprice').textContent=rp(p[2]);
-    $('itmeta').innerHTML=ic('star')+'<span>'+String(p[3]).replace('.',',')+'</span>'+(p[6]>=0?'<span>Tersisa '+p[6]+'</span>':'')+'<span>Terjual '+p[4]+'</span><span>'+cl[1]+'</span>';
-    var dd=$('itdesc');dd.textContent=p[7]||'';dd.hidden=!p[7];dd.scrollTop=0;
+    $('itmeta').innerHTML=ic('star')+'<span>'+String(p[3]).replace('.',',')+'</span>'+stk(p)+'<span>Terjual '+p[4]+'</span><span>'+cl[1]+'</span>';
+    $('itadd').disabled=p[6]===0;var dd=$('itdesc');dd.textContent=p[7]||'';dd.hidden=!p[7];dd.scrollTop=0;
     $('itwa').href=wa('Halo Kedai Pramuka Carangki, saya ingin menanyakan '+p[0]+' ('+rp(p[2])+').');
     $('itemov').classList.add('on');document.body.classList.add('cartopen')}
   $('itadd').addEventListener('click',function(){addCart(cur,$('ittile'));closeCart()});
@@ -449,7 +450,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
   $('mapgo').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(MQ);
   $('addrbtn').addEventListener('click',function(){closeP('');var f=$('mapf');if(!f.src||f.src==='about:blank'||f.getAttribute('src')===null)f.src='https://www.google.com/maps?q='+encodeURIComponent(MQ)+'&z=17&output=embed';
     $('mapov').classList.add('on');document.body.classList.add('cartopen')});
-  $('citems').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var k=b.dataset.k,v=(cart[k]||0)+ +b.dataset.d;if(v<1)delete cart[k];else cart[k]=v;setCart()});
+  $('citems').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var k=b.dataset.k,v=(cart[k]||0)+ +b.dataset.d;var sk=P[k]?P[k][6]:-1;if(sk>=0&&v>sk){toast('Stok hanya tersisa '+sk);return}if(v<1)delete cart[k];else cart[k]=v;setCart()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeCart()});
   $('q').addEventListener('input',render);
   $('cats').addEventListener('click',function(e){var b=e.target.closest('.cat');if(!b)return;var on=b.getAttribute('aria-pressed')==='true';
@@ -504,6 +505,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
   document.addEventListener('keydown',function(e){if(e.key==='Tab')document.body.classList.add('kb')});
   ['mousedown','touchstart'].forEach(function(t){document.addEventListener(t,function(){document.body.classList.remove('kb')},{passive:true})});
   /* data dari Google Sheet (database yang sama dengan Admin_Kedai.html) */
+  function stk(p){return p[6]===0?'<span class="soldout">Habis</span>':p[6]>0?'<span>Tersisa '+p[6]+'</span>':''}
   function pic(p){return p[5]?'<img class="pimg" src="'+p[5]+'" alt="" loading="lazy" onerror="this.remove()">':''}
   function setT(sel,v){var e=document.querySelector(sel);if(e&&v)e.textContent=v}
   function clean(v){return String(v==null?'':v).replace(/[<>]/g,'')}
@@ -525,7 +527,7 @@ body:not(.kb) *:focus,body:not(.kb) *:focus-visible{outline:none!important}
     P=(d.produk||[]).filter(function(p){return p.aktif!==false&&p.nama}).map(function(p){var k=kt.indexOf(clean(p.kategori));
       return [clean(p.nama),k<0?'':'c'+k,Number(p.harga)||0,Number(p.rating)||0,Number(p.terjual)||0,clean(p.gambar).replace(/["'\s]/g,''),(p.stok===''||p.stok==null||isNaN(Number(p.stok)))?-1:Number(p.stok),clean(p.deskripsi).trim()]});
     cart={};setCart();render();
-    T=(d.lagu||[]).filter(function(l){return l.file}).map(function(l){return{n:clean(l.judul||l.file),src:l.file}});
+    T=(d.lagu||[]).filter(function(l){return /^(musik\/|https:\/\/)[^"'<>\s]+$/.test(String(l.file||'').trim())}).map(function(l){return{n:clean(l.judul||l.file),src:String(l.file).trim()}});
     $('musicbtn').style.display=T.length?'':'none';if(tk>=T.length)tk=0;ui();
   }
   var cache=null;try{cache=JSON.parse(localStorage.getItem('kpc-data'))}catch(e){}
