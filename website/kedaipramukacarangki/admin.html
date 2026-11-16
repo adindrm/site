@@ -50,16 +50,35 @@ label{font-size:12.5px;font-weight:600;margin:0 0 5px}
 .row.prod>:nth-child(7),.row.prod>:nth-child(8){grid-column:2/-1}.row.prod>:nth-child(9){grid-column:2/3}.row.prod>:nth-child(10){grid-column:3/5}.row.prod>:nth-child(11){grid-column:5;justify-self:end}
 .row.prod .pv{width:140px;height:140px}
 .row.prod .btn.sm{margin-bottom:2px}
+.imgc .url{margin-top:6px;font-size:12px}
 .grp summary{justify-content:flex-start;gap:8px;border-radius:var(--rad)}.grp summary span{margin-left:auto}
 .grp summary::before{content:'▾';color:var(--g)}.grp:not([open]) summary::before{content:'▸'}
 .grp>.btn.o,#pane>.btn.o{width:100%;border-style:dashed;padding:11px;margin-top:2px}
 .hint{line-height:1.5}
 @media(max-width:640px){
+ header{position:static;padding:10px 12px!important}header b{font-size:16px;width:100%}
+ .hr{width:100%;justify-content:flex-start;gap:8px}.hr .btn{padding:7px 14px;font-size:13px}
+ #save{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:5;padding:13px 22px;font-size:15px;box-shadow:0 6px 18px rgba(42,11,71,.35)}
+ #msg{bottom:calc(80px + env(safe-area-inset-bottom,0px));max-width:calc(100% - 24px);text-align:center}
+ main{padding:12px 10px 100px}
+ .card{padding:12px}
+ input,select,textarea{font-size:16px;padding:11px 12px}
  .fg{grid-template-columns:1fr}
- .row.prod{grid-template-columns:1fr 1fr!important}.row.prod>*{grid-column:auto!important;grid-row:auto!important}
- .row.prod>:nth-child(-n+3),.row.prod>:nth-child(7),.row.prod>:nth-child(8),.row.prod>:nth-child(11){grid-column:1/-1!important;justify-self:stretch}
- .row.prod .pv{width:100%;height:160px}
- .tabs button{padding:9px 14px}
+ .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.tabs button{padding:9px 14px;flex:none;white-space:nowrap}
+ .chips{flex-wrap:nowrap;overflow-x:auto;margin-inline:-10px;padding:0 10px 6px;scrollbar-width:none}.chip{flex:none;white-space:nowrap;padding:8px 14px}
+ .grp summary{padding:13px 14px}
+ .row>.btn.x{width:100%;padding:10px}
+ .row.prod{grid-template-columns:1fr 1fr!important;gap:14px 10px;align-items:end}
+ .row.prod>*{grid-column:auto!important;grid-row:auto!important}
+ .row.prod>:nth-child(1),.row.prod>:nth-child(2),.row.prod>:nth-child(7),.row.prod>:nth-child(8),.row.prod>:nth-child(11){grid-column:1/-1!important;justify-self:stretch}
+ .row.prod>:nth-child(11){margin-top:2px}
+ .row.prod .imgc{display:flex;gap:12px;align-items:flex-start}
+ .row.prod .imgc .pv{width:108px;height:108px;margin:0;flex:none}
+ .row.prod .imgc .ctl{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ .row.prod .imgc .btn.sm{margin:0;padding:8px 14px}
+ .row.prod .imgc .url{flex:1 1 100%;margin-top:0;font-size:16px}
+ .row.prod textarea{min-height:92px}.row.prod>:nth-child(8) textarea{min-height:130px}
+ .chk{min-height:46px;padding:0;font-size:15px}.chk input{width:22px;height:22px}
 }
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--p)}
 .chip .n{margin-left:6px;font-weight:400;opacity:.7}.chip.on{background:var(--p);color:var(--g);border-color:var(--p)}
@@ -114,7 +133,7 @@ function draw(){tabs();const p=$('pane');
  if(tab==='tampilan'){p.innerHTML=GROUPS.map(g=>`<section class="card"><h3>${g[0]}</h3><div class="fg">${g[1].map(k=>{const f=FIELDS.find(x=>x[0]===k);return `<div class="${f[2]||/alamat|lokasi/.test(k)?'full':''}"><label>${f[1]}</label>${f[2]?`<textarea rows="2" data-s="${k}">${esc(D.settings[k])}</textarea>`:`<input data-s="${k}" value="${esc(D.settings[k])}">`}</div>`}).join('')}</div></section>`).join('')+(()=>{const u=PREV.get(D.settings)||D.settings.gambar_hero;return `<section class="card"><h3>Gambar beranda</h3><p class="hint" style="margin-top:0">Menggantikan logo di kartu ungu pada beranda.</p><div class="pv" style="width:140px;height:140px">${u?`<img src="${esc(u)}" alt="" style="object-fit:contain">`:'Memakai logo bawaan'}${stHtml(D.settings)}</div><label class="btn o sm">Pilih gambar<input type="file" accept="image/*" data-uph="1"></label>${u?' <button class="btn x sm" data-noh="1">Hapus (pakai logo bawaan)</button>':''}<input data-s="gambar_hero" placeholder="atau tempel URL gambar" value="${esc(D.settings.gambar_hero)}" style="margin-top:8px;max-width:420px"></section>`})();return}
  const T=TABLES[tab],R=D[tab];
  const card=(r,i)=>`<div class="card row${tab==='produk'?' prod':''}" style="grid-template-columns:${T.g}">`+T.cols.map(c=>{const v=r[c[0]];
-  if(c[2]==='i'){const u=PREV.get(r)||v;return `<div><div class="pv">${u?`<img src="${esc(u)}" alt="">`:'Belum ada gambar'}${stHtml(r)}</div><label class="btn o sm">Pilih gambar<input type="file" accept="image/*" data-up="${i}"></label>${u?` <button class="btn x sm" data-noimg="${i}">Hapus</button>`:''}<input placeholder="atau tempel URL gambar" data-i="${i}" data-k="gambar" value="${esc(v)}" style="margin-top:6px;font-size:12px"></div>`}
+  if(c[2]==='i'){const u=PREV.get(r)||v;return `<div class="imgc"><div class="pv">${u?`<img src="${esc(u)}" alt="">`:'Belum ada gambar'}${stHtml(r)}</div><div class="ctl"><label class="btn o sm">Pilih gambar<input type="file" accept="image/*" data-up="${i}"></label>${u?` <button class="btn x sm" data-noimg="${i}">Hapus</button>`:''}<input class="url" placeholder="atau tempel URL gambar" data-i="${i}" data-k="gambar" value="${esc(v)}"></div></div>`}
   if(c[2]==='t')return `<div><label>${c[1]}</label><textarea rows="${c[0]==='spesifikasi'?6:3}" data-i="${i}" data-k="${c[0]}" placeholder="${esc(c[3]||'')}">${esc(v)}</textarea></div>`;
   if(c[2]==='c')return `<label class="chk"><input type="checkbox" data-i="${i}" data-k="${c[0]}" ${v!==false?'checked':''}>${c[1]}</label>`;
   if(c[2]==='s'){let o=typeof c[3]==='function'?c[3]():c[3];if(v&&!o.includes(v))o=o.concat(v);return `<div><label>${c[1]}</label><select data-i="${i}" data-k="${c[0]}">${o.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('')}</select></div>`}
