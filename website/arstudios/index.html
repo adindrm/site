@@ -304,6 +304,8 @@ nav[data-ph] button.t[data-pv]{display:flex!important}
 .sg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
 .sg button{padding:10px 0;border:1px solid var(--ln);border-radius:12px;background:var(--cd);font:500 12.5px 'JetBrains Mono',ui-monospace,monospace}
 .sg button.sel{background:var(--ac);color:#fff;border-color:var(--ac)}.sg button:disabled{opacity:.35;text-decoration:line-through}
+.pim{height:86px;margin:-2px -2px 8px;border-radius:10px;background:var(--ln) center/cover no-repeat;display:grid;place-items:center;color:var(--mu)}.pim svg{width:26px;height:26px}
+.pik{display:flex;gap:12px;align-items:center;margin-top:8px}
 </style>
 </head>
 <body>
@@ -363,7 +365,7 @@ ${x.st=='pending'||x.st=='ok'?`<div class="g2" style="margin-top:10px"><button c
 const cartN=()=>Object.values(S.cart).reduce((a,b)=>a+b,0),cartT=()=>Object.entries(S.cart).reduce((a,[i,n])=>a+S.prod[i].p*n,0);
 function prod(cus){const tp=S.tx.filter(x=>x.y=='p'&&x.t>=new Date().setHours(0,0,0,0));
 return head(cus?'Layanan & Produk':'Produk',cus?'Harga resmi barbershop':'Penjualan produk · '+today,cus||S.role!='adm'?'':`<button class="btn s k" data-a="pd-e" data-id="-1">+ Produk</button>`)+(cus?`<div class="cd">${SV.map(s=>`<div class="lst"><span>${s.n}<div class="mu sm">${s.m} menit</div></span><b>${rp(s.p)}</b></div>`).join('')}</div>${BR.length?`<div class="mono sec">barber kami</div><div class="cd">${BR.map((n,i)=>{const q=pfb(i);return row(`<span data-a="pf-vb" data-i="${i}" style="cursor:pointer;display:flex;align-items:center;gap:8px">${avh(q.id,n)}${esc(n)}</span>`,esc(q.sp||'Barber')+rate(i),'')}).join('')}</div>`:''}<div class="mono sec">produk tersedia</div>`:'')+
-`<div class="g2 pg">${S.prod.length?'':'<div class="cd mu" style="grid-column:1/-1;text-align:center">Belum ada produk.</div>'}${S.prod.map((p,i)=>`<div class="cd" style="margin:0"><div class="row"><span class="mono">${cus?(p.s>0?'tersedia':'habis'):'stok '+p.s}</span>${!cus&&S.role=='adm'?`<span class="row" style="gap:2px"><button class="chip" data-a="pd-e" data-id="${i}">Ubah</button><button class="x" data-a="pd-d" data-id="${i}" aria-label="Hapus">${I.x}</button></span>`:''}</div><div style="margin:6px 0 2px;min-height:38px"><b>${p.n}</b></div><div class="mu sm">${rp(p.p)}</div>${cus?'':`<div class="qty row" style="margin-top:10px"><button data-a="cm" data-v="${i}" aria-label="Kurang">−</button><b>${S.cart[i]||0}</b><button data-a="cp" data-v="${i}" aria-label="Tambah">+</button></div>`}</div>`).join('')}</div>`+
+`<div class="g2 pg">${S.prod.length?'':'<div class="cd mu" style="grid-column:1/-1;text-align:center">Belum ada produk.</div>'}${S.prod.map((p,i)=>`<div class="cd" style="margin:0">${pimgH(p)}<div class="row"><span class="mono">${cus?(p.s>0?'tersedia':'habis'):'stok '+p.s}</span>${!cus&&S.role=='adm'?`<span class="row" style="gap:2px"><button class="chip" data-a="pd-e" data-id="${i}">Ubah</button><button class="x" data-a="pd-d" data-id="${i}" aria-label="Hapus">${I.x}</button></span>`:''}</div><div style="margin:6px 0 2px;min-height:38px"><b>${p.n}</b></div><div class="mu sm">${rp(p.p)}</div>${cus?'':`<div class="qty row" style="margin-top:10px"><button data-a="cm" data-v="${i}" aria-label="Kurang">−</button><b>${S.cart[i]||0}</b><button data-a="cp" data-v="${i}" aria-label="Tambah">+</button></div>`}</div>`).join('')}</div>`+
 (cus?'':(cartN()?`<div class="cbar"><button class="btn" data-a="co">Bayar ${cartN()} produk · ${rp(cartT())}</button></div>`:'')+`<div class="mono sec">penjualan produk hari ini</div><div class="cd">${tp.slice().reverse().map(x=>`<div class="lst"><span>${x.n}<div class="mu sm">${jam(x.t)}</div></span><b>${rp(x.a)}</b></div>`).join('')||'<span class="mu">Belum ada penjualan hari ini.</span>'}</div>`)}
 function exp(){const m0=new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime(),ex=S.ex.filter(x=>x.t>=m0),tot=ex.reduce((a,x)=>a+x.a,0),inc=S.tx.filter(x=>x.t>=m0).reduce((a,x)=>a+x.a,0);
 return head('Pengeluaran',`Pribadi · hanya terlihat oleh admin`,`<button class="btn s k" data-a="fab-e">+ Catat</button>`)+`<div class="dk"><div class="mono">total bulan ini</div><div class="amt">${rp(tot)}</div><div class="ln"><span>Pendapatan bulan ini</span><span>${rp(inc)}</span></div><div class="ln"><span>Sisa setelah pengeluaran</span><b>${rp(inc-tot)}</b></div></div>
@@ -388,7 +390,7 @@ const A={
 theme(){const r=document.documentElement;r.classList.add('tx');setTimeout(()=>r.classList.remove('tx'),600);const d=r.dataset.theme?r.dataset.theme=='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=d?'light':'dark'},
 role(v){S.role=v;$('main').scrollTop=0},tab(v){if(S.tab[S.role]!=v){S.tab[S.role]=v;$('main').scrollTop=0}},rng(v){S.rng=+v},qt(v){S.qt=v},qv(v){S.qv=v},bt(v){S.bt=+v},close,
 qb(v,el){S.q.find(x=>x.id==el.dataset.id).b=+el.value},
-qs(v,el){const x=S.q.find(x=>x.id==el.dataset.id);if(x.b<0&&CU.role=='kry'&&CU.bi!=null)x.b=CU.bi;if(x.b<0)return toast('Pilih barber dulu');x.st='chair';S.qt='chair';toast('Pelanggan di kursi')},
+qs(v,el){const x=S.q.find(x=>x.id==el.dataset.id);if(x.b<0&&(CU.role=='kry'||CU.role=='adm')&&CU.bi!=null)x.b=CU.bi;if(x.b<0)return toast('Pilih barber dulu');x.st='chair';S.qt='chair';toast('Pelanggan di kursi')},
 qp(v,el){const x=S.q.find(x=>x.id==el.dataset.id),s=sv(x.svc);payOpen([[s.n,s.p]],s.p,()=>{x.st='done';x.pa=s.p;S.tx.push({t:Date.now(),y:'j',a:s.p,b:Math.max(x.b,0),n:s.n});S.qt='done'})},
 qx(v,el){S.q=S.q.filter(x=>x.id!=el.dataset.id)},
 bk(v,el){S.q.find(x=>x.id==el.dataset.id).st='ok';toast('Booking dikonfirmasi')},bx(v,el){S.q=S.q.filter(x=>x.id!=el.dataset.id)},
@@ -445,7 +447,7 @@ I.dl=P('<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>');$('#ins').innerHTML=I.dl;if(
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e});
 addEventListener('appinstalled',()=>{$('#ins').hidden=true;toast('Aplikasi terpasang')});
 A.install=()=>{if(dp){dp.prompt();dp.userChoice.finally(()=>dp=null);return}sheet('Pasang aplikasi',`<p class="mu">Pasang AR Studios di layar utama agar terbuka layar penuh seperti aplikasi.</p><div class="ins"><span class="av">iOS</span><div><b>iPhone / iPad (Safari)</b><div class="mu sm">Ketuk tombol Bagikan, lalu pilih “Tambah ke Layar Utama”.</div></div></div><div class="ins"><span class="av">An</span><div><b>Android (Chrome)</b><div class="mu sm">Ketuk menu ⋮, lalu pilih “Instal aplikasi” atau “Tambahkan ke layar utama”.</div></div></div>`)};
-if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').then(r=>{r.addEventListener('updatefound',()=>{const w=r.installing;w&&w.addEventListener('statechange',()=>{if(w.state=='activated'&&navigator.serviceWorker.controller){const b=document.createElement('div');b.style.cssText='position:fixed;left:12px;right:12px;bottom:84px;z-index:95;background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;gap:10px';b.innerHTML='<span>Versi baru tersedia</span><button style="background:var(--ac);color:#fff;border-radius:10px;padding:7px 12px;font-weight:600">Muat ulang</button>';b.querySelector('button').onclick=()=>location.reload();document.body.appendChild(b)}})})}).catch(()=>{});
 let ANIM=false,LK=null,pm={},RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
 addEventListener('resize',()=>{pm={};post()});
 /* ===== AUTH & ROLES ===== */
@@ -538,13 +540,13 @@ mgo:v=>{close();if(v=='usr')return setTimeout(()=>A.usr(),50);S.tab[S.role]=v=='
 /* rating */
 const gt=()=>{try{return JSON.parse(localStorage.getItem('ars_gt'))||[]}catch(e){return[]}},sgt=a=>{try{localStorage.setItem('ars_gt',JSON.stringify(a.slice(-30)))}catch(e){}},
 rtd=x=>(S.rt||[]).some(r=>r.qid==x.id),pend=()=>S.q.filter(x=>x.st=='done'&&!rtd(x)&&(CU.guest?gt().includes(x.id):x.uid==CU.id)),
-rate=bi=>{const r=(S.rt||[]).filter(a=>a.bi==bi);return r.length?' · ★ '+(r.reduce((n,a)=>n+a.s,0)/r.length).toFixed(1)+' ('+r.length+')':''},
+rate=bi=>{const r=(S.rt||[]).filter(a=>a.bi==bi&&bsv(a)>0);return r.length?' · ★ '+(r.reduce((n,a)=>n+bsv(a),0)/r.length).toFixed(1)+' ('+r.length+')':''},
 stv=n=>'★'.repeat(n)+'☆'.repeat(5-n);
 let RTS=null;
 function rtc(){const l=pend().slice(-3).reverse();return l.length?`<div class="mono sec">beri penilaian</div>`+l.map(x=>`<div class="cd"><div class="row"><b>${sv(x.svc).n}</b><span class="mu sm">${x.no}</span></div><div class="mu sm">${x.b>=0?BR[x.b]:'AR Studios'} · ${jam(x.t)}</div><button class="btn s" style="margin-top:10px" data-a="rt-o" data-id="${x.id}">Beri rating</button></div>`).join('')+(CU.guest?`<div class="mu sm" style="margin-top:-4px">Tamu bisa menilai selama data browser di perangkat ini belum terhapus. Jika sudah hilang, minta kasir mencatatkan rating Anda.</div>`:''):''}
 function rtSheet(x,adm){RTS={id:x.id,s:0,adm};sheet(adm?'Rating atas nama pelanggan':'Beri penilaian',`<div class="mu sm" style="margin-top:4px">${x.name} · ${sv(x.svc).n}${x.b>=0?' · '+BR[x.b]:''}</div><div class="rts" id="rts">${[1,2,3,4,5].map(n=>`<button type="button" class="rs" data-a="rt-p" data-v="${n}" aria-label="${n} bintang">★</button>`).join('')}</div><label>Komentar (opsional)<input id="r-c" maxlength="120" placeholder="${adm?'Catatan dari pelanggan':'Ceritakan pengalaman anda'}"></label><button class="btn" data-a="rt-go">Kirim</button>`)}
 function rat(){const l=gs('rt',[]),avg=l.length?(l.reduce((n,x)=>n+x.s,0)/l.length).toFixed(1):'–',pd=S.q.filter(x=>x.st=='done'&&!rtd(x)).slice(-20).reverse();
-return head('Rating','Penilaian pelanggan dan tamu')+`<div class="g2">${st('rata-rata','★ '+avg,l.length+' ulasan')}${st('belum dinilai',pd.length,'tiket selesai')}</div><div class="cd" style="margin-top:10px">${[5,4,3,2,1].map(k=>`<div class="lst"><span>${stv(k)}</span><b>${l.filter(x=>x.s==k).length}</b></div>`).join('')}</div><div class="mono sec">belum dinilai · tanyakan langsung ke pelanggan</div><div class="cd">${pd.map(x=>row(x.name+(x.uid?'':' · Tamu'),sv(x.svc).n+' · '+(x.b>=0?BR[x.b]:'-')+' · '+jam(x.t),'',`<button class="chip" data-a="rt-oa" data-id="${x.id}">Beri rating</button>`)).join('')||emp('Semua sudah dinilai.')}</div><div class="mono sec">ulasan terbaru</div><div class="cd">${l.slice().reverse().slice(0,40).map(x=>row(stv(x.s)+' · '+x.n+(x.g?' (Tamu)':''),(x.c?x.c+' · ':'')+(x.bi>=0?(BR[x.bi]||'-')+' · ':'')+new Date(x.t).toLocaleDateString('id-ID',{day:'numeric',month:'short'})+(x.by=='admin'?' · diinput admin':''),'',`<button class="x" data-a="rt-d" data-id="${x.id}" aria-label="Hapus">${I.x}</button>`)).join('')||emp('Belum ada ulasan.')}</div>`}
+return head('Rating','Penilaian pelanggan dan tamu')+`<div class="g2">${st('toko · rata-rata','★ '+avg,l.length+' ulasan')}${st('belum dinilai',pd.length,'tiket selesai')}</div><div class="cd" style="margin-top:10px">${[5,4,3,2,1].map(k=>`<div class="lst"><span>${stv(k)}</span><b>${l.filter(x=>x.s==k).length}</b></div>`).join('')}</div><div class="mono sec">belum dinilai · tanyakan langsung ke pelanggan</div><div class="cd">${pd.map(x=>row(x.name+(x.uid?'':' · Tamu'),sv(x.svc).n+' · '+(x.b>=0?BR[x.b]:'-')+' · '+jam(x.t),'',`<button class="chip" data-a="rt-oa" data-id="${x.id}">Beri rating</button>`)).join('')||emp('Semua sudah dinilai.')}</div><div class="mono sec">ulasan terbaru</div><div class="cd">${l.slice().reverse().slice(0,40).map(x=>row(stv(x.s)+' · '+x.n+(x.g?' (Tamu)':''),(x.c?x.c+' · ':'')+(x.bi>=0?(BR[x.bi]||'-')+' · ':'')+new Date(x.t).toLocaleDateString('id-ID',{day:'numeric',month:'short'})+(x.by=='admin'?' · diinput admin':''),'',`<button class="x" data-a="rt-d" data-id="${x.id}" aria-label="Hapus">${I.x}</button>`)).join('')||emp('Belum ada ulasan.')}</div>`}
 R.adm.rat=rat;ADM.add('rt-oa');
 Object.assign(A,{
 'rt-o':(v,el)=>{const x=pend().find(a=>a.id==el.dataset.id);if(x)rtSheet(x,false)},
@@ -582,13 +584,13 @@ Object.assign(A,{
 'rt-d':(v,el)=>{S.rt=gs('rt',[]).filter(x=>x.id!=el.dataset.id)},
 cbx:(v,el)=>{const id=el.dataset.id;if(!S.me.b.some(i=>i==id))return;S.q=S.q.filter(x=>x.id!=id);S.me.b=S.me.b.filter(i=>i!=id);toast('Booking dibatalkan')},
 'pd-e':(v,el)=>{const i=+el.dataset.id,x=S.prod[i]||{n:'',p:'',s:''};sheet(i<0?'Produk baru':'Ubah produk',`<label style="margin-top:4px">Nama produk<input id="d-n" value="${x.n}" maxlength="40"></label><label>Harga (Rp)<input id="d-p" inputmode="numeric" value="${x.p}"></label><label>Stok<input id="d-s" inputmode="numeric" value="${x.s}"></label><button class="btn" data-a="pd-go" data-id="${i}">Simpan</button>`)},
-'pd-go':(v,el)=>{const i=+el.dataset.id,n=clean(val('d-n')),p=num('d-p'),s=num('d-s');if(!n||!p)return toast('Isi nama dan harga');if(i<0)S.prod.push({n,p,s});else Object.assign(S.prod[i],{n,p,s});S.cart={};close();toast('Produk disimpan')},
+'pd-go':(v,el)=>{const i=+el.dataset.id,n=clean(val('d-n')),p=num('d-p'),s=num('d-s');if(!n||!p)return toast('Isi nama dan harga');if(i<0)S.prod.push({id:nid(),n,p,s});else Object.assign(S.prod[i],{n,p,s});S.cart={};close();toast('Produk disimpan')},
 'pd-d':(v,el)=>{S.prod.splice(+el.dataset.id,1);S.cart={};toast('Produk dihapus')},
 'sv-d':(v,el)=>{const i=+el.dataset.id;if(S.q.some(x=>x.svc==i&&x.st!='done'))return toast('Masih dipakai antrian/booking aktif');S.q.concat(S.rt||[]).forEach(x=>{if(x.svc==i)x.svc=-1;else if(x.svc>i)x.svc--});SV.splice(i,1);S.sv=SV.map(x=>({...x}));toast('Layanan dihapus')},
 'ml-n':(v,el)=>{const k=el.dataset.k,t={br:'barber',cat:'kategori',tm:'slot jam'}[k];sheet('Tambah '+t,`<label style="margin-top:4px">${k=='tm'?'Jam (mis. 10:00)':'Nama '+t}<input id="m-v" maxlength="30"></label><button class="btn" data-a="ml-go" data-k="${k}">Simpan</button>`)},
 'ml-go':(v,el)=>{const k=el.dataset.k,a={br:BR,cat:CAT,tm:TM}[k];let s=clean(val('m-v'));if(!s)return toast('Isi dulu');if(k=='tm'){s=s.replace('.',':');if(!/^\d{1,2}:\d{2}$/.test(s))return toast('Format jam 10:00');s=s.padStart(5,'0')}if(a.includes(s))return toast('Sudah ada');a.push(s);if(k=='tm')a.sort();S[k]=a.slice();close();toast('Ditambahkan')},
 'ml-d':(v,el)=>{const k=el.dataset.k,i=+el.dataset.id,a={br:BR,cat:CAT,tm:TM}[k],fx=(o,f)=>{if(o[f]==i)o[f]=-1;else if(o[f]>i)o[f]--};
-if(k=='br'){S.q.concat(S.tx,S.rt||[]).forEach(x=>fx(x,x.bi!==undefined?'bi':'b'));U.forEach(u=>{if(u.bi!=null){if(u.bi==i)u.bi=null;else if(u.bi>i)u.bi--}});if(CU&&CU.bi!=null){if(CU.bi==i)CU.bi=undefined;else if(CU.bi>i)CU.bi--}saveU();const o={};Object.entries(S.kom||{}).forEach(([j,r])=>{j=+j;if(j<i)o[j]=r;else if(j>i)o[j-1]=r});S.kom=o}
+if(k=='br'){if(S.duty)S.duty.ids=S.duty.ids.filter(j=>j!=i).map(j=>j>i?j-1:j);S.q.concat(S.tx,S.rt||[]).forEach(x=>fx(x,x.bi!==undefined?'bi':'b'));U.forEach(u=>{if(u.bi!=null){if(u.bi==i)u.bi=null;else if(u.bi>i)u.bi--}});if(CU&&CU.bi!=null){if(CU.bi==i)CU.bi=undefined;else if(CU.bi>i)CU.bi--}saveU();const o={};Object.entries(S.kom||{}).forEach(([j,r])=>{j=+j;if(j<i)o[j]=r;else if(j>i)o[j-1]=r});S.kom=o}
 if(k=='cat')S.ex.forEach(x=>fx(x,'c'));
 a.splice(i,1);S[k]=a.slice();toast('Dihapus')}
 });
@@ -612,7 +614,7 @@ function pfSheet(uid,nm,bi0){const a=acc(uid),p=pfo(uid),me=!!CU&&!CU.guest&&CU.
 ok=CU.guest?role=='kry':adm||me||role=='kry'||(CU.role=='kry'&&role=='cus');if(!ok)return toast('Anda tidak punya akses');
 const raw=(a&&a.name)||nm||'Pengguna',bi=role=='kry'?(a&&a.bi!=null?a.bi:p.bn?BR.indexOf(p.bn):bi0):null,
 rw=(l,v)=>v?`<div class="lst"><span class="mu">${l}</span><span style="text-align:right;max-width:65%">${v}</span></div>`:'';let b='';
-if(role=='kry'){const r=(S.rt||[]).filter(x=>bi!=null&&x.bi==bi);b=rw('Spesialisasi',esc(p.sp))+rw('Tentang',esc(p.bio))+rw('Rating',r.length?'★ '+(r.reduce((n,x)=>n+x.s,0)/r.length).toFixed(1)+' ('+r.length+' ulasan)':'')+((adm||me)?rw('Telepon',esc(p.hp))+rw('Username',a?'@'+esc(a.u):''):'')}
+if(role=='kry'){const r=(S.rt||[]).filter(x=>bi!=null&&x.bi==bi&&bsv(x)>0);b=rw('Spesialisasi',esc(p.sp))+rw('Tentang',esc(p.bio))+rw('Rating',r.length?'★ '+(r.reduce((n,x)=>n+bsv(x),0)/r.length).toFixed(1)+' ('+r.length+' ulasan)':'')+((adm||me)?rw('Telepon',esc(p.hp))+rw('Username',a?'@'+esc(a.u):''):'')}
 else if(role=='cus'){const dn=S.q.filter(x=>x.uid==uid&&x.st=='done'),sp=dn.reduce((n,x)=>n+(x.pa||0),0);b=rw('Telepon',esc(p.hp))+rw('Catatan',esc(p.bio))+rw('Kunjungan',dn.length+' kali')+rw('Poin loyalti',Math.floor(sp/LO().rate)+' poin')+(adm&&a?rw('Username','@'+esc(a.u)):'')}
 else b=rw('Telepon',esc(p.hp))+rw('Catatan',esc(p.bio));
 sheet(role=='kry'?'Profil barber':'Profil',`<div class="pfi" style="margin-top:6px">${avh(uid,raw,'avl')}<div><b style="font-size:16px">${esc(raw)}</b><div class="mu sm">${ROL[role]||'Pelanggan'}${me?' · Anda':''}</div></div></div><div style="margin-top:10px">${b||'<div class="mu sm">Profil belum dilengkapi.</div>'}</div>${(me||adm)&&uid?`<button class="btn o" data-a="pf-e" data-u="${uid}">Ubah profil</button>`:''}`)}
@@ -645,7 +647,7 @@ ADM.add('pin-t');ADM.add('pin-x');
 Object.assign(A,{'pin-t':v=>{const p=S.pin=S.pin||[],i=p.indexOf(v);if(i>=0)p.splice(i,1);else{if(p.length>=5)return toast('Maksimal 5 pintasan');p.push(v)}},'pin-x':()=>{S.pin=[]}});
 /* koneksi Google Sheets (tes saja; sinkronisasi data belum diaktifkan) */
 const API_URL='https://script.google.com/macros/s/AKfycbyS2KlzkuJZBQ6-mnOJiktgcdHp_WZqQyj1TNRsc6coAYRQBU72xsC0mfFccKI9PX_r/exec';
-const api=b=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);return fetch(S.api||API_URL,{method:'POST',body:JSON.stringify(b),signal:c.signal}).then(r=>r.json()).finally(()=>clearTimeout(t))};
+const api=b=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);return fetch(S.api||API_URL,{method:'POST',body:JSON.stringify(Object.assign({dv:(()=>{try{return localStorage.getItem('ars_dv')}catch(e){return null}})()},b)),signal:c.signal}).then(r=>r.json()).finally(()=>clearTimeout(t))};
 function apiUI(){const u=S.api||API_URL;return `<div class="mono sec">koneksi google sheets</div><div class="cd"><div class="mu sm" style="word-break:break-all">${u.slice(0,48)}…${u.slice(-12)}</div><div class="row" style="margin-top:12px"><span class="mu sm" id="api-s">${S.apiOk?'Terakhir terhubung: '+new Date(S.apiOk).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Belum dites'}</span><button class="chip" data-a="api-t">Tes koneksi</button></div></div>`}
 ADM.add('api-t');
 Object.assign(A,{'api-t':()=>{const e=$('#api-s');if(e)e.textContent='Menghubungi…';api({a:'guest'}).then(r=>{if(r&&r.ok){S.apiOk=Date.now();toast('Terhubung ke Google Sheets');save();const e=$('#api-s');if(e)e.textContent='Terhubung'}else throw 0}).catch(()=>{toast('Gagal terhubung. Periksa deployment skrip');const e=$('#api-s');if(e)e.textContent='Gagal terhubung'})}});
@@ -679,11 +681,12 @@ if((r.Layanan||[]).length){SV.length=0;r.Layanan.forEach(x=>SV.push({id:x.id,n:S
 const lst=(k,f,a)=>{if((r[k]||[]).length){a.length=0;r[k].forEach(x=>a.push(String(x[f])));S[{Barber:'br',Kategori:'cat',Slot:'tm'}[k]]=a.slice()}};lst('Barber','nama',BR);lst('Kategori','nama',CAT);lst('Slot','jam',TM);
 const o=S.ol=S.ol||{};if(kv.outlet_nama)o.n=kv.outlet_nama;if(kv.alamat!==undefined)o.a=kv.alamat||o.a;if(kv.jam_operasional)o.h=kv.jam_operasional;if(kv.mode_toko)o.m=kv.mode_toko;
 if(kv.loyalti_rate)S.lo={rate:+kv.loyalti_rate,val:+kv.loyalti_nilai,min:+kv.loyalti_min,bonus:+kv.loyalti_bonus,exp:+kv.loyalti_bulan};
+if(kv.barber_hari_ini){const p=String(kv.barber_hari_ini).split('|');S.duty={d:+p[0],ids:(p[1]||'').split(',').filter(x=>x!=='').map(Number)}}
 if(kv.pintasan!==undefined)S.pin=String(kv.pintasan).split(',').filter(Boolean);
 if(kv.komisi)try{S.kom=JSON.parse(kv.komisi)}catch(e){}
 save()}
 function dbLoad(){return api({a:'cfg'}).then(r=>{if(r&&r.ok){dbApply(r);S.dbOk=Date.now();pfLoad();if(CU)render();else if(LM=='home')lgView('home')}}).catch(()=>{})}
-let dbT;function dbPush(f){if(CU&&CU.role!='adm')return;S.mdDirty=true;save();clearTimeout(dbT);if(!TK||!NET.on)return;dbT=setTimeout(async()=>{try{const o=S.ol||{},l=LO(),kv={outlet_nama:o.n,alamat:o.a,jam_operasional:o.h,mode_toko:o.m||'auto',loyalti_rate:l.rate,loyalti_nilai:l.val,loyalti_min:l.min,loyalti_bonus:l.bonus,loyalti_bulan:l.exp,pintasan:(S.pin||[]).join(','),komisi:JSON.stringify(S.kom||{})},
+let dbT;function dbPush(f){if(CU&&CU.role!='adm')return;S.mdDirty=true;save();clearTimeout(dbT);if(!TK||!NET.on)return;dbT=setTimeout(async()=>{try{const o=S.ol||{},l=LO(),kv={outlet_nama:o.n,alamat:o.a,jam_operasional:o.h,mode_toko:o.m||'auto',loyalti_rate:l.rate,loyalti_nilai:l.val,loyalti_min:l.min,loyalti_bonus:l.bonus,loyalti_bulan:l.exp,pintasan:(S.pin||[]).join(','),barber_hari_ini:S.duty?S.duty.d+'|'+S.duty.ids.join(','):undefined,komisi:JSON.stringify(S.kom||{})},
 a=await apiT({a:'batch',sheet:'Pengaturan',rows:Object.keys(kv).filter(k=>kv[k]!==undefined).map(k=>({kunci:k,nilai:kv[k]}))}),
 b=await apiT({a:'rep',sheet:'Layanan',rows:SV.map(x=>({nama:x.n,harga:x.p,durasi:x.m,aktif:true}))}),
 c=await apiT({a:'rep',sheet:'Barber',rows:BR.map(n=>({nama:n,aktif:true}))}),
@@ -693,7 +696,7 @@ if(![a,b,c,d,e].every(x=>x&&x.ok))throw 0;b.ids.forEach((id,i)=>{if(SV[i])SV[i].
 ['ol-go','ol-m','pin-t','pin-x','lo-go','sv-go','sv-d','ml-go','ml-d','kom-go'].forEach(k=>{const f=A[k];if(f)A[k]=(v,el)=>{const r=f(v,el);dbPush();return r}});
 /* kinerja karyawan */
 function mine(){const bi=CU.bi==null?-1:CU.bi,t0=new Date().setHours(0,0,0,0),all=bi<0?[]:S.tx.filter(x=>x.y=='j'&&x.b==bi),td=all.filter(x=>x.t>=t0),w7=all.filter(x=>x.t>=t0-6*D),sum=a=>a.reduce((s,x)=>s+x.a,0),cur=S.q.find(x=>x.st=='chair'&&x.b==bi),nx=S.q.filter(x=>x.st=='wait'&&(x.b==bi||x.b<0)).sort((a,b)=>a.t-b.t);
-return head('Halo, '+first(CU.name),`${today} · ${BR[bi]||'Barber'}`)+`<div class="dk"><div class="mono">pendapatan jasa saya · hari ini</div><div class="amt">${rp(sum(td))}</div><div class="ln"><span>${td.length} pelanggan dilayani</span><span>7 hari: ${rp(sum(w7))}</span></div></div>`+(bi<0?`<div class="cd mu sm">Akun ini belum dikaitkan ke profil barber. Minta admin mengaturnya di Kelola akun.</div>`:`<div class="g2"><div class="cd st"><div class="mono">komisi 7 hari</div><b>${rp(Math.round(sum(w7)*((S.kom||{})[bi]==null?40:S.kom[bi])/100))}</b><div class="mu sm">${(S.kom||{})[bi]==null?40:S.kom[bi]}% dari jasa</div></div><div class="cd st"><div class="mono">rating saya</div><b>${(()=>{const r=(S.rt||[]).filter(a=>a.bi==bi);return r.length?'★ '+(r.reduce((n,a)=>n+a.s,0)/r.length).toFixed(1):'–'})()}</b><div class="mu sm">${(S.rt||[]).filter(a=>a.bi==bi).length} ulasan</div></div></div>`)+
+return head('Halo, '+first(CU.name),`${today} · ${BR[bi]||'Barber'}`)+`<div class="dk"><div class="mono">pendapatan jasa saya · hari ini</div><div class="amt">${rp(sum(td))}</div><div class="ln"><span>${td.length} pelanggan dilayani</span><span>7 hari: ${rp(sum(w7))}</span></div></div>`+(bi<0?`<div class="cd mu sm">Akun ini belum dikaitkan ke profil barber. Minta admin mengaturnya di Kelola akun.</div>`:`<div class="g2"><div class="cd st"><div class="mono">komisi 7 hari</div><b>${rp(Math.round(sum(w7)*((S.kom||{})[bi]==null?40:S.kom[bi])/100))}</b><div class="mu sm">${(S.kom||{})[bi]==null?40:S.kom[bi]}% dari jasa</div></div><div class="cd st"><div class="mono">rating saya</div><b>${(()=>{const r=(S.rt||[]).filter(a=>a.bi==bi&&bsv(a)>0);return r.length?'★ '+(r.reduce((n,a)=>n+bsv(a),0)/r.length).toFixed(1):'–'})()}</b><div class="mu sm">${(S.rt||[]).filter(a=>a.bi==bi&&bsv(a)>0).length} ulasan</div></div></div>`)+
 `<div class="g2"><div class="cd st"><div class="mono">sedang dicukur</div><b>${cur?cur.no:'—'}</b><div class="mu sm">${cur?cur.name:'kursi kosong'}</div></div><div class="cd st"><div class="mono">menunggu saya</div><b>${nx.length} orang</b><div class="mu sm">${nx[0]?'berikutnya '+nx[0].no:'tidak ada antrian'}</div></div></div>`+
 `<div class="mono sec">layanan saya hari ini</div><div class="cd">${td.slice().reverse().map(x=>`<div class="lst"><span>${x.n}<div class="mu sm">${jam(x.t)}</div></span><b>${rp(x.a)}</b></div>`).join('')||'<span class="mu">Belum ada layanan hari ini.</span>'}</div>`}
 
@@ -719,11 +722,11 @@ ymd=t=>{const d=new Date(t);return d.getFullYear()*1e4+(d.getMonth()+1)*100+d.ge
 hm=t=>{const a=String(t).split(':');return(+a[0]||0)*60+(+a[1]||0)},mh=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'),
 MAP={
 Antrian:{to:r=>({id:r.id,no:r.no||'',nama:r.name,uid:r.uid||'',svc:r.svc,barber:r.b,status:r.st,src:r.src||'',waktu:r.t,pa:r.pa||0}),from:x=>({id:String(x.id),no:x.no||null,name:String(x.nama),uid:x.uid||undefined,svc:+x.svc,b:+x.barber,st:x.status,src:x.src||undefined,t:+x.waktu,pa:+x.pa||undefined})},
-Booking:{to:r=>({id:r.id,uid:r.uid||'',nama:r.name,hp:'',svc:r.svc,barber:r.b,tanggal:ymd(r.t+(r.sch?r.sch.day:0)*D1),jam:r.sch?hm(r.sch.time):0,status:r.st,dibuat:r.t}),from:x=>{const q=String(x.tanggal),dt=new Date(+q.slice(0,4),+q.slice(4,6)-1,+q.slice(6,8));return{id:String(x.id),no:null,name:String(x.nama),uid:x.uid||undefined,svc:+x.svc,b:+x.barber,st:x.status,src:'booking',t:+x.dibuat,sch:{day:Math.round((dt-new Date().setHours(0,0,0,0))/D1),time:mh(+x.jam)}}}},
+Booking:{to:r=>({id:r.id,uid:r.uid||'',nama:r.name,hp:'',svc:r.svc,barber:r.b,tanggal:ymd(r.sch&&r.sch.ad!=null?r.sch.ad:r.t+(r.sch?r.sch.day:0)*D1),jam:r.sch?hm(r.sch.time):0,status:r.st,dibuat:r.t}),from:x=>{const q=String(x.tanggal),dt=new Date(+q.slice(0,4),+q.slice(4,6)-1,+q.slice(6,8));return{id:String(x.id),no:null,name:String(x.nama),uid:x.uid||undefined,svc:+x.svc,b:+x.barber,st:x.status,src:'booking',t:+x.dibuat,sch:{day:Math.round((dt-new Date().setHours(0,0,0,0))/D1),time:mh(+x.jam),ad:+dt}}}},
 Transaksi:{to:r=>({id:r.id,waktu:r.t,tipe:r.y,nama:r.n,jumlah:r.a,barber:r.b,metode:'',qid:''}),from:x=>({id:String(x.id),t:+x.waktu,y:x.tipe,n:String(x.nama),a:+x.jumlah,b:+x.barber})},
 Pengeluaran:{to:r=>({id:r.id,waktu:r.t,kategori:r.c,catatan:r.n,jumlah:r.a,oleh:CU?CU.u||'':''}),from:x=>({id:String(x.id),t:+x.waktu,c:+x.kategori,n:String(x.catatan),a:+x.jumlah})},
-Rating:{to:r=>({id:r.id,qid:r.qid,uid:r.uid||'',nama:r.n,svc:r.svc,barber:r.bi,bintang:r.s,komentar:r.c||'',waktu:r.t,oleh:r.by||''}),from:x=>({id:String(x.id),qid:String(x.qid),uid:x.uid||null,g:!x.uid,n:String(x.nama),svc:+x.svc,bi:+x.barber,s:+x.bintang,c:String(x.komentar||''),t:+x.waktu,by:x.oleh})},
-Produk:{to:r=>({id:r.id,nama:r.n,harga:r.p,stok:r.s,aktif:true}),from:x=>({id:String(x.id),n:String(x.nama),p:+x.harga,s:+x.stok})},
+Rating:{to:r=>({id:r.id,qid:r.qid,uid:r.uid||'',nama:r.n,svc:r.svc,barber:r.bi,bintang:r.s,komentar:r.c||'',waktu:r.t,oleh:r.by||'',bbar:r.bs==null?'':r.bs,produk:r.pn||'',bprod:r.ps||0}),from:x=>({id:String(x.id),qid:String(x.qid),uid:x.uid||null,g:!x.uid,n:String(x.nama),svc:+x.svc,bi:+x.barber,s:+x.bintang,c:String(x.komentar||''),t:+x.waktu,by:x.oleh,bs:(x.bbar===''||x.bbar==null)?null:+x.bbar,pn:String(x.produk||''),ps:+x.bprod||0})},
+Produk:{to:r=>({id:r.id,nama:r.n,harga:r.p,stok:r.s,aktif:true,gambar:r._gd?((S.pimg||{})[r.id]||{}).g||'':undefined}),from:x=>({id:String(x.id),n:String(x.nama),p:+x.harga,s:+x.stok,gv:x.gv?String(x.gv):''})},
 Promo:{to:r=>({id:r.id,nama:r.n,diskon:r.v,aktif:!!r.on}),from:x=>({id:String(x.id),n:String(x.nama),v:+x.diskon,on:String(x.aktif).toLowerCase()!='false'})},
 Voucher:{to:r=>({id:r.id,kode:r.c,potongan:r.v,kuota:r.q,aktif:true}),from:x=>({id:String(x.id),c:String(x.kode),v:+x.potongan,q:+x.kuota})}};
 function migIds(){if(SYN.mig)return;const mp={};['q','tx','ex','rt','prod','pr','vc'].forEach(k=>(S[k]||[]).forEach(r=>{if(r._ro)return;if(r.id==null||typeof r.id=='number'){const n=nid();if(r.id!=null)mp[k+r.id]=n;r.id=n}}));
@@ -749,7 +752,7 @@ try{if(!TK&&CU.guest){const g=await api({a:'guest'});if(!g||!g.ok)throw 0;stk(g.
 for(;;){const o=SYN.ob.find(x=>x.by==b);if(!o)break;NET.cur=o;const r=await(o.op=='del'?apiT({a:'del',sheet:o.sh,id:o.id}):apiT({a:'save',sheet:o.sh,row:o.row}));NET.cur=null;
 if(r&&r.code==401)throw 0;
 if(r&&r.ok){SYN.ob=SYN.ob.filter(x=>x!==o);ack(o,r)}else if((r&&PERM_RE.test(r.err||''))||++o.tr>8){SYN.ob=SYN.ob.filter(x=>x!==o);fail(o,r)}else throw 0;sysave()}
-if(S.mdDirty&&CU.role=='adm')dbPush(1)}catch(e){NET.cur=null}finally{NET.busy=false;sysave();netUI()}}
+if(S.mdDirty&&CU.role=='adm')dbPush(1)}catch(e){NET.cur=null;if(e&&(e.name=='AbortError'||e instanceof TypeError))NET.on=false}finally{NET.busy=false;sysave();netUI()}}
 function apply(k,items,role){const arr=S[k]=S[k]||[],pend=new Set(SYN.ob.map(o=>String(o.id))),byId={};arr.forEach(r=>byId[r.id]=r);
 Object.keys(items).forEach(id=>{const it=items[id];let l=byId[id];if(it.r.st=='batal'){if(l&&!pend.has(id)){arr.splice(arr.indexOf(l),1);delete SYN.sn[k+'|'+id]}return}
 if(l){if(pend.has(id))return;Object.assign(l,it.r);l._v=it.v}else{l=Object.assign({},it.r,{_v:it.v});arr.push(l)}
@@ -758,7 +761,7 @@ arr.slice().forEach(l=>{const key=k+'|'+l.id;if(l._ro||items[l.id]||pend.has(Str
 function dedupeNo(){const seen={};S.q.filter(x=>x.no&&x.st!='pending'&&x.st!='ok').sort((a,b)=>a.t-b.t).forEach(x=>{if(!seen[x.no]){seen[x.no]=x;return}
 if(!x._ro&&String(x.id).indexOf('i'+DV)==0&&(x.st=='wait'||x.st=='chair')){const o=x.no;nxn();x.no='A'+String(S.n).padStart(2,'0');toast('Nomor '+o+' bentrok, diganti '+x.no)}})}
 function applyPub(r){const own=new Set(S.q.filter(x=>!x._ro).map(x=>String(x.id)));S.q=S.q.filter(x=>!x._ro).concat((r.q||[]).filter(x=>!own.has(String(x.id))).map(x=>({id:String(x.id),no:x.no,name:String(x.nama),svc:+x.svc,b:+x.barber,st:x.status,t:+x.waktu,_ro:1})));
-S.prod=(S.prod||[]).filter(x=>!x._ro).concat((r.prod||[]).map((x,i)=>({id:'pub'+i,n:String(x.nama),p:+x.harga,s:x.ada?1:0,_ro:1})))}
+S.prod=(S.prod||[]).filter(x=>!x._ro).concat((r.prod||[]).map((x,i)=>({id:'pub'+i,sid:x.id,gv:x.gv||'',n:String(x.nama),p:+x.harga,s:x.ada?1:0,_ro:1})))}
 function purgeRo(){if(CU.role!='cus'&&!CU.guest){S.q=(S.q||[]).filter(x=>!x._ro);S.prod=(S.prod||[]).filter(x=>!x._ro)}}
 async function pull(){if(!CU||NET.pull||!NET.on||pendN())return;const role=CU.guest?'tamu':CU.role;NET.pull=true;
 try{let got=null,pub=null;if(role!='tamu'){if(!TK)return;const r=await apiT({a:'pull',sheets:PL[role]});if(!r||!r.ok)return;got=r.data}
@@ -767,7 +770,7 @@ capture();if(pendN())return;
 if(got){const K={q:['Antrian','Booking'],tx:['Transaksi'],ex:['Pengeluaran'],rt:['Rating'],prod:['Produk'],pr:['Promo'],vc:['Voucher']};
 Object.keys(K).forEach(k=>{if(!K[k].every(sh=>got[sh]))return;const items={};K[k].forEach(sh=>got[sh].forEach(x=>{const id=String(x.id);if(items[id]&&sh=='Booking')return;items[id]={sh,v:x.diubah,r:MAP[sh].from(x)}}));apply(k,items,role)})}
 if(pub)applyPub(pub);dedupeNo();NET.last=Date.now();S.sync=NET.last;save();sysave();ui()}catch(e){}finally{NET.pull=false;netUI()}}
-async function sync(){if(!CU)return;NET.on=navigator.onLine;netUI();await flush();if(!pendN())await pull();netUI()}
+async function sync(){if(!CU)return;NET.on=navigator.onLine&&await probe();netUI();await flush();if(!pendN())await pull();netUI()}
 function netUI(){const t=syTxt(),c=!NET.on?'off':(NET.busy||pendN())?'sy':'';document.querySelectorAll('.dot').forEach(d=>{d.classList.remove('off','sy');if(c)d.classList.add(c)});document.querySelectorAll('.syt').forEach(e=>e.textContent=t)}
 function syc(){try{capture();sysave();netUI();flush()}catch(e){}}
 async function ocSet(u,p,usr){try{const s0=rnd(),h=await hp(p,s0),o=OCg();o[u]={id:usr.id,u,name:usr.name,role:usr.role,bi:usr.bi===''?undefined:+usr.bi,s:s0,h};localStorage.setItem('ars_oc',JSON.stringify(o))}catch(e){}}
@@ -802,16 +805,66 @@ const oh=$('#sh #o-h');if(oh&&!oh.dataset.e){oh.dataset.e=1;const m=oh.value.mat
 const set=()=>{oh.value=v.a+' – '+v.z;bx.nextSibling.textContent=hm(v.z)<=hm(v.a)?'Jam tutup harus setelah jam buka':''};oh.style.display='none';
 bx.className='g2';bx.innerHTML='<div><div class="mono" style="margin-top:8px">buka</div></div><div><div class="mono" style="margin-top:8px">tutup</div></div>';
 bx.children[0].append(wheel(v.a,x=>{v.a=x;set()}));bx.children[1].append(wheel(v.z,x=>{v.z=x;set()}));oh.after(bx);bx.insertAdjacentHTML('afterend','<div class="er"></div>')}
+const fb=$('#f-b');if(fb&&!fb.dataset.d){fb.dataset.d=1;const on=dutyOn(),o0=fb.options[0];if(on&&o0&&o0.value=='-1'&&/Siapa/.test(o0.text))[...fb.options].forEach(o=>{if(+o.value>=0&&!on.includes(+o.value))o.remove()})}
 sg()}
 let enT;new MutationObserver(()=>{if(enT)return;enT=requestAnimationFrame(()=>{enT=0;enh()})}).observe(document.querySelector('.app'),{childList:true,subtree:true});
 document.addEventListener('click',e=>{const b=e.target.closest('#sg button');if(b&&!b.disabled){$('#f-t').value=b.dataset.t;sg()}});
-{const bk0=A['bk-go'];if(bk0)A['bk-go']=(v,el)=>{if(!val('f-t'))return toast('Pilih jam yang tersedia');return bk0(v,el)}}
+{const bk0=A['bk-go'];if(bk0)A['bk-go']=(v,el)=>{if(!val('f-t'))return toast('Pilih jam yang tersedia');const r=bk0(v,el);renorm();return r}}
 /* ===== PENGERAS OFFLINE ===== */
 /* 1) bentrok jam booking dari perangkat lain: batalkan lokal & beri tahu, jangan diulang terus */
 {const f0=fail;fail=function(o,r){f0(o,r);if(o.sh=='Booking'&&/Slot sudah/.test((r&&r.err)||'')){drop('q',o.id);toast('Jam itu sudah diambil orang lain. Pilih jam lain.');ui()}}}
 /* 2) hanya satu tab yang mengirim outbox (cegah kiriman ganda) */
 {const fl0=flush;flush=function(){return navigator.locks?navigator.locks.request('ars-sync',{ifAvailable:true},l=>l?fl0():0):fl0()}}
 /* 3) server menolak karena bentrok / stok: jangan diulang 8x */
+/* ===== v3: online sungguhan, tanggal booking absolut, nomor dari server ===== */
+const probe=()=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),4000);return fetch(S.api||API_URL,{mode:'no-cors',cache:'no-store',signal:c.signal}).then(()=>true,()=>false).finally(()=>clearTimeout(t))};
+const sod=t=>new Date(t).setHours(0,0,0,0);
+function renorm(){const t0=sod(Date.now());(S.q||[]).forEach(x=>{if(!x.sch)return;if(x.sch.ad==null)x.sch.ad=sod(x.t)+x.sch.day*D1;x.sch.day=Math.round((x.sch.ad-t0)/D1)})}
+{const r0=render;render=function(){renorm();return r0.apply(this,arguments)}}
+{const a0=ack;ack=function(o,r){a0(o,r);if(!r||!r.no||o.op=='del')return;const k=SH2K[o.sh],l=(S[k]||[]).find(x=>x.id==o.id);
+if(l&&l.no!==r.no){toast('Nomor antrian diganti menjadi '+r.no);l.no=r.no;SYN.sn[k+'|'+o.id]={h:JSON.stringify(MAP[o.sh].to(l)),sh:o.sh};SYN.ob.forEach(p=>{if(p.id==o.id&&p.sh==o.sh&&p.row)p.row.no=r.no});ui()}}}
+/* ===== barber bertugas hari ini + admin sebagai barber ===== */
+const dutyOn=()=>S.duty&&S.duty.d==ymd(Date.now())?S.duty.ids:null;
+function dutyUI(){const d=dutyOn(),on=i=>!d||d.includes(i);
+return `<div class="mono sec">barber bertugas hari ini</div><div class="cd"><div class="mu sm">${d?d.length+' dari '+BR.length+' barber tampil ke pelanggan':'Belum diatur: semua barber tampil. Ketuk nama untuk memilih.'}</div><div class="row" style="justify-content:flex-start;flex-wrap:wrap;gap:8px;margin-top:10px">${BR.map((n,i)=>`<button class="chip ${on(i)?'g':''}" data-a="dy-t" data-v="${i}">${on(i)?'✓ ':''}${esc(n)}${CU.bi==i?' (Anda)':''}</button>`).join('')||emp('Belum ada barber. Tambah di Katalog.')}</div><div class="row" style="margin-top:12px;justify-content:flex-start;gap:8px"><button class="chip" data-a="dy-all">Semua hadir</button><button class="chip" data-a="dy-none">Kosongkan</button></div></div><div class="mono sec">saya juga barber</div><div class="cd"><div class="mu sm">Pilih nama barber Anda agar bisa dipilih pelanggan dan ikut diatur di atas.</div><label>Nama barber saya<select id="dy-me">${opts(BR,CU.bi==null?-1:CU.bi,'Bukan barber')}</select></label><button class="btn" data-a="dy-me">Simpan</button></div>`}
+{const k0=R.adm.kar||kar;R.adm.kar=()=>k0()+dutyUI()}
+['dy-t','dy-all','dy-none','dy-me'].forEach(k=>ADM.add(k));
+const dySet=ids=>{S.duty={d:ymd(Date.now()),ids};dbPush(1)};
+Object.assign(A,{'dy-t':v=>{const d=dutyOn(),ids=d?d.slice():BR.map((_,i)=>i),i=+v,k=ids.indexOf(i);k>=0?ids.splice(k,1):ids.push(i);dySet(ids)},
+'dy-all':()=>dySet(BR.map((_,i)=>i)),'dy-none':()=>dySet([]),
+'dy-me':()=>{const i=+val('dy-me');CU.bi=i<0?undefined:i;const u=U.find(x=>x.id==CU.id);if(u)u.bi=i<0?null:i;saveU();try{sessionStorage.setItem('ars_cu',JSON.stringify(CU))}catch(e){}
+if(TK&&NET.on)apiT({a:'save',sheet:'Users',row:{id:CU.id,bi:i<0?'':i}}).catch(()=>{});toast(i<0?'Anda tidak lagi tercatat sebagai barber':'Anda tercatat sebagai barber: '+BR[i])}});
+/* ===== rating dua arah: toko + barber + produk ===== */
+const bsv=a=>a.bs==null?a.s:a.bs;
+rtSheet=function(x,adm){RTS={id:x.id,s:0,bs:0,ps:0,adm};
+const st=(id,a)=>`<div class="rts" id="${id}">${[1,2,3,4,5].map(n=>`<button type="button" class="rs" data-a="${a}" data-v="${n}" aria-label="${n} bintang">★</button>`).join('')}</div>`,pn=[...new Set((S.prod||[]).map(p=>p.n))];
+sheet(adm?'Rating atas nama pelanggan':'Beri penilaian',`<div class="mu sm" style="margin-top:4px">${esc(x.name)} · ${sv(x.svc).n}</div><div class="mono sec">toko · pengalaman keseluruhan</div>${st('rts','rt-p')}${x.b>=0?`<div class="mono sec">barber · ${esc(BR[x.b]||'')} (opsional)</div>${st('rtb','rt-pb')}`:''}${pn.length?`<div class="mono sec">produk (opsional)</div><label style="margin-top:0"><select id="r-p"><option value="">Tidak menilai produk</option>${pn.map(n=>`<option>${esc(n)}</option>`).join('')}</select></label>${st('rtp','rt-pp')}`:''}<label>Komentar (opsional)<input id="r-c" maxlength="120" placeholder="${adm?'Catatan dari pelanggan':'Ceritakan pengalaman anda'}"></label><button class="btn" data-a="rt-go">Kirim</button>`)};
+const star=(id,k,v)=>{if(!RTS)return;RTS[k]=+v;document.querySelectorAll('#'+id+' .rs').forEach((b,i)=>b.classList.toggle('on',i<+v))};
+Object.assign(A,{'rt-pb':v=>star('rtb','bs',v),'rt-pp':v=>star('rtp','ps',v)});
+{const g0=A['rt-go'];A['rt-go']=(v,el)=>{if(!RTS)return g0(v,el);const bs=RTS.bs||0,ps=RTS.ps||0,p=(($('#r-p')||{}).value||'').trim(),n=(S.rt||[]).length;
+if(RTS.s&&p&&!ps)return toast('Beri bintang untuk produk, atau pilih "Tidak menilai produk"');
+const r=g0(v,el),L=S.rt||[];if(L.length>n){const l=L[L.length-1];l.bs=bs;if(p){l.pn=p;l.ps=ps}}return r}}
+function ratX(){const L=S.rt||[],avg=a=>(a.reduce((n,x)=>n+x,0)/a.length).toFixed(1),
+B=BR.map((n,i)=>[n,L.filter(x=>x.bi==i&&bsv(x)>0).map(bsv)]).filter(a=>a[1].length),P={};L.forEach(x=>{if(x.pn&&x.ps>0)(P[x.pn]=P[x.pn]||[]).push(x.ps)});
+const li=(n,a)=>`<div class="lst"><span>${esc(n)}<div class="mu sm">${a.length} ulasan</div></span><b>★ ${avg(a)}</b></div>`;
+return `<div class="mono sec">penilaian per barber</div><div class="cd">${B.map(([n,a])=>li(n,a)).join('')||emp('Belum ada penilaian barber.')}</div><div class="mono sec">penilaian per produk</div><div class="cd">${Object.entries(P).map(([n,a])=>li(n,a)).join('')||emp('Belum ada penilaian produk.')}</div>`}
+{const r0=R.adm.rat;R.adm.rat=()=>r0()+ratX()}
+/* ===== foto produk ===== */
+const pimgH=p=>{const g=((S.pimg||{})[p.sid||p.id]||{}).g;return g?`<div class="pim" style="background-image:url(${g})"></div>`:`<div class="pim">${I.bag}</div>`};
+function shrink(f,cb){const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const m=Math.min(im.width,im.height),c=document.createElement('canvas');c.width=c.height=240;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,240,240);
+x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,240,240);URL.revokeObjectURL(u);let q=.8,d;do{d=c.toDataURL('image/jpeg',q);q-=.1}while(d.length>20000&&q>.3);cb(d.length>42000?null:d)};im.onerror=()=>cb(null);im.src=u}
+let PIM={dirty:0};ADM.add('pk-x');
+{const e0=A['pd-e'];A['pd-e']=(v,el)=>{e0(v,el);PIM={dirty:0};const i=+el.dataset.id,p=S.prod[i],g=p&&((S.pimg||{})[p.sid||p.id]||{}).g,b=document.querySelector('#sh [data-a="pd-go"]');
+if(b)b.insertAdjacentHTML('beforebegin',`<div class="mono sec" style="margin-top:14px">foto produk (opsional)</div><div class="pik"><div class="pim" id="pk-v" style="width:84px;height:84px;margin:0;flex:none;${g?'background-image:url('+g+')':''}"></div><div><label class="chip" style="cursor:pointer;display:inline-block;margin:0">Pilih foto<input id="pk-f" type="file" accept="image/*" style="display:none"></label> <button type="button" class="chip" data-a="pk-x">Hapus</button><div class="mu sm" id="pk-i" style="margin-top:6px">Dipotong persegi dan dikecilkan otomatis.</div></div></div>`)}}
+document.addEventListener('change',e=>{if(e.target.id!='pk-f'||!e.target.files[0])return;shrink(e.target.files[0],g=>{if(!g)return toast('Foto tidak bisa diproses');PIM={dirty:1,g};$('#pk-v').style.backgroundImage=`url(${g})`;$('#pk-i').textContent='Foto siap disimpan ('+Math.round(g.length/1024)+' KB)'})});
+A['pk-x']=()=>{PIM={dirty:1,g:''};const v=$('#pk-v');if(v)v.style.backgroundImage='none';return 0};
+{const g0=A['pd-go'];A['pd-go']=(v,el)=>{const ok=clean(val('d-n'))&&num('d-p'),i=+el.dataset.id,r=g0(v,el);
+if(ok&&PIM.dirty){const p=i<0?S.prod[S.prod.length-1]:S.prod[i];if(p){if(p.id==null)p.id=nid();const P=S.pimg=S.pimg||{};if(PIM.g)P[p.id]={v:'local',g:PIM.g};else{delete P[p.id];p.gv=''}p._gd=1}}PIM={dirty:0};return r}}
+{const a1=ack;ack=function(o,r){a1(o,r);if(o.sh=='Produk'&&o.op!='del'&&r&&r.ok&&!r.conflict&&o.row&&o.row.gambar!==undefined){const l=(S.prod||[]).find(x=>x.id==o.id);if(l&&l._gd){delete l._gd;SYN.sn['prod|'+o.id]={h:JSON.stringify(MAP.Produk.to(l)),sh:'Produk'}}}}}
+async function imgSync(){const P=S.pimg=S.pimg||{},key=x=>x.sid||x.id;Object.keys(P).forEach(id=>{if(!(S.prod||[]).some(x=>key(x)==id))delete P[id]});
+const need=(S.prod||[]).filter(x=>key(x)&&x.gv&&!x._gd&&(!P[key(x)]||P[key(x)].v!=x.gv)).slice(0,12);if(!need.length||!NET.on)return;
+try{const r=await api({a:'pimg',ids:need.map(key)});if(r&&r.ok){need.forEach(x=>{const g=r.img[key(x)];if(g)P[key(x)]={v:x.gv,g}});save();ui()}}catch(e){}}
+{const p0=pull;pull=async function(){await p0();await imgSync()}}
 /* boot */
 loadU();
 const boot=(async()=>{try{}catch(e){}
