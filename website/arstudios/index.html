@@ -503,6 +503,13 @@ nav button.on {
 .tk .amt {
   font-size:58px
 }
+.dk.tk{display:block;width:auto;max-width:none;box-sizing:border-box;overflow:hidden;overflow-wrap:break-word;word-break:normal}
+.dk.tk .amt{font-size:clamp(34px,14vw,58px);line-height:1.1;margin:8px 0 6px}
+.dk.tk .ln{gap:14px;text-align:left}
+.dk.tk .ln span{min-width:0}
+.dk.tk .ln b{text-align:right;flex:none;max-width:60%}
+.dk.tk .mu{overflow-wrap:break-word}
+@media(max-width:360px){.dk.tk{padding:18px 14px}}
 #ld {
   position:fixed;
   inset:0;
@@ -1664,7 +1671,7 @@ input,textarea,select {
   -webkit-user-select:text;
   user-select:text
 }
-.tk {
+.tk:not(.dk) {
   display:flex;
   align-items:center;
   justify-content:center;
@@ -1679,11 +1686,11 @@ input,textarea,select {
   background:#d3ecd9;
   color:#1d5a30
 }
-.tk.c {
+.tk.c:not(.dk) {
   background:#f3d6d1;
   color:#8a2a1c
 }
-.tk i {
+.tk:not(.dk) i {
   width:7px;
   height:7px;
   border-radius:50%;
@@ -2324,6 +2331,7 @@ const toast=m=>{
   toast.k=setTimeout(()=>t.classList.remove('on'),1800)
 };
 const sheet=(t,h)=>{
+  $('#sh').classList.remove('pay');
   try{FXS('open')}catch(e){}
   $('#sh').innerHTML=`<div class="bd" data-a="close"></div><div class="pn"><i class="hd"></i><div class="sr"><h2>${t}</h2><button class="ib" data-a="close" aria-label="Tutup">${I.x}</button></div>${h}</div>`;
   [...$('#sh .pn').children].forEach((c,i)=>c.style.setProperty('--k',i));
@@ -2366,7 +2374,7 @@ function dash(){
 <div class="ln" style="margin-top:6px"><span>Setelah pengeluaran pribadi</span><b>${rp(rev-ex)}</b></div></div>
 <div class="g2 g4"><div class="cd st"><div class="mono">transaksi</div><b>${tx.length}</b><div class="mu sm">layanan + produk</div></div><div class="cd st"><div class="mono">pelanggan</div><b>${jasa.length}</b><div class="mu sm">dilayani</div></div>
 <div class="cd st"><div class="mono">penjualan produk</div><b>${rp(pr)}</b><div class="mu sm">${Math.round(pr/Math.max(rev,1)*100)}% dari omzet</div></div><div class="cd st"><div class="mono">pengeluaran pribadi</div><b>${rp(ex)}</b><div class="mu sm">periode ini</div></div></div>
-<div class="cd"><div class="row"><b>Top barber</b><span class="mono">${{1:'hari ini',7:'7 hari',30:'30 hari'}[S.rng]}</span></div>${tb.map(b=>`<div class="lst" style="display:block"><div class="row"><span class="row"><span class="av">${ini(b.n)}</span><span>${b.n}<div class="mu sm">${b.c} pelanggan</div></span></span><b>${rp(b.a)}</b></div><div class="bar"><i style="width:${b.a/tm*100}%"></i></div></div>`).join('')}</div>`
+<div class="cd"><div class="row"><b>Top barber</b><span class="mono">${{1:'hari ini',7:'7 hari',30:'30 hari'}[S.rng]}</span></div>${tb.map(b=>`<div class="lst" style="display:block"><div class="row"><span class="row">${avC(pfb(b.i).id,b.n)}<span>${b.n}<div class="mu sm">${b.c} pelanggan</div></span></span><b>${rp(b.a)}</b></div><div class="bar"><i style="width:${b.a/tm*100}%"></i></div></div>`).join('')}</div>`
 }
 function queue(){
   const q=S.q,t=S.qt,n=s=>q.filter(x=>x.st==s).length;
@@ -2389,8 +2397,8 @@ const cartN=()=>Object.values(S.cart).reduce((a,b)=>a+b,0),
 function prod(cus){
   const bar=cus&&BR.length&&(!isC()||VS().bs)?`<div class="mono sec">barber kami</div><div class="cd"><div class="bsr">${BR.map((n,i)=>{
     if(vHid(i))return'';
-    const q=pfb(i);
-    return `<div class="bsi" data-a="pf-vb" data-i="${i}">${avC(q.id,n)}<span>${esc(n)}</span></div>`
+    const q=pfb(i),tt=TB(),gone=tt.on&&tt.n&&(tt.bi==i||String(tt.n).trim().toLowerCase()==String(n).trim().toLowerCase());
+    return `<div class="bsi${gone?' gone':''}" data-a="pf-vb" data-i="${i}"${gone?' title="Tampil sebagai terbaik sepanjang masa"':''}>${avC(q.id,n)}<span>${esc(n)}</span></div>`
   }).join('')}</div>${tbHtml()}</div>`:'';
   const tp=S.tx.filter(x=>x.y=='p'&&x.t>=new Date().setHours(0,0,0,0));
   return head(cus?'Layanan & Produk':'Produk',cus?'Harga resmi barbershop':'Penjualan produk · '+today,cus||S.role!='adm'?'':`<button class="btn s k" data-a="pd-e" data-id="-1">+ Produk</button>`)+(cus?`<div class="cd">${SV.map(s=>`<div class="lst"><span>${s.n}<div class="mu sm">${s.m} menit</div></span><b>${rp(s.p)}</b></div>`).join('')}</div><div class="mono sec">produk tersedia</div>`:'')+
@@ -2425,7 +2433,7 @@ else if(me){
     top=`<div class="dk tk"><div class="mono">selesai</div><div class="amt">Terima kasih</div><div>Sampai jumpa lagi, ${me.name}.</div></div><button class="btn" data-a="cn">Ambil antrian baru</button>`
   }
 else top=`<div class="cd"><div class="mono">ambil nomor antrian</div><label>Nama<input id="f-n" placeholder="Nama anda" autocomplete="name" value="${CU.guest?'':CU.name}"></label><label>Layanan<select id="f-s">${opts(SV,0)}</select></label><label>Barber<select id="f-b">${optsC('Siapa saja')}</select></label><button class="btn" data-a="cq-go">Ambil nomor</button></div>`;
-  return head('Antrian',today)+`<div class="g2"><div class="cd st"><div class="mono">sedang dilayani</div><b>${cur?cur.no:'-'}</b></div><div class="cd st"><div class="mono">menunggu</div><b>${w.length} orang</b></div></div>`+top+rtc()+`<div class="mono sec">antrian saat ini</div><div class="cd">${S.q.filter(x=>x.st=='wait'||x.st=='chair').sort((a,b)=>a.t-b.t).map(x=>`<div class="lst"><span>${x.no} · ${x.name.split(' ')[0]} ${x.name.split(' ')[1]?x.name.split(' ')[1][0]+'.':''}<div class="mu sm">${sv(x.svc).n}</div></span><span class="chip ${x.st=='chair'?'g':'w'}">${x.st=='chair'?'Di kursi':'Menunggu'}</span></div>`).join('')||'<span class="mu">Tidak ada antrian. Silakan langsung datang.</span>'}</div>`
+  return head('Antrian',today)+`<div class="g2"><div class="cd st"><div class="mono">sedang dilayani</div><b>${cur?cur.no:'-'}</b></div><div class="cd st"><div class="mono">menunggu</div><b>${w.length} orang</b></div></div>`+top+rtc()+`<div class="mono sec">antrian saat ini</div><div class="cd">${S.q.filter(x=>x.st=='wait'||x.st=='chair').sort((a,b)=>a.t-b.t).map(x=>`<div class="lst"><span style="display:flex;align-items:center;gap:10px">${avh(x.uid,x.name)}<span>${x.no} · ${x.name.split(' ')[0]} ${x.name.split(' ')[1]?x.name.split(' ')[1][0]+'.':''}<div class="mu sm">${sv(x.svc).n}</div></span></span><span class="chip ${x.st=='chair'?'g':'w'}">${x.st=='chair'?'Di kursi':'Menunggu'}</span></div>`).join('')||'<span class="mu">Tidak ada antrian. Silakan langsung datang.</span>'}</div>`
 }
 function cb(){
   if(CU.guest){
@@ -2440,9 +2448,12 @@ const fN=`<label>Nama pelanggan<input id="f-n" placeholder="Nama"></label>`,
   fS=`<label>Layanan<select id="f-s">${opts(SV,0)}</select></label>`,
   fB=`<label>Barber<select id="f-b">${opts(BR,-1,'Pilih barber…')}</select></label>`;
 let PAY;
-function payOpen(lines,total,done){
+function payOpen(lines,total,done,meta){
   PAY={done,m:'cash',total};
-  sheet('Pembayaran',`<div class="dk"><div class="mono">untuk dibayar</div><div class="amt">${rp(total)}</div>${lines.map(l=>`<div class="ln"><span>${l[0]}</span><span>${rp(l[1])}</span></div>`).join('')}</div><div class="mono sec">metode pembayaran</div><div class="g2"><button class="mt on" data-a="pm" data-v="cash">Tunai</button><button class="mt" data-a="pm" data-v="qris">QRIS</button></div><div id="cash"><label>Diterima<input id="rcv" inputmode="numeric" placeholder="0"></label><div class="row" style="margin-top:8px"><span class="mu">Kembalian</span><b id="chg">Rp 0</b></div></div><div id="qr" class="mu sm" hidden style="margin-top:12px">Tunjukkan kode QRIS ke pelanggan, lalu konfirmasi setelah pembayaran masuk.</div><button class="btn" data-a="paygo">Konfirmasi pembayaran</button>`)
+  meta=meta||{};
+  const qk=[...new Set([total,Math.ceil(total/50000)*50000,Math.ceil(total/100000)*100000])].filter(x=>x>0).slice(0,3);
+  sheet(meta.title||'Pembayaran',(meta.t?`<div class="pyh">${meta.h||''}<div><b>${meta.t}</b><div class="mu sm">${meta.s||''}</div></div></div>`:'')+`<div class="dk"><div class="mono">untuk dibayar</div><div class="amt">${rp(total)}</div>${lines.map(l=>`<div class="ln"><span>${l[0]}</span><span>${rp(l[1])}</span></div>`).join('')}</div><div class="mono sec">metode pembayaran</div><div class="g2"><button class="mt on" data-a="pm" data-v="cash">Tunai</button><button class="mt" data-a="pm" data-v="qris">QRIS</button></div><div id="cash"><label>Diterima<input id="rcv" inputmode="numeric" placeholder="0"></label><div class="pyq">${qk.map((x,i)=>`<button class="chip" data-a="pq" data-v="${x}">${i==0?'Uang pas':rp(x)}</button>`).join('')}</div><div class="row" style="margin-top:8px"><span class="mu">Kembalian</span><b id="chg">Rp 0</b></div></div><div id="qr" class="mu sm" hidden style="margin-top:12px">Tunjukkan kode QRIS ke pelanggan, lalu konfirmasi setelah pembayaran masuk.</div><button class="btn" data-a="paygo">Konfirmasi pembayaran</button>`);
+  $('#sh').classList.add('pay')
 }
 const val=id=>($('#'+id)||{}).value;
 const A={
@@ -2466,6 +2477,10 @@ const A={
   rng(v){
     S.rng=+v
   },
+  rwj(v){S.rj=v;S.rl=40},
+  rwp(v){S.rp=v;S.rv='';S.rl=40},
+  rwv(v){S.rv=v;S.rl=40},
+  rwm(){S.rl=(S.rl||40)+60},
   qt(v){
     S.qt=v
   },
@@ -2494,7 +2509,7 @@ const A={
       x.pa=s.p;
       S.tx.push({t:Date.now(),y:'j',a:s.p,b:Math.max(x.b,0),n:s.n});
       S.qt='done'
-    })
+    },{title:'Pembayaran layanan',h:avh(x.uid,x.name),t:esc(x.name),s:esc((x.no?x.no+' · ':'')+s.n+' · '+(BR[x.b]||'Barber belum dipilih'))})
   },
   qx(v,el){
     S.q=S.q.filter(x=>x.id!=el.dataset.id)
@@ -2581,7 +2596,12 @@ const A={
       Object.entries(S.cart).forEach(([i,n])=>S.prod[i].s-=n);
       S.tx.push({t:Date.now(),y:'p',a:cartT(),b:-1,n:nm});
       S.cart={}
-    })
+    },{title:'Pembelian produk',h:`<span class="av">${I.bag}</span>`,t:cartN()+' produk',s:'Penjualan produk'})
+  },
+  pq(v){
+    const e=$('#rcv');if(!e)return;
+    e.value=String(v).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    $('#chg').textContent=rp(Math.max(0,+v-PAY.total))
   },
   pm(v,el){
     PAY.m=v;
@@ -2641,6 +2661,13 @@ function addQ(name,svc,b,src){
 const R={adm:{dash,queue:()=>S.qv=='b'?book():queue(),prod:()=>prod(0),exp},kry:{queue:()=>S.qv=='b'?book():queue(),me:()=>mine(),prod:()=>prod(0),svc:()=>prod(1)},cus:{queue:()=>S.qv=='b'?cb():cq(),svc:()=>prod(1)}};
 function render(){
   if(!CU)return;
+  /* rekam posisi titik (pill) yang sedang tampil, sebelum DOM diganti, supaya animasi mulai dari halaman terakhir */
+  document.querySelectorAll('.seg').forEach((sg,i)=>{
+    const pl=sg.querySelector('.pl'),b=sg.children[1];
+    if(!pl||!b)return;
+    const cs=getComputedStyle(pl),w=parseFloat(cs.width),l=parseFloat(cs.left);
+    if(w>0&&!isNaN(l))pm[b.dataset.a+':'+i]={l,w}
+  });
   const r=S.role,tab=S.tab[r],m=$('#mn'),sc=m.scrollTop;
   if(!R[r][tab])S.tab[r]=Object.keys(R[r])[0];
   const kk=r+S.tab[r]+(S.tab[r]=='queue'?S.qv||'q':'');
@@ -2715,10 +2742,10 @@ function render(){
 function post(){
   dkApply();
   $('#nv').classList.toggle('sw',ANIM);
-  document.querySelectorAll('.seg').forEach(s=>{
+  document.querySelectorAll('.seg').forEach((s,i)=>{
     const on=s.querySelector('.on'),pl=s.querySelector('.pl');
-    if(!on||!pl)return;
-    const k=s.children[1].dataset.a,pv=pm[k];
+    if(!on||!pl||!on.offsetWidth)return;
+    const k=s.children[1].dataset.a+':'+i,pv=pm[k];
     if(pv&&!RM){
       pl.style.left=pv.l+'px';
       pl.style.width=pv.w+'px';
@@ -2973,7 +3000,7 @@ addEventListener('resize',()=>{
 /* ===== AUTH & ROLES ===== */
 const UK='ars_users',SK='ars_sess',ROL={adm:'Admin',kry:'Karyawan',cus:'Pelanggan'};
 const ADM=new Set(['tx-d','rt-d','pd-e','pd-go','pd-d','sv-d','ml-n','ml-go','ml-d','fab-e','e-go','ex-del','usr','usr-new','usr-go','usr-del','usr-pw','usr-pw-go']),
-  STF=new Set(['pf-vt','qb','qs','qp','qx','bk','bx','bc','fab','fab-q','q-go','fab-p','cp','cm','co','pm','paygo']);
+  STF=new Set(['pf-vt','qb','qs','qp','qx','bk','bx','bc','fab','fab-q','q-go','fab-p','cp','cm','co','pm','pq','paygo']);
 const xs=v=>String(v==null?'':v).replace(/[<>&"'`\\]/g,''),
   clean=s=>String(s||'').replace(/[<>&"'`\\]/g,'').replace(/\s+/g,' ').trim().slice(0,40),
   first=n=>String(n||'').split(' ')[0];
@@ -3383,9 +3410,44 @@ const KD=()=>S.kd==null?40:+S.kd,
   emp=t=>`<span class="mu">${t}</span>`,
   KR=()=>AU().filter(x=>x.role=='kry');
 function riw(){
-  const TX=CU.role=='kry'?S.tx.filter(x=>x.b==CU.bi&&x.y=='j'):S.tx;
-  const t0=new Date().setHours(0,0,0,0),l=TX.slice().reverse().slice(0,60),td=TX.filter(x=>x.t>=t0);
-  return head('Riwayat',CU.role=='kry'?'Layanan yang anda kerjakan':'Transaksi terbaru')+`<div class="g2">${st('hari ini',rp(tot(td)),td.length+' transaksi')}${st('total tercatat',rp(tot(TX)),TX.length+' transaksi')}</div><div class="mono sec">daftar transaksi</div><div class="cd">${l.map(x=>row(x.n,new Date(x.t).toLocaleDateString('id-ID',{day:'numeric',month:'short'})+' '+jam(x.t)+' · '+(x.y=='j'?BR[x.b]||'Jasa':'Produk'),`<b>${rp(x.a)}</b>`,CU.role=='adm'?`<button class="x" data-a="tx-d" data-i="${S.tx.indexOf(x)}" aria-label="Hapus">${I.x}</button>`:'')).join('')||emp('Belum ada transaksi.')}</div>`
+  const kry=CU.role=='kry',
+    ALL=(kry?S.tx.filter(x=>x.b==CU.bi&&x.y=='j'):S.tx).filter(x=>x&&x.t),
+    jn=kry?'j':(S.rj||'all'),pr=S.rp||'all',
+    pk=(t,m)=>{const d=new Date(t),y=d.getFullYear(),mo=String(d.getMonth()+1).padStart(2,'0');return m=='y'?''+y:m=='m'?y+'-'+mo:y+'-'+mo+'-'+String(d.getDate()).padStart(2,'0')},
+    pl=(k,m)=>{
+      const a=k.split('-').map(Number);
+      return m=='y'?k:m=='m'?new Date(a[0],a[1]-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'}):new Date(a[0],a[1]-1,a[2]).toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'})
+    },
+    byJ=ALL.filter(x=>jn=='all'||x.y==jn),
+    keys=pr=='all'?[]:[...new Set(byJ.map(x=>pk(x.t,pr)))].sort().reverse();
+  let sel=S.rv;
+  if(pr!='all'&&!keys.includes(sel)){
+    const cur=pk(Date.now(),pr);
+    sel=keys.includes(cur)?cur:keys[0]
+  }
+  const rows=(pr=='all'?byJ:byJ.filter(x=>pk(x.t,pr)==sel)).slice().sort((a,b)=>b.t-a.t),
+    lim=S.rl||40,vis=rows.slice(0,lim),
+    t0=new Date().setHours(0,0,0,0),td=ALL.filter(x=>x.t>=t0),
+    sj=rows.filter(x=>x.y=='j'),sp=rows.filter(x=>x.y=='p'),
+    dk=t=>new Date(t).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  let last='',body='';
+  vis.forEach(x=>{
+    const k=pk(x.t,'d');
+    if(k!=last){
+      last=k;
+      const dd=rows.filter(z=>pk(z.t,'d')==k);
+      body+=`<div class="row" style="margin:14px 0 2px"><span class="mono">${dk(x.t)}</span><span class="mono">${rp(tot(dd))}</span></div>`
+    }
+    body+=row(x.n,jam(x.t)+' · '+(x.y=='j'?'Layanan · '+(BR[x.b]||'Jasa'):'Produk'),`<b>${rp(x.a)}</b>`,CU.role=='adm'?`<button class="x" data-a="tx-d" data-i="${S.tx.indexOf(x)}" aria-label="Hapus">${I.x}</button>`:'')
+  });
+  const per=pr=='all'?'Semua periode':pl(sel,pr);
+  return head('Riwayat',kry?'Layanan yang anda kerjakan':'Semua transaksi yang tercatat')
+  +`<div class="g2">${st('hari ini',rp(tot(td)),td.length+' transaksi')}${st('total tercatat',rp(tot(ALL)),ALL.length+' transaksi')}</div>`
+  +(kry?'':`<div class="mono sec">jenis</div>`+seg('rwj',[['all','Semua'],['j','Layanan'],['p','Produk']],jn))
+  +`<div class="mono sec">periode</div>`+seg('rwp',[['d','Hari'],['m','Bulan'],['y','Tahun'],['all','Semua']],pr)
+  +(pr=='all'?'':`<select data-a="rwv" style="margin-top:10px">${keys.map(k=>`<option value="${k}"${k==sel?' selected':''}>${pl(k,pr)}</option>`).join('')||'<option>Belum ada data</option>'}</select>`)
+  +`<div class="cd" style="margin-top:12px"><div class="row"><b>${per}</b><span class="mono">${rows.length} transaksi</span></div><div class="lst"><span class="mu">Total</span><b>${rp(tot(rows))}</b></div>${jn=='all'?`<div class="lst"><span class="mu">Layanan · ${sj.length}</span><span>${rp(tot(sj))}</span></div><div class="lst"><span class="mu">Produk · ${sp.length}</span><span>${rp(tot(sp))}</span></div>`:''}</div>`
+  +`<div class="mono sec">daftar transaksi</div><div class="cd">${body||emp('Belum ada transaksi.')}${rows.length>lim?`<button class="btn s o" style="width:100%;margin-top:12px" data-a="rwm">Tampilkan lebih banyak (${rows.length-lim} lagi)</button>`:''}</div>`
 }
 function pel(){
   const c=AU().filter(x=>x.role=='cus'),g=S.q.filter(x=>x.src=='Tamu').length;
@@ -3756,7 +3818,16 @@ const PF=()=>S.pf=S.pf||{},
   acc=id=>id==null?null:(CU&&CU.id==id?CU:AU().find(x=>x.id==id)||null),
   cln=(v,n)=>String(v||'').replace(/[<>&"'`\\]/g,'').replace(/\s+/g,' ').trim().slice(0,n),
   pfb=i=>{
-    const o=PF(),k=Object.keys(o).find(k=>o[k].bn&&o[k].bn==BR[i]);
+    const o=PF(),nm=String(BR[i]||'').trim().toLowerCase();
+    let k=Object.keys(o).find(k=>o[k].bn&&String(o[k].bn).trim().toLowerCase()==nm);
+    if(!k){
+      const a=AU().find(x=>x.role=='kry'&&x.bi==i&&o[x.id]);
+      if(a)k=a.id
+    }
+    if(!k){
+      const a=AU().find(x=>x.role=='kry'&&x.bi==i);
+      if(a)return Object.assign({id:a.id},o[a.id]||{})
+    }
     return k?Object.assign({id:k},o[k]):{}
   },
   okv=v=>/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v)?v:'';
@@ -4166,6 +4237,7 @@ rs(TM,'tm');
 function dbApply(r){
   if((r.Profil||[]).length)pfMerge(r.Profil,false);
   if(r.RB)S.rb=r.RB;
+  if(r.RBM)S.rbm=r.RBM;
   if(S.mdDirty&&(CU?CU.role=='adm':S.role=='adm'))return;
   const kv={};
   (r.Pengaturan||[]).forEach(x=>kv[x.kunci]=x.nilai);
@@ -4205,7 +4277,7 @@ function dbApply(r){
   {
     const ix=v=>v===''||v==null||isNaN(+v)?-1:+v;
     if(kv.terbaik_mode!==undefined||kv.tsm_aktif!==undefined){
-      S.tb={m:['auto','man','off'].includes(kv.terbaik_mode)?kv.terbaik_mode:'auto',i:ix(kv.terbaik_barber),min:Math.max(1,+kv.terbaik_min||3),on:String(kv.tsm_aktif)=='1',n:String(kv.tsm_nama||''),bi:ix(kv.tsm_barber),c:String(kv.tsm_catatan||'')}
+      S.tb={m:['auto','man','off'].includes(kv.terbaik_mode)?kv.terbaik_mode:'auto',i:ix(kv.terbaik_barber),min:Math.max(1,+kv.terbaik_min||3),on:String(kv.tsm_aktif)=='1',n:String(kv.tsm_nama||''),bi:ix(kv.tsm_barber),c:String(kv.tsm_catatan||''),am:(()=>{try{return JSON.parse(kv.terbaik_bulan)}catch(e){return undefined}})()}
     }
   }
   save()
@@ -4233,7 +4305,7 @@ function dbPush(f){
         l=LO(),
         kv={outlet_nama:o.n,alamat:o.a,jam_operasional:o.h,mode_toko:o.m||'auto',loyalti_rate:l.rate,loyalti_nilai:l.val,loyalti_min:l.min,loyalti_bonus:l.bonus,loyalti_bulan:l.exp,pintasan:(S.pin||[]).join(','),barber_hari_ini:S.duty?S.duty.d+'|'+S.duty.ids.join(','):undefined,komisi:JSON.stringify(S.kom||{}),komisi_default:KD(),...(()=>{
           const t=TB();
-          return{terbaik_mode:t.m,terbaik_barber:t.i<0?'':t.i,terbaik_min:t.min,tsm_aktif:t.on?'1':'0',tsm_nama:t.n,tsm_barber:t.bi<0?'':t.bi,tsm_catatan:t.c}
+          return{terbaik_mode:t.m,terbaik_barber:t.i<0?'':t.i,terbaik_min:t.min,terbaik_bulan:t.am?JSON.stringify(t.am):'',tsm_aktif:t.on?'1':'0',tsm_nama:t.n,tsm_barber:t.bi<0?'':t.bi,tsm_catatan:t.c}
         })(),...(()=>{
           const v=VS();
           return{vis_rating:v.rt?'1':'0',vis_ulasan:v.ul?'1':'0',vis_foto:v.ft?'1':'0',vis_profil:v.pf?'1':'0',vis_staf_rating:v.sr?'1':'0',vis_sembunyi:v.hid.join(','),vis_tanpa_booking:v.nb.join(','),vis_barber:v.bs?'1':'0',vis_kartu_tb:v.tk?'1':'0'}
@@ -4257,11 +4329,23 @@ function dbPush(f){
 }
 /* karyawan terbaik: semua isi dan pilihan diatur admin lewat Outlet, tidak ada data tetap di kode */
 const TB=()=>Object.assign({m:'auto',i:-1,min:3,on:false,n:'',bi:-1,c:''},S.tb||{});
-function bStats(){
-  const m={};
+const mKey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)};
+function bStats(mo){
+  const m={},ms=new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime();
+  if(mo&&!(CU&&CU.role!='cus'&&!CU.guest)){
+    const rm=S.rbm;
+    if(rm&&rm.k==mKey()){
+      Object.keys(rm.d||{}).forEach(k=>{const x=rm.d[k];if(x&&+x.n>0)m[k]={n:+x.n,a:+x.a}});
+      return m
+    }
+    const am=(S.tb||{}).am;
+    if(am&&am.k==mKey()&&am.i>=0&&+am.n>0)m[am.i]={n:+am.n,a:+am.a};
+    return m
+  }
   if(CU&&CU.role!='cus'&&!CU.guest&&(S.rt||[]).length){
     (S.rt||[]).forEach(a=>{
       const v=bsv(a);
+      if(mo&&!(a.t>=ms))return;
       if(v>0&&a.bi>=0){
         const z=m[a.bi]=m[a.bi]||{n:0,s:0};
         z.n++;
@@ -4271,14 +4355,14 @@ function bStats(){
     Object.keys(m).forEach(k=>{
       m[k].a=m[k].s/m[k].n
     })
-  }else Object.keys(S.rb||{}).forEach(k=>{
+  }else if(!mo)Object.keys(S.rb||{}).forEach(k=>{
     const x=S.rb[k];
     if(x&&+x.n>0)m[k]={n:+x.n,a:+x.a}
   });
   return m
 }
 function tb1(){
-  const t=TB(),st=bStats();
+  const t=TB(),st=bStats(1);
   if(t.m=='off')return null;
   if(t.m=='man'){
     if(t.i<0||!BR[t.i])return null;
@@ -4291,6 +4375,11 @@ function tb1(){
     if(!BR[i]||x.n<t.min)return;
     if(!b||x.a>b.a||(x.a==b.a&&x.n>b.n))b={i,a:x.a,n:x.n}
   });
+  /* staf menghitung pemenang bulan ini lalu membagikannya ke pelanggan lewat pengaturan */
+  if(CU&&CU.role!='cus'&&!CU.guest&&(S.rt||[]).length>=0){
+    const am=b?{k:mKey(),i:b.i,a:Math.round(b.a*100)/100,n:b.n}:{k:mKey(),i:-1,a:0,n:0},o=(S.tb||{}).am;
+    if(!o||o.k!=am.k||o.i!=am.i||o.n!=am.n||o.a!=am.a){S.tb=Object.assign(TB(),{am});save()}
+  }
   return b
 }
 function tbHtml(){
@@ -4300,7 +4389,7 @@ function tbHtml(){
   let h='';
   if(a){
     const q=pfb(a.i);
-    h+=`<div class="tbi" data-a="pf-vb" data-i="${a.i}"><div class="mono tbl">Karyawan terbaik</div>${avC(q.id,BR[a.i])}<b>${esc(BR[a.i])}</b><span class="mu sm">${canRt()&&a.n?'★ '+a.a.toFixed(1)+(!isC()||VS().ul?' · '+a.n+' ulasan':''):(a.n?'':'Pilihan admin')}</span></div>`
+    h+=`<div class="tbi" data-a="pf-vb" data-i="${a.i}"><div class="mono tbl">Karyawan terbaik · ${new Date().toLocaleDateString('id-ID',{month:'long',year:'numeric'})}</div>${avC(q.id,BR[a.i])}<b>${esc(BR[a.i])}</b><span class="mu sm">${canRt()&&a.n?'★ '+a.a.toFixed(1)+(!isC()||VS().ul?' · '+a.n+' ulasan':''):(a.n?'':'Pilihan admin')}</span></div>`
   }
   if(l){
     const q=l.bi>=0&&BR[l.bi]&&!vHid(l.bi)?pfb(l.bi):{};
@@ -4316,7 +4405,7 @@ A['tsm-v']=()=>{
 };
 function tbUI(){
   const t=TB(),a=tb1(),mt={auto:'Otomatis dari rating',man:'Pilih manual',off:'Disembunyikan'};
-  return `<div class="mono sec">karyawan terbaik · tampil di kartu barber</div><div class="cd"><div class="lst"><span><b>Karyawan terbaik</b><div class="mu sm">${mt[t.m]||mt.auto} · ${a?esc(BR[a.i]):'belum ada'}</div></span><button class="chip" data-a="tb-e">Atur</button></div><div class="lst"><span><b>Terbaik sepanjang masa</b><div class="mu sm">${t.on&&t.n?esc(t.n):'Belum diatur'}</div></span><button class="chip" data-a="tsm-e">Atur</button></div></div>`
+  return `<div class="mono sec">karyawan terbaik bulan ini · tampil di kartu barber</div><div class="cd"><div class="lst"><span><b>Karyawan terbaik</b><div class="mu sm">${mt[t.m]||mt.auto} · ${a?esc(BR[a.i]):'belum ada'}</div></span><button class="chip" data-a="tb-e">Atur</button></div><div class="lst"><span><b>Terbaik sepanjang masa</b><div class="mu sm">${t.on&&t.n?esc(t.n):'Belum diatur'}</div></span><button class="chip" data-a="tsm-e">Atur</button></div></div>`
 }
 A['tb-e']=()=>{
   const t=TB(),o=(k,l)=>`<option value="${k}"${t.m==k?' selected':''}>${l}</option>`;
@@ -4969,6 +5058,7 @@ async function autoRefresh(){
   try{
     await sync();
     if(!NET.on)return;
+    if(Date.now()-(autoRefresh.pt||0)>90000){autoRefresh.pt=Date.now();try{pfLoad()}catch(e){}}
     logoPulse();
     if(TK&&!busyIn())await dbLoad()
   }catch(e){}finally{RFB=false}
@@ -5851,6 +5941,37 @@ function tone(f,t0,d,v,type,f2){
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+d);
   o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.03)
 }
+/* ===== suara call bell (bel meja resepsionis): dipakai admin/karyawan DAN pelanggan ===== */
+function fxMaster(c){
+  if(!FXA.m){
+    const cp=c.createDynamicsCompressor(),g=c.createGain();
+    cp.threshold.value=-14;cp.knee.value=8;cp.ratio.value=10;cp.attack.value=.002;cp.release.value=.2;
+    g.gain.value=1.6;
+    cp.connect(g);g.connect(c.destination);FXA.m=cp
+  }
+  return FXA.m
+}
+function bell(t0,v){
+  const c=fxCtx();if(!c)return;
+  const t=c.currentTime+t0,out=c.createGain(),m=fxMaster(c);
+  out.gain.value=v;out.connect(m);
+  /* "tak" mekanis saat tombol ditekan */
+  const nb=c.createBuffer(1,Math.floor(c.sampleRate*.03),c.sampleRate),d=nb.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);
+  const ns=c.createBufferSource(),hp=c.createBiquadFilter(),ng=c.createGain();
+  ns.buffer=nb;hp.type='highpass';hp.frequency.value=2500;ng.gain.value=.9;
+  ns.connect(hp);hp.connect(ng);ng.connect(out);ns.start(t);
+  /* dering logam: partial tidak harmonik, peluruhan panjang */
+  [[2400,1,1.25],[3600,.55,1],[6620,.5,.75],[12960,.22,.45],[1480,.35,1.4],[4800,.3,.9]].forEach(([f,a,dc])=>{
+    const o=c.createOscillator(),g=c.createGain();
+    o.type='sine';o.frequency.setValueAtTime(f,t);
+    g.gain.setValueAtTime(.0001,t);
+    g.gain.exponentialRampToValueAtTime(a,t+.004);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dc);
+    o.connect(g);g.connect(out);o.start(t);o.stop(t+dc+.05)
+  })
+}
+const bell3=()=>{bell(0,.55);bell(.42,.62);bell(.84,.7)};
 const FXM={
   tap:()=>tone(900,0,.05,.045,'triangle'),
   nav:()=>{tone(620,0,.06,.05);tone(820,.05,.08,.04)},
@@ -5859,8 +5980,8 @@ const FXM={
   ok:()=>{tone(660,0,.1,.07);tone(990,.09,.16,.07)},
   err:()=>{tone(220,0,.16,.06,'sawtooth');tone(165,.12,.18,.05,'sawtooth')},
   del:()=>tone(520,0,.14,.06,'triangle',220),
-  staff:()=>[0,.24,.48].forEach(d=>{tone(880,d,.2,.16);tone(1320,d,.2,.07)}),
-  turn:()=>{const a=()=>[523,659,784,1047].forEach((f,i)=>tone(f,i*.12,.3,.17,'triangle'));a();setTimeout(a,950)},
+  staff:()=>bell3(),
+  turn:()=>bell3(),
   soft:()=>{tone(740,0,.22,.03);tone(988,.12,.28,.022)}
 };
 function FXS(n){if(!FXA.on)return;try{FXM[n]&&FXM[n]()}catch(e){}}
@@ -5897,7 +6018,7 @@ Object.assign(A,{snd:()=>{
 /* banner notifikasi: staff = ding 3x (keras), turn = giliran pelanggan, soft = info lembut */
 function ntf(kind,title,body){
   FXS(kind);
-  try{navigator.vibrate&&navigator.vibrate(kind=='turn'?[200,100,200,100,300]:kind=='staff'?[120,60,120]:[40])}catch(e){}
+  try{navigator.vibrate&&navigator.vibrate(kind=='turn'||kind=='staff'?[200,100,200,100,300]:[40])}catch(e){}
   const box=$('#ntf');if(!box)return;
   while(box.children.length>=3)box.firstChild.remove();
   const n=document.createElement('div');
@@ -5907,7 +6028,7 @@ function ntf(kind,title,body){
   const rm=()=>{if(!n.parentNode||n.classList.contains('out'))return;n.classList.add('out');setTimeout(()=>n.remove(),320)};
   n.addEventListener('click',rm);
   box.appendChild(n);
-  setTimeout(rm,kind=='turn'?12000:6000);
+  setTimeout(rm,kind=='turn'||kind=='staff'?12000:6000);
   try{if(window.Notification&&Notification.permission=='granted'&&document.visibilityState!='visible')new Notification(title,{body:body||'',tag:'ars-'+kind})}catch(e){}
 }
 const FXN={prev:null,key:null,ah:null};
@@ -5943,13 +6064,12 @@ function fxScan(){
 #ntf{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:9999;pointer-events:none;padding:0 12px}
 .nt{pointer-events:auto;cursor:pointer;width:100%;max-width:420px;display:flex;flex-direction:column;gap:2px;padding:12px 16px;border-radius:16px;background:var(--ink);color:var(--bg);border-left:4px solid var(--ac);box-shadow:0 10px 30px rgba(0,0,0,.25);animation:ntin .45s cubic-bezier(.2,.8,.2,1) both}
 .nt span{font-size:13px;opacity:.85}
-.nt.staff{border-left-color:#e8821f}
-.nt.turn{border-left-color:#2e9e5b;animation:ntin .45s cubic-bezier(.2,.8,.2,1) both,ntpl 1.6s ease-in-out .5s 4}
+.nt.turn,.nt.staff{border-left-color:#e8821f;animation:ntin .45s cubic-bezier(.2,.8,.2,1) both,ntpl 1.6s ease-in-out .5s 4}
 .nt.soft{opacity:.92}
 .nt.out{animation:ntout .3s ease forwards}
 @keyframes ntin{from{opacity:0;transform:translateY(-24px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes ntout{to{opacity:0;transform:translateY(-16px) scale(.97)}}
-@keyframes ntpl{50%{box-shadow:0 0 0 7px rgba(46,158,91,.3)}}
+@keyframes ntpl{50%{box-shadow:0 0 0 7px rgba(232,130,31,.35)}}
 @media(prefers-reduced-motion:no-preference){
   .btn:active,.chip:active,.mt:active,.ib:active,nav button.t:active{animation:prs .18s ease}
   input:focus,select:focus{animation:fcs .35s ease}
@@ -5958,6 +6078,19 @@ function fxScan(){
 @keyframes prs{50%{transform:scale(.95)}}
 @keyframes fcs{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--ac) 45%,transparent)}to{box-shadow:0 0 0 6px transparent}}
 @keyframes tkp{50%{box-shadow:0 0 0 8px color-mix(in srgb,#2e9e5b 30%,transparent)}}
+
+.sh.pay .bd{background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+.sh.pay .pn{left:50%;right:auto;bottom:auto;top:50%;width:min(420px,calc(100% - 28px));max-height:90%;border-radius:26px;padding:18px 18px 20px;box-shadow:0 24px 70px rgba(0,0,0,.4);opacity:0;transform:translate(-50%,-44%) scale(.9);transition:transform .38s cubic-bezier(.2,.9,.25,1.15),opacity .25s}
+.sh.pay.on .pn{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.sh.pay .hd{display:none}
+.pyh{display:flex;align-items:center;gap:12px;margin:2px 0 12px}
+.pyh .av{width:44px;height:44px;font-size:14px}
+.pyh .av svg{width:20px;height:20px;stroke:#fff;fill:none}
+.pyq{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+.bsi.gone .av{position:relative;filter:grayscale(1)}
+.bsi.gone .av::after{content:'';position:absolute;inset:0;border-radius:50%;background:rgba(110,110,110,.62)}
+.bsi.gone>span:last-child{opacity:.5}
 </style>
 
 </body>
