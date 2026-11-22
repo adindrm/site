@@ -2127,12 +2127,7 @@ header .gb:active {
   line-height:1.3;
   text-align:center
 }
-.tbi .tbl .i {
-  width:12px;
-  height:12px;
-  flex:none;
-  color:var(--ac)
-}
+
 .tbi .av {
   width:52px;
   height:52px;
@@ -2294,6 +2289,7 @@ const head=(t,sub,act='')=>`<div class="ph"><div><h1>${t}</h1><div class="mu sm"
 const fToday=()=>new Date().toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 let today=fToday();
 const toast=m=>{
+  try{FXT(m)}catch(e){}
   const t=$('#toast');
   t.textContent=m;
   t.classList.add('on');
@@ -2301,6 +2297,7 @@ const toast=m=>{
   toast.k=setTimeout(()=>t.classList.remove('on'),1800)
 };
 const sheet=(t,h)=>{
+  try{FXS('open')}catch(e){}
   $('#sh').innerHTML=`<div class="bd" data-a="close"></div><div class="pn"><i class="hd"></i><div class="sr"><h2>${t}</h2><button class="ib" data-a="close" aria-label="Tutup">${I.x}</button></div>${h}</div>`;
   [...$('#sh .pn').children].forEach((c,i)=>c.style.setProperty('--k',i));
   requestAnimationFrame(()=>{
@@ -2308,7 +2305,11 @@ const sheet=(t,h)=>{
     if(!RM)cnt($('#sh .pn'))
   })
 };
-const close=()=>$('#sh').classList.remove('on');
+const close=()=>{
+  const s=$('#sh');
+  if(s.classList.contains('on'))try{FXS('close')}catch(e){}
+  s.classList.remove('on')
+};
 function range(){
   const d0=new Date().setHours(0,0,0,0),days=S.rng,st=d0-(days-1)*D;
   return{st,days,en:st+days*D}
@@ -2391,7 +2392,7 @@ function cq(){
   let top;
   if(me&&me.st!='done'){
     const ah=w.filter(x=>x.t<me.t),eta=ah.reduce((a,x)=>a+sv(x.svc).m,0)+(cur&&me.st=='wait'?15:0);
-    top=`<div class="dk tk"><div class="mono">nomor antrian anda</div><div class="amt">${me.no}</div><div>${me.name} · ${sv(me.svc).n}</div>${CU.guest?'<div class="mu sm" style="margin-top:10px;color:#a79c8f">Catat nomor ini. Setelah halaman ditutup, nomor tidak bisa dilihat lagi.</div>':''}<div class="ln" style="margin-top:14px"><span>${me.st=='chair'?'Status':'Di depan anda'}</span><b>${me.st=='chair'?'Sedang dicukur':ah.length+' orang'}</b></div>${me.st=='wait'?`<div class="ln"><span>Perkiraan dipanggil</span><b>±${eta} menit</b></div>`:''}</div>${me.st=='wait'?`<button class="btn o" data-a="cx">Batalkan antrian</button>`:''}`
+    top=`<div class="dk tk${me.st=='chair'?' turn':''}"><div class="mono">nomor antrian anda</div><div class="amt">${me.no}</div><div>${me.name} · ${sv(me.svc).n}</div>${CU.guest?'<div class="mu sm" style="margin-top:10px;color:#a79c8f">Catat nomor ini. Setelah halaman ditutup, nomor tidak bisa dilihat lagi.</div>':''}<div class="ln" style="margin-top:14px"><span>${me.st=='chair'?'Status':'Di depan anda'}</span><b>${me.st=='chair'?'Sedang dicukur':ah.length+' orang'}</b></div>${me.st=='wait'?`<div class="ln"><span>Perkiraan dipanggil</span><b>±${eta} menit</b></div>`:''}</div>${me.st=='wait'?`<button class="btn o" data-a="cx">Batalkan antrian</button>`:''}`
   }
 else if(me){
     top=`<div class="dk tk"><div class="mono">selesai</div><div class="amt">Terima kasih</div><div>Sampai jumpa lagi, ${me.name}.</div></div><button class="btn" data-a="cn">Ambil antrian baru</button>`
@@ -2656,7 +2657,7 @@ function render(){
     },
     gl=(g,l,f)=>`<button class="gl dx${f?' '+(typeof f=='string'?f:'o1'):''}${NG[g]===false?' cx':''}" data-a="ngrp" data-v="${g}"><span>${l}</span>${I.chv}</button>`,
     hd=`<div class="sbh dx"><svg class="hl" role="img" aria-label="Logo AR Studios"><use href="#arl"/></svg><span>AR Studios</span>${r=='adm'?`<button class="gear${S.tab[r]=='out'?' on':''}" data-a="tab" data-v="out" aria-label="Pengaturan outlet">${I.gear}</button>`:''}</div><div class="ol dx"><i class="dot"></i><span><b>AR Studios</b><small>${r=='adm'?'Admin':r=='kry'?'Karyawan':CU.guest?'Tamu':'Pelanggan'} · <span class="syt">${syTxt()}</span></small></span></div>`,
-    ft=`<div class="sbf dx"><button class="av${avs(CU.id)}" data-a="acct" aria-label="Akun saya">${ini(CU.name)}</button><span class="sbn"><b>${CU.name}</b><small>${CU.guest?'Tamu':ROL[CU.role]}</small></span><span class="sbi"><button class="ib" data-a="shr" aria-label="Bagikan">${I.shr}</button><button class="ib" data-a="theme" aria-label="Ganti tema">${I.moon}</button></span></div>`,
+    ft=`<div class="sbf dx"><button class="av${avs(CU.id)}" data-a="acct" aria-label="Akun saya">${ini(CU.name)}</button><span class="sbn"><b>${CU.name}</b><small>${CU.guest?'Tamu':ROL[CU.role]}</small></span><span class="sbi"><button class="ib" data-a="shr" aria-label="Bagikan">${I.shr}</button><button class="ib" data-a="snd" aria-label="Suara">${typeof FXI=='function'?FXI():''}</button><button class="ib" data-a="theme" aria-label="Ganti tema">${I.moon}</button></span></div>`,
     fb=`<button class="fab" data-a="fab" aria-label="Tambah">${I.plus}</button>`,
     qq=nt('queue','Antrian',I.q,{b:nq,a:'nq',g:'op',on:S.tab[r]=='queue',off:qb})+nt('bk','Booking',I.cal,{a:'nbk',v:'bk',g:'op',b:r=='cus'?0:nbp,on:qb});
   const FL=AM.flatMap(x=>x[2]),
@@ -4195,11 +4196,11 @@ function tbHtml(){
   let h='';
   if(a){
     const q=pfb(a.i);
-    h+=`<div class="tbi" data-a="pf-vb" data-i="${a.i}"><div class="mono tbl">${I.str}Karyawan terbaik</div>${avC(q.id,BR[a.i])}<b>${esc(BR[a.i])}</b><span class="mu sm">${canRt()&&a.n?'★ '+a.a.toFixed(1)+(!isC()||VS().ul?' · '+a.n+' ulasan':''):(a.n?'':'Pilihan admin')}</span></div>`
+    h+=`<div class="tbi" data-a="pf-vb" data-i="${a.i}"><div class="mono tbl">Karyawan terbaik</div>${avC(q.id,BR[a.i])}<b>${esc(BR[a.i])}</b><span class="mu sm">${canRt()&&a.n?'★ '+a.a.toFixed(1)+(!isC()||VS().ul?' · '+a.n+' ulasan':''):(a.n?'':'Pilihan admin')}</span></div>`
   }
   if(l){
     const q=l.bi>=0&&BR[l.bi]&&!vHid(l.bi)?pfb(l.bi):{};
-    h+=`<div class="tbi" data-a="tsm-v"><div class="mono tbl">${I.str}Terbaik sepanjang masa</div>${avC(q.id,l.n)}<b>${esc(l.n)}</b>${l.c?`<span class="mu sm tbc">${esc(l.c)}</span>`:''}</div>`
+    h+=`<div class="tbi" data-a="tsm-v"><div class="mono tbl">Terbaik sepanjang masa</div>${avC(q.id,l.n)}<b>${esc(l.n)}</b>${l.c?`<span class="mu sm tbc">${esc(l.c)}</span>`:''}</div>`
   }
   return `<div class="tb" style="grid-template-columns:repeat(${a&&l?2:1},minmax(0,1fr))">${h}</div>`
 }
@@ -4788,6 +4789,7 @@ async function pull(){
     S.sync=NET.last;
     save();
     sysave();
+    try{fxScan()}catch(e){}
     ui()
   }catch(e){}finally{
     NET.pull=false;
@@ -4858,7 +4860,7 @@ function logoPulse(){
   requestAnimationFrame(step)
 }
 async function autoRefresh(){
-  if(RFB||!CU||document.visibilityState!='visible'||!navigator.onLine)return;
+  if(RFB||!CU||!navigator.onLine||(document.visibilityState!='visible'&&!(window.Notification&&Notification.permission=='granted')))return;
   RFB=true;
   try{
     await sync();
@@ -5729,5 +5731,130 @@ document.addEventListener('keydown',e=>{
   }
 });
 </script>
+<script>
+/* ===== EFEK SUARA, NOTIFIKASI DUA ARAH, ANIMASI TAMBAHAN ===== */
+const FXA={c:null,on:(()=>{try{return localStorage.getItem('ars_snd')!='0'}catch(e){return true}})()};
+function fxCtx(){
+  if(!FXA.c){try{FXA.c=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}
+  if(FXA.c.state=='suspended')FXA.c.resume().catch(()=>{});
+  return FXA.c
+}
+function tone(f,t0,d,v,type,f2){
+  const c=fxCtx();if(!c)return;
+  const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+t0;
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);
+  if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.03)
+}
+const FXM={
+  tap:()=>tone(900,0,.05,.045,'triangle'),
+  nav:()=>{tone(620,0,.06,.05);tone(820,.05,.08,.04)},
+  open:()=>{tone(520,0,.08,.05);tone(780,.06,.1,.05)},
+  close:()=>tone(700,0,.1,.05,'sine',420),
+  ok:()=>{tone(660,0,.1,.07);tone(990,.09,.16,.07)},
+  err:()=>{tone(220,0,.16,.06,'sawtooth');tone(165,.12,.18,.05,'sawtooth')},
+  del:()=>tone(520,0,.14,.06,'triangle',220),
+  staff:()=>[0,.24,.48].forEach(d=>{tone(880,d,.2,.16);tone(1320,d,.2,.07)}),
+  turn:()=>{const a=()=>[523,659,784,1047].forEach((f,i)=>tone(f,i*.12,.3,.17,'triangle'));a();setTimeout(a,950)},
+  soft:()=>{tone(740,0,.22,.03);tone(988,.12,.28,.022)}
+};
+function FXS(n){if(!FXA.on)return;try{FXM[n]&&FXM[n]()}catch(e){}}
+function FXT(m){FXS(/gagal|tidak|salah|bentrok|ditolak|habis|offline|berakhir|terlalu/i.test(m)?'err':'ok')}
+function FXI(){
+  const b='<path d="M4 9v6h4l5 4V5L8 9z"/>';
+  return typeof P=='function'?P(FXA.on?b+'<path d="M16.5 8.5a5 5 0 010 7"/>':b+'<path d="M17 9l4 6M21 9l-4 6"/>'):''
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-a],button,.chip,.mt');
+  if(!t)return;
+  const a=t.dataset.a||'';
+  if(a=='close'||a=='snd')return;
+  FXS(/^(tab|nq|nbk|mgo|hgs|hgm|ngrp|menu)$/.test(a)?'nav':/(^cx$|^qx$|-d$|del|^x$)/.test(a)||t.classList.contains('x')?'del':'tap')
+},true);
+document.addEventListener('change',e=>{if(/SELECT|INPUT/.test(e.target.tagName))FXS('nav')},true);
+Object.assign(A,{snd:()=>{
+  FXA.on=!FXA.on;
+  try{localStorage.setItem('ars_snd',FXA.on?'1':'0')}catch(e){}
+  const h=$('#sndb');if(h)h.innerHTML=FXI();
+  if(FXA.on)FXS('ok');
+  toast(FXA.on?'Suara dinyalakan':'Suara dimatikan')
+}});
+(()=>{
+  const th=$('#thm');
+  if(th){th.insertAdjacentHTML('beforebegin','<button class="'+th.className+'" id="sndb" data-a="snd" aria-label="Suara">'+FXI()+'</button>')}
+  document.body.insertAdjacentHTML('beforeend','<div id="ntf" aria-live="polite"></div>');
+  const first=()=>{
+    if(CU&&!FXA.asked&&window.Notification&&Notification.permission=='default'){FXA.asked=1;try{Notification.requestPermission()}catch(e){}}
+  };
+  document.addEventListener('click',first,true);
+  ['pointerdown','keydown'].forEach(n=>document.addEventListener(n,()=>fxCtx(),{once:true,capture:true}))
+})();
+/* banner notifikasi: staff = ding 3x (keras), turn = giliran pelanggan, soft = info lembut */
+function ntf(kind,title,body){
+  FXS(kind);
+  try{navigator.vibrate&&navigator.vibrate(kind=='turn'?[200,100,200,100,300]:kind=='staff'?[120,60,120]:[40])}catch(e){}
+  const box=$('#ntf');if(!box)return;
+  while(box.children.length>=3)box.firstChild.remove();
+  const n=document.createElement('div');
+  n.className='nt '+kind;
+  n.innerHTML='<b></b><span></span>';
+  n.firstChild.textContent=title;n.lastChild.textContent=body||'';
+  const rm=()=>{if(!n.parentNode||n.classList.contains('out'))return;n.classList.add('out');setTimeout(()=>n.remove(),320)};
+  n.addEventListener('click',rm);
+  box.appendChild(n);
+  setTimeout(rm,kind=='turn'?12000:6000);
+  try{if(window.Notification&&Notification.permission=='granted'&&document.visibilityState!='visible')new Notification(title,{body:body||'',tag:'ars-'+kind})}catch(e){}
+}
+const FXN={prev:null,key:null,ah:null};
+function fxScan(){
+  if(!CU)return;
+  const k=CU.id+'|'+CU.role,snap={};
+  S.q.forEach(x=>snap[x.id]={st:x.st});
+  const me=CU.role=='cus'?(S.q.find(x=>x.id==S.me.q)||(CU.guest?null:S.q.find(x=>x.uid==CU.id&&(x.st=='wait'||x.st=='chair')))):null,
+    ah=me&&me.st=='wait'?S.q.filter(x=>x.st=='wait'&&x.t<me.t).length:null,p=FXN.prev,pa=FXN.ah;
+  FXN.prev=snap;FXN.ah=ah;
+  if(FXN.key!==k||!p){FXN.key=k;return}
+  if(CU.role!='cus'){
+    S.q.forEach(x=>{
+      if(p[x.id]||x._ro||String(x.id).indexOf('i'+DV)==0)return;
+      if(CU.role=='kry'&&x.b>=0&&x.b!=CU.bi)return;
+      if(x.st=='wait')ntf('staff','Pelanggan baru masuk antrian',(x.no?x.no+' · ':'')+x.name);
+      else if(x.st=='pending')ntf('staff','Booking baru masuk',x.name+' · menunggu konfirmasi')
+    });
+    Object.keys(p).forEach(id=>{if(!snap[id]&&p[id].st=='wait')ntf('soft','Antrian dibatalkan','Seorang pelanggan keluar dari antrian')})
+  }else{
+    if(me&&p[me.id]){
+      if(p[me.id].st!='chair'&&me.st=='chair')ntf('turn','Giliran Anda!','Nomor '+me.no+', silakan menuju kursi.');
+      else if(me.st=='wait'&&pa!=null&&ah<pa)ntf('soft',ah==0?'Anda berikutnya':'Antrian bergerak',ah==0?'Bersiaplah, sebentar lagi giliran Anda.':'Tinggal '+ah+' orang di depan Anda.')
+    }
+    (S.me.b||[]).forEach(id=>{
+      const b=S.q.find(x=>x.id==id);
+      if(b&&p[id]&&p[id].st=='pending'&&b.st=='ok')ntf('soft','Booking dikonfirmasi','Jadwal Anda sudah disetujui.')
+    })
+  }
+}
+</script>
+<style>
+#ntf{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:9999;pointer-events:none;padding:0 12px}
+.nt{pointer-events:auto;cursor:pointer;width:100%;max-width:420px;display:flex;flex-direction:column;gap:2px;padding:12px 16px;border-radius:16px;background:var(--ink);color:var(--bg);border-left:4px solid var(--ac);box-shadow:0 10px 30px rgba(0,0,0,.25);animation:ntin .45s cubic-bezier(.2,.8,.2,1) both}
+.nt span{font-size:13px;opacity:.85}
+.nt.staff{border-left-color:#e8821f}
+.nt.turn{border-left-color:#2e9e5b;animation:ntin .45s cubic-bezier(.2,.8,.2,1) both,ntpl 1.6s ease-in-out .5s 4}
+.nt.soft{opacity:.92}
+.nt.out{animation:ntout .3s ease forwards}
+@keyframes ntin{from{opacity:0;transform:translateY(-24px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes ntout{to{opacity:0;transform:translateY(-16px) scale(.97)}}
+@keyframes ntpl{50%{box-shadow:0 0 0 7px rgba(46,158,91,.3)}}
+@media(prefers-reduced-motion:no-preference){
+  .btn:active,.chip:active,.mt:active,.ib:active,nav button.t:active{animation:prs .18s ease}
+  input:focus,select:focus{animation:fcs .35s ease}
+  .dk.tk.turn{animation:tkp 2s ease-in-out infinite}
+}
+@keyframes prs{50%{transform:scale(.95)}}
+@keyframes fcs{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--ac) 45%,transparent)}to{box-shadow:0 0 0 6px transparent}}
+@keyframes tkp{50%{box-shadow:0 0 0 8px color-mix(in srgb,#2e9e5b 30%,transparent)}}
+</style>
+
 </body>
 </html>
