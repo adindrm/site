@@ -2453,7 +2453,7 @@ function payOpen(lines,total,done,meta){
   PAY={done,m:'cash',total};
   meta=meta||{};
   const qk=[...new Set([total,Math.ceil(total/50000)*50000,Math.ceil(total/100000)*100000])].filter(x=>x>0).slice(0,3);
-  sheet(meta.title||'Pembayaran',(meta.t?`<div class="pyh">${meta.h||''}<div><b>${meta.t}</b><div class="mu sm">${meta.s||''}</div></div></div>`:'')+`<div class="dk"><div class="mono">untuk dibayar</div><div class="amt">${rp(total)}</div>${lines.map(l=>`<div class="ln"><span>${l[0]}</span><span>${rp(l[1])}</span></div>`).join('')}</div><div class="mono sec">metode pembayaran</div><div class="g2"><button class="mt on" data-a="pm" data-v="cash">Tunai</button><button class="mt" data-a="pm" data-v="qris">QRIS</button></div><div id="cash"><label>Diterima<input id="rcv" inputmode="numeric" placeholder="0"></label><div class="pyq">${qk.map((x,i)=>`<button class="chip" data-a="pq" data-v="${x}">${i==0?'Uang pas':rp(x)}</button>`).join('')}</div><div class="row" style="margin-top:8px"><span class="mu">Kembalian</span><b id="chg">Rp 0</b></div></div><div id="qr" class="mu sm" hidden style="margin-top:12px">Tunjukkan kode QRIS ke pelanggan, lalu konfirmasi setelah pembayaran masuk.</div><button class="btn" data-a="paygo">Konfirmasi pembayaran</button>`);
+  sheet(meta.title||'Pembayaran',(meta.t?`<div class="pyh">${meta.h||''}<div><b>${meta.t}</b><div class="mu sm">${meta.s||''}</div></div></div>`:'')+`<div class="dk"><div class="mono">untuk dibayar</div><div class="amt">${rp(total)}</div>${lines.map(l=>`<div class="ln"><span>${l[0]}</span><span>${rp(l[1])}</span></div>`).join('')}</div><div class="mono sec">metode pembayaran</div><div class="g2"><button class="mt on" data-a="pm" data-v="cash">Tunai</button><button class="mt" data-a="pm" data-v="qris">QRIS</button></div><div id="cash"><label>Diterima<input id="rcv" inputmode="numeric" placeholder="0"></label><div class="pyq">${qk.map((x,i)=>`<button class="chip" data-a="pq" data-v="${x}">${i==0?'Uang pas':rp(x)}</button>`).join('')}</div><div class="row" style="margin-top:8px"><span class="mu">Kembalian</span><b id="chg">Rp 0</b></div></div><div id="qr" class="mu sm" hidden style="margin-top:12px">${S.qr?`<img src="${S.qr}" alt="QRIS" style="width:100%;max-width:280px;display:block;margin:0 auto 10px;border-radius:12px;background:#fff">`:'<b>Gambar QRIS belum diunggah.</b> Admin bisa mengunggahnya di Outlet. '}Tunjukkan kode QRIS ke pelanggan, lalu konfirmasi setelah pembayaran masuk.</div><button class="btn" data-a="paygo">Konfirmasi pembayaran</button>`);
   $('#sh').classList.add('pay')
 }
 const val=id=>($('#'+id)||{}).value;
@@ -2678,7 +2678,7 @@ function render(){
   }
   m.classList.remove('enter');
   if(ANIM&&!RM)m.classList.add('enter');
-  m.innerHTML=R[r][S.tab[r]]();
+  m.innerHTML=(()=>{try{return R[r][S.tab[r]]()}catch(e){console.error(e);return '<div class="cd mu">Halaman gagal dimuat: '+esc(String(e&&e.message||e))+'</div>'}})();
   m.scrollTop=sc;
   if(ANIM&&!RM)[...m.children].forEach((c,i)=>{
     c.style.setProperty('--k',Math.min(i,10));
@@ -3477,7 +3477,7 @@ function out(){
   return head('Outlet','Informasi toko')+`<div class="cd"><div class="row"><b>${o.n}</b>${(()=>{
     const k=toko();
     return k?`<span class="chip ${k.open?'g':'w'}">${k.open?'Buka':'Tutup'}</span>`:''
-  })()}</div><div class="mu sm" style="margin-top:6px">${o.a}</div><div class="mono" style="margin-top:10px">jam operasional · ${o.h}</div></div><div class="mono sec">status toko di halaman login</div><div class="row" style="justify-content:flex-start;gap:8px">${[['auto','Otomatis (sesuai jam)'],['open','Paksa buka'],['closed','Paksa tutup']].map(([k,l])=>`<button class="chip ${(o.m||'auto')==k?'g':''}" data-a="ol-m" data-v="${k}">${l}</button>`).join('')}</div><div class="g2" style="margin-top:12px">${st('barber',BR.length)}${st('layanan',SV.length)}</div>${tbUI()}${vsUI()}${pinUI()}<button class="btn o" data-a="ol-e" style="margin-top:12px">Ubah info outlet</button><button class="btn o" data-a="dk-e" style="margin-top:8px">Ubah diksi</button>`
+  })()}</div><div class="mu sm" style="margin-top:6px">${o.a}</div><div class="mono" style="margin-top:10px">jam operasional · ${o.h}</div></div><div class="mono sec">status toko di halaman login</div><div class="row" style="justify-content:flex-start;gap:8px">${[['auto','Otomatis (sesuai jam)'],['open','Paksa buka'],['closed','Paksa tutup']].map(([k,l])=>`<button class="chip ${(o.m||'auto')==k?'g':''}" data-a="ol-m" data-v="${k}">${l}</button>`).join('')}</div><div class="g2" style="margin-top:12px">${st('barber',BR.length)}${st('layanan',SV.length)}</div>${tbUI()}${vsUI()}${pinUI()}<div class="mono sec">qris pembayaran</div><div class="cd">${S.qr?`<img src="${S.qr}" alt="QRIS" style="width:100%;max-width:240px;display:block;margin:0 auto 10px;border-radius:12px;background:#fff">`:'<div class="mu sm">Belum ada gambar QRIS.</div>'}<label class="btn o" style="display:block;text-align:center;margin-top:10px">${S.qr?'Ganti gambar QRIS':'Unggah gambar QRIS'}<input id="qr-f" type="file" accept="image/*" hidden></label>${S.qr?'<button class="btn o" data-a="qr-x" style="margin-top:8px">Hapus gambar QRIS</button>':''}</div><button class="btn o" data-a="ol-e" style="margin-top:12px">Ubah info outlet</button><button class="btn o" data-a="dk-e" style="margin-top:8px">Ubah diksi</button>`
 }
 function pro(){
   const l=gs('pr',[]);
@@ -3858,7 +3858,7 @@ function pfSheet(uid,nm,bi0){
   let b='';
   if(role=='kry'){
     const r=(S.rt||[]).filter(x=>bi!=null&&x.bi==bi&&bsv(x)>0);
-    b=((!isC()||VS().pf)?rw('Jabatan',bi==null||!BR[bi]?esc(p.jb):'')+rw('Spesialisasi',esc(p.sp)||(isC()?'':'<span class="mu">Belum diisi</span>'))+rw('Tentang',esc(p.bio)||(isC()?'':'<span class="mu">Belum diisi</span>')):'')+(!isC()&&!VS().pf?'<div class="mu sm" style="margin-top:8px">Catatan admin: Jabatan, Spesialisasi, dan Tentang saat ini disembunyikan dari pelanggan dan tamu (Pengaturan outlet → Visibilitas karyawan).</div>':'')+(canRt(me)?rw('Rating',rtTxt(bi)):'')+((adm||me)?rw('Telepon',esc(p.hp))+rw('Username',a?'@'+esc(a.u):''):'')
+    b=((!isC()||VS().pf)?rw('Jabatan',bi==null||!BR[bi]?esc(p.jb):'')+rw('Spesialisasi',esc(p.sp)||(isC()?'':'<span class="mu">Belum diisi</span>'))+rw('Kutipan',esc(p.bio)||(isC()?'':'<span class="mu">Belum diisi</span>')):'')+(!isC()&&!VS().pf?'<div class="mu sm" style="margin-top:8px">Catatan admin: Jabatan, Spesialisasi, dan Tentang saat ini disembunyikan dari pelanggan dan tamu (Pengaturan outlet → Visibilitas karyawan).</div>':'')+(canRt(me)?rw('Rating',rtTxt(bi)):'')+((adm||me)?rw('Telepon',esc(p.hp))+rw('Username',a?'@'+esc(a.u):''):'')
   }
 else if(role=='cus'){
     const dn=S.q.filter(x=>x.uid==uid&&x.st=='done'),sp=dn.reduce((n,x)=>n+(x.pa||0),0);
@@ -3915,7 +3915,7 @@ function pfEdit(uid){
   const role=a.role||CU.role;
   PFT={uid,av:p.av||''};
   setTimeout(()=>bpSync('pk'),0);
-  sheet(self?'Profil saya':'Ubah profil',`<div class="pfi" style="margin-top:6px"><span id="pf-pv" class="av avl${PFT.av?' im':''}" style="${PFT.av?'background-image:url('+PFT.av+')':''}">${ini(a.name||'?')}</span><div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><button type="button" class="chip" data-a="pf-pick">Pilih foto</button><button type="button" class="chip" data-a="pf-rm">Hapus foto</button><input id="pf-f" type="file" accept="image/*" data-a="pf-img" hidden></div></div><div class="mu sm" style="margin-top:6px">Foto bersifat opsional.</div>${adm?`<label>Nama<input id="pf-n" maxlength="40" value="${esc(a.name)}"></label>`:''}${adm&&role=='kry'&&a.id?bpk('pk',a.bi,p.jb):''}<label>Telepon (opsional)<input id="pf-h" inputmode="tel" maxlength="16" value="${esc(p.hp)}"></label>${role=='kry'?`<label>Spesialisasi (opsional)<input id="pf-s" maxlength="40" value="${esc(p.sp)}"></label>`:''}<label>${role=='kry'?'Tentang saya':'Catatan / preferensi'} (opsional)<input id="pf-b" maxlength="120" value="${esc(p.bio)}"></label><div class="mu sm" style="margin-top:10px">${role=='kry'?'Pelanggan hanya melihat foto, nama, spesialisasi, tentang saya, dan rating.':role=='cus'?'Telepon dan catatan terlihat oleh karyawan dan admin.':''}</div><button class="btn" data-a="pf-go">Simpan</button>`)
+  sheet(self?'Profil saya':'Ubah profil',`<div class="pfi" style="margin-top:6px"><span id="pf-pv" class="av avl${PFT.av?' im':''}" style="${PFT.av?'background-image:url('+PFT.av+')':''}">${ini(a.name||'?')}</span><div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><button type="button" class="chip" data-a="pf-pick">Pilih foto</button><button type="button" class="chip" data-a="pf-rm">Hapus foto</button><input id="pf-f" type="file" accept="image/*" data-a="pf-img" hidden></div></div><div class="mu sm" style="margin-top:6px">Foto bersifat opsional.</div>${adm?`<label>Nama<input id="pf-n" maxlength="40" value="${esc(a.name)}"></label>`:''}${adm&&role=='kry'&&a.id?bpk('pk',a.bi,p.jb):''}<label>Telepon (opsional)<input id="pf-h" inputmode="tel" maxlength="16" value="${esc(p.hp)}"></label>${role=='kry'?`<label>Spesialisasi (opsional)<input id="pf-s" maxlength="40" value="${esc(p.sp)}"></label>`:''}<label>${role=='kry'?'Kutipan saya':'Catatan / preferensi'} (opsional)<input id="pf-b" maxlength="120" value="${esc(p.bio)}"></label><div class="mu sm" style="margin-top:10px">${role=='kry'?'Pelanggan hanya melihat foto, nama, spesialisasi, tentang saya, dan rating.':role=='cus'?'Telepon dan catatan terlihat oleh karyawan dan admin.':''}</div><button class="btn" data-a="pf-go">Simpan</button>`)
 }
 const pvSet=()=>{
   const e=$('#pf-pv');
@@ -3961,6 +3961,7 @@ function pfLoad(){
       const kv={};
       r.rows.forEach(x=>kv[x.kunci]=x.nilai);
       komApply(kv);
+      if(kv.qris_img!==undefined&&!S.qrD)S.qr=/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]*$/.test(kv.qris_img)?String(kv.qris_img):'';
       if(CU)render()
     }
   }).catch(()=>{});
@@ -4315,7 +4316,7 @@ function dbPush(f){
     try{
       const o=S.ol||{},
         l=LO(),
-        kv={outlet_nama:o.n,alamat:o.a,jam_operasional:o.h,mode_toko:o.m||'auto',loyalti_rate:l.rate,loyalti_nilai:l.val,loyalti_min:l.min,loyalti_bonus:l.bonus,loyalti_bulan:l.exp,pintasan:(S.pin||[]).join(','),barber_hari_ini:S.duty?S.duty.d+'|'+S.duty.ids.join(','):undefined,komisi:JSON.stringify(S.kom||{}),komisi_default:KD(),...(()=>{
+        kv={qris_img:S.qrD?(S.qr||''):undefined,outlet_nama:o.n,alamat:o.a,jam_operasional:o.h,mode_toko:o.m||'auto',loyalti_rate:l.rate,loyalti_nilai:l.val,loyalti_min:l.min,loyalti_bonus:l.bonus,loyalti_bulan:l.exp,pintasan:(S.pin||[]).join(','),barber_hari_ini:S.duty?S.duty.d+'|'+S.duty.ids.join(','):undefined,komisi:JSON.stringify(S.kom||{}),komisi_default:KD(),...(()=>{
           const t=TB();
           return{terbaik_mode:t.m,terbaik_barber:t.i<0?'':t.i,terbaik_min:t.min,terbaik_bulan:t.am?JSON.stringify(t.am):'',tsm_aktif:t.on?'1':'0',tsm_nama:t.n,tsm_barber:t.bi<0?'':t.bi,tsm_catatan:t.c}
         })(),...(()=>{
@@ -4335,6 +4336,7 @@ function dbPush(f){
       });
       S.sv=SV.map(x=>({...x}));
       S.mdDirty=false;
+      S.qrD=false;
       save()
     }catch(e){}
   },f?0:600)
@@ -5434,6 +5436,26 @@ document.addEventListener('change',e=>{
     $('#pk-i').textContent='Foto siap disimpan ('+Math.round(g.length/1024)+' KB)'
   })
 });
+document.addEventListener('change',e=>{
+  if(e.target.id!='qr-f'||!e.target.files[0])return;
+  const f=e.target.files[0];
+  if(!/^image\//.test(f.type)||f.size>1e7)return toast('Pilih file gambar');
+  const im=new Image(),u=URL.createObjectURL(f);
+  im.onload=()=>{
+    const m=Math.min(1,520/Math.max(im.width,im.height)),w=Math.round(im.width*m),h=Math.round(im.height*m),c=document.createElement('canvas');
+    c.width=w;c.height=h;
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);
+    URL.revokeObjectURL(u);
+    let q=.9,d;
+    do{d=c.toDataURL('image/jpeg',q);q-=.1}while(d.length>42000&&q>.3);
+    if(d.length>42000)return toast('Gambar terlalu besar, pakai gambar lebih sederhana');
+    S.qr=d;S.qrD=true;dbPush();render();toast('Gambar QRIS disimpan')
+  };
+  im.onerror=()=>toast('Gambar tidak bisa dibaca');
+  im.src=u
+});
+A['qr-x']=()=>{S.qr='';S.qrD=true;dbPush()};
+ADM.add('qr-x');
 A['pk-x']=()=>{
   PIM={dirty:1,g:''};
   const v=$('#pk-v');
