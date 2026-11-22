@@ -2939,11 +2939,12 @@ A['shr-app']=()=>{
     if(!h.hidden)h.scrollIntoView({block:'nearest',behavior:'smooth'})
   }
 };
+const HAD_SW=!!(navigator.serviceWorker&&navigator.serviceWorker.controller);   /* true hanya bila halaman ini sudah dikendalikan service worker lama = pengunjung lama */
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').then(r=>{
   r.addEventListener('updatefound',()=>{
     const w=r.installing;
     w&&w.addEventListener('statechange',()=>{
-      if(w.state=='activated'&&navigator.serviceWorker.controller){
+      if(w.state=='activated'&&HAD_SW){
         const b=document.createElement('div');
         b.style.cssText='position:fixed;left:12px;right:12px;bottom:84px;z-index:95;background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;gap:10px';
         b.innerHTML='<span>Versi baru tersedia</span><button style="background:var(--ac);color:#fff;border-radius:10px;padding:7px 12px;font-weight:600">Muat ulang</button>';
