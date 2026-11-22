@@ -1843,7 +1843,9 @@ header .gb:active {
 }
 .hgl {
   position:fixed;
-  z-index:60;
+  z-index:70;
+  max-height:70vh;
+  overflow:auto;
   min-width:176px;
   background:var(--cd);
   border:1px solid var(--ln);
@@ -1872,7 +1874,21 @@ header .gb:active {
     display:flex
   }
   html[data-role=adm] header {
-    flex-wrap:wrap
+    flex-wrap:nowrap
+  }
+  html[data-role=adm] header>div:first-child {
+    flex:1 1 auto;
+    min-width:0
+  }
+  html[data-role=adm] header .br span,html[data-role=adm] #sub {
+    overflow:hidden;
+    text-overflow:ellipsis
+  }
+  html[data-role=adm] .hs {
+    display:none!important
+  }
+  html[data-role=adm] .hgp {
+    flex:none
   }
 }
 @media(min-width:768px) {
@@ -3241,9 +3257,13 @@ Object.assign(A,{
       }catch(x){}
       if(!s||!s.ok)return e.textContent=(s&&s.err)||'Gagal menyimpan ke database. Periksa koneksi.';
       uxSet({id,u,name:n,role:r,bi});
+      PF()[id]=Object.assign({},pfo(id),r=='kry'&&bi!=null&&BR[bi]?{bn:BR[bi]}:{});
+      save();
+      pfPush(id);
       A.usr();
       return toast('Akun ditambahkan')
     }
+    if(TK)return e.textContent='Perlu koneksi internet agar akun tersimpan di database.';
     U.push(await mkU(u,n,p,r,bi));
     saveU();
     A.usr();
@@ -3760,6 +3780,7 @@ const pvSet=()=>{
 function pfPush(uid){
   if(!TK)return;
   const p=pfo(uid),a=acc(uid)||{};
+  if(CU.role=='adm'&&uid!=CU.id&&!(S.ux||[]).some(x=>x.id==uid))return toast('Akun ini belum ada di database, profil hanya tersimpan di perangkat');
   apiT({a:'save',sheet:'Profil',row:{id:uid,uid,role:a.role||CU.role,nama:a.name||'',hp:p.hp||'',bio:p.bio||'',sp:p.sp||'',bn:p.bn||'',foto:p.av||'',diubah:new Date().toISOString()}}).then(r=>{
     if(!r||!r.ok)throw 0
   }).catch(()=>toast('Tersimpan di perangkat, belum masuk database'))
@@ -4024,6 +4045,8 @@ Object.assign(A,{
 document.addEventListener('click',e=>{
   if(!e.target.closest('#hgp,#hgl'))$('#hgl').classList.remove('on')
 });
+addEventListener('resize',()=>$('#hgl').classList.remove('on'));
+document.addEventListener('scroll',()=>$('#hgl').classList.remove('on'),true);
 /* database: data master & pengaturan dibaca dari Google Sheets */
 let TK=null;
 try{
