@@ -11,6 +11,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <title>AR Studios</title>
 <meta name="description" content="Ambil antrian dan booking tanpa menunggu lama di AR Studios.">
+<!-- Pratinjau tautan (WhatsApp, Telegram, Facebook, dll). Alamat situs: https://aiidentity.web.id/website/arstudios/ (harus lengkap, diawali https://, diakhiri /). -->
 <link rel="canonical" href="https://aiidentity.web.id/website/arstudios/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AR Studios">
@@ -844,7 +845,7 @@ select:focus,input:focus {
   left:3px;
   background:var(--ink);
   border-radius:99px;
-  transition:left .45s cubic-bezier(.3,1.2,.4,1),width .45s cubic-bezier(.3,1.2,.4,1)
+  transition:left .38s cubic-bezier(.4,0,.2,1),width .38s cubic-bezier(.4,0,.2,1)
 }
 .btn,.fab,.mt {
   position:relative;
@@ -2744,16 +2745,27 @@ function post(){
   $('#nv').classList.toggle('sw',ANIM);
   document.querySelectorAll('.seg').forEach((s,i)=>{
     const on=s.querySelector('.on'),pl=s.querySelector('.pl');
-    if(!on||!pl||!on.offsetWidth)return;
+    if(!on||!pl)return;
     const k=s.children[1].dataset.a+':'+i,pv=pm[k];
-    if(pv&&!RM){
-      pl.style.left=pv.l+'px';
-      pl.style.width=pv.w+'px';
-      pl.offsetWidth
+    /* penting: titik awal dipasang SEBELUM layout dibaca. Sebelumnya membaca offsetWidth lebih dulu membuat titik
+       tergambar di posisi bawaan CSS (kiri, lebar 0) lalu "tumbuh" dari bar pertama setiap kali berpindah. */
+    pl.style.transition='none';
+    if(pv&&!RM){pl.style.left=pv.l+'px';pl.style.width=pv.w+'px'}
+    const tl=on.offsetLeft,tw=on.offsetWidth;
+    if(!tw){pl.style.transition='';return}
+    if(pv&&!RM&&(Math.abs(pv.l-tl)>.5||Math.abs(pv.w-tw)>.5)){
+      void pl.offsetWidth;
+      pl.style.transition='';
+      void pl.offsetWidth;
+      pl.style.left=tl+'px';
+      pl.style.width=tw+'px'
+    }else{
+      pl.style.left=tl+'px';
+      pl.style.width=tw+'px';
+      void pl.offsetWidth;
+      pl.style.transition=''
     }
-    pl.style.left=on.offsetLeft+'px';
-    pl.style.width=on.offsetWidth+'px';
-    pm[k]={l:on.offsetLeft,w:on.offsetWidth}
+    pm[k]={l:tl,w:tw}
   });
   if(ANIM&&!RM)cnt($('#mn'));
   ANIM=false
@@ -3846,7 +3858,7 @@ function pfSheet(uid,nm,bi0){
   let b='';
   if(role=='kry'){
     const r=(S.rt||[]).filter(x=>bi!=null&&x.bi==bi&&bsv(x)>0);
-    b=((!isC()||VS().pf)?rw('Jabatan',bi==null||!BR[bi]?esc(p.jb):'')+rw('Spesialisasi',esc(p.sp))+rw('Tentang',esc(p.bio)):'')+(canRt(me)?rw('Rating',rtTxt(bi)):'')+((adm||me)?rw('Telepon',esc(p.hp))+rw('Username',a?'@'+esc(a.u):''):'')
+    b=((!isC()||VS().pf)?rw('Jabatan',bi==null||!BR[bi]?esc(p.jb):'')+rw('Spesialisasi',esc(p.sp)||(isC()?'':'<span class="mu">Belum diisi</span>'))+rw('Tentang',esc(p.bio)||(isC()?'':'<span class="mu">Belum diisi</span>')):'')+(!isC()&&!VS().pf?'<div class="mu sm" style="margin-top:8px">Catatan admin: Jabatan, Spesialisasi, dan Tentang saat ini disembunyikan dari pelanggan dan tamu (Pengaturan outlet → Visibilitas karyawan).</div>':'')+(canRt(me)?rw('Rating',rtTxt(bi)):'')+((adm||me)?rw('Telepon',esc(p.hp))+rw('Username',a?'@'+esc(a.u):''):'')
   }
 else if(role=='cus'){
     const dn=S.q.filter(x=>x.uid==uid&&x.st=='done'),sp=dn.reduce((n,x)=>n+(x.pa||0),0);
@@ -4875,7 +4887,8 @@ async function flush(){
       }else throw 0;
       sysave()
     }
-    if(S.mdDirty&&CU.role=='adm')dbPush(1)
+    if(S.mdDirty&&CU.role=='adm')dbPush(1);
+    LMV=null
   }catch(e){
     NET.cur=null;
     if(e&&(e.name=='AbortError'||e instanceof TypeError))NET.on=false
@@ -4951,16 +4964,16 @@ async function pull(){
   NET.pull=true;
   try{
     let got=null,pub=null;
+    if(role!='tamu'&&!TK)return;
+    const [r,pb]=await Promise.all([
+      role!='tamu'?apiT({a:'pull',sheets:PL[role]}):Promise.resolve(null),
+      role=='tamu'||role=='cus'?api({a:'pub'}).catch(()=>null):Promise.resolve(null)
+    ]);
     if(role!='tamu'){
-      if(!TK)return;
-      const r=await apiT({a:'pull',sheets:PL[role]});
       if(!r||!r.ok)return;
       got=r.data
     }
-    if(role=='tamu'||role=='cus'){
-      pub=await api({a:'pub'});
-      if(!pub||!pub.ok)pub=null
-    }
+    if(pb&&pb.ok)pub=pb
     capture();
     if(pendN())return;
     if(got){
@@ -4991,7 +5004,7 @@ async function pull(){
 }
 async function sync(){
   if(!CU)return;
-  NET.on=navigator.onLine&&await probe();
+  NET.on=navigator.onLine&&(Date.now()-(NET.last||0)<60000||await probe());
   netUI();
   await flush();
   if(!pendN())await pull();
@@ -5064,6 +5077,28 @@ async function autoRefresh(){
   }catch(e){}finally{RFB=false}
 }
 setInterval(autoRefresh,30000);
+/* polling cepat: tanyakan penanda perubahan terakhir ke server (ringan); tarik data hanya bila berubah */
+let LMV=null,LMN=0,LMF=0,LMB=false;
+async function fastPoll(){
+  if(LMB||RFB||!CU||!NET.on||NET.busy||NET.pull||document.visibilityState!='visible'||pendN())return;
+  LMB=true;
+  try{
+    if(LMF&&Date.now()<LMF){
+      if(Date.now()-(NET.last||0)>15000)await pull();
+      return
+    }
+    const r=await api({a:'lm'});
+    if(!(r&&r.ok&&r.v!=null)){LMF=Date.now()+600000;return}   /* server belum punya aksi 'lm': pakai tarik berkala */
+    const v=String(r.v);
+    if(v==='0'||v!==LMV){
+      const t=NET.last;
+      await pull();
+      if(NET.last!==t)LMV=v
+    }
+  }catch(e){}finally{LMB=false}
+}
+setInterval(fastPoll,4000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible')LMV=null});
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState=='visible'&&CU)sync()
 });
