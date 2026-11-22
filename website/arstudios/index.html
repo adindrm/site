@@ -1030,14 +1030,14 @@ select:focus,input:focus {
   color:var(--ink)
 }
 .l1 {
-  fill:var(--ink)
+  fill:var(--lg,var(--ink))
 }
 .l0 {
   fill:var(--bg)
 }
 .l2 {
-  fill:var(--ink);
-  stroke:var(--ink);
+  fill:var(--lg,var(--ink));
+  stroke:var(--lg,var(--ink));
   stroke-width:.3
 }
 #ld .stt {
@@ -1048,7 +1048,7 @@ select:focus,input:focus {
 }
 .lt {
   font:400 7.86px 'Crow Bait',Georgia,serif;
-  fill:var(--ink)
+  fill:var(--lg,var(--ink))
 }
 .app {
   transition:opacity .9s ease .15s,transform 1s cubic-bezier(.2,.7,.2,1) .15s
@@ -3044,7 +3044,8 @@ async function doLogin(){
   const u=val('l-u').trim().toLowerCase(),p=val('l-p');
   if(Date.now()<lockT)return er('Terlalu banyak percobaan. Coba lagi dalam '+Math.ceil((lockT-Date.now())/1e3)+' detik.');
   if(!u||!p)return er('Isi username dan kata sandi.');
-  const sr=await api({a:'login',u,p}).catch(()=>null);
+  let sr=await api({a:'login',u,p}).catch(()=>null);
+  if(!sr)sr=await api({a:'login',u,p}).catch(()=>null);
   if(sr){
     if(sr.ok&&(LM=='stf'?sr.user.role!='cus':sr.user.role=='cus')){
       fails=0;
@@ -3065,6 +3066,7 @@ async function doLogin(){
     return er(sr.err&&/Terlalu/.test(sr.err)?sr.err:'Username atau kata sandi salah.')
   }
   const x=U.find(a=>a.u==u)||OCg()[u],h=await hp(p,x?x.s:'-');
+  if(!x)return er('Tidak dapat terhubung ke server. Periksa internet lalu coba lagi.');
   if(!x||h!==x.h||(LM=='stf'?x.role=='cus':x.role!='cus')){
     if(++fails>=5){
       lockT=Date.now()+3e4;
@@ -3160,6 +3162,8 @@ Object.assign(A,{
       localStorage.removeItem(SK)
     }catch(e){}
     CU=null;
+    S.hg=null;
+    $('#nv').removeAttribute('data-ph');
     document.querySelector('.app').classList.add('pre');
     showLogin();
     setTimeout(()=>{
@@ -3800,7 +3804,7 @@ function pfLoad(){
       save();
       if(CU)render()
     }
-  }).catch(()=>{})
+  }).catch(()=>{toast('Gagal memuat daftar karyawan. Periksa koneksi lalu tekan Sinkronisasi.')})
 }
 Object.assign(A,{
   'pf-e':(v,el)=>pfEdit(el&&el.dataset.u?el.dataset.u:CU.id),
@@ -3990,6 +3994,8 @@ function hdrMenu(){
   if(CU.role!='adm'){
     hs.innerHTML='';
     hs.classList.remove('on');
+    S.hg=null;
+    phoneNav(null);
     return
   }
   const G=hgroups(),cur=G.find(x=>x[0]==S.hg),tk=S.tab[CU.role],qb=tk=='queue'&&S.qv=='b';
@@ -4830,9 +4836,38 @@ addEventListener('offline',()=>{
   toast('Mode offline: data disimpan di perangkat');
   netUI()
 });
-setInterval(()=>{
-  if(document.visibilityState=='visible'&&CU)sync()
-},30000);
+/* refresh otomatis tiap 30 dtk saat terhubung; logo berubah perlahan jadi oranye sesaat sebagai penanda */
+let RFB=false,LPR=false;
+function logoPulse(){
+  if(RM||LPR)return;
+  const els=[...document.querySelectorAll('.hl')].filter(e=>e.getClientRects().length);
+  if(!els.length)return;
+  const m=(getComputedStyle(els[0]).color.match(/[\d.]+/g)||[]).slice(0,3).map(Number);
+  if(m.length<3)return;
+  const to=[240,138,36],D=2600,t0=performance.now();
+  LPR=true;
+  const step=now=>{
+    const t=Math.min(1,(now-t0)/D),k=Math.sin(Math.PI*t),c=m.map((v,i)=>Math.round(v+(to[i]-v)*k));
+    document.querySelectorAll('.hl').forEach(e=>e.style.setProperty('--lg','rgb('+c.join(',')+')'));
+    if(t<1)requestAnimationFrame(step);
+    else{
+      document.querySelectorAll('.hl').forEach(e=>e.style.removeProperty('--lg'));
+      LPR=false
+    }
+  };
+  requestAnimationFrame(step)
+}
+async function autoRefresh(){
+  if(RFB||!CU||document.visibilityState!='visible'||!navigator.onLine)return;
+  RFB=true;
+  try{
+    await sync();
+    if(!NET.on)return;
+    logoPulse();
+    if(TK&&!busyIn())await dbLoad()
+  }catch(e){}finally{RFB=false}
+}
+setInterval(autoRefresh,30000);
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState=='visible'&&CU)sync()
 });
@@ -4850,6 +4885,7 @@ Object.assign(A,{
   'sync-go':()=>{
     NET.on=navigator.onLine;
     sync();
+    if(NET.on)try{pfLoad()}catch(e){}
     toast(NET.on?'Menyinkronkan…':'Masih offline')
   }
 });
