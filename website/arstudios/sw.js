@@ -1,5 +1,5 @@
 /* Naikkan angka versi setiap kali index.html diganti agar cache lama dibersihkan */
-const C = 'ars-v28',
+const C = 'ars-v29',
   F = [
     './',
     'index.html',
