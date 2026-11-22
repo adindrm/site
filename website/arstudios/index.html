@@ -2001,6 +2001,17 @@ header .gb:active {
   opacity:.35;
   text-decoration:line-through
 }
+.ck {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:12px;
+  font-size:13px
+}
+.ck input {
+  width:auto;
+  margin:0
+}
 .pim {
   height:86px;
   margin:-2px -2px 8px;
@@ -3120,7 +3131,7 @@ const uxSet=x=>{
   S.ux.push({id:x.id,u:x.u,name:x.name,role:x.role,bi:x.bi==null?null:x.bi});
   save()
 },
-  online=()=>!!TK&&NET.on;
+  online=()=>!!TK&&navigator.onLine!==false;   /* jangan bergantung pada NET.on (hasil probe bisa salah saat server lambat) */
 Object.assign(A,{
   login:()=>{
     doLogin()
@@ -3214,8 +3225,8 @@ Object.assign(A,{
     close();
     toast('Kata sandi diganti')
   },
-  usr:()=>sheet('Kelola akun',`<button class="btn k" data-a="usr-new" style="margin-top:4px">+ Tambah akun</button><div class="cd" style="margin-top:12px">${AU().map(x=>`<div class="lst"><span class="row" style="justify-content:flex-start">${avh(x.id,x.name)}<span><b>${x.name}</b><div class="mu sm">@${x.u} · ${ROL[x.role]}${x.role=='kry'?' · '+(BR[x.bi]||'-'):''}</div></span></span><span class="row"><button class="chip" data-a="pf-v" data-u="${x.id}">Profil</button><button class="chip" data-a="usr-pw" data-id="${x.id}">Reset</button>${x.id==CU.id?'':`<button class="x" data-a="usr-del" data-id="${x.id}" aria-label="Hapus">${I.x}</button>`}</span></div>`).join('')}</div>`),
-  'usr-new':()=>sheet('Tambah akun',`<label style="margin-top:4px">Nama lengkap<input id="a-n" placeholder="Nama"></label><label>Username<input id="a-u" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="3-20 huruf/angka"></label><label>Kata sandi<input id="a-p" type="text" placeholder="minimal 6 karakter"></label><label>Peran<select id="a-r"><option value="kry">Karyawan</option><option value="adm">Admin</option><option value="cus">Pelanggan</option></select></label><label>Profil barber (khusus karyawan)<select id="a-b">${opts(BR,0)}</select></label><div class="er" id="s-e" role="alert"></div><button class="btn" data-a="usr-go">Simpan akun</button>`),
+  usr:()=>sheet('Kelola akun',`<button class="btn k" data-a="usr-new" style="margin-top:4px">+ Tambah akun</button><div class="cd" style="margin-top:12px">${AU().map(x=>`<div class="lst"><span class="row" style="justify-content:flex-start">${avh(x.id,x.name)}<span><b>${x.name}</b><div class="mu sm">@${x.u} · ${ROL[x.role]}${x.role=='kry'?' · '+(BR[x.bi]||pfo(x.id).jb||'Tanpa profil barber'):''}</div></span></span><span class="row"><button class="chip" data-a="pf-v" data-u="${x.id}">Profil</button><button class="chip" data-a="usr-pw" data-id="${x.id}">Reset</button>${x.id==CU.id?'':`<button class="x" data-a="usr-del" data-id="${x.id}" aria-label="Hapus">${I.x}</button>`}</span></div>`).join('')}</div>`),
+  'usr-new':()=>sheet('Tambah akun',`<label style="margin-top:4px">Nama lengkap<input id="a-n" placeholder="Nama"></label><label>Username<input id="a-u" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="3-20 huruf/angka"></label><label>Kata sandi<input id="a-p" type="text" placeholder="minimal 6 karakter"></label><label>Peran<select id="a-r"><option value="kry">Karyawan</option><option value="adm">Admin</option><option value="cus">Pelanggan</option></select></label><div id="ak-w">${bpk('ak',null,'')}</div><div class="er" id="s-e" role="alert"></div><button class="btn" data-a="usr-go">Simpan akun</button>`,setTimeout(()=>bpSync('ak'),0)),
   'usr-del':async(v,el)=>{
     const x=AU().find(a=>a.id==el.dataset.id);
     if(!x||x.id==CU.id)return;
@@ -3248,24 +3259,32 @@ Object.assign(A,{
     if(!/^[a-z0-9._-]{3,20}$/.test(u))return e.textContent='Username 3-20 karakter: huruf, angka, titik, strip.';
     if(p.length<6)return e.textContent='Kata sandi minimal 6 karakter.';
     if(AU().some(a=>a.u==u))return e.textContent='Username sudah dipakai.';
-    const bi=r=='kry'&&val('a-b')!==''?+val('a-b'):null;
+    let bp={bi:null,jb:''};
+    if(r=='kry'){
+      bp=bpGet('ak');
+      if(bp.err)return e.textContent=bp.err
+    }
+    const bi=bp.bi;
     if(online()){
       e.textContent='Menyimpan ke database…';
       const id='u'+rnd();
-      let s=null;
+      let s=null,ex=null;
       try{
         s=await apiT({a:'save',sheet:'Users',row:{id,username:u,name:n,role:r,bi:bi==null?'':bi,aktif:true,dibuat:new Date().toISOString(),password:p}})
-      }catch(x){}
-      if(!s||!s.ok)return e.textContent=(s&&s.err)||'Gagal menyimpan ke database. Periksa koneksi.';
+      }catch(x){ex=x}
+      if(!s||!s.ok)return e.textContent=(s&&s.err)||(ex&&ex.name=='AbortError'?'Server Google Sheets terlalu lama merespons. Tunggu sebentar lalu coba lagi.':'Gagal menyimpan ke database. Coba lagi.');
+      bpCommit(bp);
       uxSet({id,u,name:n,role:r,bi});
-      PF()[id]=Object.assign({},pfo(id),r=='kry'&&bi!=null&&BR[bi]?{bn:BR[bi]}:{});
+      PF()[id]=Object.assign({},pfo(id),r=='kry'?{bn:bi!=null&&BR[bi]?BR[bi]:'',jb:bp.jb}:{});
       save();
       pfPush(id);
       A.usr();
       return toast('Akun ditambahkan')
     }
     if(TK)return e.textContent='Perlu koneksi internet agar akun tersimpan di database.';
+    bpCommit(bp);
     U.push(await mkU(u,n,p,r,bi));
+    if(r=='kry')PF()[U[U.length-1].id]=Object.assign({},pfo(U[U.length-1].id),{bn:bi!=null&&BR[bi]?BR[bi]:'',jb:bp.jb});
     saveU();
     A.usr();
     toast('Akun disimpan di perangkat ini saja (offline). Buat ulang saat online agar bisa dipakai di perangkat lain.')
@@ -3376,7 +3395,7 @@ function kar(){
   const t0=new Date().setHours(0,0,0,0);
   return head('Karyawan','Barber dan performa hari ini')+`<div class="cd">${KR().map(x=>{
     const a=S.tx.filter(y=>y.y=='j'&&y.b==x.bi&&y.t>=t0);
-    return row(`<span data-a="pf-v" data-u="${x.id}" style="cursor:pointer;display:flex;align-items:center;gap:8px">${avh(x.id,x.name)}${x.name}</span>`,'@'+x.u+' · '+(BR[x.bi]||'-')+rate(x.bi),`<b>${rp(tot(a))}</b>`,`<span class="chip">${a.length} layanan</span>`)
+    return row(`<span data-a="pf-v" data-u="${x.id}" style="cursor:pointer;display:flex;align-items:center;gap:8px">${avh(x.id,x.name)}${x.name}</span>`,'@'+x.u+' · '+(BR[x.bi]||pfo(x.id).jb||'-')+(BR[x.bi]?rate(x.bi):''),`<b>${rp(tot(a))}</b>`,`<span class="chip">${a.length} layanan</span>`)
   }).join('')||emp('Belum ada karyawan.')}</div><button class="btn k" data-a="usr">Kelola akun karyawan</button>`
 }
 function out(){
@@ -3756,7 +3775,7 @@ function pfSheet(uid,nm,bi0){
   let b='';
   if(role=='kry'){
     const r=(S.rt||[]).filter(x=>bi!=null&&x.bi==bi&&bsv(x)>0);
-    b=((!isC()||VS().pf)?rw('Spesialisasi',esc(p.sp))+rw('Tentang',esc(p.bio)):'')+(canRt(me)?rw('Rating',rtTxt(bi)):'')+((adm||me)?rw('Telepon',esc(p.hp))+rw('Username',a?'@'+esc(a.u):''):'')
+    b=((!isC()||VS().pf)?rw('Jabatan',bi==null||!BR[bi]?esc(p.jb):'')+rw('Spesialisasi',esc(p.sp))+rw('Tentang',esc(p.bio)):'')+(canRt(me)?rw('Rating',rtTxt(bi)):'')+((adm||me)?rw('Telepon',esc(p.hp))+rw('Username',a?'@'+esc(a.u):''):'')
   }
 else if(role=='cus'){
     const dn=S.q.filter(x=>x.uid==uid&&x.st=='done'),sp=dn.reduce((n,x)=>n+(x.pa||0),0);
@@ -3765,12 +3784,55 @@ else if(role=='cus'){
 else b=rw('Telepon',esc(p.hp))+rw('Catatan',esc(p.bio));
   sheet(role=='kry'?'Profil barber':'Profil',`<div class="pfi" style="margin-top:6px">${role=='kry'?avC(uid,raw,'avl'):avh(uid,raw,'avl')}<div><b style="font-size:16px">${esc(raw)}</b><div class="mu sm">${ROL[role]||'Pelanggan'}${me?' · Anda':''}</div></div></div><div style="margin-top:10px">${b||'<div class="mu sm">Profil belum dilengkapi.</div>'}</div>${(me||adm)&&uid?`<button class="btn o" data-a="pf-e" data-u="${uid}">Ubah profil</button>`:''}`)
 }
+/* pemilih profil barber untuk karyawan: kosong / barber yang ada / isi baru (+ centang tambah ke daftar barber, atau beri jabatan: Kasir, Cleaning, dll.) */
+const bpk=(k,cur,jb)=>`<div class="bpk"><label>Profil barber (khusus karyawan)<select id="${k}-b" data-bp="${k}"><option value="" ${cur==null||cur===''||!BR[cur]?'selected':''}>Kosong (bukan barber)</option>${BR.map((x,i)=>`<option value="${i}" ${cur!=null&&cur!==''&&cur==i?'selected':''}>${esc(x)}</option>`).join('')}<option value="new">+ Isi baru...</option></select></label><div id="${k}-nw" hidden><label class="ck"><input type="checkbox" id="${k}-ba" checked>Tambahkan otomatis ke daftar barber</label><label id="${k}-bnw">Nama barber baru<input id="${k}-bn" maxlength="30" placeholder="Nama barber"></label></div><div id="${k}-jw" hidden><label><span id="${k}-jl">Jabatan (opsional)</span><input id="${k}-j" list="${k}-dl" maxlength="30" placeholder="mis. Kasir, Cleaning" value="${esc(jb||'')}"></label><datalist id="${k}-dl"><option value="Kasir"><option value="Cleaning"><option value="Admin"><option value="Kapster magang"></datalist></div></div>`;
+function bpSync(k){
+  const v=val(k+'-b'),nw=$('#'+k+'-nw'),jw=$('#'+k+'-jw'),ba=$('#'+k+'-ba');
+  if(!nw||!jw)return;
+  const isNew=v=='new',add=isNew&&ba&&ba.checked;
+  nw.hidden=!isNew;
+  $('#'+k+'-bnw').hidden=!add;
+  jw.hidden=!(v===''||(isNew&&!add));
+  const l=$('#'+k+'-jl');
+  if(l)l.textContent=isNew&&!add?'Jabatan baru (wajib), mis. Kasir':'Jabatan (opsional)'
+}
+function bpGet(k){
+  const v=val(k+'-b'),j=cln(val(k+'-j'),30);
+  if(v==='')return{bi:null,jb:j};
+  if(v!=='new')return{bi:+v,jb:''};
+  const ba=$('#'+k+'-ba');
+  if(ba&&ba.checked){
+    const n=cln(val(k+'-bn'),30);
+    if(!n)return{err:'Isi nama barber baru.'};
+    const i=BR.findIndex(x=>String(x).toLowerCase()==n.toLowerCase());
+    return i>=0?{bi:i,jb:''}:{bi:BR.length,jb:'',add:n}
+  }
+  return j?{bi:null,jb:j}:{err:'Isi jabatan baru (mis. Kasir atau Cleaning).'}
+}
+function bpCommit(r){
+  if(r&&r.add&&!BR.includes(r.add)){
+    BR.push(r.add);
+    S.br=BR.slice();
+    dbPush()
+  }
+}
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(!t||!t.id)return;
+  if(t.dataset&&t.dataset.bp)bpSync(t.dataset.bp);
+  else if(/-ba$/.test(t.id))bpSync(t.id.slice(0,-3));
+  else if(t.id=='a-r'){
+    const w=$('#ak-w');
+    if(w)w.hidden=t.value!='kry'
+  }
+});
 function pfEdit(uid){
   const a=acc(uid)||{},p=pfo(uid),self=!CU.guest&&CU.id==uid,adm=CU.role=='adm';
   if(!(self||adm))return toast('Anda tidak punya akses');
   const role=a.role||CU.role;
   PFT={uid,av:p.av||''};
-  sheet(self?'Profil saya':'Ubah profil',`<div class="pfi" style="margin-top:6px"><span id="pf-pv" class="av avl${PFT.av?' im':''}" style="${PFT.av?'background-image:url('+PFT.av+')':''}">${ini(a.name||'?')}</span><div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><button type="button" class="chip" data-a="pf-pick">Pilih foto</button><button type="button" class="chip" data-a="pf-rm">Hapus foto</button><input id="pf-f" type="file" accept="image/*" data-a="pf-img" hidden></div></div><div class="mu sm" style="margin-top:6px">Foto bersifat opsional.</div>${adm?`<label>Nama<input id="pf-n" maxlength="40" value="${esc(a.name)}"></label>`:''}<label>Telepon (opsional)<input id="pf-h" inputmode="tel" maxlength="16" value="${esc(p.hp)}"></label>${role=='kry'?`<label>Spesialisasi (opsional)<input id="pf-s" maxlength="40" value="${esc(p.sp)}"></label>`:''}<label>${role=='kry'?'Tentang saya':'Catatan / preferensi'} (opsional)<input id="pf-b" maxlength="120" value="${esc(p.bio)}"></label><div class="mu sm" style="margin-top:10px">${role=='kry'?'Pelanggan hanya melihat foto, nama, spesialisasi, tentang saya, dan rating.':role=='cus'?'Telepon dan catatan terlihat oleh karyawan dan admin.':''}</div><button class="btn" data-a="pf-go">Simpan</button>`)
+  setTimeout(()=>bpSync('pk'),0);
+  sheet(self?'Profil saya':'Ubah profil',`<div class="pfi" style="margin-top:6px"><span id="pf-pv" class="av avl${PFT.av?' im':''}" style="${PFT.av?'background-image:url('+PFT.av+')':''}">${ini(a.name||'?')}</span><div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><button type="button" class="chip" data-a="pf-pick">Pilih foto</button><button type="button" class="chip" data-a="pf-rm">Hapus foto</button><input id="pf-f" type="file" accept="image/*" data-a="pf-img" hidden></div></div><div class="mu sm" style="margin-top:6px">Foto bersifat opsional.</div>${adm?`<label>Nama<input id="pf-n" maxlength="40" value="${esc(a.name)}"></label>`:''}${adm&&role=='kry'&&a.id?bpk('pk',a.bi,p.jb):''}<label>Telepon (opsional)<input id="pf-h" inputmode="tel" maxlength="16" value="${esc(p.hp)}"></label>${role=='kry'?`<label>Spesialisasi (opsional)<input id="pf-s" maxlength="40" value="${esc(p.sp)}"></label>`:''}<label>${role=='kry'?'Tentang saya':'Catatan / preferensi'} (opsional)<input id="pf-b" maxlength="120" value="${esc(p.bio)}"></label><div class="mu sm" style="margin-top:10px">${role=='kry'?'Pelanggan hanya melihat foto, nama, spesialisasi, tentang saya, dan rating.':role=='cus'?'Telepon dan catatan terlihat oleh karyawan dan admin.':''}</div><button class="btn" data-a="pf-go">Simpan</button>`)
 }
 const pvSet=()=>{
   const e=$('#pf-pv');
@@ -3782,7 +3844,7 @@ function pfPush(uid){
   if(!TK)return;
   const p=pfo(uid),a=acc(uid)||{};
   if(CU.role=='adm'&&uid!=CU.id&&!(S.ux||[]).some(x=>x.id==uid))return toast('Akun ini belum ada di database, profil hanya tersimpan di perangkat');
-  apiT({a:'save',sheet:'Profil',row:{id:uid,uid,role:a.role||CU.role,nama:a.name||'',hp:p.hp||'',bio:p.bio||'',sp:p.sp||'',bn:p.bn||'',foto:p.av||'',diubah:new Date().toISOString()}}).then(r=>{
+  apiT({a:'save',sheet:'Profil',row:{id:uid,uid,role:a.role||CU.role,nama:a.name||'',hp:p.hp||'',bio:p.bio||'',sp:p.sp||'',bn:p.bn||'',jb:p.jb||'',foto:p.av||'',diubah:new Date().toISOString()}}).then(r=>{
     if(!r||!r.ok)throw 0
   }).catch(()=>toast('Tersimpan di perangkat, belum masuk database'))
 }
@@ -3791,7 +3853,8 @@ function pfMerge(rows,full){
   (rows||[]).forEach(r=>{
     if(!r.id)return;
     const p=o[r.id]=o[r.id]||{};
-    if(r.bn)p.bn=xs(r.bn);
+    if(r.bn!==undefined)p.bn=xs(r.bn);
+    if(r.jb!==undefined)p.jb=xs(r.jb);
     if(r.sp!==undefined)p.sp=xs(r.sp);
     if(r.bio!==undefined)p.bio=xs(r.bio);
     p.av=okv(String(r.foto||''));
@@ -3880,8 +3943,25 @@ Object.assign(A,{
       o={hp:String(val('pf-h')||'').replace(/[^\d+ ]/g,'').trim().slice(0,16),bio:cln(val('pf-b'),120),av:t.av||''};
     if(role=='kry'){
       o.sp=cln(val('pf-s'),40);
-      const bi=a?a.bi:CU.bi;
-      if(bi!=null&&BR[bi])o.bn=BR[bi]
+      if(adm&&a&&$('#pk-b')){
+        const bp=bpGet('pk');
+        if(bp.err)return toast(bp.err);
+        bpCommit(bp);
+        a.bi=bp.bi;
+        if(CU.id==t.uid){
+          CU.bi=bp.bi==null?undefined:bp.bi;
+          try{
+            sessionStorage.setItem('ars_cu',JSON.stringify(CU))
+          }catch(e){}
+        }
+        saveU();
+        if(TK)apiT({a:'save',sheet:'Users',row:{id:t.uid,bi:bp.bi==null?'':bp.bi}}).catch(()=>toast('Pilihan barber belum masuk database'));
+        o.bn=bp.bi!=null&&BR[bp.bi]?BR[bp.bi]:'';
+        o.jb=bp.jb
+      }else{
+        const bi=a?a.bi:CU.bi;
+        if(bi!=null&&BR[bi])o.bn=BR[bi]
+      }
     }
     PF()[t.uid]=Object.assign({},pfo(t.uid),o);
     if(adm&&$('#pf-n')&&a){
@@ -3925,7 +4005,7 @@ Object.assign(A,{
 /* koneksi Google Sheets (tes saja; sinkronisasi data belum diaktifkan) */
 const API_URL='https://script.google.com/macros/s/AKfycbyS2KlzkuJZBQ6-mnOJiktgcdHp_WZqQyj1TNRsc6coAYRQBU72xsC0mfFccKI9PX_r/exec';
 const api=b=>{
-  const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);
+  const c=new AbortController(),t=setTimeout(()=>c.abort(),30000);
   return fetch(S.api||API_URL,{method:'POST',body:JSON.stringify(Object.assign({dv:(()=>{
     try{
       return localStorage.getItem('ars_dv')
@@ -5061,7 +5141,7 @@ document.addEventListener('click',e=>{
 /* 3) server menolak karena bentrok / stok: jangan diulang 8x */
 /* ===== v3: online sungguhan, tanggal booking absolut, nomor dari server ===== */
 const probe=()=>{
-  const c=new AbortController(),t=setTimeout(()=>c.abort(),4000);
+  const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);
   return fetch(S.api||API_URL,{mode:'no-cors',cache:'no-store',signal:c.signal}).then(()=>true,()=>false).finally(()=>clearTimeout(t))
 };
 const sod=t=>new Date(t).setHours(0,0,0,0);
