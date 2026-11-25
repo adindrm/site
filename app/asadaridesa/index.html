@@ -1059,7 +1059,7 @@ function viewHTML(b,p,det){
   return `${det?'':stp(4)}<h3 style="margin:6px 0 0">${det?'Detail Batch':'Produk Jadi'} · ${esc(b.n)}</h3><div class="mt">Batch <b>${esc(b.k||'')}</b>${b.fd?' · selesai '+esc(b.fd):''}</div>
 <div class="card" style="margin:10px 0 0;padding:6px 12px">${rwx('Estimasi awal',`<span>${fmt(b.qty)}</span>`)}${rwx('Aktual (masuk stok)',`<b>${fmt(a)}</b>`)}${Math.abs(sel)>1e-9?rwx('Selisih',`<b style="color:${sel<0?'var(--ex)':'var(--inc)'}">${sel>0?'+':''}${fmt(sel)}</b>`):''}${b.pn?rwx('Catatan',`<span style="text-align:right">${esc(b.pn)}</span>`):''}${rwx('Total biaya bahan batch',`<b>${rp(c1)}</b>`)}${rwx('Modal bahan / produk',`<b>${rp(a>0?c1/a:0)}</b>`)}${c2>0?rwx('Packing / produk',`<b>${rp(c2/a)}</b>`):''}${rwx('HPP / produk (dihitung ulang)',`<b>${rp(hpp)}</b>`)}${mg!=null?rwx('Margin / produk',`<b style="color:${mg<0?'var(--ex)':'var(--inc)'}">${rp(mg)}</b>`):''}${b.k1>0?rwx('Rasio hasil',`<span>${fmt(a/b.k1)} produk / ${esc(b.us||'')}</span>`):''}</div>
 ${tlHTML(b)}${eqHTML(b,a)}<div class="mt" style="margin-top:12px"><b>Kebutuhan &amp; biaya per 1 produk</b> (realisasi batch)</div><div class="card" style="margin:6px 0 0;padding:6px 12px">${per||'<div class="mt">-</div>'}</div>${cmp}
-${det?`<div class="mt" style="margin-top:12px"><b>Simulasi</b></div><input id="pdsimq" type="number" min="0" step="any" inputmode="decimal" placeholder="Jumlah produk yang ingin dibuat" oninput="pdSim(this.value)" style="margin-top:6px"><div class="card" id="pdsim" style="margin:8px 0 0;padding:6px 12px"><div class="mt">Isi jumlah produk untuk melihat kebutuhan bahan dan modal berdasarkan realisasi batch ini.</div></div><button type="button" class="btn" style="width:100%;margin-top:14px" onclick="cl()">Tutup</button>`:`<div class="mt" style="margin-top:6px"></div><label style="margin-top:12px">Tanggal masuk stok</label><input id="pdfd" type="date" value="${today()}" required><div class="mt" style="margin-top:6px">Tempel kode batch pada kemasan sebelum dimasukkan ke stok.</div>${btns('Masuk Stok')}`}`}
+${det?`<div class="mt" style="margin-top:12px"><b>Simulasi</b></div><input id="pdsimq" type="number" min="0" step="any" inputmode="decimal" placeholder="Jumlah produk yang ingin dibuat" oninput="pdSim(this.value)" style="margin-top:6px"><div class="card" id="pdsim" style="margin:8px 0 0;padding:6px 12px"><div class="mt">Isi jumlah produk untuk melihat kebutuhan bahan dan modal berdasarkan realisasi batch ini.</div></div><button type="button" class="btn o" style="width:100%;margin-top:14px;color:var(--ex);border-color:var(--ex)" onclick="pdDelHist('${b.id}',0)">Hapus Riwayat</button><button type="button" class="btn o" style="width:100%;margin-top:8px;color:var(--ex);border-color:var(--ex)" onclick="pdDelHist('${b.id}',1)">Hapus Riwayat + Tarik Stok Produk</button><button type="button" class="btn" style="width:100%;margin-top:8px" onclick="cl()">Tutup</button>`:`<div class="mt" style="margin-top:6px"></div><label style="margin-top:12px">Tanggal masuk stok</label><input id="pdfd" type="date" value="${today()}" required><div class="mt" style="margin-top:6px">Tempel kode batch pada kemasan sebelum dimasukkan ke stok.</div>${btns('Masuk Stok')}`}`}
 window.pdSim=function(v){
   const el=$('#pdsim');if(!el||!VB)return;const b=VB,n=num(v),a=b.act!=null?b.act:b.qty;
   if(!(n>0)||!(a>0)){el.innerHTML='<div class="mt">Isi jumlah produk untuk melihat kebutuhan bahan dan modal berdasarkan realisasi batch ini.</div>';return}
@@ -1084,6 +1084,12 @@ window.pdDone=function(id){
     window.ivAuto&&window.ivAuto({tp:'in',jn:'Produk',tgl:b.fd,items:[{n:p.n,q:a,s:p.us||p.s||'',h:Math.round(hpp)}],src:'Produksi selesai'});
     sv();cl();go(cur,1)},'Masuk Stok')};
   open()};
+window.pdDelHist=function(id,tarik){
+  const b=batches().find(z=>z.id==id);if(!b)return;const a=b.act!=null?b.act:b.qty;
+  ask('Hapus riwayat batch '+esc(b.k||'')+' ('+esc(b.n)+')? '+(tarik?'Stok produk dikurangi '+fmt(a)+'. ':'Stok produk tidak berubah. ')+'Bahan tidak dikembalikan dan invoice yang sudah dibuat tetap ada.',()=>{
+    const p=prods().find(z=>z.id==b.pid);
+    if(p){if(p.lots)p.lots=p.lots.filter(t=>t.k!==b.k);if(tarik)p.q=Math.max(0,r6((+p.q||0)-a))}
+    S.g.batch=batches().filter(z=>z.id!=id);sv();cl();go(cur,1)},'Hapus',1)};
 window.pdCancel=function(id){
   const b=batches().find(z=>z.id==id);if(!b)return;
   const rf=b.st!='rencana';
@@ -1701,11 +1707,11 @@ async function ivPages(v){
     if(im){const s=Math.min(CW/im.width,CH/im.height),w=im.width*s,h=im.height*s;x.drawImage(im,(CW-w)/2,(CH-h)/2,w,h)}return[c]}
   const it=v.items,per=8,np=Math.max(1,Math.ceil(it.length/per)),out=[],masuk=v.tp=='in',sub=it.reduce((a,r)=>a+r.q*r.h,0),tot=sub+(v.ongkir||0);
   const C=ivCfg(),brand=(C.nama||((S.pf&&(S.pf.fn+' '+(S.pf.ln||'')))||'')).trim();
-  const LG=C.logo?await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=C.logo}):null;let lw=0,lh=0;const LBW=360,LBH=200;if(LG){const k=Math.min(LBW/LG.width,LBH/LG.height);lw=LG.width*k;lh=LG.height*k}const tx=LG?M+LBW+36:M;
+  const LG=C.logo?await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=C.logo}):null;let lw=0,lh=0;const LBW=360,LBH=200;if(LG){const k=Math.min(LBW/LG.width,LBH/LG.height);lw=LG.width*k;lh=LG.height*k}const tx=LG?M+lw+28:M;
   const SG=C.ttd?await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=C.ttd}):null,hasS=!!(SG||C.ttdn),cw=hasS?820:1150;
   for(let p=0;p<np;p++){const[c,x]=pg();
     x.fillStyle=GR;x.fillRect(0,0,CW,26);x.fillStyle=YL;x.fillRect(0,26,CW,8);
-    x.textAlign='left';x.fillStyle=INK;x.font=fnt(62,'bold');x.fillText(brand,tx,150);if(LG)x.drawImage(LG,M+(LBW-lw)/2,56+(LBH-lh)/2,lw,lh);
+    x.textAlign='left';x.fillStyle=INK;x.font=fnt(62,'bold');x.fillText(brand,tx,150);if(LG)x.drawImage(LG,M,56+(LBH-lh)/2,lw,lh);
     x.fillStyle=MU;x.font=fnt(32);x.fillText(C.tag!=null&&C.tag!==''?C.tag:'Inventori & Produksi',tx,198);x.font=fnt(26);wrap(x,[C.alamat,C.telp].filter(Boolean).join('\n'),1100,2).forEach((l,i)=>{if(l)x.fillText(l,tx,238+i*30)});
     x.textAlign='right';x.fillStyle=GR;x.font=fnt(96,'bold');x.fillText('INVOICE',CW-M,160);
     const tag=(v.jn||'Barang').toUpperCase()+(masuk?' MASUK':' KELUAR');x.font=fnt(30,'bold');const tw=x.measureText(tag).width+56;
