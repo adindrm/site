@@ -464,11 +464,19 @@ const spend=(d)=>{const m={};S.rec.filter(r=>r.t=='ex'&&new Date(r.d)>=ago(d)).f
 
 
 const BBC={inv_bahan:{t:'Bahan Baku',ic:'bag',cnt:'Jumlah Bahan',e:'Belum ada bahan baku',d:'Catat bahan pembuat pupuk beserta satuannya: bahan organik (kotoran ternak, sekam), pembenah (dolomit, tanah), dan fermentator/biang.',tips:['Tambah bahan, jumlah stok, dan satuannya (kg, karung, liter, drum)','Isi harga per satuan dan ongkir pengiriman','Pakai bahan di Tahap 1 (Pencampuran & fermentasi) pada komposisi'],mv:'inv_packing',mvl:'Pindah ke Bahan Packing'},inv_packing:{t:'Bahan Packing',ic:'gift',cnt:'Jumlah Item',e:'Belum ada bahan packing',d:'Catat karung, plastik liner, benang jahit, label/stiker merek, dan bahan packing lainnya.',tips:['Tambah karung, benang jahit, label, dll','Isi harga satuan dan ongkir pengiriman','Pakai di Tahap 2 (Packing) pada komposisi'],mv:'inv_bahan',mvl:'Pindah ke Bahan Baku'}};
+const lc=s=>String(s||'').trim().toLowerCase();
+const anyB=id=>{for(const k of['inv_bahan','inv_packing']){const x=(S.g[k]||[]).find(y=>y.id==id);if(x)return{k,x}}return null};
+const findB=r=>{if(!r)return null;const a=anyB(r.b);if(a)return a;if(!r.n)return null;let best=null;for(const k of['inv_bahan','inv_packing'])(S.g[k]||[]).forEach(x=>{if(lc(x.n)==lc(r.n)&&(!best||((+best.x.q||0)<=0&&(+x.q||0)>0)))best={k,x}});return best};
+function fillN(){(S.g.inv_produk||[]).forEach(p=>['mix','pack'].forEach(k=>(p[k]||[]).forEach(r=>{if(!r.n){const a=anyB(r.b);if(a)r.n=a.x.n}})))}
+function usedBy(k,x){if(k=='inv_produk')return[];const f=k=='inv_packing'?'pack':'mix';return(S.g.inv_produk||[]).filter(p=>(p[f]||[]).some(r=>r.b==x.id||(r.n&&lc(r.n)==lc(x.n))))}
+function compNames(x){return[...new Set((x.mix||[]).concat(x.pack||[]).map(r=>r.n||((anyB(r.b)||{}).x||{}).n).filter(Boolean))]}
+function bhPrune(x){['inv_bahan','inv_packing'].forEach(k=>{const l=S.g[k]||[],i=l.indexOf(x);if(i>=0){fillN();l.splice(i,1)}})}
 function BBL(k){k=k||'inv_bahan';const C=BBC[k],l=S.g[k]||[],tv=x=>(+x.q||0)*(+x.v||0)+(+x.o||0),n=v=>Math.abs(v).toLocaleString('id-ID'),tot=l.reduce((a,x)=>a+tv(x),0),ong=l.reduce((a,x)=>a+(+x.o||0),0),st=(t,v,i)=>`<div class="bbst"><span class="bbi">${I(i)}</span><div><div class="mt">${t}</div><b>${v}</b></div></div>`;
 const head=`<div class="bbs"><button type="button" class="bbst" style="text-align:left;cursor:pointer;font:inherit;color:inherit" onclick="bblRincian('${k}')" aria-label="Lihat rincian total nilai"><span class="bbi">${I('wallet')}</span><div><div class="mt">Total Nilai</div><b>${rp(tot)}</b></div></button><button type="button" class="bbst" style="text-align:left;cursor:pointer;font:inherit;color:inherit" onclick="ivDet('j','${k}')" aria-label="Lihat rincian jumlah"><span class="bbi">${I(C.ic)}</span><div><div class="mt">${C.cnt}</div><b>${l.length.toLocaleString('id-ID')}</b></div></button></div>`;
 const bar=`<div class="bbh"><b>Daftar ${C.t}</b><button class="btn" onclick="addG('${k}')">+ Tambah</button></div>`;
 if(!l.length)return`<div class="bb">${head}<div class="card bbc">${bar}<div class="bbe"><span class="bbo">${I(C.ic)}</span><b>${C.e}</b><p class="mt">${C.d}</p><button class="btn" onclick="addG('${k}')">+ Tambah ${C.t}</button><ol class="bbt">${C.tips.map(t=>`<li>${t}</li>`).join('')}</ol></div></div></div>`;
-return`<div class="bb">${head}<div class="card bbc">${bar}<div style="overflow-x:auto"><table class="pdt" style="min-width:600px"><thead><tr><th>${C.t}</th><th class="r">Stok</th><th class="r">Harga satuan</th><th class="r">Ongkir</th><th class="r">Total</th><th class="r">/ Satuan (incl. ongkir)</th><th></th></tr></thead><tbody>${l.map(x=>{const q=+x.q||0,o=+x.o||0,t=tv(x),nt=[x.on,x.ot].filter(Boolean).join(' · ');return`<tr><td><b>${esc(x.n)}</b>${nt?`<div class="mt" style="font-size:11px">${esc(nt)}</div>`:''}</td><td class="r">${n(q)}${x.s?' '+esc(x.s):''}</td><td class="r">${rp(+x.v||0)}</td><td class="r">${o?(o<0?'− ':'')+rp(Math.abs(o)):'-'}</td><td class="r"><b>${rp(t)}</b></td><td class="r">${q?rp(t/q):'-'}</td><td class="r" style="white-space:normal;min-width:150px"><button class="bbmv" onclick="stOut('${k}','${x.id}','jual')">Jual</button> <button class="bbmv" onclick="stOut('${k}','${x.id}','kurang')">Kurangi</button> <button class="bbmv" onclick="mvG('${k}','${C.mv}','${x.id}')" title="${esc(C.mvl)}">⇄ ${C.mvl}</button> <button class="x" aria-label="Hapus" onclick="delG('${k}','${x.id}')">✕</button></td></tr>`}).join('')}</tbody></table></div></div></div>`}
+const lk=x=>{const u=usedBy(k,x).map(p=>esc(p.n)),sb=l.filter(y=>y.id!=x.id&&lc(y.n)==lc(x.n)).length;return[u.length?'Dipakai: '+u.slice(0,2).join(', ')+(u.length>2?' +'+(u.length-2):''):'',sb?sb+' sumber lain':''].filter(Boolean).join(' · ')};
+return`<div class="bb">${head}<div class="card bbc">${bar}<div style="overflow-x:auto"><table class="pdt cp" style="min-width:560px"><thead><tr><th>Sumber</th><th>${C.t}</th><th class="r">Stok</th><th class="r">Harga</th><th class="r">Ongkir</th><th class="r">Total</th><th class="r">/ Satuan</th><th></th></tr></thead><tbody>${l.map(x=>{const q=+x.q||0,o=+x.o||0,t=tv(x),nt=[x.on,x.ot].filter(Boolean).join(' · '),lt=lk(x);return`<tr class="pdrw" onclick="itAct('${k}','${x.id}')"><td>${x.sp?esc(x.sp):'<span class="mt">-</span>'}</td><td><b>${esc(x.n)}</b>${nt||lt?`<div class="mt">${[nt?esc(nt):'',lt].filter(Boolean).join(' · ')}</div>`:''}</td><td class="r">${n(q)}${x.s?' '+esc(x.s):''}</td><td class="r">${rp(+x.v||0)}</td><td class="r">${o?(o<0?'− ':'')+rp(Math.abs(o)):'-'}</td><td class="r"><b>${rp(t)}</b></td><td class="r">${q?rp(t/q):'-'}</td><td class="r"><button class="x" aria-label="Hapus" onclick="event.stopPropagation();delG('${k}','${x.id}')">✕</button></td></tr>`}).join('')}</tbody></table></div></div></div>`}
 const fmt=n=>(Math.round(n*100)/100).toLocaleString('id-ID');
 function stOut(k,id,mode){
   const x=(S.g[k]||[]).find(y=>y.id==id);if(!x)return;
@@ -489,10 +497,11 @@ ${jual?ivBlock():''}
   f.onsubmit=e=>{e.preventDefault();if(jual&&!ivOk())return;const q=g('q'),h=g('h');
     if(!(q>0))return alert('Isi jumlah lebih dari 0.');
     if(q>q0+1e-9)return alert('Jumlah melebihi stok ('+fmt(q0)+').');
-    ask((jual?'Catat penjualan ':'Kurangi stok ')+esc(x.n)+' sebanyak '+fmt(q)+(x.s||x.us?' '+esc(x.s||x.us):'')+'? Sisa stok menjadi '+fmt(q0-q)+(jual?' dan penjualan tercatat di Invoice.':'. Tindakan ini tidak dihitung sebagai penjualan.'),()=>{
+    ask((jual?'Catat penjualan ':'Kurangi stok ')+esc(x.n)+' sebanyak '+fmt(q)+(x.s||x.us?' '+esc(x.s||x.us):'')+'? Sisa stok menjadi '+fmt(q0-q)+(jual?' dan penjualan tercatat di Invoice.':'. Tindakan ini tidak dihitung sebagai penjualan.')+(k!='inv_produk'&&q>=q0-1e-9?' Stok habis, jadi bahan dihapus dari daftar.':''),()=>{
     x.q=Math.round((q0-q)*1e6)/1e6;
     if(jual)(S.g.inv_transaksi=S.g.inv_transaksi||[]).push(ivSale({id:uid(),n:x.n,t:'out',q:q,v:Math.round(q*h),d:(f.elements.tg&&f.elements.tg.value)||today()}));
     else window.ivAutoKurang(x,q,k=='inv_produk'?'Produk':'Bahan');
+    if(k!='inv_produk'&&x.q<=1e-9)bhPrune(x);
     sv();cl();f.oninput=null;go(cur,1)},jual?'Catat':'Kurangi',!jual)};
   $('#md').classList.remove('side');$('#md').classList.add('on');
   setTimeout(()=>{const e=f.elements.q;if(e)e.focus()},120)}
@@ -722,11 +731,13 @@ const r6=n=>Math.round(n*1e6)/1e6,r4=n=>Math.round(n*1e4)/1e4;
 const fmt=n=>(Math.round(n*100)/100).toLocaleString('id-ID');
 const bahan=()=>S.g.inv_bahan||[],packing=()=>S.g.inv_packing||[],bf=id=>bahan().find(x=>x.id==id)||packing().find(x=>x.id==id);
 /* harga per satuan (termasuk ongkir); dibekukan di x.u saat stok dipakai */
+const rB=r=>{const a=findB(r);return a?a.x:null},rI=r=>{const x=rB(r);return x?x.id:r.b};
+function rv(r,k){const u=r.j>0?num(r.c)/r.j:0,x={id:r.b,n:r.n||'',sp:r.sp||'',s:r.s||'',q:0,v:u,o:0,u:u};(S.g[k]=S.g[k]||[]).push(x);return x}
 const uc=x=>{if(!x)return 0;const q=+x.q||0;return q>0?(q*(+x.v||0)+(+x.o||0))/q:(x.u!=null?+x.u:(+x.v||0))};
 /* ubah stok tanpa mengubah harga per satuan: ongkir disesuaikan proporsional */
-function setStock(x,nq){if(x.u==null)x.u=uc(x);nq=Math.max(0,r6(nq));x.q=nq;x.o=((+x.u)-(+x.v||0))*nq}
-const cost=l=>l.reduce((a,r)=>a+num(r.j)*uc(bf(r.b)),0);
-const bn=id=>{const x=bf(id);return x?esc(x.n):'(bahan dihapus)'};
+function setStock(x,nq){if(x.u==null)x.u=uc(x);nq=Math.max(0,r6(nq));x.q=nq;x.o=((+x.u)-(+x.v||0))*nq;if(nq<=1e-9)bhPrune(x)}
+const cost=l=>l.reduce((a,r)=>a+num(r.j)*uc(rB(r)),0);
+const bn=r=>{const x=rB(r);return esc(x?x.n:(r.n||'(bahan dihapus)'))};
 /* cek kecukupan stok untuk daftar {b,j} (digabung per bahan) */
 function check(l){const m={};l.forEach(r=>m[r.b]=(m[r.b]||0)+num(r.j));return Object.keys(m).map(b=>{const x=bf(b),has=x?+x.q||0:0;return{b,n:x?x.n:'(bahan dihapus)',need:m[b],has,ok:!!x&&has+1e-9>=m[b]}})}
 const prods=()=>S.g.inv_produk||[],batches=()=>S.g.batch||[];
@@ -754,6 +765,15 @@ button.pdf{cursor:pointer}.pdf.on{background:color-mix(in srgb,var(--c) 12%,var(
 .pdef u{text-decoration:none;color:var(--mt)}
 .pdg{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700}
 .pdt .btn{padding:5px 11px;font-size:12px}
+.pdt.cp th,.pdt.cp td{padding:6px 8px!important;font-size:12.5px;min-width:0!important}
+.pdt.cp th{font-size:11px!important}.pdt.cp th:first-child,.pdt.cp td:first-child{padding-left:4px!important}.pdt.cp .mt{font-size:11px}
+.pdt.cp td:first-child{white-space:normal;overflow-wrap:anywhere;min-width:64px!important}
+.ivi .ivm{padding:7px 0}.ivx{display:flex;align-items:center;gap:6px;flex:none}.ivx .x{padding:2px 6px}.ivm .mt{overflow-wrap:anywhere}
+.bbf .bbsp{padding:8px 9px;font-size:14px;margin:0 0 5px}
+.itl .bbmv{margin:2px 4px 2px 0;max-width:100%;overflow-wrap:anywhere;white-space:normal;text-align:left}
+.itl .ivr>b{overflow-wrap:anywhere}
+@media(max-width:359px){.ivx{flex-direction:column;align-items:flex-end;gap:2px}.ivm{gap:6px}.pdt.cp{min-width:480px!important}.ivt button{padding:8px 8px}.bbf .bbsp{font-size:13px}#md form{padding-left:12px;padding-right:12px}.itl .ivch .btn{padding:9px 10px;font-size:13px}}
+.pdrw{cursor:pointer;transition:background .15s}.pdrw:hover{background:color-mix(in srgb,var(--pr) 8%,transparent)}.pdrw:active{background:color-mix(in srgb,var(--pr) 14%,transparent)}
 .pdt{table-layout:auto;min-width:640px}
 .pdt th{padding:10px 14px;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;vertical-align:middle;background:color-mix(in srgb,var(--mt) 7%,transparent)}
 .pdt td{padding:11px 14px;vertical-align:middle}
@@ -776,7 +796,7 @@ const STP=['Komposisi','Pencampuran','Packing','Produk Jadi'];
 const stp=n=>`<div class="stp">${STP.map((t,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div><div class="stl">Langkah ${n} dari 4 · ${STP[n-1]}</div>`;
 const mk=t=>{const d='B'+(t||today()).replace(/-/g,''),n=batches().filter(z=>z.k&&z.k.indexOf(d)==0).length+1;return d+'-'+String(n).padStart(3,'0')};
 const f3=n=>(Math.round(n*1000)/1000).toLocaleString('id-ID');
-const uu=b=>{const x=bf(b);return x&&x.s?' '+esc(x.s):''};
+const uu=b=>{const o=b&&typeof b=='object',x=o?rB(b):bf(b),t=x&&x.s?x.s:(o&&b.s?b.s:'');return t?' '+esc(t):''};
 /* satuan acuan: bahan bersatuan sama (atau tanpa satuan) = jumlahnya; beda satuan = pakai kolom "Setara" */
 const sameU=(id,us)=>{const x=bf(id),u=String(us||'').trim().toLowerCase();return !x||!x.s||!u||String(x.s).trim().toLowerCase()==u};
 const eq=(r,us)=>sameU(r.b,us)?num(r.j):num(r.k);
@@ -796,7 +816,7 @@ const pctBadge=A=>A.over?`<b style="color:var(--ex)">${fmt(A.sf)}% · melebihi 1
 const pctErr=A=>A.over?'Total persen melebihi 100% ('+fmt(A.sf)+'%). Kurangi persen salah satu bahan.':'Total persen harus 100% (sekarang '+fmt(Math.round(A.sum*100)/100)+'%). Isi persen sisanya, atau kosongkan agar dihitung otomatis dari jumlah.';
 /* resep/batch lama (kolom Setara) otomatis dikonversi ke persen */
 const normMix=(mix,us)=>{mix=mix||[];if(mix.some(r=>r.p!==undefined))return mix.map(r=>Object.assign({},r,{p:r.p===undefined?null:r.p}));const t=mix.reduce((a,r)=>a+eq(r,us),0);return mix.map(r=>Object.assign({},r,{p:t>0?Math.round(eq(r,us)/t*10000)/100:null}))};
-const snap=(rows,us)=>rows.map(r=>({b:r.b,n:(bf(r.b)||{}).n||'(bahan dihapus)',j:r6(num(r.j)),p:hasP(r)?num(r.p):null,c:num(r.j)*uc(bf(r.b))}));
+const snap=(rows,us)=>rows.map(r=>{const x=rB(r);return{b:x?x.id:r.b,n:(x||{}).n||r.n||'(bahan dihapus)',sp:(x||{}).sp||'',s:(x||{}).s||'',j:r6(num(r.j)),p:hasP(r)?num(r.p):null,c:num(r.j)*uc(x)}});
 const rc=r=>r.c!=null?+r.c:num(r.j)*uc(bf(r.b));
 const sumc=l=>l.reduce((a,r)=>a+rc(r),0),sume=l=>l.reduce((a,r)=>a+(+r.e||0),0);
 const err=m=>{const e=$('#pderr');if(e){e.textContent=m;e.scrollIntoView({block:'center'})}else alert(m)};
@@ -818,12 +838,12 @@ R.inv_produk=function(){
     :b.st=='packing'?`<button class="btn" onclick="pdDone('${b.id}')">Produk Jadi</button> ${X(b.id)}`
     :`<button class="btn o" onclick="pdView('${b.id}')">Detail</button>`;
   const jm=b=>{if(b.act==null)return fmt(b.qty)+(b.st=='selesai'?'':'<div class="mt" style="font-size:11px">estimasi</div>');const d=b.act-b.qty;return fmt(b.act)+' / '+fmt(b.qty)+(Math.abs(d)>1e-9?`<div class="mt" style="font-size:11px;color:${d<0?'var(--ex)':'var(--inc)'}">${d>0?'+':''}${fmt(d)}</div>`:'')};
-  h+=`<div class="card" style="grid-column:1/-1"><div class="row" style="padding-top:0"><h3 style="margin:0">Tabel Produksi${FL?' · '+STG[FL][0]:''}</h3>${FL?`<button class="x" style="font-size:13px" onclick="pdFil('${FL}')">Semua</button>`:''}</div><div style="overflow-x:auto"><table class="pdt"><thead><tr><th>Tanggal</th><th>Produk</th><th class="r">Jumlah</th><th>Tahap</th><th class="r">Modal</th><th class="r">HPP/pcs</th><th></th></tr></thead><tbody>${rows.length?rows.map(b=>{const s=STG[b.st]||STG.campur,mod=b.st=='rencana'?((b.plan&&b.plan.c)||0):(b.c1||0)+(b.c2||0),pre=b.st=='rencana'||b.st=='campur'||b.st=='fermentasi',hp=pre?null:(b.st=='selesai'&&b.hpp!=null?b.hpp:mod/(b.act!=null?b.act:b.qty));return`<tr><td>${esc(({selesai:b.fd,packing:b.pd||(b.ck||'').slice(0,10),fermentasi:b.fs,campur:b.md}[b.st])||b.d)}</td><td><b>${esc(b.n)}</b><div class="mt" style="font-size:11px">${esc(b.k||'')}</div></td><td class="r">${jm(b)}</td><td><span class="pdg" style="background:color-mix(in srgb,${s[1]} 18%,transparent);color:${s[1]}">${s[0]}</span>${(b.st=='campur'||b.st=='fermentasi')&&b.rd?'<div class="mt" style="font-size:11px">siap packing '+esc(b.rd)+'</div>':''}</td><td class="r">${rp(mod)}${b.st=='rencana'?'<div class="mt" style="font-size:11px">estimasi</div>':''}</td><td class="r">${hp==null?'-':rp(hp)}</td><td class="r">${act(b)}</td></tr>`}).join(''):`<tr><td colspan="7" class="mt" style="text-align:center;padding:16px">${B.length?'Tidak ada batch di tahap ini.':l.length?'Belum ada produksi. Ketuk Rencana Batch pada produk di bawah.':'Belum ada produksi. Buat produk dulu dengan tombol (+).'}</td></tr>`}</tbody></table></div></div>`;
+  h+=`<div class="card" style="grid-column:1/-1"><div class="row" style="padding-top:0"><h3 style="margin:0">Tabel Produksi${FL?' · '+STG[FL][0]:''}</h3>${FL?`<button class="x" style="font-size:13px" onclick="pdFil('${FL}')">Semua</button>`:''}</div><div style="overflow-x:auto"><table class="pdt"><thead><tr><th>Tanggal</th><th>Produk</th><th class="r">Jumlah</th><th>Tahap</th><th class="r">Modal</th><th class="r">HPP/pcs</th></tr></thead><tbody>${rows.length?rows.map(b=>{const s=STG[b.st]||STG.campur,mod=b.st=='rencana'?((b.plan&&b.plan.c)||0):(b.c1||0)+(b.c2||0),pre=b.st=='rencana'||b.st=='campur'||b.st=='fermentasi',hp=pre?null:(b.st=='selesai'&&b.hpp!=null?b.hpp:mod/(b.act!=null?b.act:b.qty));return`<tr class="pdrw" onclick="pdRow('${b.id}')"><td>${esc(({selesai:b.fd,packing:b.pd||(b.ck||'').slice(0,10),fermentasi:b.fs,campur:b.md}[b.st])||b.d)}</td><td><b>${esc(b.n)}</b><div class="mt" style="font-size:11px">${esc(b.k||'')}</div></td><td class="r">${jm(b)}</td><td><span class="pdg" style="background:color-mix(in srgb,${s[1]} 18%,transparent);color:${s[1]}">${s[0]}</span>${(b.st=='campur'||b.st=='fermentasi')&&b.rd?'<div class="mt" style="font-size:11px">siap packing '+esc(b.rd)+'</div>':''}</td><td class="r">${rp(mod)}${b.st=='rencana'?'<div class="mt" style="font-size:11px">estimasi</div>':''}</td><td class="r">${hp==null?'-':rp(hp)}</td></tr>`}).join(''):`<tr><td colspan="6" class="mt" style="text-align:center;padding:16px">${B.length?'Tidak ada batch di tahap ini.':l.length?'Belum ada produksi. Ketuk Rencana Batch pada produk di bawah.':'Belum ada produksi. Buat produk dulu dengan tombol (+).'}</td></tr>`}</tbody></table></div></div>`;
   h+=l.map(x=>{
     const bt=x.bt,tgt=num(x.tgt),us=esc(x.us||''),c1=cost(x.mix||[]),c2=cost(x.pack||[]),per=bt&&tgt>0?c1/tgt:0,est=bt?per+c2:c1+c2,hh=window.pdCost(x),mg=(+x.v||0)-hh,pc=(+x.v)?mg/(+x.v)*100:0;
     const nmx=normMix(x.mix,x.us),AL=alloc(nmx.map(m=>({b:m.b||'x',j:m.j,p:m.p}))),wv=x.w!=null?x.w:10;
-    const t1=!bt?'<span style="color:var(--ex)">Komposisi lama (per kemasan). Ketuk Ubah Komposisi untuk menyusun per batch.</span>':!(x.mix||[]).length?'<span style="color:var(--ex)">Komposisi belum diisi. Ketuk Ubah Komposisi.</span>':(x.mix||[]).map((m,i)=>`${bn(m.b)} ${AL.eff[i]!=null?fmt(AL.eff[i])+'% ':''}(${fmt(m.j)}${uu(m.b)})`).join(', ')||'-';
-    const t2=(x.pack||[]).map(m=>`${bn(m.b)} ×${fmt(m.j)}`).join(', ')||'-';
+    const t1=!bt?'<span style="color:var(--ex)">Komposisi lama (per kemasan). Ketuk Ubah Komposisi untuk menyusun per batch.</span>':!(x.mix||[]).length?'<span style="color:var(--ex)">Komposisi belum diisi. Ketuk Ubah Komposisi.</span>':(x.mix||[]).map((m,i)=>`${bn(m)} ${AL.eff[i]!=null?fmt(AL.eff[i])+'% ':''}(${fmt(m.j)}${uu(m)})`).join(', ')||'-';
+    const t2=(x.pack||[]).map(m=>`${bn(m)} ×${fmt(m.j)}`).join(', ')||'-';
     return`<div class="card"><div class="row" style="padding-top:0"><div><b>${esc(x.n)}</b><div class="mt">Stok ${fmt(+x.q||0)} · Harga jual ${rp(+x.v||0)}</div></div><button class="x" aria-label="Hapus" onclick="delG('inv_produk','${x.id}')">✕</button></div>
 <div class="mt"><b>Komposisi per batch</b>${bt?` (target ${fmt(tgt)} produk · isi ${fmt(wv)} ${us})`:''}<br>${t1}</div>
 <div class="mt" style="margin-top:6px"><b>Packing per produk</b><br>${t2}</div>
@@ -839,7 +859,7 @@ ${(x.lots||[]).length?`<div class="mt" style="margin-top:6px"><b>Lot terakhir</b
 const ED={},SUMF={},DRAW={};
 function rowsHTML(ns){
   const L=ED[ns];
-  const opt=s=>{let A=bahan();const cu=s&&!A.some(x=>x.id==s)?bf(s):null;if(cu)A=A.concat([cu]);return '<option value="">Pilih bahan…</option>'+A.map(x=>`<option value="${x.id}"${x.id==s?' selected':''}>${esc(x.n)} · ${fmt(+x.q||0)}${x.s?' '+esc(x.s):''}</option>`).join('')};
+  const opt=s=>{let A=bahan();const cu=s&&!A.some(x=>x.id==s)?bf(s):null;if(cu)A=A.concat([cu]);return '<option value="">Pilih bahan…</option>'+A.map(x=>`<option value="${x.id}"${x.id==s?' selected':''}>${esc(x.n)}${x.sp?' · '+esc(x.sp):''} · ${fmt(+x.q||0)}${x.s?' '+esc(x.s):''}</option>`).join('')};
   const ni=(a,ph,v)=>`<input type="number" min="0" step="any" inputmode="decimal" placeholder="${ph}" value="${v===''||v==null?'':v}" ${a}>`;
   return `<div class="rw rw4 rwh"><span>Bahan · stok</span><span>Jumlah</span><span>Persen (%)</span><span></span></div>`+L.rows.map((r,i)=>{const x=bf(r.b);return `<div class="rw rw4" style="margin-top:6px"><select onchange="edSel('${ns}',${i},this.value)">${opt(r.b)}</select>${ni(`oninput="edIn('${ns}',${i},'j',this.value)"`,'Jml'+(x&&x.s?' ('+esc(x.s)+')':''),r.j)}${ni(`id="k${ns}${i}" oninput="edIn('${ns}',${i},'p',this.value)"`,'%',r.p)}<button type="button" class="x" aria-label="Hapus baris" onclick="edDel('${ns}',${i})">✕</button></div><div class="hn" id="h${ns}${i}"></div>`}).join('')+`<button type="button" class="btn o" style="margin-top:8px;padding:6px 14px" onclick="edAdd('${ns}')">+ Bahan</button>`}
 function upd(ns){
@@ -866,7 +886,7 @@ const DEF_MIX=[['Sekam mentah',['sekam'],['bakar','arang'],16,31],['Sekam bakar'
 const defMix=()=>{if(!bahan().length)return[{b:'',j:'',p:''}];const used={},has=(x,a)=>a.some(k=>String(x.n||'').toLowerCase().indexOf(k)>=0);return DEF_MIX.map(d=>{const f=bahan().find(x=>!used[x.id]&&has(x,d[1])&&!has(x,d[2]));if(f)used[f.id]=1;return{b:f?f.id:'',j:d[3],p:d[4]}})};
 window.pdEdit=function(id){
   const x=id?prods().find(p=>p.id==id):null;
-  D=x?{id:x.id,n:x.n,v:x.v,us:x.us||'kg',w:x.w!=null?x.w:10,tgt:x.bt?x.tgt:'',old:!x.bt,rows:x.bt?normMix(x.mix,x.us||'kg').map(m=>({b:m.b,j:m.j,p:m.p==null?'':m.p})):[{b:'',j:'',p:''}],pack:(x.pack||[]).map(m=>({b:m.b,j:m.j}))}
+  D=x?{id:x.id,n:x.n,v:x.v,us:x.us||'kg',w:x.w!=null?x.w:10,tgt:x.bt?x.tgt:'',old:!x.bt,rows:x.bt?normMix(x.mix,x.us||'kg').map(m=>({b:rI(m),j:m.j,p:m.p==null?'':m.p})):[{b:'',j:'',p:''}],pack:(x.pack||[]).map(m=>({b:rI(m),n:m.n,j:m.j}))}
      :{id:null,n:'',v:'',us:'kg',w:10,tgt:'',old:false,rows:defMix(),pack:[]};
   ED.pd=D;draw();open()};
 DRAW.pd=()=>draw();
@@ -898,7 +918,7 @@ function save(){
   if(rows.some(r=>!r.b||!(num(r.j)>0)))return err('Setiap baris harus memilih bahan dan mengisi jumlah.');
   if(new Set(rows.map(r=>r.b)).size<rows.length)return err('Ada bahan yang dipilih dua kali. Gabungkan jadi satu baris.');
   if(rows.length){const A=alloc(rows);if(!A.ok)return err(pctErr(A))}
-  const rec={id:D.id||uid(),n,v:num(D.v),us,w,tgt:t,bt:1,q:0,mix:rows.map(r=>({b:r.b,j:num(r.j),p:hasP(r)?num(r.p):null})),pack:D.pack.map(r=>({b:r.b,j:num(r.j)}))};
+  const rec={id:D.id||uid(),n,v:num(D.v),us,w,tgt:t,bt:1,q:0,mix:rows.map(r=>({b:r.b,n:(bf(r.b)||{}).n,j:num(r.j),p:hasP(r)?num(r.p):null})),pack:D.pack.map(r=>({b:r.b,n:(bf(r.b)||{}).n||r.n,j:num(r.j)}))};
   ask('Simpan produk "'+esc(n)+'" dan komposisinya? Isi per produk '+fmt(w)+' '+esc(us)+', target '+fmt(t)+' produk per batch.',()=>{
     const l=S.g.inv_produk=S.g.inv_produk||[],i=l.findIndex(p=>p.id==rec.id);
     if(i>=0){rec.q=l[i].q||0;l[i]=Object.assign({},l[i],rec)}else l.push(rec);
@@ -920,7 +940,7 @@ let MX=null;
 window.pdMix=function(id){
   const b=batches().find(z=>z.id==id);if(!b||b.st!='rencana')return;
   const us=b.us||'kg',pr=prods().find(z=>z.id==b.pid)||{};
-  MX={id,tgl:today(),us,w:String(b.w!=null?b.w:(pr.w!=null?pr.w:10)),tgt:String(b.tgt!=null?b.tgt:b.qty),rows:normMix(b.mix,us).map(r=>({b:r.b,j:r.j,p:r.p==null?'':r.p}))};
+  MX={id,tgl:today(),us,w:String(b.w!=null?b.w:(pr.w!=null?pr.w:10)),tgt:String(b.tgt!=null?b.tgt:b.qty),rows:normMix(b.mix,us).map(r=>({b:rI(r),j:r.j,p:r.p==null?'':r.p}))};
   ED.mx=MX;drawMx();open()};
 DRAW.mx=()=>drawMx();
 window.mxTgt=function(v){MX.tgt=v;upd('mx')};
@@ -976,12 +996,12 @@ window.pdNext=function(id){
   const b=batches().find(z=>z.id==id);if(!b||(b.st!='campur'&&b.st!='fermentasi'))return;
   if(!b.k)b.k=mk();
   const p=prods().find(z=>z.id==b.pid)||{};
-  PK={id,tgl:today(),act:String(b.qty),note:'',rows:(p.pack||[]).map(r=>({b:r.b,u:num(r.j),j:r6(num(r.j)*b.qty),man:0}))};
+  PK={id,tgl:today(),act:String(b.qty),note:'',rows:(p.pack||[]).map(r=>({b:rI(r),u:num(r.j),j:r6(num(r.j)*b.qty),man:0}))};
   if(!PK.rows.length)PK.rows.push({b:'',u:0,j:'',man:1});
   draw3();open()};
 function draw3(){
   const b=batches().find(z=>z.id==PK.id),fm=$('#fm'),st=fm.scrollTop;if(!b)return;
-  const opt=s=>{let L=packing();const cu=s&&!L.some(x=>x.id==s)?bf(s):null;if(cu)L=L.concat([cu]);return '<option value="">Pilih bahan packing…</option>'+L.map(x=>`<option value="${x.id}"${x.id==s?' selected':''}>${esc(x.n)} · ${fmt(+x.q||0)}${x.s?' '+esc(x.s):''}</option>`).join('')};
+  const opt=s=>{let L=packing();const cu=s&&!L.some(x=>x.id==s)?bf(s):null;if(cu)L=L.concat([cu]);return '<option value="">Pilih bahan packing…</option>'+L.map(x=>`<option value="${x.id}"${x.id==s?' selected':''}>${esc(x.n)}${x.sp?' · '+esc(x.sp):''} · ${fmt(+x.q||0)}${x.s?' '+esc(x.s):''}</option>`).join('')};
   const rows=PK.rows.map((r,i)=>`<div class="rw rw2p"><select data-i="${i}" onchange="pkSel(this)">${opt(r.b)}</select><input type="number" min="0" step="any" inputmode="decimal" placeholder="Jumlah" value="${r.j===''?'':r.j}" data-i="${i}" oninput="pkIn(this)"><button type="button" class="x" aria-label="Hapus baris" onclick="pkDel(${i})">✕</button></div>`).join('');
   fm.innerHTML=`${stp(3)}<h3 style="margin:6px 0 0">Packing · ${esc(b.n)}</h3><div class="mt">Batch <b>${esc(b.k)}</b> · estimasi awal ${fmt(b.qty)}${b.rd&&b.st=='fermentasi'&&today()<b.rd?` · <span style="color:var(--ex)">fermentasi selesai ${esc(b.rd)}</span>`:''}</div>
 <label>Tanggal packing</label><input type="date" value="${esc(PK.tgl)}" oninput="pkTgl(this.value)" required>
@@ -1011,13 +1031,13 @@ function savePk(){
   if(pv0&&pt<pv0)return err('Tanggal packing tidak boleh sebelum proses sebelumnya ('+pv0+').');
   if(rows.some(r=>!r.b||!(num(r.j)>0)))return err('Setiap baris packing harus memilih bahan dan mengisi jumlah.');
   if(new Set(rows.map(r=>r.b)).size<rows.length)return err('Ada bahan packing yang dipilih dua kali. Gabungkan jadi satu baris.');
-  const pk=rows.map(r=>({b:r.b,n:(bf(r.b)||{}).n||'(bahan dihapus)',j:r6(num(r.j)),c:num(r.j)*uc(bf(r.b))})),bad=check(pk).filter(c=>!c.ok);
+  const pk=rows.map(r=>{const x=bf(r.b);return{b:r.b,n:(x||{}).n||'(bahan dihapus)',sp:(x||{}).sp||'',s:(x||{}).s||'',j:r6(num(r.j)),c:num(r.j)*uc(x)}}),bad=check(pk).filter(c=>!c.ok);
   if(bad.length)return err('Stok packing kurang: '+bad.map(c=>`${c.n} (butuh ${fmt(c.need)}, stok ${fmt(c.has)})`).join(', '));
   const run=()=>{
     b.c2=sumc(pk);
     pk.forEach(r=>{const x=bf(r.b);setStock(x,(+x.q||0)-r.j)});
     b.pack=pk;b.qc=1;b.act=a;b.sel=r6(a-b.qty);b.rej=Math.max(0,r6(b.qty-a));b.pn=String(PK.note||'').trim();b.pd=pt;b.ck=new Date().toISOString();b.st='packing';
-    const p=prods().find(z=>z.id==b.pid);if(p)p.pack=pk.map(r=>({b:r.b,j:r6(r.j/a)}));
+    const p=prods().find(z=>z.id==b.pid);if(p)p.pack=pk.map(r=>({b:r.b,n:r.n,j:r6(r.j/a)}));
     sv();cl();go(cur,1)};
   const early=b.st=='fermentasi'&&b.rd&&pt<b.rd;
   ask((early?'Jadwal fermentasi baru selesai '+b.rd+'. ':'')+'Simpan packing '+esc(b.n)+'? Hasil aktual '+fmt(a)+' produk dikunci'+(pk.length?' dan bahan packing dikurangi dari stok':'')+'.',run,'Simpan')}
@@ -1030,11 +1050,11 @@ const tlHTML=b=>{const pk=b.pd||(b.ck||'').slice(0,10),L=[['Rencana',b.d?dtx(b.d
 function eqHTML(b,a){
   const w=num(b.w);if(!(w>0)||!(a>0)||!(b.mix||[]).length||b.mix.every(r=>r.p===undefined))return '';
   const A=alloc((b.mix||[]).map(r=>({b:r.b||'x',j:r.j,p:r.p}))),W=a*w,us=esc(b.us||'kg');
-  const rows=(b.mix||[]).map((r,i)=>{const e=A.eff[i];if(e==null)return rwx(esc(r.n||''),'<span class="mt">tanpa jatah persen</span>');const kg=e/100*W;return rwx(esc(r.n||''),`<span style="text-align:right">${fmt(e)}% · ${fmt(kg)} ${us}${r.j>0?'<div class="mt" style="font-size:11px">≈ '+fmt(kg/r.j)+' '+us+' / '+(uu(r.b).trim()||'satuan')+'</div>':''}</span>`)}).join('');
+  const rows=(b.mix||[]).map((r,i)=>{const e=A.eff[i];if(e==null)return rwx(esc(r.n||''),'<span class="mt">tanpa jatah persen</span>');const kg=e/100*W;return rwx(esc(r.n||''),`<span style="text-align:right">${fmt(e)}% · ${fmt(kg)} ${us}${r.j>0?'<div class="mt" style="font-size:11px">≈ '+fmt(kg/r.j)+' '+us+' / '+(uu(r).trim()||'satuan')+'</div>':''}</span>`)}).join('');
   return `<div class="mt" style="margin-top:12px"><b>Kesetaraan bahan</b> (dari ${fmt(a)} produk × ${fmt(w)} ${us} = ${fmt(W)} ${us})</div><div class="card" style="margin:6px 0 0;padding:6px 12px">${rows}</div>`}
 function viewHTML(b,p,det){
   const a=b.act!=null?b.act:b.qty,c1=b.c1||0,c2=b.c2||0,tot=c1+c2,hpp=a>0?tot/a:0,sel=a-b.qty,mg=p?(+p.v||0)-hpp:null;
-  const per=(b.mix||[]).concat(b.pack||[]).map(r=>rwx(esc(r.n||''),`<span>${f3(r.j/a)}${uu(r.b)} · ${rp(rc(r)/a)}</span>`)).join('');
+  const per=(b.mix||[]).concat(b.pack||[]).map(r=>rwx(esc(r.n||''),`<span>${f3(r.j/a)}${uu(r)} · ${rp(rc(r)/a)}</span>`)).join('');
   let cmp='';if(det&&p&&p.bt&&num(p.tgt)>0){const est=cost(p.mix||[])/num(p.tgt),real=c1/a,d=real-est;cmp=`<div class="mt" style="margin-top:12px"><b>Dibanding komposisi produk sekarang</b></div><div class="card" style="margin:6px 0 0;padding:6px 12px">${rwx('Modal bahan/produk (realisasi)',`<b>${rp(real)}</b>`)}${rwx('Estimasi komposisi sekarang',`<span>${rp(est)}</span>`)}${rwx('Selisih',`<b style="color:${d>0?'var(--ex)':'var(--inc)'}">${d>0?'+':'-'}${rp(Math.abs(d))}</b>`)}</div>`}
   return `${det?'':stp(4)}<h3 style="margin:6px 0 0">${det?'Detail Batch':'Produk Jadi'} · ${esc(b.n)}</h3><div class="mt">Batch <b>${esc(b.k||'')}</b>${b.fd?' · selesai '+esc(b.fd):''}</div>
 <div class="card" style="margin:10px 0 0;padding:6px 12px">${rwx('Estimasi awal',`<span>${fmt(b.qty)}</span>`)}${rwx('Aktual (masuk stok)',`<b>${fmt(a)}</b>`)}${Math.abs(sel)>1e-9?rwx('Selisih',`<b style="color:${sel<0?'var(--ex)':'var(--inc)'}">${sel>0?'+':''}${fmt(sel)}</b>`):''}${b.pn?rwx('Catatan',`<span style="text-align:right">${esc(b.pn)}</span>`):''}${rwx('Total biaya bahan batch',`<b>${rp(c1)}</b>`)}${rwx('Modal bahan / produk',`<b>${rp(a>0?c1/a:0)}</b>`)}${c2>0?rwx('Packing / produk',`<b>${rp(c2/a)}</b>`):''}${rwx('HPP / produk (dihitung ulang)',`<b>${rp(hpp)}</b>`)}${mg!=null?rwx('Margin / produk',`<b style="color:${mg<0?'var(--ex)':'var(--inc)'}">${rp(mg)}</b>`):''}${b.k1>0?rwx('Rasio hasil',`<span>${fmt(a/b.k1)} produk / ${esc(b.us||'')}</span>`):''}</div>
@@ -1044,7 +1064,7 @@ window.pdSim=function(v){
   const el=$('#pdsim');if(!el||!VB)return;const b=VB,n=num(v),a=b.act!=null?b.act:b.qty;
   if(!(n>0)||!(a>0)){el.innerHTML='<div class="mt">Isi jumlah produk untuk melihat kebutuhan bahan dan modal berdasarkan realisasi batch ini.</div>';return}
   const f=n/a,L=(b.mix||[]).concat(b.pack||[]);
-  el.innerHTML=L.map(r=>rwx(esc(r.n||''),`<span>${fmt(r.j*f)}${uu(r.b)} · ${rp(rc(r)*f)}</span>`)).join('')+rwx('<b>Total modal</b>',`<b>${rp(sumc(L)*f)}</b>`)};
+  el.innerHTML=L.map(r=>rwx(esc(r.n||''),`<span>${fmt(r.j*f)}${uu(r)} · ${rp(rc(r)*f)}</span>`)).join('')+rwx('<b>Total modal</b>',`<b>${rp(sumc(L)*f)}</b>`)};
 window.pdView=function(id){
   const b=batches().find(z=>z.id==id);if(!b)return;
   VB=b;const fm=$('#fm');fm.innerHTML=viewHTML(b,prods().find(z=>z.id==b.pid),true);fm.onsubmit=e=>e.preventDefault();open()};
@@ -1068,9 +1088,22 @@ window.pdCancel=function(id){
   const b=batches().find(z=>z.id==id);if(!b)return;
   const rf=b.st!='rencana';
   ask(rf?`Batalkan produksi ${esc(b.n)} × ${fmt(b.qty)}? Bahan mentah${b.st=='packing'?' dan kemasan':''} dikembalikan ke stok.`:`Hapus rencana batch ${esc(b.n)} (${esc(b.k||'')})? Stok tidak berubah.`,()=>{
-    if(rf){b.mix.forEach(r=>{const x=bf(r.b);if(x)setStock(x,(+x.q||0)+r.j)});
-      if(b.st=='packing')b.pack.forEach(r=>{const x=bf(r.b);if(x)setStock(x,(+x.q||0)+r.j)})}
+    if(rf){b.mix.forEach(r=>{const x=bf(r.b)||rv(r,'inv_bahan');setStock(x,(+x.q||0)+r.j)});
+      if(b.st=='packing')b.pack.forEach(r=>{const x=bf(r.b)||rv(r,'inv_packing');setStock(x,(+x.q||0)+r.j)})}
     S.g.batch=batches().filter(z=>z.id!=id);sv();go(cur,1)},rf?'Batalkan':'Hapus',1)};
+
+/* klik baris tabel produksi: selesai = detail; tahap lain = pilihan aksi tahap tsb */
+window.pdRow=function(id){
+  const b=batches().find(z=>z.id==id);if(!b)return;
+  if(b.st=='selesai')return pdView(id);
+  const s=STG[b.st]||STG.campur,sb=t=>`<small style="display:block;font-weight:400;opacity:.85">${t}</small>`;
+  const A=b.st=='rencana'?[['pdMix','Pencampuran','Mulai campur bahan & kurangi stok',1]]
+    :b.st=='campur'?[['pdFerm','Fermentasi','Masa tunggu setelah pencampuran',1],['pdNext','Packing','Langsung ke pengemasan',0]]
+    :b.st=='fermentasi'?[['pdNext','Packing','Lanjut ke pengemasan',1]]
+    :[['pdDone','Produk Jadi','Masukkan hasil ke stok',1]];
+  const fm=$('#fm');
+  fm.innerHTML=`<h3 style="margin:0">${esc(b.n)}</h3><div class="mt">Batch <b>${esc(b.k||'')}</b> · ${fmt(b.act!=null?b.act:b.qty)} produk · <span style="color:${s[1]};font-weight:700">${s[0]}</span></div><div class="ivch" style="margin-top:14px">${A.map(a=>`<button type="button" class="btn${a[3]?'':' o'}" onclick="${a[0]}('${id}')">${a[1]}${sb(a[2])}</button>`).join('')}<button type="button" class="btn o" style="color:var(--ex);border-color:var(--ex)" onclick="cl();pdCancel('${id}')">${b.st=='rencana'?'Hapus Rencana':'Batalkan Produksi'}</button><button type="button" class="btn o" onclick="cl()">Tutup</button></div>`;
+  fm.onsubmit=e=>e.preventDefault();open()};
 
 /* tombol (+) di menu Produksi membuka form resep */
 window.pdCost=x=>x.hpp!=null?+x.hpp:(x.bt?(num(x.tgt)>0?cost(x.mix||[])/num(x.tgt):0)+cost(x.pack||[]):cost(x.mix||[])+cost(x.pack||[]));
@@ -1123,7 +1156,7 @@ const f=n=>(n<0?'-':'')+'Rp '+Math.round(Math.abs(n)).toLocaleString('id-ID');
 const OT={antar:['Diantar penjual',1],jemput:['Dijemput sendiri',1],potong:['Potongan / subsidi ongkir',-1]};
 let D=[],K='inv_bahan';
 const KT=()=>K=='inv_packing'?'Bahan Packing':'Bahan Baku',KP=()=>K=='inv_packing'?'Contoh: Karung 25 kg, Benang jahit karung':'Contoh: Kotoran kambing (kohe)';
-const bi=()=>({n:'',q:'',v:'',s:''}),bg=()=>({on:'',ot:'antar',o:'',bs:'nilai',items:[bi()]});
+const bi=()=>({sp:'',n:'',q:'',v:'',s:''}),bg=()=>({on:'',ot:'antar',o:'',bs:'nilai',items:[bi()]});
 const sgn=g=>OT[g.ot][1]*num(g.o);
 function alloc(g){
   const it=g.items,w=it.map(r=>g.bs=='qty'?num(r.q):g.bs=='sama'?1:num(r.q)*num(r.v));
@@ -1158,12 +1191,12 @@ function draw(){
 .bbf .bbgear{flex:none;width:26px;height:26px;padding:0;border:1px solid var(--ln);border-radius:50%;background:var(--sf);color:var(--mt);display:flex;align-items:center;justify-content:center;cursor:pointer}.bbf .bbgear .sv{width:15px;height:15px}.bbf .bbgear.on{color:var(--pr);border-color:var(--pr)}
 .bbf .bbsub{margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--sf);font-size:13px;display:none}
 .bbf .ft{position:sticky;bottom:0;background:var(--sf);margin:16px -16px -16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--ln)}
-</style><div class="bbf"><h3 style="margin:0">Tambah ${KT()}</h3><div class="hint">Isi nama, jumlah, dan harga. Ongkir boleh dilewati.</div>`
+</style><div class="bbf"><h3 style="margin:0">Tambah ${KT()}</h3><div class="hint">Isi sumber (toko / pemasok), nama, jumlah, dan harga. Bahan yang sama dari sumber lain dicatat terpisah. Ongkir boleh dilewati.</div><datalist id="bbspl">${[...new Set([].concat(S.g.inv_bahan||[],S.g.inv_packing||[]).map(x=>String(x.sp||'').trim()).filter(Boolean))].map(u=>`<option value="${esc(u)}">`).join('')}</datalist>`
 +D.map((g,gi)=>`<div class="bbi2">
 <div class="row" style="border:0;padding:0"><span style="display:flex;gap:8px;align-items:center;min-width:0"><b style="font-size:14px">${D.length>1?'Pembelian '+(gi+1):KT()}</b><button type="button" class="bbgear${pOpen(g)?' on':''}" aria-label="Pengaturan pemasok / toko" onclick="bbPk(${gi})">${I('set')}</button></span><span style="display:flex;gap:8px;align-items:center">${oOpen(g)?'':`<button type="button" class="btn o" style="padding:3px 10px;font-size:12px" onclick="bbOn(${gi})">+ Ongkir</button>`}${D.length>1?`<button type="button" class="x" aria-label="Hapus pembelian" onclick="bbDelG(${gi})">✕</button>`:''}</span></div>
 ${pOpen(g)?`<div style="margin-top:10px;padding:10px;border:1px dashed var(--ln);border-radius:12px;background:var(--sf)"><div class="row" style="border:0;padding:0"><b style="font-size:13px">Pemasok / toko</b><button type="button" class="x" aria-label="Hapus data pemasok" onclick="bbPkOff(${gi})">✕</button></div><label style="margin-top:6px">Nama pemasok / toko</label><input value="${esc(g.pn||'')}" data-g="${gi}" data-k="pn" oninput="bbIn(this)" placeholder="Contoh: UD Tani Makmur" maxlength="80" autocomplete="off"><label>Alamat / kontak</label><input value="${esc(g.pa||'')}" data-g="${gi}" data-k="pa" oninput="bbIn(this)" placeholder="Opsional" maxlength="120" autocomplete="off"></div>`:''}
 <div class="bbr bbh"><span>No</span><span>Nama</span><span>Jumlah</span><span>Satuan</span><span>Harga/satuan (Rp)</span><span></span></div>
-${g.items.map((r,i)=>`<div class="bbit"><div class="bbr"><span class="bbn">${i+1}</span><input value="${esc(r.n)}" data-g="${gi}" data-i="${i}" data-k="n" oninput="bbIn(this)" placeholder="${K=='inv_packing'?'Nama packing':'Nama bahan'}" aria-label="Nama" autocomplete="off">${ni(gi,i,'q','0',r.q)}<input value="${esc(r.s||'')}" data-g="${gi}" data-i="${i}" data-k="s" oninput="bbIn(this);bbSg(this,1)" onfocus="bbSg(this,1)" onblur="bbSg(this,0)" placeholder="kg" maxlength="14" aria-label="Satuan" autocomplete="off">${ni(gi,i,'v','0',r.v)}${g.items.length>1?`<button type="button" class="x bbxd" aria-label="Hapus baris ${i+1}" onclick="bbDel(${gi},${i})">✕</button>`:'<span></span>'}</div>
+${g.items.map((r,i)=>`<div class="bbit"><input class="bbsp" list="bbspl" value="${esc(r.sp||'')}" data-g="${gi}" data-i="${i}" data-k="sp" oninput="bbIn(this)" placeholder="Sumber (toko / pemasok)" maxlength="60" aria-label="Sumber" autocomplete="off"><div class="bbr"><span class="bbn">${i+1}</span><input value="${esc(r.n)}" data-g="${gi}" data-i="${i}" data-k="n" oninput="bbIn(this)" placeholder="${K=='inv_packing'?'Nama packing':'Nama bahan'}" aria-label="Nama" autocomplete="off">${ni(gi,i,'q','0',r.q)}<input value="${esc(r.s||'')}" data-g="${gi}" data-i="${i}" data-k="s" oninput="bbIn(this);bbSg(this,1)" onfocus="bbSg(this,1)" onblur="bbSg(this,0)" placeholder="kg" maxlength="14" aria-label="Satuan" autocomplete="off">${ni(gi,i,'v','0',r.v)}${g.items.length>1?`<button type="button" class="x bbxd" aria-label="Hapus baris ${i+1}" onclick="bbDel(${gi},${i})">✕</button>`:'<span></span>'}</div>
 <div class="bbsg" id="bbg${gi}_${i}"></div>
 <div class="bbsub" id="bbs${gi}_${i}"></div></div>`).join('')}
 <button type="button" class="btn o" style="margin-top:10px;padding:6px 14px;font-size:13px" onclick="bbAdd(${gi})">+ Tambah ${KT().toLowerCase()} lain</button>
@@ -1207,10 +1240,10 @@ function save(){
     if(!rows.length){if(num(g.o)||g.on.trim())return alert('Pengiriman '+(gi+1)+': ada ongkir tapi belum ada bahan.');continue}
     const nm=g.items.findIndex(r=>!r.n.trim()&&(r.q!==''||r.v!==''));if(nm>=0)return alert('Pengiriman '+(gi+1)+': nama bahan wajib diisi.');
     const al=alloc({...g,items:rows.map(x=>x.r)});
-    rows.forEach((x,i)=>{const t=num(x.r.q)*num(x.r.v)+al[i];if(t<0)return out.err=out.err||'Pengiriman '+(gi+1)+': potongan terlalu besar sehingga modal '+x.r.n.trim()+' menjadi negatif.';out.push({id:uid(),n:x.r.n.trim(),s:String(x.r.s||'').trim(),q:num(x.r.q),v:num(x.r.v),o:al[i],on:g.on.trim(),ot:num(g.o)||g.on.trim()?OT[g.ot][0]:''})})}
+    rows.forEach((x,i)=>{const t=num(x.r.q)*num(x.r.v)+al[i];if(t<0)return out.err=out.err||'Pengiriman '+(gi+1)+': potongan terlalu besar sehingga modal '+x.r.n.trim()+' menjadi negatif.';out.push({id:uid(),sp:String(x.r.sp||g.pn||'').trim(),n:x.r.n.trim(),s:String(x.r.s||'').trim(),q:num(x.r.q),v:num(x.r.v),o:al[i],on:g.on.trim(),ot:num(g.o)||g.on.trim()?OT[g.ot][0]:''})})}
   if(out.err)return alert(out.err);
   if(!out.length)return alert('Isi minimal satu bahan baku.');
-  {const u=k=>[...new Set(D.map(g=>String(g[k]||'').trim()).filter(Boolean))];if(window.ivDraft){window.ivDraft.f.pihak=u('pn').join(', ');window.ivDraft.f.kontak=u('pa').join(' | ')}
+  {const u=k=>[...new Set(D.map(g=>String(g[k]||'').trim()).filter(Boolean))];if(window.ivDraft){window.ivDraft.f.pihak=[...new Set(u('pn').concat(D.flatMap(g=>g.items.filter(r=>r.n.trim()&&num(r.q)>0).map(r=>String(r.sp||'').trim()))).filter(Boolean))].join(', ');window.ivDraft.f.kontak=u('pa').join(' | ')}
   const l=S.g[K]=S.g[K]||[];out.forEach(x=>l.push(x));ivSaveIn();sv();cl();go(cur,1)}}
 const _ag=window.addG;
 window.addG=function(k){
@@ -1275,9 +1308,10 @@ function PRL(){
   const head=`<div class="bbs">${stb('Jumlah produk',fmt(l.length),'store','pn')}${stb('Total stok',fmt(stok),'box','pq')}${stb('Nilai stok jual',rp(nilai),'wallet','pv')}</div>`;
   const bar=`<div class="bbh"><b>Daftar Produk</b><button class="btn" onclick="addG('inv_produk')">+ Tambah</button></div>`;
   if(!l.length)return`<div class="bb">${head}<div class="card bbc">${bar}<div class="bbe"><span class="bbo">${I('store')}</span><b>Belum ada produk</b><p class="mt">Produk dibuat lewat komposisi (pencampuran bahan, lalu packing). Stok produk jadi bertambah saat produksi diselesaikan.</p><button class="btn" onclick="addG('inv_produk')">+ Tambah Produk</button></div></div></div>`;
-  return`<div class="bb">${head}<div class="card bbc">${bar}<div style="overflow-x:auto"><table class="pdt" style="min-width:600px"><thead><tr><th>Produk</th><th class="r">Stok</th><th class="r">Harga jual</th><th class="r">HPP</th><th class="r">Margin</th><th class="r">Nilai jual</th><th></th></tr></thead><tbody>${l.map(x=>{
+  const cmp=x=>{const nm=compNames(x);return nm.length?'Bahan: '+nm.slice(0,3).map(esc).join(', ')+(nm.length>3?' +'+(nm.length-3):''):'Komposisi belum diisi'};
+  return`<div class="bb">${head}<div class="card bbc">${bar}<div style="overflow-x:auto"><table class="pdt cp" style="min-width:500px"><thead><tr><th>Produk</th><th class="r">Stok</th><th class="r">Harga jual</th><th class="r">HPP</th><th class="r">Margin</th><th class="r">Nilai jual</th><th></th></tr></thead><tbody>${l.map(x=>{
     const q=+x.q||0,v=+x.v||0,hpp=window.pdCost?window.pdCost(x):0,mg=v-hpp;
-    return`<tr><td><b>${esc(x.n)}</b></td><td class="r">${fmt(q)}</td><td class="r">${rp(v)}</td><td class="r">${rp(hpp)}</td><td class="r" style="color:${mg<0?'var(--ex)':'var(--inc)'}">${rp(mg)}</td><td class="r"><b>${rp(q*v)}</b></td><td class="r" style="white-space:normal;min-width:170px"><button class="bbmv" onclick="stOut('inv_produk','${x.id}','jual')">Jual</button> <button class="bbmv" onclick="stOut('inv_produk','${x.id}','kurang')">Kurangi</button> <button class="bbmv" onclick="pdEdit('${x.id}')">Ubah Komposisi</button> <button class="bbmv" onclick="go('inv_produk')">Ke Produksi</button> <button class="x" aria-label="Hapus" onclick="delG('inv_produk','${x.id}')">✕</button></td></tr>`}).join('')}</tbody></table></div></div></div>`;
+    return`<tr class="pdrw" onclick="itAct('inv_produk','${x.id}')"><td><b>${esc(x.n)}</b><div class="mt">${cmp(x)}</div></td><td class="r">${fmt(q)}</td><td class="r">${rp(v)}</td><td class="r">${rp(hpp)}</td><td class="r" style="color:${mg<0?'var(--ex)':'var(--inc)'}">${rp(mg)}</td><td class="r"><b>${rp(q*v)}</b></td><td class="r"><button class="x" aria-label="Hapus" onclick="event.stopPropagation();delG('inv_produk','${x.id}')">✕</button></td></tr>`}).join('')}</tbody></table></div></div></div>`;
 }
 const view=k=>k=='inv_produk'?PRL():BBL(k);
 const IVO={v:0,j:0};
@@ -1326,6 +1360,25 @@ window.ivDet=(t,k)=>{
   f.onsubmit=e=>e.preventDefault();
   $('#md').classList.add('side','on')};
 window.ivAct=el=>{const a=el.nextElementSibling;if(a)a.classList.toggle('on')};
+window.delG=function(k,id){const x=(S.g[k]||[]).find(y=>y.id==id);if(!x)return;fillN();const u=usedBy(k,x).map(p=>esc(p.n));
+  ask('Hapus "'+esc(x.n)+'"?'+(u.length?' Dipakai di komposisi: '+u.join(', ')+'. Komposisi tetap terhubung lewat nama bila ada bahan sama dari sumber lain.':''),()=>{S.g[k]=(S.g[k]||[]).filter(y=>y.id!=id);sv();go(cur,1)},'Hapus',1)};
+window.itAct=function(k,id){
+  const x=(S.g[k]||[]).find(y=>y.id==id);if(!x)return;
+  const isP=k=='inv_produk',u=x.s||x.us||'',q=+x.q||0,v=+x.v||0,f=$('#fm');
+  const chip=(t,fn)=>`<button type="button" class="bbmv" onclick="${fn}">${t}</button>`;
+  const rw=(a,b)=>`<div class="ivr"><span class="mt">${a}</span><b>${b}</b></div>`;
+  let h=`<div class="itl"><div class="ivtt"><h3 style="margin:0;min-width:0;overflow-wrap:anywhere">${esc(x.n)}</h3><button type="button" class="x" aria-label="Tutup" onclick="cl()">✕</button></div><div style="margin-top:8px;padding:0 12px;background:var(--bg);border:1px solid var(--ln);border-radius:12px">`
+   +(isP?'':rw('Sumber',x.sp?esc(x.sp):'-'))+rw('Stok',fmt(q)+(u?' '+esc(u):''))+rw(isP?'Harga jual':'Harga satuan',rp(v))+(!isP&&+x.o?rw('Ongkir',rp(+x.o)):'')+rw('Nilai',rp(isP?q*v:q*v+(+x.o||0)))+`</div>`;
+  if(isP){const L=(x.mix||[]).concat(x.pack||[]);if(L.length)h+=`<div class="mt" style="margin-top:12px"><b>Komposisi terhubung</b></div><div>${L.map(r=>{const a=findB(r),nm=esc(r.n||(a&&a.x.n)||'(bahan dihapus)');return a?chip(nm+(a.x.sp?' · '+esc(a.x.sp):''),`itAct('${a.k}','${a.x.id}')`):`<span class="mt" style="margin-right:8px">${nm}</span>`}).join('')}</div>`}
+  else{const U=usedBy(k,x),O=(S.g[k]||[]).filter(y=>y.id!=x.id&&lc(y.n)==lc(x.n));
+    if(U.length)h+=`<div class="mt" style="margin-top:12px"><b>Dipakai di produk</b></div><div>${U.map(p=>chip(esc(p.n),`pdEdit('${p.id}')`)).join('')}</div>`;
+    if(O.length)h+=`<div class="mt" style="margin-top:12px"><b>Sumber lain (bahan sama)</b></div><div>${O.map(y=>chip((y.sp?esc(y.sp):'tanpa sumber')+' · '+rp(+y.v||0),`itAct('${k}','${y.id}')`)).join('')}</div>`}
+  const B=(t,fn,c,st)=>`<button type="button" class="btn${c||''}"${st?` style="${st}"`:''} onclick="${fn}">${t}</button>`;
+  h+=`<div class="ivch" style="margin-top:14px">`+B('Jual',`stOut('${k}','${id}','jual')`)+B('Kurangi stok',`stOut('${k}','${id}','kurang')`,' o')
+   +(isP?B('Ubah Komposisi',`pdEdit('${id}')`,' o')+B('Ke Produksi',`cl();go('inv_produk')`,' o'):B(BBC[k].mvl,`cl();mvG('${k}','${BBC[k].mv}','${id}')`,' o'))
+   +B('Hapus',`cl();delG('${k}','${id}')`,' o','color:var(--ex);border-color:var(--ex)')+B('Tutup','cl()',' o')+`</div></div>`;
+  f.innerHTML=h;f.onsubmit=e=>e.preventDefault();
+  $('#md').classList.remove('side');$('#md').classList.add('on')};
 function ALL(){
   const bh=S.g.inv_bahan||[],pk=S.g.inv_packing||[],pr=S.g.inv_produk||[];
   const tv=x=>(+x.q||0)*(+x.v||0)+(+x.o||0),pv=x=>(+x.q||0)*(+x.v||0),sm=(l,f)=>l.reduce((a,x)=>a+f(x),0);
@@ -1336,10 +1389,8 @@ function ALL(){
   const stb=(id,k,t,v,i)=>`<button type="button" id="${id}" class="bbst ${IVO[k]?'on':''}" style="text-align:left;cursor:pointer;font:inherit;color:inherit" onclick="ivTog('${k}')" aria-label="Lihat rincian"><span class="bbi">${I(i)}</span><div><div class="mt">${t}</div><b>${v}</b></div></button>`;
   const head=`<div class="bbs">${stb('ivb_v','v','Total Nilai',rp(tot),'wallet')}${stb('ivb_j','j','Jumlah Bahan',cntAll.toLocaleString('id-ID'),'bag')}</div>`;
   if(!cntAll)return`<div class="ivs">${head}<div class="card"><div class="bbe"><span class="bbo">${I('box')}</span><b>Inventori masih kosong</b><p class="mt">Tambahkan bahan baku, bahan packing, atau produk dengan tombol (+).</p><button class="btn" onclick="addG('inv_stok')">+ Tambah</button></div></div></div>`;
-  const row=(k,x,tag,val,btns)=>{const q=+x.q||0,u=x.s||x.us||'';return`<div class="ivi"><div class="ivm" onclick="ivAct(this)"><div><b>${esc(x.n)}</b><div class="mt">${tag} · ${fmt(q)}${u?' '+esc(u):''} × ${rp(+x.v||0)}</div></div><b>${rp(val)}</b></div><div class="iva">${btns}</div></div>`};
-  const bt=(k,x)=>`<button class="bbmv" onclick="stOut('${k}','${x.id}','jual')">Jual</button><button class="bbmv" onclick="stOut('${k}','${x.id}','kurang')">Kurangi</button><button class="bbmv" onclick="mvG('${k}','${BBC[k].mv}','${x.id}')">⇄ ${BBC[k].mvl}</button><button class="x" aria-label="Hapus" onclick="delG('${k}','${x.id}')">✕</button>`;
-  const pb=x=>`<button class="bbmv" onclick="stOut('inv_produk','${x.id}','jual')">Jual</button><button class="bbmv" onclick="stOut('inv_produk','${x.id}','kurang')">Kurangi</button><button class="bbmv" onclick="pdEdit('${x.id}')">Ubah Komposisi</button><button class="bbmv" onclick="go('inv_produk')">Ke Produksi</button><button class="x" aria-label="Hapus" onclick="delG('inv_produk','${x.id}')">✕</button>`;
-  const list=pr.map(x=>row('inv_produk',x,'Produk',pv(x),pb(x))).join('')+bh.map(x=>row('inv_bahan',x,'Bahan Baku',tv(x),bt('inv_bahan',x))).join('')+pk.map(x=>row('inv_packing',x,'Bahan Packing',tv(x),bt('inv_packing',x))).join('');
+  const row=(k,x,tag,val)=>{const q=+x.q||0,u=x.s||x.us||'',isP=k=='inv_produk',lk=isP?compNames(x):usedBy(k,x).map(p=>p.n),sub=[x.sp?esc(x.sp):'',tag,fmt(q)+(u?' '+esc(u):'')+' × '+rp(+x.v||0)].filter(Boolean).join(' · ');return`<div class="ivi" onclick="itAct('${k}','${x.id}')"><div class="ivm"><div><b>${esc(x.n)}</b><div class="mt">${sub}</div>${lk.length?`<div class="mt" style="font-size:11px">${isP?'Bahan':'Dipakai'}: ${lk.slice(0,3).map(esc).join(', ')}${lk.length>3?' +'+(lk.length-3):''}</div>`:''}</div><span class="ivx"><b>${rp(val)}</b><button class="x" aria-label="Hapus" onclick="event.stopPropagation();delG('${k}','${x.id}')">✕</button></span></div></div>`};
+  const list=pr.map(x=>row('inv_produk',x,'Produk',pv(x))).join('')+bh.map(x=>row('inv_bahan',x,'Bahan Baku',tv(x))).join('')+pk.map(x=>row('inv_packing',x,'Bahan Packing',tv(x))).join('');
   return`<div class="ivs">${head}<div class="card"><div class="ivl" style="margin-top:0">${list}</div></div></div>`}
 
 
@@ -1436,6 +1487,8 @@ window.brDet=function(m){
 ADD.beranda='';
 /* ===== Beranda: total nilai (mata + Detail), kartu kategori, garis + Widget ===== */
 (function(){
+/* widget ringkasan beranda disembunyikan sementara: ubah ke true untuk menampilkan lagi */
+const WGT_ON=false;
 const HM=window.HM={t:1,d:0};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)HM.t=1});
 const n0=n=>Math.round(n).toLocaleString('id-ID'),fm=n=>(Math.round(n*100)/100).toLocaleString('id-ID');
@@ -1489,7 +1542,7 @@ R.beranda=function(){
     +`<button type="button" class="chip" aria-label="Tambah ke inventori" style="font-size:24px" onclick="hmAdd()">+</button></div>`;
   const dv=`<div class="dv"><button type="button" class="btn o" style="padding:5px 14px;font-size:13px" onclick="hmWidget()">+ Widget</button></div>`;
   const ws=en().map(k=>{const w=WGS[k];return`<button type="button" class="fc w1" style="text-align:left;font:inherit;color:inherit;cursor:pointer" onclick="hmGo('${w.pg}'${w.tab?`,'${w.tab}'`:''})"><div class="fi" style="color:var(--pr)">${I(w.ic)}</div><div class="mt">${w.t}</div><b style="font-size:20px">${w.v(c)}</b><div class="mt">${w.s(c)}</div></button>`}).join('');
-  return top+acc+dv+(ws||`<div class="mt" style="grid-column:1/-1;text-align:center;padding:18px 0">Belum ada widget. Ketuk "+ Widget" untuk menambah.</div>`)};
+  return top+acc+(WGT_ON?dv+(ws||`<div class="mt" style="grid-column:1/-1;text-align:center;padding:18px 0">Belum ada widget. Ketuk "+ Widget" untuk menambah.</div>`):'')};
 })();
 
 /* ===== INVOICE: lampiran gambar / buat sendiri, A5 landscape, simpan PDF ===== */
@@ -1809,6 +1862,7 @@ const _agI=window.addG;window.addG=function(k){if(k=='inv_transaksi')return ivCo
 })();
 
 
+fillN();
 go('beranda');
 
 (()=>{const t=Date.now(),e=document.getElementById('ld');setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),600)},Math.max(0,4200-(Date.now()-t)))})();
